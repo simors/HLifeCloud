@@ -7,8 +7,8 @@ var AV = require('leanengine');
 function modifyMobilePhoneVerified(request, response) {
   var user = AV.Object.createWithoutData('_User',request.params.id)
   user.set("mobilePhoneVerified", true)
-  user.save();
-  response.success( "test")
+  user.save()
+  response.success()
 }
 
 var authFunc = {
