@@ -12,7 +12,12 @@ function modifyMobilePhoneVerified(request, response) {
 }
 
 function verifyInvitationCode(request, response) {
-  response.success('success')
+  let invitationsCode = request.params.invitationsCode
+  if(invitationsCode) {
+    response.success('success')
+  }else {
+    response.error('error')
+  }
 }
 
 var authFunc = {
