@@ -17,6 +17,7 @@ function verifyInvitationCode(request, response) {
 
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
+  verifyInvitationCode: verifyInvitationCode,
 }
 
 module.exports = authFunc
