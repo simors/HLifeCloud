@@ -11,6 +11,10 @@ function modifyMobilePhoneVerified(request, response) {
   response.success()
 }
 
+function verifyInvitationCode(request, response) {
+  response.success('success')
+}
+
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
 }
