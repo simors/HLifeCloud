@@ -12,7 +12,7 @@ function modifyMobilePhoneVerified(request, response) {
 }
 
 function verifyInvitationCode(request, response) {
-  let invitationsCode = request.params.invitationsCode
+  var invitationsCode = request.params.invitationsCode
   if(invitationsCode) {
     response.success('success')
   }else {
