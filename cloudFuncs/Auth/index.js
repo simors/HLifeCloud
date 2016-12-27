@@ -38,10 +38,26 @@ function getDocterList(request, response) {
   })
 }
 
+function getArticleLikers(request,response){
+  let article= new AV.Object.createWithoutData('Articles',request.params.articleId)
+  let relation = article.relation('likers')
+  let query = relation.query()
+  query.find().then(function (results) {
+    if(results){
+      response.success(results)
+    }
+      else{
+        response.error('error')
+    }
+    
+  })
+}
+
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
+  getArticleLikers:getArticleLikers,
 }
 
 module.exports = authFunc
