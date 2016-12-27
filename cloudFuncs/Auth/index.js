@@ -20,9 +20,28 @@ function verifyInvitationCode(request, response) {
   }
 }
 
+function getDocterList(request, response) {
+  let query = new AV.Query('_User')
+  query.find().then((results) => {
+    let userInfoList = []
+    results.forEach((result) => {
+      console.log(result.attributes)
+      let userInfo = result.attributes
+      userInfoList.push({
+        username: userInfo.username,
+        nickname: userInfo.nickname,
+        phone: userInfo.mobilePhoneNumber,
+        avatar: userInfo.avatar
+      })
+    })
+    response.success(userInfoList)
+  })
+}
+
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
+  getDocterList: getDocterList,
 }
 
 module.exports = authFunc
