@@ -21,12 +21,12 @@ function verifyInvitationCode(request, response) {
 }
 
 function getDocterList(request, response) {
-  let query = new AV.Query('_User')
+  var query = new AV.Query('_User')
   query.find().then((results) => {
-    let userInfoList = []
+    var userInfoList = []
     results.forEach((result) => {
       console.log(result.attributes)
-      let userInfo = result.attributes
+      var userInfo = result.attributes
       userInfoList.push({
         username: userInfo.username,
         nickname: userInfo.nickname,
@@ -39,9 +39,9 @@ function getDocterList(request, response) {
 }
 
 function getArticleLikers(request,response){
-  let article= new AV.Object.createWithoutData('Articles',request.params.articleId)
-  let relation = article.relation('likers')
-  let query = relation.query()
+  var article= new AV.Object.createWithoutData('Articles',request.params.articleId)
+  var relation = article.relation('likers')
+  var query = relation.query()
   query.find().then(function (results) {
     if(results){
       response.success(results)
