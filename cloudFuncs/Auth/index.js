@@ -27,6 +27,7 @@ function getDocterList(request, response) {
     results.forEach((result) => {
       var userInfo = result.attributes
       userInfoList.push({
+        id: result.id,
         username: userInfo.username,
         nickname: userInfo.nickname,
         phone: userInfo.mobilePhoneNumber,
