@@ -46,10 +46,13 @@ function getArticleLikers(request, response) {
   query.find().then(function (results) {
     if (results) {
       results.forEach(function (result) {
+        var likeInfo=result.attributes
+
         likersList.push({
-          authorId:result.id,
-          nickname:result.nickname?result.nickname:result.username,
-          avatar:result.avatar,
+          authorId: result.id,
+          username: likeInfo.username,
+          nickname: likeInfo.nickname,
+          avatar: likeInfo.avatar,
         })
       })
       response.success(likersList)
