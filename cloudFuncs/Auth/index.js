@@ -42,9 +42,17 @@ function getArticleLikers(request, response) {
   var article = new AV.Object.createWithoutData('Articles', request.params.articleId)
   var relation = article.relation('likers')
   var query = relation.query()
+  var likersList = []
   query.find().then(function (results) {
     if (results) {
-      response.success(results)
+      results.forEach(function (result) {
+        likersList.push({
+          authorId:result.id,
+          nickname:result.nickname?result.nickname:result.username,
+          avatar:result.avatar,
+        })
+      })
+      response.success(likersList)
     } else {
       response.error('error')
     }
