@@ -5,7 +5,7 @@
 var AV = require('leanengine');
 
 function modifyMobilePhoneVerified(request, response) {
-  var user = AV.Object.createWithoutData('_User',request.params.id)
+  var user = AV.Object.createWithoutData('_User', request.params.id)
   user.set("mobilePhoneVerified", true)
   user.save()
   response.success()
@@ -13,9 +13,9 @@ function modifyMobilePhoneVerified(request, response) {
 
 function verifyInvitationCode(request, response) {
   var invitationsCode = request.params.invitationsCode
-  if(invitationsCode) {
+  if (invitationsCode) {
     response.success('success')
-  }else {
+  } else {
     response.error('error')
   }
 }
@@ -25,7 +25,6 @@ function getDocterList(request, response) {
   query.find().then((results) => {
     var userInfoList = []
     results.forEach((result) => {
-      console.log(result.attributes)
       var userInfo = result.attributes
       userInfoList.push({
         username: userInfo.username,
@@ -38,18 +37,17 @@ function getDocterList(request, response) {
   })
 }
 
-function getArticleLikers(request,response){
-  var article= new AV.Object.createWithoutData('Articles',request.params.articleId)
+function getArticleLikers(request, response) {
+  var article = new AV.Object.createWithoutData('Articles', request.params.articleId)
   var relation = article.relation('likers')
   var query = relation.query()
   query.find().then(function (results) {
-    if(results){
+    if (results) {
       response.success(results)
+    } else {
+      response.error('error')
     }
-      else{
-        response.error('error')
-    }
-    
+
   })
 }
 
@@ -57,7 +55,7 @@ var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
-  getArticleLikers:getArticleLikers,
+  getArticleLikers: getArticleLikers,
 }
 
 module.exports = authFunc
