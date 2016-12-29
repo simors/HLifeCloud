@@ -48,7 +48,7 @@ function getUserinfoById(request, response) {
     var user = result.attributes
     var userInfo = {
       id: result.id,
-      nickname: user.username,
+      nickname: user.nickname ? user.nickname : user.mobilePhoneNumber,
       phone: user.mobilePhoneNumber,
       avatar: user.avatar,
       gender: user.gender,
