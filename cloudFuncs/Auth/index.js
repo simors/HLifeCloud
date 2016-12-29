@@ -38,6 +38,27 @@ function getDocterList(request, response) {
   })
 }
 
+function getUserinfoById(request, response) {
+  var userId = request.params.userId
+  var query = new AV.Query('_User')
+  var rsp = {
+    error: 0,     // 正常返回
+  }
+  query.get(userId).then((result) => {
+    var user = result.attributes
+    var userInfo = {
+      id: result.id,
+      nickname: user.username,
+      phone: user.mobilePhoneNumber,
+      avatar: user.avatar,
+    }
+    rsp.userInfo = userInfo
+    response.success(rsp)
+  }).catch((error) => {
+    response.error({error: error.code})
+  })
+}
+
 function getArticleLikers(request, response) {
   var article = new AV.Object.createWithoutData('Articles', request.params.articleId)
   var relation = article.relation('likers')
@@ -56,6 +77,7 @@ var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
+  getUserinfoById: getUserinfoById,
   getArticleLikers: getArticleLikers,
 }
 
