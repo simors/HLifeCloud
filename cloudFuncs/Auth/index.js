@@ -87,17 +87,12 @@ function getArticleLikers(request, response) {
   })
 }
 
-function fetchShopCommentList(request, response) {
-  
-}
-
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
   getUserinfoById: getUserinfoById,
-  getArticleLikers: getArticleLikers,
-  fetchShopCommentList: fetchShopCommentList
+  getArticleLikers: getArticleLikers
 }
 
 module.exports = authFunc
