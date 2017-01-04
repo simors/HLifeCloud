@@ -5,18 +5,18 @@
 var AV = require('leanengine');
 
 function fetchShopCommentList(request, response) {
-  let shopId = request.params.id
-  let isRefresh = request.params.isRefresh
-  let lastCreatedAt = request.params.lastCreatedAt
+  var shopId = request.params.id
+  var isRefresh = request.params.isRefresh
+  var lastCreatedAt = request.params.lastCreatedAt
 
-  let query = new AV.Query('ShopComment')
+  var query = new AV.Query('ShopComment')
 
   if(!isRefresh && lastCreatedAt) { //分页查询
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
 
   //构建内嵌查询
-  let innerQuery = new AV.Query('Shop')
+  var innerQuery = new AV.Query('Shop')
   innerQuery.equalTo('objectId', shopId)
   //执行内嵌查询
   query.matchesQuery('targetShop', innerQuery)
