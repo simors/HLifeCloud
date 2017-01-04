@@ -3,6 +3,7 @@
  */
 
 var AV = require('leanengine');
+var shopUtil = require('../../utils/shopUtil');
 
 function fetchShopCommentList(request, response) {
   var shopId = request.params.id
@@ -26,7 +27,8 @@ function fetchShopCommentList(request, response) {
   query.addDescending('createdAt')
   query.limit(5) // 最多返回 5 条结果
   return query.find().then(function(results) {
-    response.success(results)
+    var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
+    response.success(shopComments)
   }, function(err) {
     response.error(err)
   })
