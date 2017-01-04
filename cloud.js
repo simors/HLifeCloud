@@ -1,6 +1,7 @@
 var AV = require('leanengine');
 
 var authFunc = require('./cloudFuncs/Auth');
+var shopFunc = require('./cloudFuncs/Shop');
 
 /**
  * 云函数
@@ -10,4 +11,5 @@ AV.Cloud.define('hLifeVerifyInvitationCode', authFunc.verifyInvitationCode)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
 AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
+AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 module.exports = AV.Cloud;
