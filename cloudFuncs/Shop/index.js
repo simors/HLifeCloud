@@ -64,8 +64,25 @@ function fetchShopCommentList(request, response) {
   })
 }
 
+function fetchShopCommentReplyList(request, response) {
+  var shopCommentId = request.params.shopCommentId
+  var query = new AV.Query('ShopCommentReply')
+  var shopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
+  query.equalTo('replyShopComment', shopComment)
+  query.include(['user', 'parentReply', 'parentReply.user'])
+  query.addDescending('createdAt')
+
+  return query.find().then(function(results){
+    var replys = shopUtil.shopCommentReplyFromLeancloudObject(results)
+    response.success(replys)
+  }, function(err) {
+    response.error(err)
+  })
+}
+
 var authFunc = {
-  fetchShopCommentList: fetchShopCommentList
+  fetchShopCommentList: fetchShopCommentList,
+  fetchShopCommentReplyList: fetchShopCommentReplyList
 }
 
 module.exports = authFunc
