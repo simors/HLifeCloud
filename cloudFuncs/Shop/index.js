@@ -12,7 +12,11 @@ function fetchShopCommentList(request, response) {
 
   var query = new AV.Query('ShopComment')
 
-  if(!isRefresh && lastCreatedAt) { //分页查询
+  if(!isRefresh) { //分页查询
+    if(!lastCreatedAt) {
+      response.success([])
+      return
+    }
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
 
