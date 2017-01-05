@@ -4,7 +4,7 @@
 
 function parseDate (iso8601) {
   var regexp = new RegExp("^([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2})" + "T" + "([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})" + "(.([0-9]+))?" + "Z$");
-  var match = regexp.exec(iso8601);
+  var match = regexp.exec(iso8601.toISOString());
   if (!match) {
     return null;
   }

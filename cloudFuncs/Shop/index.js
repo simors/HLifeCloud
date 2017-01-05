@@ -27,8 +27,32 @@ function fetchShopCommentList(request, response) {
   query.addDescending('createdAt')
   query.limit(5) // 最多返回 5 条结果
   return query.find().then(function(results) {
-    var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
-    response.success(shopComments)
+    try{
+      var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
+
+      var queryArr = []
+      shopComments.forEach(function(item, index){
+        var replyQuery = new AV.Query('ShopCommentReply')
+        var shopComment = AV.Object.createWithoutData('ShopComment', item.id)
+        replyQuery.equalTo('replyShopComment', shopComment)
+        queryArr.push(replyQuery)
+      })
+
+      var orQuery = AV.Query.or.apply(null, queryArr)
+      orQuery.include(['user', 'parentReply', 'parentReply.user'])
+      orQuery.addDescending('createdAt')
+
+      return orQuery.find().then(function(orResults){
+        var replys = shopUtil.shopCommentReplyFromLeancloudObject(orResults)
+        shopUtil.shopCommentsConcatReplys(shopComments, replys)
+        response.success(shopComments)
+      }, function(err) {
+        response.success(shopComments)
+      })
+
+    }catch(err) {
+      response.error(err)
+    }
   }, function(err) {
     response.error(err)
   })
