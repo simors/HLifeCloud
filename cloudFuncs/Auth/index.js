@@ -114,7 +114,7 @@ var authFunc = {
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
   getUserinfoById: getUserinfoById,
-  getArticleLikers: getArticleLikers,
+  getArticleLikers: getArticleLikers
 }
 
 module.exports = authFunc
