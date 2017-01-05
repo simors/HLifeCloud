@@ -30,26 +30,28 @@ function fetchShopCommentList(request, response) {
     try{
       var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
 
-      var queryArr = []
-      shopComments.forEach(function(item, index){
-        var replyQuery = new AV.Query('ShopCommentReply')
-        var shopComment = AV.Object.createWithoutData('ShopComment', item.id)
-        replyQuery.equalTo('replyShopComment', shopComment)
-        queryArr.push(replyQuery)
-      })
+      if(shopComments && shopComments.length) {
+        var queryArr = []
+        shopComments.forEach(function(item, index){
+          var replyQuery = new AV.Query('ShopCommentReply')
+          var shopComment = AV.Object.createWithoutData('ShopComment', item.id)
+          replyQuery.equalTo('replyShopComment', shopComment)
+          queryArr.push(replyQuery)
+        })
 
-      var orQuery = AV.Query.or.apply(null, queryArr)
-      orQuery.include(['user', 'parentReply', 'parentReply.user'])
-      orQuery.addDescending('createdAt')
+        var orQuery = AV.Query.or.apply(null, queryArr)
+        orQuery.include(['user', 'parentReply', 'parentReply.user'])
+        orQuery.addDescending('createdAt')
 
-      return orQuery.find().then(function(orResults){
-        var replys = shopUtil.shopCommentReplyFromLeancloudObject(orResults)
-        shopUtil.shopCommentsConcatReplys(shopComments, replys)
-        response.success(shopComments)
-      }, function(err) {
-        response.success(shopComments)
-      })
-
+        return orQuery.find().then(function(orResults){
+          var replys = shopUtil.shopCommentReplyFromLeancloudObject(orResults)
+          shopUtil.shopCommentsConcatReplys(shopComments, replys)
+          response.success(shopComments)
+        }, function(err) {
+          response.success(shopComments)
+        })
+      }
+      response.success(shopComments)
     }catch(err) {
       response.error(err)
     }
