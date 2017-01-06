@@ -109,6 +109,7 @@ function shopCommentUpFromLeancloudObject(results) {
 
       var attrs = item.attributes
       shopCommentUp.targetShopCommentId = attrs.targetShopComment.id
+      shopCommentUp.status = attrs.status
 
       var user = {}
       var userAttrs = attrs.user && attrs.user.attributes

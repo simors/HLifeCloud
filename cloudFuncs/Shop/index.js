@@ -47,7 +47,6 @@ function fetchShopCommentList(request, response) {
 
           var upQuery = new AV.Query('ShopCommentUp')
           upQuery.equalTo('targetShopComment', shopComment)
-          upQuery.equalTo('status', true)
           upQueryArr.push(upQuery)
         })
 
@@ -113,7 +112,6 @@ function fetchShopCommentUpedUserList(request, response) {
   var query = new AV.Query('ShopCommentUp')
   var shopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
   query.equalTo('targetShopComment', shopComment)
-  query.equalTo('status', true)
   query.include(['user'])
   query.addAscending('createdAt')
 
