@@ -70,7 +70,7 @@ function fetchShopCommentReplyList(request, response) {
   var shopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
   query.equalTo('replyShopComment', shopComment)
   query.include(['user', 'parentReply', 'parentReply.user'])
-  query.addDescending('createdAt')
+  query.addAscending('createdAt')
 
   return query.find().then(function(results){
     var replys = shopUtil.shopCommentReplyFromLeancloudObject(results)
