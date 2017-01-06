@@ -61,15 +61,15 @@ function fetchShopCommentList(request, response) {
           var upOrQuery = AV.Query.or.apply(null, upQueryArr)
           upOrQuery.include(['user'])
           upOrQuery.addAscending('createdAt')
-          console.log('orResults==========', orResults)
+          // console.log('orResults==========', orResults)
           
           return upOrQuery.find().then(function(upOrResults) {
             try{
-              console.log('upOrResults==========', upOrResults)
+              // console.log('upOrResults==========', upOrResults)
               var ups = shopUtil.shopCommentUpFromLeancloudObject(upOrResults)
-              console.log('shopCommentUpFromLeancloudObject==========')
+              // console.log('shopCommentUpFromLeancloudObject==========')
               shopUtil.shopCommentsConcatUps(shopComments, ups)
-              console.log('shopCommentsConcatUps==========')
+              // console.log('shopCommentsConcatUps==========')
               response.success(shopComments)
             }catch(err) {
               console.log('err==========', err)

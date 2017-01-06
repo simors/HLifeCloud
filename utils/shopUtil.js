@@ -79,9 +79,9 @@ function shopCommentReplyFromLeancloudObject(results) {
         var _user = {}
         var parentReplyAttrsUserAttrs = parentReplyAttrs.user && parentReplyAttrs.user.attributes
         if(parentReplyAttrsUserAttrs) {
-          _user.id = attrs.user.id
-          _user.nickname = userAttrs.nickname
-          _user.avatar = userAttrs.avatar
+          _user.id = parentReplyAttrsUserAttrs.id
+          _user.nickname = parentReplyAttrsUserAttrs.nickname
+          _user.avatar = parentReplyAttrsUserAttrs.avatar
         }
         parentReply.user = _user
         shopCommentReply.parentReply = parentReply
