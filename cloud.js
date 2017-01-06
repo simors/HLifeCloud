@@ -13,4 +13,5 @@ AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
+AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
 module.exports = AV.Cloud;

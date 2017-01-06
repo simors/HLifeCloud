@@ -45,6 +45,37 @@ function shopCommentFromLeancloudObject(results) {
   return shopComments
 }
 
+function shopCommentUpeduserFromLeancloudObject(results){
+  var shopCommentUpedUsers = []
+  if(results && results.length) {
+    results.forEach(function(item, index) {
+      var shopCommentUpedUser = {}
+      shopCommentUpedUser.id = item.id
+      var createdAt = util.parseDate(item.createdAt)
+      shopCommentUpedUser.createdAt = createdAt.valueOf()
+      shopCommentUpedUser.createdDate = numberUtils.formatLeancloudTime(createdAt, 'YYYY-MM-DD HH:mm:SS')
+      shopCommentUpedUser.shopCommentUpTime = numberUtils.getConversationTime(createdAt.valueOf())
+      var updatedAt = util.parseDate(item.updatedAt)
+      shopCommentUpedUser.updatedAt = updatedAt.valueOf()
+  
+      var attrs = item.attributes
+      shopCommentUpedUser.status = attrs.status
+
+      var user = {}
+      var userAttrs = attrs.user && attrs.user.attributes
+      if(userAttrs) {
+        user.id = attrs.user.id
+        user.nickname = userAttrs.nickname
+        user.avatar = userAttrs.avatar
+      }
+      shopCommentUpedUser.user = user
+
+      shopCommentUpedUsers.push(shopCommentUpedUser)
+    })
+  }
+  return shopCommentUpedUsers
+}
+
 function shopCommentReplyFromLeancloudObject(results) {
   var shopCommentReplys = []
   if(results && results.length) {
@@ -115,7 +146,8 @@ function shopCommentsConcatReplys(shopComments, replys) {
 var shopUtil = {
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
   shopCommentReplyFromLeancloudObject: shopCommentReplyFromLeancloudObject,
-  shopCommentsConcatReplys: shopCommentsConcatReplys
+  shopCommentsConcatReplys: shopCommentsConcatReplys,
+  shopCommentUpeduserFromLeancloudObject: shopCommentUpeduserFromLeancloudObject
 }
 
 module.exports = shopUtil
