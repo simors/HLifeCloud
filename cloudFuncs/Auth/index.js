@@ -20,21 +20,43 @@ function verifyInvitationCode(request, response) {
   }
 }
 
+// function getDocterList(request, response) {
+//   var query = new AV.Query('_User')
+//   query.find().then((results) => {
+//     var userInfoList = []
+//     results.forEach((result) => {
+//       var userInfo = result.attributes
+//       userInfoList.push({
+//         id: result.id,
+//         username: userInfo.username,
+//         nickname: userInfo.nickname,
+//         phone: userInfo.mobilePhoneNumber,
+//         avatar: userInfo.avatar
+//       })
+//     })
+//     response.success(userInfoList)
+//   })
+// }
+
 function getDocterList(request, response) {
-  var query = new AV.Query('_User')
+  var query = new AV.Query('Doctor')
+  query.include(['user'])
   query.find().then((results) => {
-    var userInfoList = []
-    results.forEach((result) => {
-      var userInfo = result.attributes
-      userInfoList.push({
-        id: result.id,
-        username: userInfo.username,
-        nickname: userInfo.nickname,
-        phone: userInfo.mobilePhoneNumber,
-        avatar: userInfo.avatar
-      })
+      var doctorList = []
+      results.forEach((result) => {
+        var doctor = result.attributes
+        var userInfo = doctor.user.attributes
+        // console.log("getDocterList userInfo:", userInfo)
+        doctorList.push({
+          id: result.id,
+          username: doctor.name,
+          department: doctor.department,
+          phone: doctor.phone,
+          organization: doctor.organization,
+          avatar: userInfo.avatar,
+        })
     })
-    response.success(userInfoList)
+    response.success(doctorList)
   })
 }
 
