@@ -48,7 +48,8 @@ function getDocterList(request, response) {
         var userInfo = doctor.user.attributes
         // console.log("getDocterList userInfo:", userInfo)
         doctorList.push({
-          id: result.id,
+          userId: doctor.user.id,
+          doctorId: result.id,
           username: doctor.name,
           department: doctor.department,
           phone: doctor.phone,
