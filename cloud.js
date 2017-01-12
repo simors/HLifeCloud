@@ -9,6 +9,7 @@ var shopFunc = require('./cloudFuncs/Shop');
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
 AV.Cloud.define('hLifeVerifyInvitationCode', authFunc.verifyInvitationCode)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
+AV.Cloud.define('hLifeGetDocterGroup', authFunc.getDocterGroup)
 AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)

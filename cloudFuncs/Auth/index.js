@@ -61,6 +61,38 @@ function getDocterList(request, response) {
   })
 }
 
+function getDocterGroup(request, response) {
+  var userIds = request.params.id
+  var query = new AV.Query('_User')
+  query.containedIn('objectId', userIds)
+  return query.find().then(function (users) {
+    var queryDor = new AV.Query('Doctor')
+    queryDor.include('user')
+    queryDor.containedIn('user', users)
+    queryDor.find().then(function (doctors) {
+      var doctorList = []
+      doctors.forEach((doctor) => {
+        var doctorInfo = doctor.attributes
+        var userInfo = doctorInfo.user.attributes
+        doctorList.push({
+        userId: doctorInfo.user.id,
+        doctorId: doctor.id,
+        username: doctorInfo.name,
+        department: doctorInfo.department,
+        phone: doctorInfo.phone,
+        organization: doctorInfo.organization,
+        avatar: userInfo.avatar,
+      })
+      })
+      response.success(doctorList)
+    })
+  }, function (error) {
+    error.message = ERROR[error.code] ? ERROR[error.code] : ERROR[9999]
+    throw error
+  })
+
+}
+
 function getUserinfoById(request, response) {
   var userId = request.params.userId
   var query = new AV.Query('_User')
@@ -114,6 +146,7 @@ var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
+  getDocterGroup: getDocterGroup,
   getUserinfoById: getUserinfoById,
   getArticleLikers: getArticleLikers
 }
