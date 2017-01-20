@@ -117,6 +117,34 @@ function getUserinfoById(request, response) {
   })
 }
 
+function getUsers(request, response) {
+  var userIds = request.params.userIds
+  var query = new AV.Query('_User')
+  var rsp = {
+    error: 0,     // 正常返回
+    users: [],
+  }
+  query.containedIn('objectId', userIds)
+  query.find().then(function (result) {
+    result.forEach((userRes) => {
+      var user = userRes.attributes
+      var userInfo = {
+        id: userRes.id,
+        nickname: user.nickname ? user.nickname : user.mobilePhoneNumber,
+        phone: user.mobilePhoneNumber,
+        avatar: user.avatar,
+        gender: user.gender,
+        birthday: user.birthday,
+        identity: user.identity,
+      }
+      rsp.users.push(userInfo)
+    })
+    response.success(rsp)
+  }).catch((error) => {
+    response.error({error: error.code})
+  })
+}
+
 function getArticleLikers(request, response) {
   var article = new AV.Object.createWithoutData('Articles', request.params.articleId)
   var relation = article.relation('likers')
@@ -148,6 +176,7 @@ var authFunc = {
   getDocterList: getDocterList,
   getDocterGroup: getDocterGroup,
   getUserinfoById: getUserinfoById,
+  getUsers: getUsers,
   getArticleLikers: getArticleLikers
 }
 
