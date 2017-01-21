@@ -16,17 +16,17 @@ var query = new AV.Query('ArticleComment')
  return query.find().then((results)=>{
     if (result) {
       results.forEach((result)=>{
-        if(result){
-        var count = getCount(result.id)
-        var status = getIsUp(result.id,userId)
+        if(result) {
+          var count = getCount(result.id)
+          var status = getIsUp(result.id, userId)
           commentList.push({
             comment: result,
             count: count,
             isUp: status
           })
-      )
+        }})
       response.success(commentList)
-   }
+    }
     else{
       response.error('error')
     }
