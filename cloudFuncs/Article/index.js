@@ -3,7 +3,7 @@
  */
 var AV = require('leanengine');
 
-getArticleCommentList(request,response){
+function getArticleCommentList(request,response){
 var articleId = request.params.articleId
 var userId = request.params.userId
 var query = new AV.Query('ArticleComment')
@@ -33,7 +33,7 @@ var query = new AV.Query('ArticleComment')
     })
 }
 
-getCount(commentId){
+function getCount(commentId){
   var query = new AV.Query('Up')
   query.equalTo('targetId',commentId)
   query.equalTo('upType','articleComment')
@@ -41,7 +41,7 @@ getCount(commentId){
   return query.count()
 }
 
-getIsUp(commentId,userId){
+function getIsUp(commentId,userId){
   var query = new AV.Query('Up')
   query.equalTo('targetId',commentId)
   query.equalTo('upType','articleComment')
