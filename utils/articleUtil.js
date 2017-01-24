@@ -20,7 +20,7 @@ if (result){
   comment.avatar = author.attributes.avatar
   comment.nickname = author.attributes.nickname
   comment.username = author.attributes.username
-  comment.createdAt = result.createdAt
+  comment.createdAt = result.createdAt.valueOf()
   if(attrs.replyId) {
     var reply = attrs.replyId
     var replyUser = attrs.replyId.attributes.author
