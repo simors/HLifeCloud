@@ -2,6 +2,7 @@
  * Created by lilu on 2017/1/21.
  */
 var AV = require('leanengine');
+var Promise = require('bluebird');
 
 function getArticleCommentList(request,response){
 var articleId = request.params.articleId
@@ -16,63 +17,43 @@ var userId = request.params.userId
     query.include(['replyId'])
   query.include(['replayId.author'])
   query.addAscending('createdAt')
-  let commentList=[]
-  let countList = []
-  let isUpList = []
+
   query.find().then((results)=>{
-  // console.log('results====>',results)
-
    if (results) {
-      results.forEach((comment)=>{
-        if(comment) {
-          // var queryCount = new Query('Up')
-          // queryCount.equalTo('targetId',comment.id)
-          // queryCount.equalTo('upType','articleComment')
-          // queryCount.equalTo('status',true)
-          // return queryCount.count().then((count)=>{
-          //   console.log('count====>',count)
-          //   var queryIsUp = new AV.Query(Up)
-          //   var user = new AV.Object.createWithoutData('_User', userId)
-          //   queryIsUp.equalTo('targetId',comment.id)
-          //   queryIsUp.equalTo('upType','articleComment')
-          //   queryIsUp.equalTo('user',user)
-          //   return queryIsUp.first().then((isUp)=>{
-          //     console.log('isUp====>',isUp)
-          //   })
-          // })
-
-          getCount(comment.id).then((count)=>{
-           //  getIsUp(comment.id,userId).then((isUp)=>{
-           //    commentList.push({
-           //      comment:comment,
-           //      count:count,
-           //      isUp:isUp
-           //    })
-           //    console.log('commentList',commentList)
-           //    response.success(commentList)
-           // })
-            commentList.push({
-              comment:comment,
-              count:count,
-             // isUp:isUp
-            })
-           // console.log('count=============',count)
-          })
-
-        }})
-
-      // console.log('commentList',commentList)
-
-
-
-
-    }
-    // else{
-    //   response.error('error')
-    // }
-    }).then(()=>{
-    response.success(commentList)
-  })
+     var commentList=[]
+     var promises = []
+     if(!request.params.userId){
+       results.forEach((comment)=>{
+         commentList.push({
+           comment:comment
+         })
+       })
+       response.success(commentList)
+     }
+     else {
+       results.forEach((comment)=> {
+         if (comment) {
+           promises.push(
+             getIsUp(comment.id, userId).then((isUp)=> {
+               commentList.push({
+                 comment: comment,
+                 // count:count,
+                 isUp: isUp
+               })
+               // console.log('isUp=============', isUp)
+             })
+           )
+         }
+       })
+       Promise.all(promises).then(()=> {
+         response.success(commentList)
+       })
+     }
+   }
+    else{
+      response.error('error')
+     }
+    })
 
 }
 
@@ -90,19 +71,25 @@ function getCount(commentId){
 }
 
 function getIsUp(commentId,userId){
-  var query = new AV.Query('Up')
-  var user = new AV.Object.createWithoutData('_User', userId)
-  query.equalTo('targetId',commentId)
-  query.equalTo('upType','articleComment')
-  query.equalTo('user',user)
-  return query.first().then((result)=>{
-    console.log('result===>',result)
-    if(!result){
-      return false
-    }else {
-      return result.attributes.status
-    }
-  })
+  if(!userId){
+    return false
+  }else {
+    var query = new AV.Query('Up')
+    var user = new AV.Object.createWithoutData('_User', userId)
+    query.equalTo('targetId', commentId)
+    query.equalTo('upType', 'articleComment')
+    query.equalTo('user', user)
+    return query.first().then((result)=> {
+
+      if (!result) {
+        console.log('result===>', 'false')
+        return false
+      } else {
+        console.log('result===>', result.attributes.status)
+        return result.attributes.status
+      }
+    })
+  }
 }
 
 
