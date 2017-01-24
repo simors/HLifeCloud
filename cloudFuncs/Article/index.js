@@ -17,7 +17,7 @@ var userId = request.params.userId
     query.include('author')
     query.include('replyId')
   query.include('replyId.author')
-  query.addAscending('createdAt')
+  query.descending('createdAt')
 
   query.find().then((results)=>{
    if (results) {
