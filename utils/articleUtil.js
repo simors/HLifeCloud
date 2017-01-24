@@ -10,7 +10,7 @@ var comment = {}
 if (result){
   var attrs =result.attributes
   var author=attrs.author
-
+  comment.articleId = attrs.articleId.id
   comment.count = attrs.count
   comment.id = result.id
   comment.content = attrs.content
