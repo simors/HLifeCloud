@@ -3,6 +3,7 @@
  */
 var AV = require('leanengine');
 var Promise = require('bluebird');
+var articleUtil = require('../../utils/articleUtil')
 
 function getArticleCommentList(request,response){
 var articleId = request.params.articleId
@@ -13,9 +14,9 @@ var userId = request.params.userId
 
   var query = new AV.Query('ArticleComment')
   query.equalTo('articleId',article)
-    query.include(['author'])
-    query.include(['replyId'])
-  query.include(['replayId.author'])
+    query.include('author')
+    query.include('replyId')
+  query.include('replyId.author')
   query.addAscending('createdAt')
 
   query.find().then((results)=>{
@@ -24,19 +25,24 @@ var userId = request.params.userId
      var promises = []
      if(!request.params.userId){
        results.forEach((comment)=>{
+          var articleComment = articleUtil.commentFromLeancloud(comment)
          commentList.push({
-           comment:comment
+           comment:articleComment
          })
        })
+
        response.success(commentList)
      }
      else {
        results.forEach((comment)=> {
+      //   console.log('comment======>',comment)
+         var articleComment = articleUtil.commentFromLeancloud(comment)
+
          if (comment) {
            promises.push(
              getIsUp(comment.id, userId).then((isUp)=> {
                commentList.push({
-                 comment: comment,
+                 comment: articleComment,
                  // count:count,
                  isUp: isUp
                })
@@ -46,6 +52,7 @@ var userId = request.params.userId
          }
        })
        Promise.all(promises).then(()=> {
+         console.log('commentList======>',commentList)
          response.success(commentList)
        })
      }
@@ -82,10 +89,10 @@ function getIsUp(commentId,userId){
     return query.first().then((result)=> {
 
       if (!result) {
-        console.log('result===>', 'false')
+        //console.log('result===>', 'false')
         return false
       } else {
-        console.log('result===>', result.attributes.status)
+        //console.log('result===>', result.attributes.status)
         return result.attributes.status
       }
     })
