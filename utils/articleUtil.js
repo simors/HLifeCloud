@@ -5,7 +5,7 @@ var numberUtils = require('./numberUtils');
 var util = require('./util');
 
 function commentFromLeancloud(result){
-  console.log('rsult===>',result)
+ // console.log('rsult===>',result)
 var comment = {}
 if (result){
   var attrs =result.attributes
@@ -14,13 +14,14 @@ if (result){
   comment.count = attrs.count
   comment.id = result.id
   comment.content = attrs.content
-  console.log('comment============>',comment)
 
   comment.author = author.id
   comment.avatar = author.attributes.avatar
   comment.nickname = author.attributes.nickname
   comment.username = author.attributes.username
   comment.createdAt = result.createdAt.valueOf()
+  console.log('comment.time============>',comment.createdAt)
+
   if(attrs.replyId) {
     var reply = attrs.replyId
     var replyUser = attrs.replyId.attributes.author

@@ -52,7 +52,8 @@ var userId = request.params.userId
          }
        })
        Promise.all(promises).then(()=> {
-         console.log('commentList======>',commentList)
+         commentList.sort(arrdes)
+       //  console.log('commentList======>',commentList)
          response.success(commentList)
        })
      }
@@ -98,7 +99,15 @@ function getIsUp(commentId,userId){
     })
   }
 }
+function arrdes(m,n){
+  //console.log('asdasdasd',m.comment.createdAt)
+ // console.log('asdasdasd',n.comment.createdAt)
 
+  if(m.comment.createdAt<n.comment.createdAt)
+  {return 1}else {
+    return -1
+  }
+}
 
 
 var ArticleFunc={
