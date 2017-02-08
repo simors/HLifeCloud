@@ -3,7 +3,7 @@ var AV = require('leanengine');
 var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
 var articleFunc = require('./cloudFuncs/Article');
-var privilegeFunc = require('./cloudFuncs/Privilege')
+var PrivilegeFunc = require('./cloudFuncs/Privilege');
 
 /**
  * 云函数
@@ -19,5 +19,7 @@ AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
-AV.Cloud.define('getMenuList',privilegeFunc.getMenuList())
+AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
+AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
+
 module.exports = AV.Cloud;
