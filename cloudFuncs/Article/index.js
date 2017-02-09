@@ -24,7 +24,7 @@ function addArticleCategory(request,response){
 }
 
 //管理栏目
-function updateCategoryType(request,response) {
+function updateCategoryWithoutType(request,response) {
  // console.log('arr',request.params.arr)
   var arr = request.params.arr
   console.log('arr',arr)
@@ -148,7 +148,7 @@ function arrdes(m,n){
 
 
 var ArticleFunc={
-  updateCategoryType:updateCategoryType,
+  updateCategoryWithoutType:updateCategoryWithoutType,
   getArticleCommentList:getArticleCommentList,
   addArticleCategory:addArticleCategory,
 }

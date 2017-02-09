@@ -20,7 +20,7 @@ AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyL
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
-AV.Cloud.define('updateCategoryType',articleFunc.updateCategoryType)
+AV.Cloud.define('updateCategoryWithoutType',articleFunc.updateCategoryWithoutType)
 AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
 AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
 AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
