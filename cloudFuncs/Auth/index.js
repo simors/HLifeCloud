@@ -54,6 +54,8 @@ function getDocterList(request, response) {
           department: doctor.department,
           phone: doctor.phone,
           organization: doctor.organization,
+          spec: doctor.spec,
+          desc: doctor.desc,
           avatar: userInfo.avatar,
         })
     })
