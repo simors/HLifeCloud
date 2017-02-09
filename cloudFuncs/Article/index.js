@@ -21,9 +21,24 @@ function addArticleCategory(request,response){
   },(err)=>{
     response.error(err)
   })
-
 }
 
+//管理栏目
+function updateCategoryType(request,response) {
+ // console.log('arr',request.params.arr)
+  var arr = request.params.arr
+  console.log('arr',arr)
+
+  arr.forEach((result)=>{
+    console.log('result',result)
+    var category = new AV.Object.createWithoutData('ArticleCategory',result.id)
+    if(result.imageSource)
+      category.set('imageSource',result.imageSource)
+    if(result.title)
+      category.set('title',result.title)
+    category.save()
+  })
+}
 
 
 //获取文章的评论列表
@@ -133,6 +148,7 @@ function arrdes(m,n){
 
 
 var ArticleFunc={
+  updateCategoryType:updateCategoryType,
   getArticleCommentList:getArticleCommentList,
   addArticleCategory:addArticleCategory,
 }
