@@ -5,6 +5,28 @@ var AV = require('leanengine');
 var Promise = require('bluebird');
 var articleUtil = require('../../utils/articleUtil')
 
+//添加栏目
+function addArticleCategory(request,response){
+  var title = request.params.title
+  var imageSource = request.params.imageSource
+  var type = 'common'
+  var ArticleCategory = AV.Object.extend('ArticleCategory')
+  var articleCategory = new ArticleCategory()
+  articleCategory.set('title',title)
+  articleCategory.set('imageSource',imageSource)
+  articleCategory.set('type',type)
+  articleCategory.save().then((result)=>{
+    console.log('result==>',result)
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+
+}
+
+
+
+//获取文章的评论列表
 function getArticleCommentList(request,response){
 var articleId = request.params.articleId
   var article = new AV.Object.createWithoutData('Articles', articleId)
@@ -112,6 +134,7 @@ function arrdes(m,n){
 
 var ArticleFunc={
   getArticleCommentList:getArticleCommentList,
+  addArticleCategory:addArticleCategory,
 }
 
 
