@@ -21,5 +21,7 @@ AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpe
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
 AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
+AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
+
 
 module.exports = AV.Cloud;
