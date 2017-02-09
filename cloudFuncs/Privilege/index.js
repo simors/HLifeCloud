@@ -82,9 +82,12 @@ function getPermissionListOnlyByLogin(request, response) {
     var query = new AV.Query('UserRole')
    // query.equalTo('role', role)
     query.equalTo('user', user)
+    query.equalTo('enable', true)
     query.include('role')
     query.find().then((roles)=> {
       //var role = new AV.Object.createWithoutData('_Role', roleId)
+     // console.log('hahahahahah', roles)
+
       var promises = []
       roles.forEach((roleInfo)=>{
         console.log('hahahahahah', roleInfo.attributes.role.id)
