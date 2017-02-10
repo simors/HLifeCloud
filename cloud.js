@@ -3,6 +3,7 @@ var AV = require('leanengine');
 var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
 var articleFunc = require('./cloudFuncs/Article');
+var PrivilegeFunc = require('./cloudFuncs/Privilege');
 
 /**
  * 云函数

@@ -69,6 +69,8 @@ function getDocterList(request, response) {
           department: doctor.department,
           phone: doctor.phone,
           organization: doctor.organization,
+          spec: doctor.spec,
+          desc: doctor.desc,
           avatar: userInfo.avatar,
         })
     })
@@ -181,6 +183,7 @@ function getArticleLikers(request, response) {
     } else {
       response.error('error')
     }
+
   })
 }
 
@@ -244,7 +247,7 @@ var authFunc = {
   getUserinfoById: getUserinfoById,
   getUsers: getUsers,
   getArticleLikers: getArticleLikers,
-  getInvitationCode: getInvitationCode,
+  getInvitationCode: getInvitationCode
 }
 
 module.exports = authFunc
