@@ -18,7 +18,7 @@ function verifyInvitationCode(request, response) {
   var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
 // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server 主从切换等原因造成短暂不可用导致应用进程退出。
   client.on('error', function(err) {
-    getInvitationCodeOnceErrorCB(userId, err, response);
+    console.log("error:", err)
   });
   var invitationsCode = request.params.invitationsCode
   if (invitationsCode) {
