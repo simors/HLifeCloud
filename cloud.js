@@ -24,6 +24,5 @@ AV.Cloud.define('updateCategoryWithoutType',articleFunc.updateCategoryWithoutTyp
 AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
 AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
 AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
-
-
+AV.Cloud.define('hLifeGetInvitationCode',authFunc.getInvitationCode)
 module.exports = AV.Cloud;
