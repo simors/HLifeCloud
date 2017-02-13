@@ -23,7 +23,7 @@ function addArticleCategory(request,response){
   })
 }
 
-//管理栏目
+//更新栏目的名字和图标
 function updateCategoryWithoutType(request,response) {
  // console.log('arr',request.params.arr)
   var arr = request.params.arr
@@ -39,7 +39,10 @@ function updateCategoryWithoutType(request,response) {
     category.save()
   })
 }
-
+//设定首页显示的栏目
+function updateCategoryType(request,response) {
+  var arr = request.params.arr
+}
 
 //获取文章的评论列表
 function getArticleCommentList(request,response){
