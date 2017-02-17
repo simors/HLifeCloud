@@ -67,21 +67,25 @@ function getMenuListByLogin(request, response) {
 }
 
 function getPermissionListOnlyByLogin(request, response) {
-  var phone = request.params.phone
+  var username = request.params.username
   var password = request.params.password
   var permssionList = []
+  var query = new AV.Query('AdminUser')
+  query.equalTo('username',username)
+  query.equalTo('password',password)
+
  // var permissionList = new set()
  // var roleId = request.params.roleId
-  AV.User.logInWithMobilePhone(phone, password).then((userInfo)=> {
+  query.first().then((userInfo)=> {
 
     var userId = userInfo.id
-   // console.log('hahahahahah', userId)
+    console.log('hahahahahah', userId)
 
-    var user = new AV.Object.createWithoutData('_User', userId)
+    var user = new AV.Object.createWithoutData('AdminUser', userId)
    // var role = new AV.Object.createWithoutData('_Role', roleId)
     var query = new AV.Query('UserRole')
    // query.equalTo('role', role)
-    query.equalTo('user', user)
+    query.equalTo('adminUser', user)
     query.equalTo('enable', true)
     query.include('role')
     query.find().then((roles)=> {
@@ -100,7 +104,9 @@ function getPermissionListOnlyByLogin(request, response) {
           results.forEach((result)=> {
             console.log('hahahahahah', result.attributes.permission.attributes.name)
             permssionList.push({
-              permission: result.attributes.permission.attributes.name
+              subPermission: result.attributes.permission.attributes.subMenu,
+              permission: result.attributes.permission.attributes.name,
+              key:result.attributes.permission.attributes.key
             })
           })
           // response.success(menuList)
