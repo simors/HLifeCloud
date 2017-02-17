@@ -124,6 +124,8 @@ function getPermissionListOnlyByLogin(request, response) {
     })
   }, (err)=> {
     response.error(err)
+  }).catch((error) => {
+    response.error({error: error.code})
   })
 }
 var PrivilegeFunc = {
