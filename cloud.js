@@ -4,7 +4,7 @@ var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
 var articleFunc = require('./cloudFuncs/Article');
 var PrivilegeFunc = require('./cloudFuncs/Privilege');
-
+var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
 /**
  * 云函数
  */
@@ -25,4 +25,5 @@ AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
 AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
 AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
 AV.Cloud.define('hLifeGetInvitationCode',authFunc.getInvitationCode)
+AV.Cloud.define('getAdminUserList',userManagerFunc.getUserList)
 module.exports = AV.Cloud;
