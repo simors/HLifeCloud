@@ -105,7 +105,7 @@ function getPermissionListOnlyByLogin(request, response) {
             console.log('hahahahahah', result.attributes.permission.attributes.name)
             permssionList.push({
               subPermission: result.attributes.permission.attributes.subMenu,
-              permission: result.attributes.permission.attributes.name,
+              name: result.attributes.permission.attributes.name,
               key:result.attributes.permission.attributes.key
             })
           })
@@ -125,7 +125,7 @@ function getPermissionListOnlyByLogin(request, response) {
   }, (err)=> {
     response.error(err)
   }).catch((error) => {
-    response.error({error: error.code})
+    response.error({error: 'password or username error'})
   })
 }
 var PrivilegeFunc = {
