@@ -26,10 +26,10 @@ var Promise = require('bluebird');
       query.find().then((roles)=>{
        var roleList = []
         roles.forEach((role)=>{
-          console.log('role=====>',role)
+      //    console.log('role=====>',role)
 
           roleList.push(
-            role.attributes.role.attributes.name
+            role.attributes.role.attributes.name+'  '
           )
         })
         userList.push({
@@ -51,8 +51,23 @@ var Promise = require('bluebird');
    })
 }
 
+function getAllRoleList(request,response){
+  var query = new AV.Query('_Role')
+  var roleList = []
+  query.find().then((results)=>{
+    results.forEach((result)=>{
+      var role = {
+        roleId: result.id,
+        roleName: result.attributes.name
+      }
+      roleList.push(role)
+    })
+    response.success(roleList)
+  })
+}
 
 var UserManagerFunc = {
-  getUserList:getUserList
+  getUserList:getUserList,
+  getAllRoleList:getAllRoleList
 }
 module.exports = UserManagerFunc

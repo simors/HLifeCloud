@@ -26,4 +26,6 @@ AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
 AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
 AV.Cloud.define('hLifeGetInvitationCode',authFunc.getInvitationCode)
 AV.Cloud.define('getAdminUserList',userManagerFunc.getUserList)
+AV.Cloud.define('getAllRoleList',userManagerFunc.getAllRoleList)
+
 module.exports = AV.Cloud;
