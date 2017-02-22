@@ -5,57 +5,57 @@ var AV = require('leanengine');
 var Promise = require('bluebird');
 
 //获取人员名单
- function getUserList(request,response) {
-   var userList = []
-   var promises = []
+function getUserList(request, response) {
+  var userList = []
+  var promises = []
   var userQuery = new AV.Query('AdminUser')
-   userQuery.find().then((results)=>{
-    results.forEach((result)=>{
-      console.log('result=====>',result)
-      var query =  new AV.Query('UserRole')
+  userQuery.find().then((results)=> {
+    results.forEach((result)=> {
+      console.log('result=====>', result)
+      var query = new AV.Query('UserRole')
 
-      var user = new AV.Object.createWithoutData('AdminUser',result.id)
+      var user = new AV.Object.createWithoutData('AdminUser', result.id)
 
-      query.equalTo('adminUser',user)
-      query.equalTo('enable',true)
+      query.equalTo('adminUser', user)
+      query.equalTo('enable', true)
       console.log('hahahahaha')
 
       query.include('role')
 
       promises.push(
-      query.find().then((roles)=>{
-       var roleList = []
-        roles.forEach((role)=>{
-      //    console.log('role=====>',role)
+        query.find().then((roles)=> {
+          var roleList = []
+          roles.forEach((role)=> {
+            //    console.log('role=====>',role)
 
-          roleList.push(
-            role.attributes.role.attributes.name+'  '
-          )
+            roleList.push(
+              role.attributes.role.attributes.name + '  '
+            )
+          })
+          userList.push({
+            username: result.attributes.username,
+            password: result.attributes.password,
+            roleList: roleList
+          })
         })
-        userList.push({
-          username:result.attributes.username,
-          password:result.attributes.password,
-          roleList:roleList
-        })
-      })
       )
     })
-     Promise.all(promises).then(()=>{
-       response.success(userList)
-     },(err)=>{
-       response.error(err)
-     })
+    Promise.all(promises).then(()=> {
+      response.success(userList)
+    }, (err)=> {
+      response.error(err)
+    })
 
-   },(err)=>{
-     response.error(err)
-   })
+  }, (err)=> {
+    response.error(err)
+  })
 }
 
-function getAllRoleList(request,response){
+function getAllRoleList(request, response) {
   var query = new AV.Query('_Role')
   var roleList = []
-  query.find().then((results)=>{
-    results.forEach((result)=>{
+  query.find().then((results)=> {
+    results.forEach((result)=> {
       var role = {
         roleId: result.id,
         roleName: result.attributes.name
@@ -66,8 +66,46 @@ function getAllRoleList(request,response){
   })
 }
 
+function addUserFromAdmin(request, response) {
+  var username = request.params.name
+  var password = request.params.password
+  var roleList = request.params.roleList
+  var promises = []
+  //console.log('role',roleList)
+
+  var AdminUser = AV.Object.extend('AdminUser')
+  var adminUser = new AdminUser()
+  adminUser.set('username', username)
+  adminUser.set('password', password)
+  adminUser.save().then((result)=> {
+    var user = AV.Object.createWithoutData('AdminUser', result.id)
+    roleList.forEach((result)=> {
+      console.log('role',result)
+      var query = new AV.Query('_Role')
+      query.equalTo('name', result)
+      promises.push(query.first().then((roleInfo)=> {
+        var role = AV.Object.createWithoutData('_Role', roleInfo.id)
+        var userRole = new AV.Object('UserRole')
+        userRole.set('role', role)
+        userRole.set('adminUser', user)
+        userRole.set('enable', true)
+        userRole.save()
+      }))
+
+    })
+    Promise.all(promises).then(()=> {
+      response.success()
+    }, (err)=> {
+      response.error(err)
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
 var UserManagerFunc = {
-  getUserList:getUserList,
-  getAllRoleList:getAllRoleList
+  getUserList: getUserList,
+  getAllRoleList: getAllRoleList,
+  addUserFromAdmin: addUserFromAdmin,
 }
 module.exports = UserManagerFunc
