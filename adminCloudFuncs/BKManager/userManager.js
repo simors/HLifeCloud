@@ -33,6 +33,7 @@ function getUserList(request, response) {
             )
           })
           userList.push({
+            id: result.id,
             username: result.attributes.username,
             password: result.attributes.password,
             roleList: roleList
@@ -58,7 +59,7 @@ function getAllRoleList(request, response) {
     results.forEach((result)=> {
       var role = {
         roleId: result.id,
-        roleName: result.attributes.name
+        roleName: result.attributes.name + '  '
       }
       roleList.push(role)
     })
