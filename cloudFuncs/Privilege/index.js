@@ -94,7 +94,7 @@ function getPermissionListOnlyByLogin(request, response) {
 
       var promises = []
       roles.forEach((roleInfo)=>{
-        console.log('hahahahahah', roleInfo.attributes.role.id)
+        // console.log('hahahahahah', roleInfo.attributes.role.id)
         var role = new AV.Object.createWithoutData('_Role', roleInfo.attributes.role.id)
         var query = new AV.Query('Privilege')
         query.equalTo('role', role)
@@ -102,9 +102,10 @@ function getPermissionListOnlyByLogin(request, response) {
         promises.push(
           query.find().then((results)=> {
           results.forEach((result)=> {
-            console.log('hahahahahah', result.attributes.permission.attributes.name)
+            // console.log('hahahahahah', result.attributes.permission.attributes.name)
             permssionList.push({
               subPermission: result.attributes.permission.attributes.subMenu,
+              menu:result.attributes.permission.attributes.menu,
               name: result.attributes.permission.attributes.name,
               key:result.attributes.permission.attributes.key
             })
