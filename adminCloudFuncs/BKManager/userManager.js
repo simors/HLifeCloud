@@ -3,6 +3,11 @@
  */
 var AV = require('leanengine');
 var Promise = require('bluebird');
+//去掉空格
+function Trim(str)
+{
+  return str.replace(/(^\s*)|(\s*$)/g, "");
+}
 
 //获取人员名单
 function getUserList(request, response) {
@@ -83,6 +88,7 @@ function addUserFromAdmin(request, response) {
     roleList.forEach((result)=> {
       console.log('role',result)
       var query = new AV.Query('_Role')
+      result=Trim(result)
       query.equalTo('name', result)
       promises.push(query.first().then((roleInfo)=> {
         var role = AV.Object.createWithoutData('_Role', roleInfo.id)
@@ -101,6 +107,13 @@ function addUserFromAdmin(request, response) {
     })
   }, (err)=> {
     response.error(err)
+  })
+}
+
+function updateUserFromAdmin(request,response){
+  var user = AV.Object.createWithoutData('AdminUser',request.params.key)
+  AV.Query.doCloudQuery('delete from UserRole where adminUser = '+ user).then(()=>{
+
   })
 }
 
