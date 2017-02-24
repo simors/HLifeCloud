@@ -4,8 +4,7 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 //去掉空格
-function Trim(str)
-{
+function Trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, "");
 }
 
@@ -86,9 +85,9 @@ function addUserFromAdmin(request, response) {
   adminUser.save().then((result)=> {
     var user = AV.Object.createWithoutData('AdminUser', result.id)
     roleList.forEach((result)=> {
-      console.log('role',result)
+      console.log('role', result)
       var query = new AV.Query('_Role')
-      result=Trim(result)
+      result = Trim(result)
       query.equalTo('name', result)
       promises.push(query.first().then((roleInfo)=> {
         var role = AV.Object.createWithoutData('_Role', roleInfo.id)
@@ -110,16 +109,53 @@ function addUserFromAdmin(request, response) {
   })
 }
 
-function updateUserFromAdmin(request,response){
-  var user = AV.Object.createWithoutData('AdminUser',request.params.key)
-  AV.Query.doCloudQuery('delete from UserRole where adminUser = '+ user).then(()=>{
+function updateUserFromAdmin(request, response) {
+  var user = AV.Object.createWithoutData('AdminUser', request.params.key)
+  AV.Query.doCloudQuery('delete from UserRole where adminUser = ' + user).then(()=> {
 
   })
+}
+
+function deleteUserFromAdmin(request, response) {
+  //console.log('jhahaha',request.params.id)
+
+  var user = AV.Object.createWithoutData('AdminUser', request.params.id)
+  var query = new AV.Query('UserRole')
+  query.equalTo('adminUser', user)
+  query.find().then((results)=> {
+    // console.log('results....',results)
+    if (results&&results.length>0) {
+      results.forEach((result)=> {
+        var adminRole = AV.Object.createWithoutData('UserRole',result.id)
+        adminRole.destroy()
+      }).then((success)=> {
+        user.destroy().then((success)=> {
+          response.success(success)
+        }, (err)=> {
+          response.error(err)
+        })
+      }, (err)=> {
+        response.error(err)
+      })
+    } else {
+      // console.log('hahahahahahaha', user)
+      user.destroy().then((success)=> {
+        response.success(success)
+      }, (err)=> {
+        response.error(err)
+      })
+    }
+
+  }, (err)=> {
+    response.error(err)
+  })
+
 }
 
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
   addUserFromAdmin: addUserFromAdmin,
+  deleteUserFromAdmin: deleteUserFromAdmin,
 }
 module.exports = UserManagerFunc
