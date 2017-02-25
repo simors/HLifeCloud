@@ -31,5 +31,6 @@ AV.Cloud.define('getAllRoleList',userManagerFunc.getAllRoleList)
 AV.Cloud.define('addUserFromAdmin',userManagerFunc.addUserFromAdmin)
 AV.Cloud.define('deleteUserFromAdmin',userManagerFunc.deleteUserFromAdmin)
 AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
+AV.Cloud.define('updateUserFromAdmin',userManagerFunc.updateUserFromAdmin)
 
 module.exports = AV.Cloud;
