@@ -12,7 +12,11 @@ function Trim(str) {
 function getTopicList(request, response) {
   var topicList = []
   var orderMode = request.params.orderMode
+  var filterName = request.params.filterName
+  var filterValue = request.params.filterValue
   var topicQuery = new AV.Query('Topics')
+  var innerQuery = new AV.Query('TopicCategory');
+
   if (orderMode == 'createTimeDescend') {
     topicQuery.descending('createdAt');
   }
@@ -29,8 +33,16 @@ function getTopicList(request, response) {
     topicQuery.descending('createdAt');
   }
 
+  if (filterName == 'title') {
+    topicQuery.contains('title', filterValue);
+  }
+  else if (filterName == 'category') {
+    innerQuery.contains('title', filterValue);
+  }
+
   topicQuery.include(['user'])
   topicQuery.include(['category'])
+  topicQuery.matchesQuery('category', innerQuery);
 
   topicQuery.find().then((results)=> {
 
