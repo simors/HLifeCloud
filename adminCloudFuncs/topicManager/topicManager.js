@@ -8,7 +8,7 @@ function Trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, "");
 }
 
-//获取人员名单
+//获取话题名单
 function getTopicList(request, response) {
   var topicList = []
   var orderMode = request.params.orderMode
@@ -60,7 +60,24 @@ function getTopicList(request, response) {
     }
 }
 
+function getTopicCategoryList(request, response) {
+  var topicCategoryList = []
+  var query = new AV.Query('TopicCategory');
+  query.find().then((results)=> {
+
+    results.forEach((result)=> {
+      topicCategoryList.push({
+        title:     result.attributes.title,
+      })
+    })
+    response.success(topicCategoryList)
+  }), (err)=> {
+    response.error(err)
+  }
+}
 var TopicManagerFunc = {
   getTopicList: getTopicList,
+  getTopicCategoryList: getTopicCategoryList,
 }
+
 module.exports = TopicManagerFunc
