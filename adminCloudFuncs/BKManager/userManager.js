@@ -178,15 +178,13 @@ function deleteUserFromAdmin(request, response) {
       results.forEach((result)=> {
         var adminRole = AV.Object.createWithoutData('UserRole', result.id)
         adminRole.destroy()
-      }).then((success)=> {
+      })
         user.destroy().then((success)=> {
           response.success(success)
         }, (err)=> {
           response.error(err)
         })
-      }, (err)=> {
-        response.error(err)
-      })
+
     } else {
       // console.log('hahahahahahaha', user)
       user.destroy().then((success)=> {
