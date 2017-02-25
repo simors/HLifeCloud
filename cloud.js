@@ -5,6 +5,7 @@ var shopFunc = require('./cloudFuncs/Shop');
 var articleFunc = require('./cloudFuncs/Article');
 var PrivilegeFunc = require('./cloudFuncs/Privilege');
 var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
+var TopicManagerFunc = require('./adminCloudFuncs/topicManager/topicManager')
 /**
  * 云函数
  */
@@ -29,7 +30,7 @@ AV.Cloud.define('getAdminUserList',userManagerFunc.getUserList)
 AV.Cloud.define('getAllRoleList',userManagerFunc.getAllRoleList)
 AV.Cloud.define('addUserFromAdmin',userManagerFunc.addUserFromAdmin)
 AV.Cloud.define('deleteUserFromAdmin',userManagerFunc.deleteUserFromAdmin)
+AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
 AV.Cloud.define('updateUserFromAdmin',userManagerFunc.updateUserFromAdmin)
-
 
 module.exports = AV.Cloud;
