@@ -32,7 +32,7 @@ function getTopicList(request, response) {
     topicQuery.descending('commentNum');
   }
   topicQuery.include(['user'])
-  topicQuery.include(['topicCategory'])
+  topicQuery.include(['category'])
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
