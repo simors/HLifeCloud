@@ -25,8 +25,13 @@ function getTopicList(request, response) {
   else if (orderMode == 'commentNumDescend') {
     topicQuery.descending('commentNum');
   }
+  else{
+    topicQuery.descending('createdAt');
+  }
+
   topicQuery.include(['user'])
   topicQuery.include(['category'])
+
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
