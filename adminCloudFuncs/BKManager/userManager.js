@@ -85,7 +85,7 @@ function addUserFromAdmin(request, response) {
   adminUser.save().then((result)=> {
     var user = AV.Object.createWithoutData('AdminUser', result.id)
     roleList.forEach((result)=> {
-      console.log('role', result)
+      //  console.log('role', result)
       var query = new AV.Query('_Role')
       result = Trim(result)
       query.equalTo('name', result)
@@ -111,9 +111,59 @@ function addUserFromAdmin(request, response) {
 
 function updateUserFromAdmin(request, response) {
   var user = AV.Object.createWithoutData('AdminUser', request.params.key)
-  AV.Query.doCloudQuery('delete from UserRole where adminUser = ' + user).then(()=> {
+  var promises = []
+  user.set('password', request.params.password)
+  user.save().then(()=> {
+    var query = new AV.Query('UserRole')
+    query.equalTo('adminUser', user)
+    query.find().then((results)=> {
+        if (results) {
+          results.forEach((result)=> {
+              var adminRole = AV.Object.createWithoutData('UserRole', result.id)
+              // console.log('hahahahahahaha',adminRole)
+              adminRole.destroy()
+              // console.log('hahahahahahaha')
+            }
+          )
+        }
+        //console.log(arr)
+        var willRoles = []
+        request.params.roleList.forEach((role)=> {
+          role = Trim(role)
+          console.log('role', role, 'asd')
+          var roleQuery = new AV.Query('_Role')
+          roleQuery.equalTo('name', role)
+          promises.push(
+            roleQuery.first().then((roleInfo)=> {
+              console.log('roleInfo', roleInfo)
+              var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
+              var UserRole = AV.Object.extend('UserRole')
+              var userRole = new UserRole()
+              userRole.set('adminUser', user)
+              userRole.set('role', roleObject)
+              console.log('jhahahahahaha', userRole)
+              userRole.save()
+            },
+              (err)=> {
+                response.error(err)
+              }))
+          // console.log('roleInfo',roleInfo)
+        })
+        // console.log('hahahahah', willRoles)
+        Promise.all(promises).then(()=> {
+          response.success()
+        })
+      },
+      (err)=> {
+        response.error(err)
+      }
+    )
 
+  }, (err)=> {
+    response.error(err)
   })
+
+
 }
 
 function deleteUserFromAdmin(request, response) {
@@ -124,9 +174,9 @@ function deleteUserFromAdmin(request, response) {
   query.equalTo('adminUser', user)
   query.find().then((results)=> {
     // console.log('results....',results)
-    if (results&&results.length>0) {
+    if (results && results.length > 0) {
       results.forEach((result)=> {
-        var adminRole = AV.Object.createWithoutData('UserRole',result.id)
+        var adminRole = AV.Object.createWithoutData('UserRole', result.id)
         adminRole.destroy()
       }).then((success)=> {
         user.destroy().then((success)=> {
@@ -157,5 +207,6 @@ var UserManagerFunc = {
   getAllRoleList: getAllRoleList,
   addUserFromAdmin: addUserFromAdmin,
   deleteUserFromAdmin: deleteUserFromAdmin,
+  updateUserFromAdmin: updateUserFromAdmin
 }
 module.exports = UserManagerFunc
