@@ -11,24 +11,18 @@ function Trim(str) {
 //获取人员名单
 function getTopicList(request, response) {
   var topicList = []
-  var type = request.params.type
+  var orderMode = request.params.orderMode
   var topicQuery = new AV.Query('Topics')
-  if (type == 'createTimeDescend') {
+  if (orderMode == 'createTimeDescend') {
     topicQuery.descending('createdAt');
   }
-  else if (type == 'createTimeAscend') {
+  else if (orderMode == 'createTimeAscend') {
     topicQuery.ascending('createdAt');
   }
-  else if (type == 'likeCountDescend') {
+  else if (orderMode == 'likeCountDescend') {
     topicQuery.descending('likeCount');
   }
-  else if (type == 'likeCountAscend') {
-    topicQuery.ascending('likeCount');
-  }
-  else if (type == 'commentNumAscend') {
-    topicQuery.ascending('commentNum');
-  }
-  else if (type == 'commentNumDescend') {
+  else if (orderMode == 'commentNumDescend') {
     topicQuery.descending('commentNum');
   }
   topicQuery.include(['user'])
