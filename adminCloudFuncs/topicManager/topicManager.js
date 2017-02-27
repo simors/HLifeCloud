@@ -8,11 +8,15 @@ function Trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, "");
 }
 
-//获取人员名单
+//获取话题名单
 function getTopicList(request, response) {
   var topicList = []
   var orderMode = request.params.orderMode
+  var categoryName = request.params.categoryName
+  var filterValue = request.params.filterValue
   var topicQuery = new AV.Query('Topics')
+  var innerQuery = new AV.Query('TopicCategory');
+
   if (orderMode == 'createTimeDescend') {
     topicQuery.descending('createdAt');
   }
@@ -28,9 +32,20 @@ function getTopicList(request, response) {
   else{
     topicQuery.descending('createdAt');
   }
+  if(!request.params.startTime) {
+    topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
+    topicQuery.lessThan('createdAt', new Date());
+  }
+  else{
+    topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    topicQuery.lessThan('createdAt', request.params.endTime);
+  }
+  topicQuery.contains('title', filterValue);
+  innerQuery.contains('title', categoryName);
 
   topicQuery.include(['user'])
   topicQuery.include(['category'])
+  topicQuery.matchesQuery('category', innerQuery);
 
   topicQuery.find().then((results)=> {
 
@@ -52,7 +67,24 @@ function getTopicList(request, response) {
     }
 }
 
+function getTopicCategoryList(request, response) {
+  var topicCategoryList = []
+  var query = new AV.Query('TopicCategory');
+  query.find().then((results)=> {
+
+    results.forEach((result)=> {
+      topicCategoryList.push({
+        title:     result.attributes.title,
+      })
+    })
+    response.success(topicCategoryList)
+  }), (err)=> {
+    response.error(err)
+  }
+}
 var TopicManagerFunc = {
   getTopicList: getTopicList,
+  getTopicCategoryList: getTopicCategoryList,
 }
+
 module.exports = TopicManagerFunc
