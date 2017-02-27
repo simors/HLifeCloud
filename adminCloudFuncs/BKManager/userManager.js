@@ -200,11 +200,30 @@ function deleteUserFromAdmin(request, response) {
 
 }
 
+ function updateMyPassword(request,response) {
+  var query = new AV.Query('AdminUser')
+  query.equalTo('username',request.params.username)
+  query.equalTo('password',request.params.password)
+  query.first().then((result)=>{
+   console.log('hahaha',result.id)
+    var user = AV.Object.createWithoutData('AdminUser',result.id)
+    user.set('password',request.params.newPassword)
+    user.save().then(()=>{
+      response.success()
+    },(err)=>{
+      response.error(err)
+    })
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
   addUserFromAdmin: addUserFromAdmin,
   deleteUserFromAdmin: deleteUserFromAdmin,
-  updateUserFromAdmin: updateUserFromAdmin
+  updateUserFromAdmin: updateUserFromAdmin,
+  updateMyPassword:updateMyPassword
 }
 module.exports = UserManagerFunc
