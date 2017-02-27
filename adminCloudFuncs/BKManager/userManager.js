@@ -205,17 +205,22 @@ function deleteUserFromAdmin(request, response) {
   query.equalTo('username',request.params.username)
   query.equalTo('password',request.params.password)
   query.first().then((result)=>{
-   console.log('hahaha',result.id)
-    var user = AV.Object.createWithoutData('AdminUser',result.id)
-    user.set('password',request.params.newPassword)
-    user.save().then((userInfo)=>{
-      response.success({
-        username:request.params.username,
-        password:userInfo.attributes.password
-      })
-    },(err)=>{
-      response.error(err)
-    })
+   //console.log('hahaha',result.id)
+    if(result){ var user = AV.Object.createWithoutData('AdminUser',result.id)
+      user.set('password',request.params.newPassword)
+      user.save().then((userInfo)=>{
+        response.success({
+          username:request.params.username,
+          password:userInfo.attributes.password
+        })
+      },(err)=>{
+        response.error(err)
+      })}
+   else{
+     var err ='密码错误'
+     response.error(err)
+    }
+
   },(err)=>{
     response.error(err)
   })
