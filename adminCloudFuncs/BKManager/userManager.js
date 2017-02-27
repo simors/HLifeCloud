@@ -208,8 +208,11 @@ function deleteUserFromAdmin(request, response) {
    console.log('hahaha',result.id)
     var user = AV.Object.createWithoutData('AdminUser',result.id)
     user.set('password',request.params.newPassword)
-    user.save().then(()=>{
-      response.success()
+    user.save().then((userInfo)=>{
+      response.success({
+        username:request.params.username,
+        password:userInfo.attributes.password
+      })
     },(err)=>{
       response.error(err)
     })
