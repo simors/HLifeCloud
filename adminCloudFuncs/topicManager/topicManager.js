@@ -40,6 +40,10 @@ function getTopicList(request, response) {
     topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
     topicQuery.lessThan('createdAt', request.params.endTime);
   }
+
+  if(request.params.picked){
+    query.equalTo('picked', true);
+  }
   topicQuery.contains('title', filterValue);
   innerQuery.contains('title', categoryName);
 
@@ -56,6 +60,7 @@ function getTopicList(request, response) {
         content:   result.attributes.content,
         commentNum:result.attributes.commentNum,
         likeCount: result.attributes.likeCount,
+        picked:    result.attributes.picked,
         username:  result.attributes.user.attributes.nickname,
         category:  result.attributes.category.attributes.title,
         createdAt: result.createdAt
