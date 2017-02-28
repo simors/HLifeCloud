@@ -42,7 +42,7 @@ function getTopicList(request, response) {
   }
 
   if(request.params.picked){
-    query.equalTo('picked', true);
+    topicQuery.equalTo('picked', true);
   }
   topicQuery.contains('title', filterValue);
   innerQuery.contains('title', categoryName);
