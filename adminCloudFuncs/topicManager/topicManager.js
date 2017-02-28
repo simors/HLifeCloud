@@ -56,6 +56,7 @@ function getTopicList(request, response) {
         content:   result.attributes.content,
         commentNum:result.attributes.commentNum,
         likeCount: result.attributes.likeCount,
+        isPicked:  result.attributes.isPicked,
         username:  result.attributes.user.attributes.nickname,
         category:  result.attributes.category.attributes.title,
         createdAt: result.createdAt
