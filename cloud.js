@@ -37,5 +37,6 @@ AV.Cloud.define('updateTopicPicked',TopicManagerFunc.updateTopicPicked)
 AV.Cloud.define('updateUserFromAdmin',userManagerFunc.updateUserFromAdmin)
 AV.Cloud.define('updateMyPassword',userManagerFunc.updateMyPassword)
 AV.Cloud.define('getShopCategoryList',ShopManagerFunc.getShopCategoryList)
+AV.Cloud.define('getShopTagList',ShopManagerFunc.getShopTagList)
 
 module.exports = AV.Cloud;

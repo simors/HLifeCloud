@@ -43,8 +43,26 @@ function getShopCategoryList(request,response) {
   })
 }
 
+function getShopTagList(request,response){
+  var query = new AV.Query('ShopTag')
+  var tagList = []
+  query.find().then((results)=>{
+      results.forEach((result)=>{
+        tagList.push({
+          id:result.id,
+          name:result.attributes.name
+        })
+      })
+    response.success(tagList)
+
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
+  getShopTagList:getShopTagList,
 
 }
 module.exports = ShopManagerFunc
