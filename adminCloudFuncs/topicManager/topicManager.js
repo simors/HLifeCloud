@@ -94,6 +94,9 @@ function getTopicCategoryList(request, response) {
     results.forEach((result)=> {
       topicCategoryList.push({
         title: result.attributes.title,
+        createdAt: result.createdAt,
+        picked: result.attributes.picked,
+        introduction: result.attributes.introduction,
       })
     })
     response.success(topicCategoryList)
