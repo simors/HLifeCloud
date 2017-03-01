@@ -88,7 +88,25 @@ function updateTopicPicked(request, response) {
 
 function getTopicCategoryList(request, response) {
   var topicCategoryList = []
+  var filterValue = ''
+  if(request.params.filterValue){
+    filterValue = request.params.filterValue
+  }
+
   var query = new AV.Query('TopicCategory');
+  if (request.params.picked) {
+    query.equalTo('isPicked', true);
+  }
+  if (!request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', new Date('2016-01-28 00:00:00'));
+    query.lessThan('createdAt', new Date());
+  }
+  else {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    query.lessThan('createdAt', request.params.endTime);
+  }
+
+  query.contains('title', filterValue);
   query.find().then((results)=> {
 
     results.forEach((result)=> {
