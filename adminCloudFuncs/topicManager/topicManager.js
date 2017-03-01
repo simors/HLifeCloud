@@ -95,7 +95,7 @@ function getTopicCategoryList(request, response) {
       topicCategoryList.push({
         title: result.attributes.title,
         createdAt: result.createdAt,
-        picked: result.attributes.picked,
+        isPicked: result.attributes.isPicked,
         introduction: result.attributes.introduction,
       })
     })
