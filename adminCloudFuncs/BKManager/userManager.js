@@ -35,7 +35,7 @@ function getUserList(request, response) {
             //    console.log('role=====>',role)
 
             roleList.push(
-              role.attributes.role.attributes.name + '  '
+              role.attributes.role.attributes.name
             )
           })
           userList.push({
@@ -65,7 +65,7 @@ function getAllRoleList(request, response) {
     results.forEach((result)=> {
       var role = {
         roleId: result.id,
-        roleName: result.attributes.name + '  '
+        roleName: result.attributes.name
       }
       roleList.push(role)
     })
@@ -89,7 +89,7 @@ function addUserFromAdmin(request, response) {
     roleList.forEach((result)=> {
       //  console.log('role', result)
       var query = new AV.Query('_Role')
-      result = Trim(result)
+      //result = Trim(result)
       query.equalTo('name', result)
       promises.push(query.first().then((roleInfo)=> {
         var role = AV.Object.createWithoutData('_Role', roleInfo.id)
@@ -131,7 +131,7 @@ function updateUserFromAdmin(request, response) {
         //console.log(arr)
         var willRoles = []
         request.params.roleList.forEach((role)=> {
-          role = Trim(role)
+         // role = Trim(role)
           console.log('role', role, 'asd')
           var roleQuery = new AV.Query('_Role')
           roleQuery.equalTo('name', role)
