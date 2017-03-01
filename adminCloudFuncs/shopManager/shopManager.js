@@ -9,6 +9,7 @@ function getShopCategoryList(request,response) {
   var query = new AV.Query('ShopCategory')
   var categoryList = []
   query.include('containedTag')
+  query.ascending('shopCategoryId')
   query.find().then((results)=>{
     results.forEach((result)=>{
       var tags=[]
