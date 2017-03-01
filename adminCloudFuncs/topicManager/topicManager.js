@@ -29,20 +29,20 @@ function getTopicList(request, response) {
   else if (orderMode == 'commentNumDescend') {
     topicQuery.descending('commentNum');
   }
-  else{
+  else {
     topicQuery.descending('createdAt');
   }
-  if(!request.params.startTime) {
+  if (!request.params.startTime) {
     topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
     topicQuery.lessThan('createdAt', new Date());
   }
-  else{
+  else {
     topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
     topicQuery.lessThan('createdAt', request.params.endTime);
   }
 
-  if(request.params.picked){
-    query.equalTo('picked', true);
+  if (request.params.picked) {
+    topicQuery.equalTo('picked', true);
   }
   topicQuery.contains('title', filterValue);
   innerQuery.contains('title', categoryName);
@@ -55,21 +55,35 @@ function getTopicList(request, response) {
 
     results.forEach((result)=> {
       topicList.push({
-        id:        result.id,
-        title:     result.attributes.title,
-        content:   result.attributes.content,
-        commentNum:result.attributes.commentNum,
+        id: result.id,
+        title: result.attributes.title,
+        content: result.attributes.content,
+        commentNum: result.attributes.commentNum,
         likeCount: result.attributes.likeCount,
-        picked:    result.attributes.picked,
-        username:  result.attributes.user.attributes.nickname,
-        category:  result.attributes.category.attributes.title,
+        picked: result.attributes.picked,
+        username: result.attributes.user.attributes.nickname,
+        category: result.attributes.category.attributes.title,
         createdAt: result.createdAt
       })
     })
     response.success(topicList)
   }), (err)=> {
-      response.error(err)
-    }
+    response.error(err)
+  }
+}
+
+function updateTopicPicked(request, response) {
+  var topic = AV.Object.createWithoutData('Topics', request.params.id);
+  // 修改属性
+  topic.set('picked', request.params.picked);
+  // 保存到云端
+  topic.save().then((topic)=> {
+    response.success({
+      topic: topic,
+    })
+  }, (err)=> {
+    response.error(err)
+  })
 }
 
 function getTopicCategoryList(request, response) {
@@ -79,7 +93,7 @@ function getTopicCategoryList(request, response) {
 
     results.forEach((result)=> {
       topicCategoryList.push({
-        title:     result.attributes.title,
+        title: result.attributes.title,
       })
     })
     response.success(topicCategoryList)
@@ -88,6 +102,7 @@ function getTopicCategoryList(request, response) {
   }
 }
 var TopicManagerFunc = {
+  updateTopicPicked: updateTopicPicked,
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
 }
