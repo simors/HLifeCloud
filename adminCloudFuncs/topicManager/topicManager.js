@@ -86,14 +86,50 @@ function updateTopicPicked(request, response) {
   })
 }
 
+function updateTopicCategoryPicked(request, response) {
+  var topicCategory = AV.Object.createWithoutData('TopicCategory', request.params.id);
+  // 修改属性
+  topicCategory.set('isPicked', request.params.picked);
+  // 保存到云端
+  topicCategory.save().then((topic)=> {
+    response.success({
+      topicCategory: topicCategory,
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
 function getTopicCategoryList(request, response) {
   var topicCategoryList = []
+  var filterValue = ''
+  if(request.params.filterValue){
+    filterValue = request.params.filterValue
+  }
+
   var query = new AV.Query('TopicCategory');
+  if (request.params.picked) {
+    query.equalTo('isPicked', true);
+  }
+  if (!request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', new Date('2016-01-28 00:00:00'));
+    query.lessThan('createdAt', new Date());
+  }
+  else {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    query.lessThan('createdAt', request.params.endTime);
+  }
+
+  query.contains('title', filterValue);
   query.find().then((results)=> {
 
     results.forEach((result)=> {
       topicCategoryList.push({
+        id: result.id,
         title: result.attributes.title,
+        createdAt: result.createdAt,
+        isPicked: result.attributes.isPicked,
+        introduction: result.attributes.introduction,
       })
     })
     response.success(topicCategoryList)
@@ -105,6 +141,7 @@ var TopicManagerFunc = {
   updateTopicPicked: updateTopicPicked,
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
+  updateTopicCategoryPicked:updateTopicCategoryPicked
 }
 
 module.exports = TopicManagerFunc
