@@ -68,7 +68,7 @@ function createShopCategory(request,response){
     var category = new Category()
     category.set('imageSource',request.params.imageSource)
     category.set('status',request.params.status)
-    category.set('containedTag',request.params.containedTag)
+    category.set('containedTag',request.params.tagList)
     category.set('text',request.params.text)
     category.set('shopCategoryId',count+1)
     category.save().then(()=>{
