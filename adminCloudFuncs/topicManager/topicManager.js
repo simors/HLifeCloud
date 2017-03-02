@@ -136,6 +136,7 @@ function getTopicCategoryList(request, response) {
         createdAt: result.createdAt,
         isPicked: result.attributes.isPicked,
         introduction: result.attributes.introduction,
+        image: result.attributes.image,
       })
     })
     response.success(topicCategoryList)
