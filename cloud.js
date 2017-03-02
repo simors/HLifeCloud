@@ -40,5 +40,6 @@ AV.Cloud.define('updateUserFromAdmin',userManagerFunc.updateUserFromAdmin)
 AV.Cloud.define('updateMyPassword',userManagerFunc.updateMyPassword)
 AV.Cloud.define('getShopCategoryList',ShopManagerFunc.getShopCategoryList)
 AV.Cloud.define('getShopTagList',ShopManagerFunc.getShopTagList)
+AV.Cloud.define('createShopCategory',ShopManagerFunc.createShopCategory)
 
 module.exports = AV.Cloud;

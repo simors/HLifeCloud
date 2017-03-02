@@ -61,9 +61,28 @@ function getShopTagList(request,response){
   })
 }
 
+function createShopCategory(request,response){
+  var query = new AV.Query('ShopCategory')
+  query.count().then((count)=>{
+    var Category = AV.Object.extend('ShopCategory')
+    var category = new Category()
+    category.set('imageSource',request.params.imageSource)
+    category.set('status',request.params.status)
+    category.set('containedTag',request.params.tagList)
+    category.set('text',request.params.text)
+    category.set('shopCategoryId',count+1)
+    category.save().then(()=>{
+        response.success()
+      },(err)=>{
+        response.error(err)
+      })
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList:getShopTagList,
+  createShopCategory:createShopCategory,
 
 }
 module.exports = ShopManagerFunc
