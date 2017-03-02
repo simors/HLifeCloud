@@ -86,6 +86,20 @@ function updateTopicPicked(request, response) {
   })
 }
 
+function updateTopicCategoryPicked(request, response) {
+  var topicCategory = AV.Object.createWithoutData('TopicCategory', request.params.id);
+  // 修改属性
+  topicCategory.set('isPicked', request.params.picked);
+  // 保存到云端
+  topicCategory.save().then((topic)=> {
+    response.success({
+      topicCategory: topicCategory,
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
 function getTopicCategoryList(request, response) {
   var topicCategoryList = []
   var filterValue = ''
@@ -126,6 +140,7 @@ var TopicManagerFunc = {
   updateTopicPicked: updateTopicPicked,
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
+  updateTopicCategoryPicked:updateTopicCategoryPicked
 }
 
 module.exports = TopicManagerFunc
