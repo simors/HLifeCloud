@@ -89,9 +89,10 @@ function updateTopicPicked(request, response) {
 function updateTopicCategoryPicked(request, response) {
   var topicCategory = AV.Object.createWithoutData('TopicCategory', request.params.id);
   // 修改属性
-  if(request.params.picked) {
+  if(request.params.picked != undefined) {
     topicCategory.set('isPicked', request.params.picked);
   }
+
   if(request.params.introduction){
     topicCategory.set('introduction', request.params.introduction);
   }
