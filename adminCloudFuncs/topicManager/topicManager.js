@@ -125,6 +125,7 @@ function getTopicCategoryList(request, response) {
 
     results.forEach((result)=> {
       topicCategoryList.push({
+        id: result.id,
         title: result.attributes.title,
         createdAt: result.createdAt,
         isPicked: result.attributes.isPicked,
