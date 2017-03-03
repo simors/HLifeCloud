@@ -89,7 +89,13 @@ function updateTopicPicked(request, response) {
 function updateTopicCategoryPicked(request, response) {
   var topicCategory = AV.Object.createWithoutData('TopicCategory', request.params.id);
   // 修改属性
-  topicCategory.set('isPicked', request.params.picked);
+  if(request.params.picked != undefined) {
+    topicCategory.set('isPicked', request.params.picked);
+  }
+
+  if(request.params.introduction){
+    topicCategory.set('introduction', request.params.introduction);
+  }
   // 保存到云端
   topicCategory.save().then((topic)=> {
     response.success({
@@ -130,6 +136,7 @@ function getTopicCategoryList(request, response) {
         createdAt: result.createdAt,
         isPicked: result.attributes.isPicked,
         introduction: result.attributes.introduction,
+        image: result.attributes.image,
       })
     })
     response.success(topicCategoryList)
@@ -137,11 +144,28 @@ function getTopicCategoryList(request, response) {
     response.error(err)
   }
 }
+
+function createNewTopicCategory(request, response) {
+  var name = request.params.name
+  var introduction = request.params.introduction
+
+  var TopicCategory = AV.Object.extend('TopicCategory')
+  var topicCategory = new TopicCategory()
+  topicCategory.set('title', name)
+  topicCategory.set('introduction', introduction)
+  topicCategory.save().then((result)=> {
+    response.success(result)
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
 var TopicManagerFunc = {
   updateTopicPicked: updateTopicPicked,
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
-  updateTopicCategoryPicked:updateTopicCategoryPicked
+  updateTopicCategoryPicked:updateTopicCategoryPicked,
+  createNewTopicCategory:createNewTopicCategory
 }
 
 module.exports = TopicManagerFunc
