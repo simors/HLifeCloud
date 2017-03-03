@@ -82,8 +82,6 @@ function createShopCategory(request,response){
 function updateShopCategory(request,response){
   var category = AV.Object.createWithoutData('ShopCategory',request.params.id)
 
-    var Category = AV.Object.extend('ShopCategory')
-    var category = new Category()
     category.set('imageSource',request.params.imageSource)
     category.set('status',request.params.status)
     category.set('containedTag',request.params.tagList)
