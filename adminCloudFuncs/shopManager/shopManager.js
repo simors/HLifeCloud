@@ -79,10 +79,28 @@ function createShopCategory(request,response){
   })
 }
 
+function updateShopCategory(request,response){
+  var category = AV.Object.createWithoutData('ShopCategory',request.params.id)
+
+    var Category = AV.Object.extend('ShopCategory')
+    var category = new Category()
+    category.set('imageSource',request.params.imageSource)
+    category.set('status',request.params.status)
+    category.set('containedTag',request.params.tagList)
+    category.set('text',request.params.text)
+    category.save().then(()=>{
+      response.success()
+    },(err)=>{
+      response.error(err)
+    })
+
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList:getShopTagList,
   createShopCategory:createShopCategory,
+  updateShopCategory:updateShopCategory
 
 }
 module.exports = ShopManagerFunc
