@@ -239,6 +239,22 @@ function getInvitationCode(request, response) {
   getInvitationCodeOnce(userId, response)
 }
 
+function setUserNickname(request, response) {
+  var userId = request.params.userId
+  var nickname = request.params.nickname
+  var user = AV.Object.createWithoutData('_User', userId)
+  user.set('nickname', nickname)
+  user.save().then(() => {
+    response.success({
+      errcode: 0,
+    })
+  }, (err) => {
+    response.error({
+      errcode: -1,
+    })
+  })
+}
+
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   verifyInvitationCode: verifyInvitationCode,
@@ -247,7 +263,8 @@ var authFunc = {
   getUserinfoById: getUserinfoById,
   getUsers: getUsers,
   getArticleLikers: getArticleLikers,
-  getInvitationCode: getInvitationCode
+  getInvitationCode: getInvitationCode,
+  setUserNickname: setUserNickname,
 }
 
 module.exports = authFunc
