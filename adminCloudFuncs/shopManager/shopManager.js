@@ -30,7 +30,11 @@ function getShopCategoryList(request,response) {
         shopCategoryId: result.attributes.shopCategoryId,
         containedTag: tags,
         status:result.attributes.status,
-        text:result.attributes.text
+        text:result.attributes.text,
+        displaySort:result.attributes.displaySort,
+        describe:result.attributes.describe,
+        showPictureSource:result.attributes.showPictureSource,
+        textColor:result.attributes.textColor
       }
       categoryList.push(category)
     })
@@ -70,6 +74,10 @@ function createShopCategory(request,response){
     category.set('status',request.params.status)
     category.set('containedTag',request.params.tagList)
     category.set('text',request.params.text)
+    category.set('displaySort',request.params.displaySort)
+    category.set('describe',request.params.describe)
+    category.set('showPictureSource',request.params.showPictureSource)
+    category.set('textColor',request.params.textColor)
     category.set('shopCategoryId',count+1)
     category.save().then(()=>{
         response.success()
@@ -86,6 +94,10 @@ function updateShopCategory(request,response){
     category.set('status',request.params.status)
     category.set('containedTag',request.params.tagList)
     category.set('text',request.params.text)
+    category.set('displaySort',request.params.displaySort)
+    category.set('describe',request.params.describe)
+    category.set('showPictureSource',request.params.showPictureSource)
+    category.set('textColor',request.params.textColor)
     category.save().then(()=>{
       response.success()
     },(err)=>{
