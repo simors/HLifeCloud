@@ -91,14 +91,35 @@ function updateShopCategory(request,response){
     },(err)=>{
       response.error(err)
     })
-
+}
+function createShopTag(request,response){
+  var Tag = AV.Object.extend('ShopTag')
+  var tag = new Tag()
+  tag.set('name',request.params.name)
+  tag.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+    }
+  )
+}
+function updateShopTag(request,response){
+  var category = AV.Object.createWithoutData('ShopTag',request.params.key)
+  category.set('name',request.params.name)
+  category.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
 }
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList:getShopTagList,
   createShopCategory:createShopCategory,
-  updateShopCategory:updateShopCategory
+  updateShopCategory:updateShopCategory,
+  createShopTag:createShopTag,
+  updateShopTag:updateShopTag
 
 }
 module.exports = ShopManagerFunc
