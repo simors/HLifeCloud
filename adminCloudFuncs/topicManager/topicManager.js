@@ -73,6 +73,49 @@ function getTopicList(request, response) {
   }
 }
 
+
+//获取精选话题名单
+function getPickedTopicList(request, response) {
+  var topicList = []
+  var topicQuery = new AV.Query('Topics')
+
+  topicQuery.descending('createdAt')
+  topicQuery.equalTo('picked', true);
+
+  topicQuery.include(['user'])
+  topicQuery.include(['category'])
+
+  if (request.params.limit) {
+    topicQuery.limit(request.params.limit)
+  }
+
+  topicQuery.find().then((results)=> {
+
+    results.forEach((result)=> {
+      topicList.push({
+        content: result.attributes.content, //话题内容
+        title: result.attributes.title,
+        abstract:result.attributes.abstract,
+        imgGroup: result.attributes.imgGroup, //图片
+        objectId: result.id,  //话题id
+        categoryId: result.attributes.category.id,  //属于的分类
+        nickname: result.attributes.user.attributes.nickname, //所属用户昵称
+        userId:result.attributes.user.id,     // 所属用户的id
+        createdAt: result.createdAt,  //创建时间
+        avatar: result.attributes.user.attributes.avatar,  //所属用户头像
+        commentNum: result.attributes.commentNum, //评论数
+        likeCount: result.attributes.likeCount, //点赞数
+        geoPoint: result.attributes.geoPoint,
+        position: result.attributes.position,
+      })
+    })
+    response.success(topicList)
+  }), (err)=> {
+    response.error(err)
+  }
+}
+
+
 function updateTopicPicked(request, response) {
   var topic = AV.Object.createWithoutData('Topics', request.params.id);
   // 修改属性
@@ -177,7 +220,8 @@ var TopicManagerFunc = {
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
   updateTopicCategoryPicked:updateTopicCategoryPicked,
-  createNewTopicCategory:createNewTopicCategory
+  createNewTopicCategory:createNewTopicCategory,
+  getPickedTopicList:getPickedTopicList
 }
 
 module.exports = TopicManagerFunc
