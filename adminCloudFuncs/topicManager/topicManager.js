@@ -131,7 +131,9 @@ function getTopicCategoryList(request, response) {
     query.lessThan('createdAt', request.params.endTime);
   }
   if (request.params.enabled!=undefined) {
-    query.equalTo('enabled', request.params.enabled);
+    if (request.params.enabled == true){
+      query.equalTo('enabled', true);
+    }
   }
   query.contains('title', filterValue);
   query.find().then((results)=> {
