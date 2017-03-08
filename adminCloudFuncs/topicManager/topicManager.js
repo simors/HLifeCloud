@@ -119,7 +119,7 @@ function getTopicCategoryList(request, response) {
   }
 
   var query = new AV.Query('TopicCategory');
-  if (request.params.picked) {
+  if (request.params.picked!=undefined) {
     query.equalTo('isPicked', true);
   }
   if (!request.params.startTime) {
@@ -130,8 +130,8 @@ function getTopicCategoryList(request, response) {
     query.greaterThanOrEqualTo('createdAt', request.params.startTime);
     query.lessThan('createdAt', request.params.endTime);
   }
-  if (request.params.enabled) {
-    query.equalTo('enabled', true);
+  if (request.params.enabled!=undefined) {
+    query.equalTo('enabled', request.params.enabled);
   }
   query.contains('title', filterValue);
   query.find().then((results)=> {
