@@ -120,7 +120,7 @@ function getTopicCategoryList(request, response) {
 
   var query = new AV.Query('TopicCategory');
   if (request.params.picked!=undefined) {
-    if (request.params.enabled == true) {
+    if (request.params.picked == true) {
       query.equalTo('isPicked', true);
     }
   }
