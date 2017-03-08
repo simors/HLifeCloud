@@ -120,7 +120,9 @@ function getTopicCategoryList(request, response) {
 
   var query = new AV.Query('TopicCategory');
   if (request.params.picked!=undefined) {
-    query.equalTo('isPicked', true);
+    if (request.params.enabled == true) {
+      query.equalTo('isPicked', true);
+    }
   }
   if (!request.params.startTime) {
     query.greaterThanOrEqualTo('createdAt', new Date('2016-01-28 00:00:00'));
