@@ -98,7 +98,7 @@ function updateTopicCategoryPicked(request, response) {
     topicCategory.set('introduction', request.params.introduction);
   }
 
-  if(request.params.enabled){
+  if(request.params.enabled != undefined){
     topicCategory.set('enabled', request.params.enabled);
   }
   // 保存到云端
