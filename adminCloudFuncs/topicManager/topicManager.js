@@ -44,6 +44,7 @@ function getTopicList(request, response) {
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
   }
+
   topicQuery.contains('title', filterValue);
   innerQuery.contains('title', categoryName);
 
@@ -96,6 +97,10 @@ function updateTopicCategoryPicked(request, response) {
   if(request.params.introduction){
     topicCategory.set('introduction', request.params.introduction);
   }
+
+  if(request.params.enabled){
+    topicCategory.set('enabled', request.params.enabled);
+  }
   // 保存到云端
   topicCategory.save().then((topic)=> {
     response.success({
@@ -125,7 +130,9 @@ function getTopicCategoryList(request, response) {
     query.greaterThanOrEqualTo('createdAt', request.params.startTime);
     query.lessThan('createdAt', request.params.endTime);
   }
-
+  if (request.params.enabled) {
+    query.equalTo('enabled', true);
+  }
   query.contains('title', filterValue);
   query.find().then((results)=> {
 
@@ -137,6 +144,7 @@ function getTopicCategoryList(request, response) {
         isPicked: result.attributes.isPicked,
         introduction: result.attributes.introduction,
         image: result.attributes.image,
+        enabled: result.attributes.enabled,
       })
     })
     response.success(topicCategoryList)
