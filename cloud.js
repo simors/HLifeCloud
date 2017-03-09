@@ -44,6 +44,10 @@ AV.Cloud.define('createShopCategory',ShopManagerFunc.createShopCategory)
 AV.Cloud.define('updateShopCategory',ShopManagerFunc.updateShopCategory)
 AV.Cloud.define('createShopTag',ShopManagerFunc.createShopTag)
 AV.Cloud.define('updateShopTag',ShopManagerFunc.updateShopTag)
+AV.Cloud.define('getShopList',ShopManagerFunc.getShopList)
+AV.Cloud.define('updateChoosenCategory',ShopManagerFunc.updateChoosenCategory())
+
+
 
 
 module.exports = AV.Cloud;
