@@ -136,7 +136,7 @@ function updateShopTag(request, response) {
     var skipNum = request.params.isRefresh ? 0 : (request.params.skipNum || 0)
     var shopTagId = request.params.shopTagId
     var query = new AV.Query('Shop')
-    
+
     if (shopCategoryId) {
       //构建内嵌查询
       var innerQuery = new AV.Query('ShopCategory')
