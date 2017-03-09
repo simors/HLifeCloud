@@ -136,6 +136,7 @@ function updateShopTag(request, response) {
     var skipNum = request.params.isRefresh ? 0 : (request.params.skipNum || 0)
     var shopTagId = request.params.shopTagId
     var query = new AV.Query('Shop')
+    
     if (shopCategoryId) {
       //构建内嵌查询
       var innerQuery = new AV.Query('ShopCategory')
@@ -167,7 +168,7 @@ function updateShopTag(request, response) {
       query.addDescending('score')
       // query.addDescending('geo')
     }
-    query.limit(5) // 最多返回 5 条结果
+    //query.limit(5) // 最多返回 5 条结果
     if (distance) {
       // console.log('getShopList.geo===', geo)
       // console.log('getShopList.Array.isArray(geo)===', Array.isArray(geo))
@@ -192,6 +193,7 @@ function updateShopTag(request, response) {
     }
     // console.log('getShopList.query===', query)
      query.find().then(function (results) {
+       console.log('count',results.length)
       // console.log('getShopList.results=', results)
       var point = null
       if (Array.isArray(geo)) {
