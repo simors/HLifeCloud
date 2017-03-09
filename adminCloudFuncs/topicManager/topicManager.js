@@ -44,6 +44,7 @@ function getTopicList(request, response) {
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
   }
+
   topicQuery.contains('title', filterValue);
   innerQuery.contains('title', categoryName);
 
@@ -72,6 +73,49 @@ function getTopicList(request, response) {
   }
 }
 
+
+//获取精选话题名单
+function getPickedTopicList(request, response) {
+  var topicList = []
+  var topicQuery = new AV.Query('Topics')
+
+  topicQuery.descending('createdAt')
+  topicQuery.equalTo('picked', true);
+
+  topicQuery.include(['user'])
+  topicQuery.include(['category'])
+
+  if (request.params.limit) {
+    topicQuery.limit(request.params.limit)
+  }
+
+  topicQuery.find().then((results)=> {
+
+    results.forEach((result)=> {
+      topicList.push({
+        content: result.attributes.content, //话题内容
+        title: result.attributes.title,
+        abstract:result.attributes.abstract,
+        imgGroup: result.attributes.imgGroup, //图片
+        objectId: result.id,  //话题id
+        categoryId: result.attributes.category.id,  //属于的分类
+        nickname: result.attributes.user.attributes.nickname, //所属用户昵称
+        userId:result.attributes.user.id,     // 所属用户的id
+        createdAt: result.createdAt,  //创建时间
+        avatar: result.attributes.user.attributes.avatar,  //所属用户头像
+        commentNum: result.attributes.commentNum, //评论数
+        likeCount: result.attributes.likeCount, //点赞数
+        geoPoint: result.attributes.geoPoint,
+        position: result.attributes.position,
+      })
+    })
+    response.success(topicList)
+  }), (err)=> {
+    response.error(err)
+  }
+}
+
+
 function updateTopicPicked(request, response) {
   var topic = AV.Object.createWithoutData('Topics', request.params.id);
   // 修改属性
@@ -96,6 +140,10 @@ function updateTopicCategoryPicked(request, response) {
   if(request.params.introduction){
     topicCategory.set('introduction', request.params.introduction);
   }
+
+  if(request.params.enabled != undefined){
+    topicCategory.set('enabled', request.params.enabled);
+  }
   // 保存到云端
   topicCategory.save().then((topic)=> {
     response.success({
@@ -114,8 +162,10 @@ function getTopicCategoryList(request, response) {
   }
 
   var query = new AV.Query('TopicCategory');
-  if (request.params.picked) {
-    query.equalTo('isPicked', true);
+  if (request.params.picked!=undefined) {
+    if (request.params.picked == true) {
+      query.equalTo('isPicked', true);
+    }
   }
   if (!request.params.startTime) {
     query.greaterThanOrEqualTo('createdAt', new Date('2016-01-28 00:00:00'));
@@ -125,7 +175,11 @@ function getTopicCategoryList(request, response) {
     query.greaterThanOrEqualTo('createdAt', request.params.startTime);
     query.lessThan('createdAt', request.params.endTime);
   }
-
+  if (request.params.enabled!=undefined) {
+    if (request.params.enabled == true){
+      query.equalTo('enabled', true);
+    }
+  }
   query.contains('title', filterValue);
   query.find().then((results)=> {
 
@@ -137,6 +191,7 @@ function getTopicCategoryList(request, response) {
         isPicked: result.attributes.isPicked,
         introduction: result.attributes.introduction,
         image: result.attributes.image,
+        enabled: result.attributes.enabled,
       })
     })
     response.success(topicCategoryList)
@@ -165,7 +220,8 @@ var TopicManagerFunc = {
   getTopicList: getTopicList,
   getTopicCategoryList: getTopicCategoryList,
   updateTopicCategoryPicked:updateTopicCategoryPicked,
-  createNewTopicCategory:createNewTopicCategory
+  createNewTopicCategory:createNewTopicCategory,
+  getPickedTopicList:getPickedTopicList
 }
 
 module.exports = TopicManagerFunc
