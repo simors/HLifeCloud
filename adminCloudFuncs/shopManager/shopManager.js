@@ -213,24 +213,27 @@ function updateShopTag(request, response) {
     var query = new AV.Query('ShopCategory')
     query.notEqualTo('displaySort',null)
     query.find().then((results)=>{
-      results.map((result)=>{
-        result['displaySort']=null
+      var categoryCancelList=[]
+     results.forEach((result)=>{
+       var category= AV.Object.createWithoutData('ShopCategory',result.id)
+       category.set('displaySort',null)
+       categoryCancelList.push(category)
+     })
+      AV.Object.saveAll(categoryCancelList).then(()=>{
+        var categorys=[]
+        var count = 1
+        request.params.choosenCategory.forEach((result)=>{
+          var category= AV.Object.createWithoutData('ShopCategory',result.id)
+          category.set('displaySort',count)
+          categorys.push(category)
+          count++
+        })
+        AV.Object.saveAll(categorys)
+      }).then(()=>{
+        response.success()
+      },(err)=>{
+        response.error(err)
       })
-      AV.Object.saveAll(results)
-    }).then(()=>{
-      var categorys=[]
-      var count = 1
-      request.params.choosenCategory.forEach((result)=>{
-        var category= AV.Object.createWithoutData('ShopCategory',result.id)
-        category.set('displaySort',count)
-        categorys.push(category)
-        count++
-      })
-      AV.Object.saveAll(categorys)
-    }).then(()=>{
-      response.success()
-    },(err)=>{
-      response.error(err)
     })
 
   }
