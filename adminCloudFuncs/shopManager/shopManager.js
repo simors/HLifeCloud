@@ -209,7 +209,7 @@ function getShopList(request, response) {
         id : result.attributes.owner.id,
         username:result.attributes.owner.attributes.username
       }
-      let shop={
+      var shop={
         id:result.objectId,
         shopName:result.attributes.shopName,
         shopAddress:result.attributes.shopAddress,
