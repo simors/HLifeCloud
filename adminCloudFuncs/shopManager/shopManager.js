@@ -264,6 +264,15 @@ function updateChoosenCategory(request, response) {
   })
 
 }
+function closeShop(request,response){
+  var shop = AV.Object.createWithoutData('Shop',request.params.id)
+  shop.set('isOpen',false)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
@@ -273,7 +282,8 @@ var ShopManagerFunc = {
   createShopTag: createShopTag,
   updateShopTag: updateShopTag,
   getShopList: getShopList,
-  updateChoosenCategory: updateChoosenCategory
+  updateChoosenCategory: updateChoosenCategory,
+  closeShop:closeShop
 
 }
 module.exports = ShopManagerFunc
