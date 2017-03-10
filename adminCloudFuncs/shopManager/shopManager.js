@@ -210,7 +210,7 @@ function getShopList(request, response) {
         username:result.attributes.owner.attributes.username
       }
       var shop={
-        id:result.objectId,
+        id:result.id,
         shopName:result.attributes.shopName,
         shopAddress:result.attributes.shopAddress,
         isOpen:result.attributes.isOpen,
