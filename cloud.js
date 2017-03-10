@@ -50,6 +50,8 @@ AV.Cloud.define('getShopList',ShopManagerFunc.getShopList)
 AV.Cloud.define('updateChoosenCategory',ShopManagerFunc.updateChoosenCategory)
 AV.Cloud.define('closeShop',ShopManagerFunc.closeShop)
 AV.Cloud.define('openShop',ShopManagerFunc.openShop)
+AV.Cloud.define('getAnnouncementsByShopId',ShopManagerFunc.getAnnouncementsByShopId)
+
 
 
 

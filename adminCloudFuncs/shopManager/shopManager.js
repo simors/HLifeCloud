@@ -184,12 +184,12 @@ function getShopList(request, response) {
   }
   // console.log('getShopList.query===', query)
   query.find().then(function (results) {
-    console.log('count', results.length)
+    // console.log('count', results.length)
     // console.log('getShopList.results=', results)
     var point = null
     var shopList = []
     results.forEach((result) => {
-      console.log('count', result.attributes.containedAnnouncements)
+      // console.log('count', result.attributes.containedTag)
       var tags = []
       // console.log('containedTag', result.attributes.containedTag)
       if (result.attributes.containedTag) {
@@ -217,6 +217,9 @@ function getShopList(request, response) {
         coverUrl:result.attributes.coverUrl,
         contactNumber:result.attributes.contactNumber,
         targetShopCategory:targetShopCategory,
+        containedTag:tags,
+        score:result.attributes.score,
+        pv:result.attributes.pv,
         phone:result.attributes.phone,
         geoCity:result.attributes.geoCity,
         name:result.attributes.name,
@@ -285,6 +288,26 @@ function openShop(request,response){
   })
 }
 
+function getAnnouncementsByShopId(request,response){
+  var shop = AV.Object.createWithoutData('Shop',request.params.id)
+  var relation = shop.relation('containedAnnouncements');
+  var query = relation.query()
+  query.find().then((results)=>{
+    var announcements=[]
+    results.forEach((result)=>{
+      var announcement={
+        id:result.id,
+        coverUrl:result.attributes.coverUrl,
+        content:result.attributes.content,
+      }
+      announcements.push(announcement)
+    })
+    response.success(announcements)
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -295,7 +318,8 @@ var ShopManagerFunc = {
   getShopList: getShopList,
   updateChoosenCategory: updateChoosenCategory,
   closeShop:closeShop,
-  openShop:openShop
+  openShop:openShop,
+  getAnnouncementsByShopId:getAnnouncementsByShopId
 
 }
 module.exports = ShopManagerFunc
