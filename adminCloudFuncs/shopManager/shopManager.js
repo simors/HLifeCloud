@@ -3,7 +3,7 @@
  */
 var AV = require('leanengine');
 var Promise = require('bluebird');
-
+var shopUtil = require('../../utils/shopUtil');
 
 function getShopCategoryList(request, response) {
   var query = new AV.Query('ShopCategory')
@@ -307,6 +307,83 @@ function getAnnouncementsByShopId(request,response){
     response.error(err)
   })
 }
+function AdminShopCommentList(request, response) {
+  var shopId = request.params.id
+  var isRefresh = request.params.isRefresh
+  var lastCreatedAt = request.params.lastCreatedAt
+
+  var query = new AV.Query('ShopComment')
+
+
+
+  //构建内嵌查询
+  var innerQuery = new AV.Query('Shop')
+  // innerQuery.equalTo('objectId', shopId)
+  //执行内嵌查询
+  query.matchesQuery('targetShop', innerQuery)
+
+  query.include(['targetShop', 'user'])
+
+  query.addDescending('createdAt')
+  return query.find().then(function(results) {
+    console.log('shopComments==', results)
+    try{
+      var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
+
+      if(shopComments && shopComments.length) {
+        var queryArr = []
+        var upQueryArr = []
+        shopComments.forEach(function(item, index){
+          var replyQuery = new AV.Query('ShopCommentReply')
+          var shopComment = AV.Object.createWithoutData('ShopComment', item.id)
+          replyQuery.equalTo('replyShopComment', shopComment)
+          queryArr.push(replyQuery)
+
+          var upQuery = new AV.Query('ShopCommentUp')
+          upQuery.equalTo('targetShopComment', shopComment)
+          upQueryArr.push(upQuery)
+        })
+
+        var orQuery = AV.Query.or.apply(null, queryArr)
+        orQuery.include(['user', 'parentReply', 'parentReply.user'])
+        orQuery.addAscending('createdAt')
+
+        return orQuery.find().then(function(orResults){
+          var replys = shopUtil.shopCommentReplyFromLeancloudObject(orResults)
+          shopUtil.shopCommentsConcatReplys(shopComments, replys)
+
+          var upOrQuery = AV.Query.or.apply(null, upQueryArr)
+          upOrQuery.include(['user'])
+          upOrQuery.addAscending('createdAt')
+          // console.log('orResults==========', orResults)
+
+          return upOrQuery.find().then(function(upOrResults) {
+            try{
+              // console.log('upOrResults==========', upOrResults)
+              var ups = shopUtil.shopCommentUpFromLeancloudObject(upOrResults)
+              // console.log('shopCommentUpFromLeancloudObject==========')
+              shopUtil.shopCommentsConcatUps(shopComments, ups)
+              // console.log('shopCommentsConcatUps==========')
+              response.success(shopComments)
+            }catch(err) {
+              console.log('err==========', err)
+            }
+          }, function(upErr) {
+            response.success(shopComments)
+          })
+
+        }, function(err) {
+          response.success(shopComments)
+        })
+      }
+      response.success(shopComments)
+    }catch(err) {
+      response.error(err)
+    }
+  }, function(err) {
+    response.error(err)
+  })
+}
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
@@ -319,7 +396,8 @@ var ShopManagerFunc = {
   updateChoosenCategory: updateChoosenCategory,
   closeShop:closeShop,
   openShop:openShop,
-  getAnnouncementsByShopId:getAnnouncementsByShopId
+  getAnnouncementsByShopId:getAnnouncementsByShopId,
+  AdminShopCommentList:AdminShopCommentList
 
 }
 module.exports = ShopManagerFunc
