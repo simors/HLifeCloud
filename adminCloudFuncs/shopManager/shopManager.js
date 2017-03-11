@@ -227,6 +227,7 @@ function getShopList(request, response) {
         geoDistrict:result.attributes.geoDistrict,
         album:result.attributes.album,
         owner:owner,
+        grade:result.attributes.grade,
         createdAt:result.createdAt
       }
 
