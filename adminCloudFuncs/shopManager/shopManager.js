@@ -201,10 +201,14 @@ function getShopList(request, response) {
           tags.push(tagInfo)
         })
       }
-      var targetShopCategory={
-        text:result.attributes.targetShopCategory.attributes.text,
-        id:result.attributes.targetShopCategory.id
+      var targetShopCategory={}
+      if (result.attributes.targetShopCategory){
+        targetShopCategory ={
+          text:result.attributes.targetShopCategory.attributes.text,
+          id:result.attributes.targetShopCategory.id
+        }
       }
+
       var owner = {
         id : result.attributes.owner.id,
         username:result.attributes.owner.attributes.username
