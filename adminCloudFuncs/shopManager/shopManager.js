@@ -330,7 +330,7 @@ function AdminShopCommentList(request, response) {
 
   query.addDescending('createdAt')
   return query.find().then(function(results) {
-    console.log('shopComments==', results)
+    // console.log('shopComments==', results)
     try{
       var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
 

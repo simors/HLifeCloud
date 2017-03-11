@@ -22,6 +22,7 @@ function shopCommentFromLeancloudObject(results) {
       shopComment.content = attrs.content
       shopComment.blueprints = attrs.blueprints
       shopComment.score = attrs.score
+      shopComment.enable = attrs.enable
 
       var targetShop = {}
       var targetShopAttrs = attrs.targetShop.attributes
