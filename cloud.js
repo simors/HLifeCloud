@@ -54,6 +54,7 @@ AV.Cloud.define('getAnnouncementsByShopId',ShopManagerFunc.getAnnouncementsBySho
 AV.Cloud.define('AdminShopCommentList',ShopManagerFunc.AdminShopCommentList)
 AV.Cloud.define('enableShopComment',ShopManagerFunc.enableShopComment)
 AV.Cloud.define('disableShopComment',ShopManagerFunc.disableShopComment)
+AV.Cloud.define('deleteShopCoverImg',ShopManagerFunc.deleteShopCoverImg)
 
 
 

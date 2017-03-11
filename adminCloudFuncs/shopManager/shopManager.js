@@ -409,7 +409,15 @@ function disableShopComment(request,response){
     response.error(err)
   })
 }
-
+function deleteShopCoverImg(request,response){
+  var shop = AV.Object.createWithoutData('Shop',request.params.id)
+  shop.set('coverUrl',null)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -424,7 +432,8 @@ var ShopManagerFunc = {
   getAnnouncementsByShopId:getAnnouncementsByShopId,
   AdminShopCommentList:AdminShopCommentList,
   disableShopComment:disableShopComment,
-  enableShopComment:enableShopComment
+  enableShopComment:enableShopComment,
+  deleteShopCoverImg:deleteShopCoverImg
 
 }
 module.exports = ShopManagerFunc
