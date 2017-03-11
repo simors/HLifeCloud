@@ -38,6 +38,7 @@ function shopCommentFromLeancloudObject(results) {
         user.id = attrs.user.id
         user.nickname = userAttrs.nickname
         user.avatar = userAttrs.avatar
+        user.username = userAttrs.username
       }
       shopComment.user = user
       shopComments.push(shopComment)
@@ -69,6 +70,7 @@ function shopCommentReplyFromLeancloudObject(results) {
         user.id = attrs.user.id
         user.nickname = userAttrs.nickname
         user.avatar = userAttrs.avatar
+        user.username = userAttrs.username
       }
       shopCommentReply.user = user
 

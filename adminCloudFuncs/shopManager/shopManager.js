@@ -189,7 +189,7 @@ function getShopList(request, response) {
     var point = null
     var shopList = []
     results.forEach((result) => {
-      // console.log('count', result.attributes.containedTag)
+       // console.log('count', result.attributes.containedTag)
       var tags = []
       // console.log('containedTag', result.attributes.containedTag)
       if (result.attributes.containedTag) {
@@ -209,6 +209,7 @@ function getShopList(request, response) {
         id : result.attributes.owner.id,
         username:result.attributes.owner.attributes.username
       }
+      // console.log('result',result)
       var shop={
         id:result.id,
         shopName:result.attributes.shopName,
@@ -230,7 +231,7 @@ function getShopList(request, response) {
         grade:result.attributes.grade,
         createdAt:result.createdAt
       }
-
+      // console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
       shopList.push(shop)
     })
@@ -389,6 +390,26 @@ function AdminShopCommentList(request, response) {
   })
 }
 
+function enableShopComment(request,response){
+  var shop = AV.Object.createWithoutData('ShopComment',request.params.id)
+  shop.set('enable',true)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
+function disableShopComment(request,response){
+  var shop = AV.Object.createWithoutData('ShopComment',request.params.id)
+  shop.set('enable',false)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -401,7 +422,9 @@ var ShopManagerFunc = {
   closeShop:closeShop,
   openShop:openShop,
   getAnnouncementsByShopId:getAnnouncementsByShopId,
-  AdminShopCommentList:AdminShopCommentList
+  AdminShopCommentList:AdminShopCommentList,
+  disableShopComment:disableShopComment,
+  enableShopComment:enableShopComment
 
 }
 module.exports = ShopManagerFunc
