@@ -318,7 +318,10 @@ function AdminShopCommentList(request, response) {
 
   //构建内嵌查询
   var innerQuery = new AV.Query('Shop')
-  // innerQuery.equalTo('objectId', shopId)
+  if(shopId){
+    innerQuery.equalTo('objectId', shopId)
+  }
+  //
   //执行内嵌查询
   query.matchesQuery('targetShop', innerQuery)
 
