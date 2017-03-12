@@ -22,6 +22,7 @@ function shopCommentFromLeancloudObject(results) {
       shopComment.content = attrs.content
       shopComment.blueprints = attrs.blueprints
       shopComment.score = attrs.score
+      shopComment.enable = attrs.enable
 
       var targetShop = {}
       var targetShopAttrs = attrs.targetShop.attributes
@@ -37,6 +38,7 @@ function shopCommentFromLeancloudObject(results) {
         user.id = attrs.user.id
         user.nickname = userAttrs.nickname
         user.avatar = userAttrs.avatar
+        user.username = userAttrs.username
       }
       shopComment.user = user
       shopComments.push(shopComment)
@@ -68,6 +70,7 @@ function shopCommentReplyFromLeancloudObject(results) {
         user.id = attrs.user.id
         user.nickname = userAttrs.nickname
         user.avatar = userAttrs.avatar
+        user.username = userAttrs.username
       }
       shopCommentReply.user = user
 

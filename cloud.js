@@ -48,6 +48,16 @@ AV.Cloud.define('createShopTag',ShopManagerFunc.createShopTag)
 AV.Cloud.define('updateShopTag',ShopManagerFunc.updateShopTag)
 AV.Cloud.define('getShopList',ShopManagerFunc.getShopList)
 AV.Cloud.define('updateChoosenCategory',ShopManagerFunc.updateChoosenCategory)
+AV.Cloud.define('closeShop',ShopManagerFunc.closeShop)
+AV.Cloud.define('openShop',ShopManagerFunc.openShop)
+AV.Cloud.define('getAnnouncementsByShopId',ShopManagerFunc.getAnnouncementsByShopId)
+AV.Cloud.define('AdminShopCommentList',ShopManagerFunc.AdminShopCommentList)
+AV.Cloud.define('enableShopComment',ShopManagerFunc.enableShopComment)
+AV.Cloud.define('disableShopComment',ShopManagerFunc.disableShopComment)
+AV.Cloud.define('deleteShopCoverImg',ShopManagerFunc.deleteShopCoverImg)
+
+
+
 
 
 
