@@ -92,6 +92,7 @@ function getPickedTopicList(request, response) {
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
+      console.log(result.attributes.category.attributes)
       topicList.push({
         content: result.attributes.content, //话题内容
         title: result.attributes.title,
@@ -99,6 +100,7 @@ function getPickedTopicList(request, response) {
         imgGroup: result.attributes.imgGroup, //图片
         objectId: result.id,  //话题id
         categoryId: result.attributes.category.id,  //属于的分类
+        categoryName: result.attributes.category.attributes.title, // 话题分类名
         nickname: result.attributes.user.attributes.nickname, //所属用户昵称
         userId:result.attributes.user.id,     // 所属用户的id
         createdAt: result.createdAt,  //创建时间
