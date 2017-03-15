@@ -6,8 +6,12 @@ var Promise = require('bluebird');
 var shopUtil = require('../../utils/shopUtil');
 
 function getShopCategoryList(request, response) {
+  var categoryStatus = request.params.status
   var query = new AV.Query('ShopCategory')
   var categoryList = []
+  if(categoryStatus==1){
+    query.equalTo('status',categoryStatus)
+  }
   query.include('containedTag')
   query.ascending('shopCategoryId')
   query.find().then((results)=> {
