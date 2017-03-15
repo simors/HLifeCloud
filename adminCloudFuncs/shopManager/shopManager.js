@@ -126,10 +126,12 @@ function updateShopTag(request, response) {
 }
 
 function getShopList(request, response) {
-  var shopCategoryId = request.params.shopCategoryId
+  var orderMode = request.params.orderMode
+  var shopCategoryName = request.params.shopCategoryName
   var sortId = request.params.sortId // 0-智能,1-按好评,2-按距离
   var geoCity = request.params.geoCity
   var isRefresh = request.params.isRefresh
+  var username = request.params.username
 
   var skipNum = request.params.isRefresh ? 0 : (request.params.skipNum || 0)
   var shopTagId = request.params.shopTagId
@@ -140,15 +142,47 @@ function getShopList(request, response) {
   query.include('targetShopCategory')
   query.include('containedTag')
 
-  if (shopCategoryId) {
+  if (orderMode == 'createTimeDescend') {
+    query.descending('createdAt');
+  }
+  else if (orderMode == 'createTimeAscend') {
+    query.ascending('createdAt');
+  }
+  else if (orderMode == 'likeCountDescend') {
+    query.descending('likeCount');
+  }
+  else if (orderMode == 'commentNumDescend') {
+    query.descending('commentNum');
+  }
+  else {
+    query.descending('createdAt');
+  }
+
+  if (!request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
+    query.lessThan('createdAt', new Date());
+  }
+  else {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    query.lessThan('createdAt', request.params.endTime);
+  }
+
+  if (shopCategoryName) {
     //构建内嵌查询
     var innerQuery = new AV.Query('ShopCategory')
 
-    innerQuery.equalTo('shopCategoryId', shopCategoryId)
+    innerQuery.contains('text', shopCategoryName)
     //执行内嵌查询
     query.matchesQuery('targetShopCategory', innerQuery)
   }
+  if (username) {
+    //构建内嵌查询
+    var innerQuery = new AV.Query('_User')
 
+    innerQuery.contains('username', username)
+    //执行内嵌查询
+    query.matchesQuery('owner', innerQuery)
+  }
 
   if (sortId == 1) {
     if (!isRefresh) { //分页查询
