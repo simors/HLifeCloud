@@ -159,7 +159,7 @@ function getShopList(request, response) {
   }
 
   if (!request.params.startTime) {
-    query.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
+    query.greaterThanOrEqualTo('createdAt', new Date('2016-11-28 00:00:00'));
     query.lessThan('createdAt', new Date());
   }
   else {
