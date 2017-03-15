@@ -5,6 +5,15 @@ var AV = require('leanengine');
 var Promise = require('bluebird');
 var shopUtil = require('../../utils/shopUtil');
 
+function updateCategoryStatus(request,response){
+  var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
+  category.set('status',request.params.status)
+  category.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 function getShopCategoryList(request, response) {
   var categoryStatus = request.params.status
   var query = new AV.Query('ShopCategory')
@@ -475,7 +484,8 @@ var ShopManagerFunc = {
   AdminShopCommentList:AdminShopCommentList,
   disableShopComment:disableShopComment,
   enableShopComment:enableShopComment,
-  deleteShopCoverImg:deleteShopCoverImg
+  deleteShopCoverImg:deleteShopCoverImg,
+  updateCategoryStatus:updateCategoryStatus
 
 }
 module.exports = ShopManagerFunc
