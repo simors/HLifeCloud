@@ -228,12 +228,68 @@ function deleteUserFromAdmin(request, response) {
   })
 }
 
+//获取APP用户列表
+function getAppUserList(request,response) {
+  var username=request.params.username
+  var geoCity = request.params.geoCity
+  var query = new AV.Query('_User')
+  query.include('detail')
+  if (!request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', new Date('2016-9-28 00:00:00'));
+    query.lessThan('createdAt', new Date());
+  }
+  else {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    query.lessThan('createdAt', request.params.endTime);
+  }
+  if(username){
+    query.contains('username',username)
+  }
+  if(geoCity){
+    query.contains('geoCity',geoCity)
+  }
+  query.find().then((results)=>{
+    // console.log('results',results)
+
+    var userList = []
+    results.forEach((result)=>{
+      // console.log('result',result)
+      var userInfo= {
+        id : result.id,
+        identity:result.attributes.identity,
+        enable:result.attributes.enable,
+        geoCity:result.attributes.geoCity,
+        nickname:result.attributes.nickname,
+        username:result.attributes.username,
+        birthday:result.attributes.birthday,
+        type:result.attributes.type,
+        emailVerified:result.attributes.emailVerified,
+        mobilePhoneNumber:result.attributes.mobilePhoneNumber,
+        avatar:result.attributes.avatar,
+        geoDistrict:result.attributes.geoDistrict,
+        gender:result.attributes.gender,
+        authData:result.attributes.authData,
+        MobilePhoneVerified:result.attributes.mobilePhoneVerified,
+        // detailId:result.attributes.detail.id,
+        createdAt:result.createdAt
+    }
+    userList.push(userInfo)
+    })
+    response.success(userList)
+  },(err)=>{
+    response.error(err)
+  })
+
+
+}
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
   addUserFromAdmin: addUserFromAdmin,
   deleteUserFromAdmin: deleteUserFromAdmin,
   updateUserFromAdmin: updateUserFromAdmin,
-  updateMyPassword:updateMyPassword
+  updateMyPassword:updateMyPassword,
+  getAppUserList:getAppUserList
 }
 module.exports = UserManagerFunc
