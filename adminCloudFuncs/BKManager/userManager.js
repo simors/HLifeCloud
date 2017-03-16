@@ -283,6 +283,18 @@ function getAppUserList(request,response) {
 
 }
 
+function updateAppUserEnable(request,response){
+  var enable = request.params.enable
+  var id = request.params.id
+  var user = AV.Object.createWithoutData('_User',id)
+  user.set('enable',enable)
+  user.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
@@ -290,6 +302,7 @@ var UserManagerFunc = {
   deleteUserFromAdmin: deleteUserFromAdmin,
   updateUserFromAdmin: updateUserFromAdmin,
   updateMyPassword:updateMyPassword,
-  getAppUserList:getAppUserList
+  getAppUserList:getAppUserList,
+  updateAppUserEnable:updateAppUserEnable
 }
 module.exports = UserManagerFunc
