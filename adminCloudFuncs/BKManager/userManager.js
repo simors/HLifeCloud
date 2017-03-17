@@ -230,6 +230,8 @@ function deleteUserFromAdmin(request, response) {
 
 //获取APP用户列表
 function getAppUserList(request,response) {
+  var orderMode = request.params.orderMode
+
   var username=request.params.username
   var geoCity = request.params.geoCity
   var query = new AV.Query('_User')
@@ -247,6 +249,21 @@ function getAppUserList(request,response) {
   }
   if(geoCity){
     query.contains('geoCity',geoCity)
+  }
+  if (orderMode == 'createTimeDescend') {
+    query.descending('createdAt');
+  }
+  else if (orderMode == 'createTimeAscend') {
+    query.ascending('createdAt');
+  }
+  else if (orderMode == 'likeCountDescend') {
+    query.descending('likeCount');
+  }
+  else if (orderMode == 'commentNumDescend') {
+    query.descending('commentNum');
+  }
+  else {
+    query.descending('createdAt');
   }
   query.find().then((results)=>{
     // console.log('results',results)
