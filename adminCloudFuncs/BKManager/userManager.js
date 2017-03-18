@@ -237,7 +237,7 @@ function getAppUserList(request,response) {
   var query = new AV.Query('_User')
 
   query.include('detail')
-  if(status){
+  if(status==1){
     query.equalTo('status',status)
   }
   if (!request.params.startTime) {

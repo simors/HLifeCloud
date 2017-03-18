@@ -141,13 +141,10 @@ function updateShopTag(request, response) {
 function getShopList(request, response) {
   var orderMode = request.params.orderMode
   var shopCategoryName = request.params.shopCategoryName
-  var sortId = request.params.sortId // 0-智能,1-按好评,2-按距离
   var geoCity = request.params.geoCity
-  var isRefresh = request.params.isRefresh
   var username = request.params.username
-  var isOpen = request.params.isOpen
+  var status = request.params.status?1:0
 
-  var skipNum = request.params.isRefresh ? 0 : (request.params.skipNum || 0)
   var shopTagId = request.params.shopTagId
   var query = new AV.Query('Shop')
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
@@ -156,9 +153,6 @@ function getShopList(request, response) {
   query.include('targetShopCategory')
   query.include('containedTag')
 
-  // if(isOpen){
-  //   query.equalTo('isOpen',isOpen)
-  // }
 
   if (orderMode == 'createTimeDescend') {
     query.descending('createdAt');
@@ -202,25 +196,7 @@ function getShopList(request, response) {
     query.matchesQuery('owner', innerQuery)
   }
 
-  if (sortId == 1) {
-    if (!isRefresh) { //分页查询
-      query.skip(skipNum)
-      // query.lessThanOrEqualTo('score', lastScore)
-    }
-    query.addDescending('score')
-  } else if (sortId == 2) {
-    if (!isRefresh) { //分页查询
-      query.skip(skipNum)
-      // query.lessThanOrEqualTo('geo', lastGeo)
-    }
-  } else {
-    if (!isRefresh) { //分页查询
-      query.skip(skipNum)
-      // query.lessThanOrEqualTo('score', lastScore)
-    }
-    query.addDescending('score')
-    // query.addDescending('geo')
-  }
+
   //query.limit(5) // 最多返回 5 条结果
 
   // console.log('getShopList.geoCity===', geoCity)
@@ -234,14 +210,20 @@ function getShopList(request, response) {
     var shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
     query.equalTo('containedTag', shopTag)
   }
+  if(status==1) {
+    query.equalTo('status',status)
+  }
+
   // console.log('getShopList.query===', query)
   query.find().then(function (results) {
-    // console.log('count', results.length)
+     console.log('count', results.length)
     // console.log('getShopList.results=', results)
     var point = null
     var shopList = []
     results.forEach((result) => {
-       // console.log('count', result.attributes.containedTag)
+      // console.log('result',result)
+
+      // console.log('count', result.attributes.containedTag)
       var tags = []
       // console.log('containedTag', result.attributes.containedTag)
       if (result.attributes.containedTag) {
@@ -265,12 +247,11 @@ function getShopList(request, response) {
         id : result.attributes.owner.id,
         username:result.attributes.owner.attributes.username
       }
-      // console.log('result',result)
       var shop={
         id:result.id,
         shopName:result.attributes.shopName,
         shopAddress:result.attributes.shopAddress,
-        isOpen:result.attributes.isOpen,
+        status:result.attributes.status,
         coverUrl:result.attributes.coverUrl,
         contactNumber:result.attributes.contactNumber,
         targetShopCategory:targetShopCategory,
