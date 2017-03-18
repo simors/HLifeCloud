@@ -307,24 +307,33 @@ function updateChoosenCategory(request, response) {
 
 }
 
-function closeShop(request,response){
-  var shop = AV.Object.createWithoutData('Shop',request.params.id)
-  shop.set('isOpen',false)
-  shop.save().then(()=>{
-    response.success()
-  },(err)=>{
-    response.error(err)
-  })
-}
+// function closeShop(request,response){
+//   var shop = AV.Object.createWithoutData('Shop',request.params.id)
+//   shop.set('isOpen',false)
+//   shop.save().then(()=>{
+//     response.success()
+//   },(err)=>{
+//     response.error(err)
+//   })
+// }
+//
+// function openShop(request,response){
+//   var shop = AV.Object.createWithoutData('Shop',request.params.id)
+//   shop.set('isOpen',true)
+//   shop.save().then(()=>{
+//     response.success()
+//   },(err)=>{
+//     response.error(err)
+//   })
+// }
 
-function openShop(request,response){
+function updateShopStatus(request,response){
   var shop = AV.Object.createWithoutData('Shop',request.params.id)
-  shop.set('isOpen',true)
+  var status = request.params.status
+  shop.set('status',status)
   shop.save().then(()=>{
     response.success()
-  },(err)=>{
-    response.error(err)
-  })
+  },(err)=>{response.error(err)})
 }
 
 function getAnnouncementsByShopId(request,response){
@@ -464,8 +473,7 @@ var ShopManagerFunc = {
   updateShopTag: updateShopTag,
   getShopList: getShopList,
   updateChoosenCategory: updateChoosenCategory,
-  closeShop:closeShop,
-  openShop:openShop,
+  updateShopStatus:updateShopStatus,
   getAnnouncementsByShopId:getAnnouncementsByShopId,
   AdminShopCommentList:AdminShopCommentList,
   disableShopComment:disableShopComment,
