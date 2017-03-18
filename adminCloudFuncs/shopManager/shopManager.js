@@ -145,6 +145,7 @@ function getShopList(request, response) {
   var geoCity = request.params.geoCity
   var isRefresh = request.params.isRefresh
   var username = request.params.username
+  var isOpen = request.params.isOpen
 
   var skipNum = request.params.isRefresh ? 0 : (request.params.skipNum || 0)
   var shopTagId = request.params.shopTagId
@@ -154,6 +155,10 @@ function getShopList(request, response) {
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
+
+  // if(isOpen){
+  //   query.equalTo('isOpen',isOpen)
+  // }
 
   if (orderMode == 'createTimeDescend') {
     query.descending('createdAt');

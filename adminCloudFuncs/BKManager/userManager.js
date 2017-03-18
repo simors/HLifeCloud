@@ -143,7 +143,7 @@ function updateUserFromAdmin(request, response) {
               var userRole = new UserRole()
               userRole.set('adminUser', user)
               userRole.set('role', roleObject)
-              console.log('jhahahahahaha', userRole)
+              // console.log('jhahahahahaha', userRole)
               userRole.save()
             },
               (err)=> {
@@ -231,11 +231,15 @@ function deleteUserFromAdmin(request, response) {
 //获取APP用户列表
 function getAppUserList(request,response) {
   var orderMode = request.params.orderMode
-
+  var status = request.params.status
   var username=request.params.username
   var geoCity = request.params.geoCity
   var query = new AV.Query('_User')
+
   query.include('detail')
+  if(status){
+    query.equalTo('status',status)
+  }
   if (!request.params.startTime) {
     query.greaterThanOrEqualTo('createdAt', new Date('2016-9-28 00:00:00'));
     query.lessThan('createdAt', new Date());
@@ -274,7 +278,7 @@ function getAppUserList(request,response) {
       var userInfo= {
         id : result.id,
         identity:result.attributes.identity,
-        enable:result.attributes.enable,
+        status:result.attributes.status,
         geoCity:result.attributes.geoCity,
         nickname:result.attributes.nickname,
         username:result.attributes.username,
@@ -301,10 +305,10 @@ function getAppUserList(request,response) {
 }
 
 function updateAppUserEnable(request,response){
-  var enable = request.params.enable
+  var status = request.params.status
   var id = request.params.id
   var user = AV.Object.createWithoutData('_User',id)
-  user.set('enable',enable)
+  user.set('status',status)
   user.save().then(()=>{
     response.success()
   },(err)=>{
