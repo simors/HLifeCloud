@@ -10,7 +10,7 @@ function getActionList(request,response){
   var geoCity = request.params.geoCity
   var geoDistrict = request.params.geoDistrict
   var actionType = request.params.actionType
-  var enable = request.params.enable
+  var status = request.params.status
   var query = new AV.Query('Banners')
 
   if (!request.params.startTime) {
@@ -36,8 +36,8 @@ function getActionList(request,response){
   else {
     query.descending('createdAt');
   }
-  if (enable){
-    query.equalTo('enable',enable)
+  if (status){
+    query.equalTo('status',status)
   }
   if (actionType){
     query.equalTo('actionType',actionType)
