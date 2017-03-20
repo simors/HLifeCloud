@@ -58,7 +58,7 @@ function getActionList(request,response){
         geoCity:result.attributes.geoCity,
         geoDistrict:result.attributes.geoDistrict,
         geo:result.attributes.geo,
-        enable:result.attributes.enable,
+        status:result.attributes.status,
         type:result.attributes.type,
         title:result.attributes.title,
         actionType:result.attributes.actionType,
