@@ -96,18 +96,29 @@ function getPermissionListOnlyByLogin(request, response) {
       roles.forEach((roleInfo)=>{
         // console.log('hahahahahah', roleInfo.attributes.role.id)
         var role = new AV.Object.createWithoutData('_Role', roleInfo.attributes.role.id)
+        // var permission = new AV.Object.createWithoutData('Permission', '58aede9fb123db0052b686da')
+
         var query = new AV.Query('Privilege')
         query.equalTo('role', role)
+        // query.equalTo('permission', permission)
         query.include('permission')
+        query.descending('createdAt')
         promises.push(
           query.find().then((results)=> {
           results.forEach((result)=> {
-            // console.log('hahahahahah', result.attributes.permission.attributes.name)
+            console.log('1', result.attributes.permission.attributes.menu)
+
+            // console.log('2', result.attributes.permission.attributes.subMenu)
+            // console.log('3',result.attributes.permission.attributes.name)
+            // console.log('4',result.attributes.permission.attributes.key)
             permssionList.push({
               subPermission: result.attributes.permission.attributes.subMenu,
               menu:result.attributes.permission.attributes.menu,
-              name: result.attributes.permission.attributes.name,
-              key:result.attributes.permission.attributes.key
+
+            name: result.attributes.permission.attributes.name,
+
+            key:result.attributes.permission.attributes.key
+
             })
           })
           // response.success(menuList)

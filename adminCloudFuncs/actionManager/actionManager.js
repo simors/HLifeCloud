@@ -75,9 +75,20 @@ function getActionList(request,response){
 
 }
 
-
+function updateBannersStatus(request,response){
+  var status = request.params.status
+  var id = request.params.id
+  var banners = AV.Object.createWithoutData('Banners',id)
+  banners.set('status',status)
+  banners.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 var actionManageFunc = {
   getActionList: getActionList,
+  updateBannersStatus:updateBannersStatus
 
 }
 module.exports = actionManageFunc
