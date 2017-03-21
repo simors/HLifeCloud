@@ -8,6 +8,8 @@ var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
 var TopicManagerFunc = require('./adminCloudFuncs/topicManager/topicManager')
 var ShopManagerFunc = require('./adminCloudFuncs/shopManager/shopManager')
 var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
+var PointsMallFunc = require('./cloudFuncs/PointsMall')
+
 /**
  * 云函数
  */
@@ -60,12 +62,22 @@ AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('updateAppUserEnable',userManagerFunc.updateAppUserEnable)
 AV.Cloud.define('getActionList',ActionManagerFunc.getActionList)
 AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
+
 AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 
 
 
 
-
+// 用户积分
+AV.Cloud.define('pointsGetUserPoint', PointsMallFunc.getUserPoint)
+AV.Cloud.define('pointsCalUserRegist', PointsMallFunc.calUserRegist)
+AV.Cloud.define('pointsCalRegistPromoter', PointsMallFunc.calRegistPromoter)
+AV.Cloud.define('pointsCalRegistShoper', PointsMallFunc.calRegistShoper)
+AV.Cloud.define('pointsCalPublishTopic', PointsMallFunc.calPublishTopic)
+AV.Cloud.define('pointsCalPublishComment', PointsMallFunc.calPublishComment)
+AV.Cloud.define('pointsCalPublishActivity', PointsMallFunc.calPublishActivity)
+AV.Cloud.define('pointsCalInvitePromoter', PointsMallFunc.calInvitePromoter)
+AV.Cloud.define('pointsCalInviteShoper', PointsMallFunc.calInviteShoper)
 
 
 
