@@ -8,6 +8,8 @@ var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
 var TopicManagerFunc = require('./adminCloudFuncs/topicManager/topicManager')
 var ShopManagerFunc = require('./adminCloudFuncs/shopManager/shopManager')
 var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
+var PointsMallFunc = require('./cloudFuncs/PointsMall')
+
 /**
  * 云函数
  */
@@ -60,7 +62,7 @@ AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('updateAppUserEnable',userManagerFunc.updateAppUserEnable)
 AV.Cloud.define('getActionList',ActionManagerFunc.getActionList)
 AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
-
+AV.Cloud.define('pointsCalUserRegist', PointsMallFunc.calUserRegist)
 
 
 
