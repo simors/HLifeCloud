@@ -5,14 +5,14 @@ var AV = require('leanengine');
 var Promise = require('bluebird');
 
 var pointsActionTable = {
-  REGIST: 200,                // 注册用户
-  REGIST_PROMOTER: 200,
-  REGIST_SHOPER: 200,
-  PUBLISH_TOPIC: 50,
-  PUBLISH_ACTIVITY: 20,
-  PUBLISH_COMMENT: 10,
-  INVITE_PROMOTER: 100,
-  INVITE_SHOPER: 100,
+  REGIST: 20,                // 注册用户
+  REGIST_PROMOTER: 20,
+  REGIST_SHOPER: 20,
+  PUBLISH_TOPIC: 5,
+  PUBLISH_ACTIVITY: 2,
+  PUBLISH_COMMENT: 1,
+  INVITE_PROMOTER: 10,
+  INVITE_SHOPER: 10,
 }
 
 function pointIncrement(request, response, point) {
