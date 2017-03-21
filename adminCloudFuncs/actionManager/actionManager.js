@@ -113,6 +113,7 @@ function updateBanner(request, response) {
   var image = request.params.image
   var geoDistrict = request.params.geoDistrict
   var action = request.params.action
+  console.log('request',request.params)
   var banner = AV.Object.createWithoutData('Banners', request.params.id)
   if (title) {
     banner.set('title', request.params.title)
@@ -121,7 +122,7 @@ function updateBanner(request, response) {
     banner.set('geoCity', request.params.geoCity)
 
   }
-  if (type) {
+  if (type!==undefined) {
     banner.set('type', request.params.type)
 
   }
