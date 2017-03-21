@@ -103,11 +103,26 @@ function createBanner(request,response){
   },(err)=>{response.error(err)})
 
 }
+function updateBanner(request,response){
+  var banner = AV.Object.createWithoutData('Banners',request.params.id)
+  banner.set('title',request.params.title)
+  banner.set('geoCity',request.params.geoCity)
+  banner.set('type',request.params.type)
+  banner.set('status',1)
+  banner.set('actionType',request.params.actionType)
+  banner.set('image',request.params.image)
+  banner.set('geoDistrict',request.params.geoDistrict)
+  banner.set('action',request.params.action)
+  banner.save().then(()=>{
+    response.success()
+  },(err)=>{response.error(err)})
+}
 
 var actionManageFunc = {
   getActionList: getActionList,
   updateBannersStatus:updateBannersStatus,
-  createBanner:createBanner
+  createBanner:createBanner,
+  updateBanner:updateBanner
 
 }
 module.exports = actionManageFunc
