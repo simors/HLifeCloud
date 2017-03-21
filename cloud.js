@@ -62,9 +62,9 @@ AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('updateAppUserEnable',userManagerFunc.updateAppUserEnable)
 AV.Cloud.define('getActionList',ActionManagerFunc.getActionList)
 AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
+// 用户积分
+AV.Cloud.define('pointsGetUserPoint', PointsMallFunc.getUserPoint)
 AV.Cloud.define('pointsCalUserRegist', PointsMallFunc.calUserRegist)
-
-
 
 
 

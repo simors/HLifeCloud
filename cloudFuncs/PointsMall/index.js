@@ -15,6 +15,22 @@ var pointsActionTable = {
   INVIATE_SHOPER: 100,
 }
 
+function getUserPoint(request, response) {
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('PointsMall')
+  query.equalTo('user', user)
+  query.first().then((userPoint) => {
+    response.success({
+      point: userPoint.attributes.point
+    })
+  }, (err) => {
+    response.error({
+      point: 0
+    })
+  })
+}
+
 function calUserRegist(request, response) {
   var userId = request.params.userId
   var PointsMall = AV.Object.extend('PointsMall')
@@ -35,6 +51,7 @@ function calUserRegist(request, response) {
 
 var PointsMallFunc = {
   calUserRegist: calUserRegist,
+  getUserPoint: getUserPoint,
 }
 
 module.exports = PointsMallFunc
