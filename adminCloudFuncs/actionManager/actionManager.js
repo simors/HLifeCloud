@@ -4,7 +4,7 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 
-function getActionList(request,response){
+function getActionList(request, response) {
   // var createdAt = request.params.createdAt
   var orderMode = request.params.orderMode
   var geoCity = request.params.geoCity
@@ -36,93 +36,124 @@ function getActionList(request,response){
   else {
     query.descending('createdAt');
   }
-  if (status){
-    query.equalTo('status',status)
+  if (status) {
+    query.equalTo('status', status)
   }
-  if (actionType){
-    query.equalTo('actionType',actionType)
+  if (actionType) {
+    query.equalTo('actionType', actionType)
   }
-  if (geoDistrict){
-    query.equalTo('geoDistrict',geoDistrict)
+  if (geoDistrict) {
+    query.equalTo('geoDistrict', geoDistrict)
   }
-  if (geoCity){
-    query.equalTo('geoCity',geoCity)
+  if (geoCity) {
+    query.equalTo('geoCity', geoCity)
   }
-  query.find().then((results)=>{
-    var banners= []
+  query.find().then((results)=> {
+    var banners = []
 
-    results.forEach((result)=>{
-      console.log('reuslt',result)
+    results.forEach((result)=> {
+      console.log('reuslt', result)
       var banner = {
-        id:result.id,
-        geoCity:result.attributes.geoCity,
-        geoDistrict:result.attributes.geoDistrict,
-        geo:result.attributes.geo,
-        status:result.attributes.status,
-        type:result.attributes.type,
-        title:result.attributes.title,
-        actionType:result.attributes.actionType,
-        image:result.attributes.image,
-        action:result.attributes.action,
-        createdAt:result.createdAt
+        id: result.id,
+        geoCity: result.attributes.geoCity,
+        geoDistrict: result.attributes.geoDistrict,
+        geo: result.attributes.geo,
+        status: result.attributes.status,
+        type: result.attributes.type,
+        title: result.attributes.title,
+        actionType: result.attributes.actionType,
+        image: result.attributes.image,
+        action: result.attributes.action,
+        createdAt: result.createdAt
       }
       banners.push(banner)
     })
     response.success(banners)
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 
 }
 
-function updateBannersStatus(request,response){
+function updateBannersStatus(request, response) {
   var status = request.params.status
   var id = request.params.id
-  var banners = AV.Object.createWithoutData('Banners',id)
-  banners.set('status',status)
-  banners.save().then(()=>{
+  var banners = AV.Object.createWithoutData('Banners', id)
+  banners.set('status', status)
+  banners.save().then(()=> {
     response.success()
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 }
 
-function createBanner(request,response){
+function createBanner(request, response) {
   var Banner = AV.Object.extend('Banners')
   var banner = new Banner()
-  banner.set('title',request.params.title)
-  banner.set('geoCity',request.params.geoCity)
-  banner.set('type',request.params.type)
-  banner.set('status',1)
-  banner.set('actionType',request.params.actionType)
-  banner.set('image',request.params.image)
-  banner.set('geoDistrict',request.params.geoDistrict)
-  banner.set('action',request.params.action)
-  banner.save().then(()=>{
+  banner.set('title', request.params.title)
+  banner.set('geoCity', request.params.geoCity)
+  banner.set('type', request.params.type)
+  banner.set('status', 1)
+  banner.set('actionType', request.params.actionType)
+  banner.set('image', request.params.image)
+  banner.set('geoDistrict', request.params.geoDistrict)
+  banner.set('action', request.params.action)
+  banner.save().then(()=> {
     response.success()
-  },(err)=>{response.error(err)})
+  }, (err)=> {
+    response.error(err)
+  })
 
 }
-function updateBanner(request,response){
-  var banner = AV.Object.createWithoutData('Banners',request.params.id)
-  banner.set('title',request.params.title)
-  banner.set('geoCity',request.params.geoCity)
-  banner.set('type',request.params.type)
-  banner.set('status',1)
-  banner.set('actionType',request.params.actionType)
-  banner.set('image',request.params.image)
-  banner.set('geoDistrict',request.params.geoDistrict)
-  banner.set('action',request.params.action)
-  banner.save().then(()=>{
+function updateBanner(request, response) {
+  var title = request.params.title
+  var geoCity = request.params.geoCity
+  var type = request.params.type
+  var actionType = request.params.actionType
+  var image = request.params.image
+  var geoDistrict = request.params.geoDistrict
+  var action = request.params.action
+  var banner = AV.Object.createWithoutData('Banners', request.params.id)
+  if (title) {
+    banner.set('title', request.params.title)
+  }
+  if (geoCity) {
+    banner.set('geoCity', request.params.geoCity)
+
+  }
+  if (type) {
+    banner.set('type', request.params.type)
+
+  }
+  if (actionType) {
+    banner.set('actionType', request.params.actionType)
+
+  }
+  if (image) {
+    banner.set('image', request.params.image)
+
+  }
+  if (geoDistrict) {
+    banner.set('geoDistrict', request.params.geoDistrict)
+
+  }
+  if (action) {
+    banner.set('action', request.params.action)
+
+  }
+
+  banner.save().then(()=> {
     response.success()
-  },(err)=>{response.error(err)})
+  }, (err)=> {
+    response.error(err)
+  })
 }
 
 var actionManageFunc = {
   getActionList: getActionList,
-  updateBannersStatus:updateBannersStatus,
-  createBanner:createBanner,
-  updateBanner:updateBanner
+  updateBannersStatus: updateBannersStatus,
+  createBanner: createBanner,
+  updateBanner: updateBanner
 
 }
 module.exports = actionManageFunc
