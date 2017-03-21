@@ -86,9 +86,28 @@ function updateBannersStatus(request,response){
     response.error(err)
   })
 }
+
+function createBanner(request,response){
+  var Banner = AV.Object.extend('Banners')
+  var banner = new Banner()
+  banner.set('title',request.title)
+  banner.set('geoCity',request.geoCity)
+  banner.set('type',request.type)
+  banner.set('status',1)
+  banner.set('actionType',request.actionType)
+  banner.set('image',request.image)
+  banner.set('geoDistrict',request.geoDistrict)
+  banner.set('action',request.action)
+  banner.save().then(()=>{
+    response.success()
+  },(err)=>{response.error(err)})
+
+}
+
 var actionManageFunc = {
   getActionList: getActionList,
   updateBannersStatus:updateBannersStatus
+  createBanner:createBanner
 
 }
 module.exports = actionManageFunc

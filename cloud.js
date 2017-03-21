@@ -60,6 +60,7 @@ AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('updateAppUserEnable',userManagerFunc.updateAppUserEnable)
 AV.Cloud.define('getActionList',ActionManagerFunc.getActionList)
 AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
+AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 
 
 
