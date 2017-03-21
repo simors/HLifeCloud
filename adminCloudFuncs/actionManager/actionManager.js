@@ -106,7 +106,7 @@ function createBanner(request,response){
 
 var actionManageFunc = {
   getActionList: getActionList,
-  updateBannersStatus:updateBannersStatus
+  updateBannersStatus:updateBannersStatus,
   createBanner:createBanner
 
 }
