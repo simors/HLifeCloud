@@ -39,12 +39,16 @@ function calUserRegist(request, response) {
   query.get(userId).then((user) => {
     pointsMall.set('user', user)
     pointsMall.set('point', pointsActionTable.REGIST)
-    pointsMall.save().then(() => {
-      response.success({errcode: 0})
+    pointsMall.save().then((userPoint) => {
+      response.success({
+        errcode: 0,
+        point: userPoint.attributes.point
+      })
     })
   }, (error)=> {
     response.error({
       errcode: -1,
+      point: 0,
     })
   })
 }
