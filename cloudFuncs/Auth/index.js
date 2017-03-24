@@ -36,7 +36,7 @@ function verifyInvitationCode(request, response) {
 }
 
 function updateUserLocationInfo(request, response) {
-  console.log('updateUserLocationInfo.request.params=====', request.params)
+  // console.log('updateUserLocationInfo.request.params=====', request.params)
 
   var userId = request.params.userId;
 
