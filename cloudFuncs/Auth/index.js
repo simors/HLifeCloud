@@ -232,58 +232,6 @@ function getArticleLikers(request, response) {
   })
 }
 
-function getInvitationCodeOnceSuccessCB(payload) {
-  payload.response.success({
-    status: 0,
-    result: payload.result,
-  })
-}
-
-var errCount = 0;
-
-function getInvitationCodeOnceErrorCB(userId, err, response) {
-  errCount  = errCount + 1
-  if(errCount < 10) {
-    getInvitationCodeOnce(userId, response)
-  }else{
-    response.success({
-      status: err,
-    })
-  }
-}
-
-function getInvitationCodeOnce(userId, response) {
-  var uuid = require('node-uuid');
-  var redis = require('redis');
-  Promise.promisifyAll(redis.RedisClient.prototype);
-  var id = uuid.v4().substring(0, 8);
-  var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
-// 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server 主从切换等原因造成短暂不可用导致应用进程退出。
-  client.on('error', function(err) {
-    getInvitationCodeOnceErrorCB(userId, err, response);
-  });
-  client.getAsync(id).then((reply) => {
-    if(reply==null) {
-      client.setAsync(id, userId).then((reply) => {
-        client.expire(id, 3600)
-        getInvitationCodeOnceSuccessCB ({
-          status: 0,
-          result: id,
-          response:response,
-        })
-      })
-    }
-    else{
-      getInvitationCodeOnceErrorCB(userId, 1, response)
-    }
-  });
-}
-
-function getInvitationCode(request, response) {
-  var userId = request.params.userId;
-  getInvitationCodeOnce(userId, response)
-}
-
 function setUserNickname(request, response) {
   var userId = request.params.userId
   var nickname = request.params.nickname
@@ -302,13 +250,11 @@ function setUserNickname(request, response) {
 
 var authFunc = {
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
-  verifyInvitationCode: verifyInvitationCode,
   getDocterList: getDocterList,
   getDocterGroup: getDocterGroup,
   getUserinfoById: getUserinfoById,
   getUsers: getUsers,
   getArticleLikers: getArticleLikers,
-  getInvitationCode: getInvitationCode,
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo
 }
