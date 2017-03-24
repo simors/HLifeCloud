@@ -73,6 +73,7 @@ AV.Cloud.define('updateBanner',ActionManagerFunc.updateBanner)
 AV.Cloud.define('hLifePush',PushManagerFunc.push)
 
 AV.Cloud.define('hLifeGetSubAreaList', baiduFunc.getSubAreaList)
+AV.Cloud.define('hLifeGetSubAreaList2', baiduFunc.getSubAreaList2)
 AV.Cloud.define('hLifeGetProviceList', baiduFunc.getProviceList)
 AV.Cloud.define('hLifeGetCityList', baiduFunc.getCityList)
 AV.Cloud.define('hLifeGetDistrictList', baiduFunc.getDistrictList)

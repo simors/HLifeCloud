@@ -7,6 +7,12 @@ var Promise = require('bluebird');
 function push(request, response) {
   console.log('push------>>>>', request.params)
 
+  var query = buildPushQuery(request.params)
+
+  var data = {}
+
+  _push(data, query)
+
   response.success(request.params)
 }
 
@@ -30,7 +36,7 @@ function push(request, response) {
  *  自定义查询条件
  */
 function _push(data, query) {
-  let defaultData = {
+  var defaultData = {
     alert: '通知',
     title: '邻家优店',
     prod: 'dev',
@@ -38,13 +44,13 @@ function _push(data, query) {
     sceneParams: {}
   }
 
-  let actionData = {
+  var actionData = {
     action: 'com.zachary.leancloud.push.action', //自定义推送,不需要设置频道
   }
 
   Object.assign(defaultData, data, actionData)
 
-  let sendData = {
+  var sendData = {
     prod: defaultData.prod || 'dev', //iOS 设备可以通过 prod 属性指定使用测试环境还是生产环境证书.dev 表示开发证书，prod 表示生产证书，默认生产证书。
     data: defaultData
   }
@@ -88,8 +94,10 @@ function _push(data, query) {
  * @param queryParams
  * @returns {*}
  */
-function buildPushQuery(queryParams = {}) {
+function buildPushQuery(queryParams) {
   var query = new AV.Query('_Installation')
+
+  var deviceUserInfoQuery = new AV.Query('DeviceUserInfo')
 
   if(queryParams.terminalType == 2) {
     query.equalTo('deviceType', 'ios')
@@ -98,7 +106,9 @@ function buildPushQuery(queryParams = {}) {
   }
 
   if(queryParams.pushCondition == 2) {
+    if(queryParams.inactivityDaysIsChecked == 'true') {
 
+    }
   }
 
 

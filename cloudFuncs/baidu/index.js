@@ -34,6 +34,20 @@ function baiduGetSubAreaList(areaCode, cbk) {
   });
 }
 
+function baiduGetSubAreaList2(areaCode, level, cbk) {
+  var url = config.serviceUrl + "/shangquan/forward/?qt=sub_area_list&ext=1&level=" + level + "&areacode=" + areaCode + "&business_flag=0"
+  request(url, function(error, response, body){
+    var result = null
+    var json = JSON.parse(body)
+    if (json && json['result'] && json['result']['error'] == "0") {
+      result = json['content']
+    }
+    if (cbk) {
+      cbk(result);
+    }
+  });
+}
+
 function baiduGetAllCityMap(areaCode, cbk) {
   var url = config.serviceUrl + "/shangquan/forward/?qt=sub_area_list&ext=1&level=2&areacode=" + areaCode + "&business_flag=0"
   request(url, function(error, response, body){
@@ -93,6 +107,18 @@ function getSubAreaList(request, response) {
   })
 }
 
+function getSubAreaList2(request, response) {
+  var level = request.params.level || '1'
+  var areaCode = request.params.areaCode || '1'
+  baiduGetSubAreaList2(areaCode, level, function (results) {
+    if(results && results.sub && results.sub.length) {
+      response.success(results.sub)
+    }else {
+      response.error("get failed!")
+    }
+  })
+}
+
 function getProviceList(request, response) {
   var areaCode = 1
   baiduGetSubAreaList(areaCode, function (results) {
@@ -142,6 +168,7 @@ var baiduFunc = {
   getCityList: getCityList,
   getDistrictList: getDistrictList,
   getSubAreaList: getSubAreaList,
+  getSubAreaList2: getSubAreaList2,
   getAllCityMap: getAllCityMap,
 }
 
