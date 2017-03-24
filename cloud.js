@@ -1,5 +1,6 @@
 var AV = require('leanengine');
 
+var utilFunc = require('./cloudFuncs/util')
 var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
 var articleFunc = require('./cloudFuncs/Article');
@@ -11,11 +12,16 @@ var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
 var PointsMallFunc = require('./cloudFuncs/PointsMall')
 var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
 var baiduFunc = require('./cloudFuncs/baidu')
+var PromoterFunc = require('./cloudFuncs/Promoter')
+
 /**
  * 云函数
  */
+// 邀请码
+AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
+AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
+
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
-AV.Cloud.define('hLifeVerifyInvitationCode', authFunc.verifyInvitationCode)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
 AV.Cloud.define('hLifeGetDocterGroup', authFunc.getDocterGroup)
 AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
@@ -31,7 +37,6 @@ AV.Cloud.define('updateCategoryWithoutType',articleFunc.updateCategoryWithoutTyp
 AV.Cloud.define('getMenuList',PrivilegeFunc.getMenuList)
 AV.Cloud.define('getMenuListByLogin',PrivilegeFunc.getMenuListByLogin)
 AV.Cloud.define('getPermissionListOnlyByLogin',PrivilegeFunc.getPermissionListOnlyByLogin)
-AV.Cloud.define('hLifeGetInvitationCode',authFunc.getInvitationCode)
 AV.Cloud.define('getAdminUserList',userManagerFunc.getUserList)
 AV.Cloud.define('getAllRoleList',userManagerFunc.getAllRoleList)
 AV.Cloud.define('addUserFromAdmin',userManagerFunc.addUserFromAdmin)
@@ -73,10 +78,6 @@ AV.Cloud.define('hLifeGetCityList', baiduFunc.getCityList)
 AV.Cloud.define('hLifeGetDistrictList', baiduFunc.getDistrictList)
 AV.Cloud.define('hLifeGetAllCityMap', baiduFunc.getAllCityMap)
 
-
-
-
-
 // 用户积分
 AV.Cloud.define('pointsGetUserPoint', PointsMallFunc.getUserPoint)
 AV.Cloud.define('pointsCalUserRegist', PointsMallFunc.calUserRegist)
@@ -88,7 +89,8 @@ AV.Cloud.define('pointsCalPublishActivity', PointsMallFunc.calPublishActivity)
 AV.Cloud.define('pointsCalInvitePromoter', PointsMallFunc.calInvitePromoter)
 AV.Cloud.define('pointsCalInviteShoper', PointsMallFunc.calInviteShoper)
 
-
+// 推广人
+AV.Cloud.define('promoterCertificate', PromoterFunc.promoterCertificate)
 
 
 module.exports = AV.Cloud;
