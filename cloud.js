@@ -10,6 +10,7 @@ var ShopManagerFunc = require('./adminCloudFuncs/shopManager/shopManager')
 var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
 var PointsMallFunc = require('./cloudFuncs/PointsMall')
 var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
+var UtilFunc = require('./cloudFuncs/Util/utils')
 /**
  * 云函数
  */
@@ -65,6 +66,7 @@ AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
 AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 AV.Cloud.define('updateBanner',ActionManagerFunc.updateBanner)
 AV.Cloud.define('hLifePush',PushManagerFunc.push)
+AV.Cloud.define('hLifeGetSubAreaList',UtilFunc.getSubAreaList)
 
 
 
