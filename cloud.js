@@ -17,14 +17,11 @@ var PromoterFunc = require('./cloudFuncs/Promoter')
 /**
  * 云函数
  */
-<<<<<<< HEAD
 AV.Cloud.define('hLifeUpdateUserLocationInfo', authFunc.updateUserLocationInfo)
-=======
 // 邀请码
 AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
 AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
 
->>>>>>> fbf87c99ffe695c2e9a27149910215fbd29bc1f0
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
 AV.Cloud.define('hLifeGetDocterGroup', authFunc.getDocterGroup)
