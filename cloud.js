@@ -14,6 +14,7 @@ var baiduFunc = require('./cloudFuncs/baidu')
 /**
  * 云函数
  */
+AV.Cloud.define('hLifeUpdateUserLocationInfo', authFunc.updateUserLocationInfo)
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
 AV.Cloud.define('hLifeVerifyInvitationCode', authFunc.verifyInvitationCode)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)

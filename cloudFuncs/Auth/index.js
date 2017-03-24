@@ -35,6 +35,52 @@ function verifyInvitationCode(request, response) {
   }
 }
 
+function updateUserLocationInfo(request, response) {
+  console.log('updateUserLocationInfo.request.params=====', request.params)
+
+  var userId = request.params.userId;
+
+  var province = request.params.province;
+  var provinceCode = request.params.provinceCode;
+
+  var city = request.params.city;
+  var cityCode = request.params.cityCode;
+
+  var district = request.params.district;
+  var districtCode = request.params.districtCode;
+
+  var latitude = request.params.latitude;
+  var longitude = request.params.longitude;
+  var geoPoint = null
+  if(latitude && longitude) {
+    geoPoint = new AV.GeoPoint([latitude, longitude])
+  }
+
+  var userInfo = AV.Object.createWithoutData('_User', userId)
+  if(province) {
+    userInfo.set('geoProvince', province + "")
+    userInfo.set('geoProvinceCode', provinceCode + "")
+  }
+  if(city) {
+    userInfo.set('geoCity', city + "")
+    userInfo.set('geoCityCode', cityCode + "")
+  }
+  if(district) {
+    userInfo.set('geoDistrict', district + "")
+    userInfo.set('geoDistrictCode', districtCode + "")
+  }
+
+  if(geoPoint) {
+    userInfo.set('geo', geoPoint)
+  }
+
+  return userInfo.save().then(function(result){
+    response.success(result)
+  }, function(error){
+    response.error('update fail', error)
+  })
+}
+
 // function getDocterList(request, response) {
 //   var query = new AV.Query('_User')
 //   query.find().then((results) => {
@@ -104,8 +150,7 @@ function getDocterGroup(request, response) {
       response.success(doctorList)
     })
   }, function (error) {
-    error.message = ERROR[error.code] ? ERROR[error.code] : ERROR[9999]
-    throw error
+    response.error('fail')
   })
 
 }
@@ -265,6 +310,7 @@ var authFunc = {
   getArticleLikers: getArticleLikers,
   getInvitationCode: getInvitationCode,
   setUserNickname: setUserNickname,
+  updateUserLocationInfo: updateUserLocationInfo
 }
 
 module.exports = authFunc
