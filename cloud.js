@@ -10,7 +10,7 @@ var ShopManagerFunc = require('./adminCloudFuncs/shopManager/shopManager')
 var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
 var PointsMallFunc = require('./cloudFuncs/PointsMall')
 var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
-var UtilFunc = require('./cloudFuncs/Util/utils')
+var baiduFunc = require('./cloudFuncs/baidu')
 /**
  * 云函数
  */
@@ -66,7 +66,14 @@ AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
 AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 AV.Cloud.define('updateBanner',ActionManagerFunc.updateBanner)
 AV.Cloud.define('hLifePush',PushManagerFunc.push)
-AV.Cloud.define('hLifeGetSubAreaList',UtilFunc.getSubAreaList)
+
+AV.Cloud.define('hLifeGetSubAreaList', baiduFunc.getSubAreaList)
+AV.Cloud.define('hLifeGetSubAreaList2', baiduFunc.getSubAreaList2)
+AV.Cloud.define('hLifeGetProviceList', baiduFunc.getProviceList)
+AV.Cloud.define('hLifeGetCityList', baiduFunc.getCityList)
+AV.Cloud.define('hLifeGetDistrictList', baiduFunc.getDistrictList)
+AV.Cloud.define('hLifeGetAllCityMap', baiduFunc.getAllCityMap)
+
 
 
 
