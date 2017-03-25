@@ -31,14 +31,14 @@ function getTopicList(request, response) {
   else {
     topicQuery.descending('createdAt');
   }
-  // if (!request.params.startTime) {
-  //   topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
-  //   topicQuery.lessThan('createdAt', new Date());
-  // }
-  // else {
-  //   topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
-  //   topicQuery.lessThan('createdAt', request.params.endTime);
-  // }
+  if (!request.params.startTime) {
+    topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
+    topicQuery.lessThan('createdAt', new Date());
+  }
+  else {
+    topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
+    topicQuery.lessThan('createdAt', request.params.endTime);
+  }
 
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
@@ -47,7 +47,6 @@ function getTopicList(request, response) {
     topicQuery.contains('title', filterValue);
 
   }
-  console.log('here is code ===============>')
 
   if(categoryName){
     innerQuery.contains('title', categoryName);
@@ -61,6 +60,8 @@ function getTopicList(request, response) {
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
+      // console.log('here is code ===============>',result.attributes)
+
       topicList.push({
         id: result.id,
         title: result.attributes.title,
@@ -72,6 +73,8 @@ function getTopicList(request, response) {
         category: result.attributes.category.attributes.title,
         createdAt: result.createdAt
       })
+      // console.log('here is code ===============>',result.attributes)
+
     })
     response.success(topicList)
   }), (err)=> {
