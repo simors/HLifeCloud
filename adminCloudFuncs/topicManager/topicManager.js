@@ -43,9 +43,15 @@ function getTopicList(request, response) {
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
   }
+  if(filterValue){
+    topicQuery.contains('title', filterValue);
 
-  topicQuery.contains('title', filterValue);
-  innerQuery.contains('title', categoryName);
+  }
+  console.log('here is code ===============>')
+
+  if(categoryName){
+    innerQuery.contains('title', categoryName);
+  }
 
   topicQuery.include(['user'])
   topicQuery.include(['category'])
