@@ -89,12 +89,12 @@ function updateBannersStatus(request, response) {
 
 function createBanner(request, response) {
   var pushTargetDistrict = request.params.pushTargetDistrict;
-  var pushTargetDistrictCode = request.params.pushTargetDistrictCode;
+  var pushTargetDistrictLabel = request.params.pushTargetDistrictLabel;
   var cityList=[]
   var provinceList=[]
   var geoCityCodes=[]
   var geoProvinceCodes=[]
-  pushTargetDistrict.forEach(function(item){
+  pushTargetDistrictLabel.forEach(function(item){
     var areaInfoArr = item.split('-');
     if('1' == areaInfoArr[0]) {
       provinceList.push (areaInfoArr[1])
@@ -103,7 +103,7 @@ function createBanner(request, response) {
     }
 
   })
-  pushTargetDistrictCode.forEach(function(item){
+  pushTargetDistrict.forEach(function(item){
     var areaInfoArr = item.split('-');
     if('1' == areaInfoArr[0]) {
       geoProvinceCodes.push (areaInfoArr[1])
