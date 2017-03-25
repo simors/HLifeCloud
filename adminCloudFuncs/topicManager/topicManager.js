@@ -16,7 +16,6 @@ function getTopicList(request, response) {
   var filterValue = request.params.filterValue
   var topicQuery = new AV.Query('Topics')
   var innerQuery = new AV.Query('TopicCategory');
-
   if (orderMode == 'createTimeDescend') {
     topicQuery.descending('createdAt');
   }
@@ -50,6 +49,7 @@ function getTopicList(request, response) {
 
   topicQuery.include(['user'])
   topicQuery.include(['category'])
+
   topicQuery.matchesQuery('category', innerQuery);
 
   topicQuery.find().then((results)=> {
