@@ -144,7 +144,7 @@ function getShopList(request, response) {
   var geoCity = request.params.geoCity
   var username = request.params.username
   var status = request.params.status?1:0
-
+  // var id = request.params.id
   var shopTagId = request.params.shopTagId
   var query = new AV.Query('Shop')
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId

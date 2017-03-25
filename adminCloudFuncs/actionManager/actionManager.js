@@ -88,9 +88,37 @@ function updateBannersStatus(request, response) {
 }
 
 function createBanner(request, response) {
+  var pushTargetDistrict = request.params.pushTargetDistrict;
+  var pushTargetDistrictCode = request.params.pushTargetDistrictCode;
+  var cityList=[]
+  var provinceList=[]
+  var geoCityCodes=[]
+  var geoProvinceCodes=[]
+  pushTargetDistrict.forEach(function(item){
+    var areaInfoArr = item.split('-');
+    if('1' == areaInfoArr[0]) {
+      provinceList.push (areaInfoArr[1])
+    }else if('2' == areaInfoArr[0]) {
+      cityList.push (areaInfoArr[1])
+    }
+
+  })
+  pushTargetDistrictCode.forEach(function(item){
+    var areaInfoArr = item.split('-');
+    if('1' == areaInfoArr[0]) {
+      geoProvinceCodes.push (areaInfoArr[1])
+    }else if('2' == areaInfoArr[0]) {
+      geoCityCodes.push (areaInfoArr[1])
+    }
+
+  })
   var Banner = AV.Object.extend('Banners')
   var banner = new Banner()
   banner.set('title', request.params.title)
+  banner.set('cityList',cityList)
+  banner.set('provinceList',provinceList)
+  banner.set('geoCityCodes',geoCityCodes)
+  banner.set('geoProvinceCodes',geoProvinceCodes)
   banner.set('geoCity', request.params.geoCity)
   banner.set('type', request.params.type)
   banner.set('status', 1)
