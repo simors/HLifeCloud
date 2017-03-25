@@ -55,8 +55,10 @@ function getActionList(request, response) {
       console.log('reuslt', result)
       var banner = {
         id: result.id,
-        geoCity: result.attributes.geoCity,
-        geoDistrict: result.attributes.geoDistrict,
+        cityList: result.attributes.cityList,
+        provinceList: result.attributes.provinceList,
+        geoProvinceCodes:result.attributes.geoProvinceCodes,
+        geoCityCodes:result.attributes.geoCityCodes,
         geo: result.attributes.geo,
         status: result.attributes.status,
         type: result.attributes.type,
