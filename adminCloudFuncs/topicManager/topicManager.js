@@ -31,14 +31,14 @@ function getTopicList(request, response) {
   else {
     topicQuery.descending('createdAt');
   }
-  if (!request.params.startTime) {
-    topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
-    topicQuery.lessThan('createdAt', new Date());
-  }
-  else {
-    topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
-    topicQuery.lessThan('createdAt', request.params.endTime);
-  }
+  // if (!request.params.startTime) {
+  //   topicQuery.greaterThanOrEqualTo('createdAt', new Date('2017-01-28 00:00:00'));
+  //   topicQuery.lessThan('createdAt', new Date());
+  // }
+  // else {
+  //   topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
+  //   topicQuery.lessThan('createdAt', request.params.endTime);
+  // }
 
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
