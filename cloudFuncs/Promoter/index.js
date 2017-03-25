@@ -6,6 +6,11 @@ var Promise = require('bluebird');
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 
+/**
+ * 用户认证为推广员
+ * @param request
+ * @param response
+ */
 function promoterCertificate(request, response) {
   var inviteCode = request.params.inviteCode
   inviteCodeFunc.verifyCode(inviteCode).then((reply) => {
@@ -55,8 +60,45 @@ function promoterCertificate(request, response) {
   })
 }
 
+/**
+ * 获取到用户的上一级推广好友
+ * @param request
+ * @param response
+ */
+function getUpPromoter(request, response) {
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('Promoter')
+  query.equalTo('user', user)
+  query.include('upUser')
+
+  query.first().then((promoter) => {
+    var upQuery = new AV.Query('Promoter')
+    upQuery.equalTo('user', promoter.attributes.upUser)
+    upQuery.include('user')
+    upQuery.first().then((upPromoter) => {
+      console.log(upPromoter)
+      response.success({
+        errcode: 0,
+        promoter: upPromoter,
+      })
+    }, (err) => {
+      response.error({
+        errcode: 1,
+        message: "无法获取到上一级推广好友"
+      })
+    })
+  }, (err) => {
+    response.error({
+      errcode: 1,
+      message: "无法获取到次用户的推广记录"
+    })
+  })
+}
+
 var PromoterFunc = {
   promoterCertificate: promoterCertificate,
+  getUpPromoter: getUpPromoter,
 }
 
 module.exports = PromoterFunc
