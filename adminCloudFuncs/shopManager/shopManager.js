@@ -221,7 +221,7 @@ function getShopList(request, response) {
     var point = null
     var shopList = []
     results.forEach((result) => {
-      // console.log('result',result)
+      // console.log('result', result.attributes)
 
       // console.log('count', result.attributes.containedTag)
       var tags = []
@@ -235,18 +235,22 @@ function getShopList(request, response) {
           tags.push(tagInfo)
         })
       }
-      var targetShopCategory={}
-      if (result.attributes.targetShopCategory){
-        targetShopCategory ={
-          text:result.attributes.targetShopCategory.attributes.text,
-          id:result.attributes.targetShopCategory.id
+      var targetShopCategory = {}
+      if (result.attributes.targetShopCategory) {
+        targetShopCategory = {
+          text: result.attributes.targetShopCategory.attributes.text,
+          id: result.attributes.targetShopCategory.id
+        }
+      }
+      // console.log('result', result.attributes.owner)
+      var owner={}
+      if (result.attributes.owner) {
+         owner = {
+          id: result.attributes.owner.id,
+          username: result.attributes.owner.attributes.username
         }
       }
 
-      var owner = {
-        id : result.attributes.owner.id,
-        username:result.attributes.owner.attributes.username
-      }
       var shop={
         id:result.id,
         shopName:result.attributes.shopName,
@@ -268,7 +272,7 @@ function getShopList(request, response) {
         grade:result.attributes.grade,
         createdAt:result.createdAt
       }
-      // console.log('hahahah',shop)
+       console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
       shopList.push(shop)
     })
