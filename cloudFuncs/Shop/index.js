@@ -4,6 +4,9 @@
 
 var AV = require('leanengine');
 var shopUtil = require('../../utils/shopUtil');
+var inviteCodeFunc = require('../util/inviteCode')
+var IDENTITY_SHOPKEEPER = require('../../constants/appConst').IDENTITY_SHOPKEEPER
+
 
 function fetchShopCommentList(request, response) {
   var shopId = request.params.id
@@ -123,10 +126,109 @@ function fetchShopCommentUpedUserList(request, response) {
   })
 }
 
-var authFunc = {
-  fetchShopCommentList: fetchShopCommentList,
-  fetchShopCommentReplyList: fetchShopCommentReplyList,
-  fetchShopCommentUpedUserList: fetchShopCommentUpedUserList
+/**
+ * 店铺注册认证
+ * @param request
+ * @param response
+ */
+function shopCertificate(request, response) {
+  var inviteCode = request.params.inviteCode
+  inviteCodeFunc.verifyCode(inviteCode).then((reply) => {
+    if (!reply) {
+      response.error({
+        errcode: 1,
+        message: '验证码无效，请向推广员重新获取验证码',
+      })
+    }
+    var currentUser = request.currentUser
+    var name = request.params.name
+    var phone = request.params.phone
+    var shopName = request.params.shopName
+    var shopAddress = request.params.shopAddress
+    var geo = request.params.geo
+    var geoCity = request.params.geoCity
+    var geoDistrict = request.params.geoDistrict
+    var inviterId = reply
+
+
+    var Shop = AV.Object.extend('Shop')
+    var shop = new Shop()
+    var inviter = AV.Object.createWithoutData('_User', inviterId)
+
+    inviter.fetch().then((inviterInfo) => {
+      shop.set('name', name)
+      shop.set('phone', phone)
+      shop.set('shopName', shopName)
+      shop.set('shopAddress', shopAddress)
+      if(geo) {
+        var point = new AV.GeoPoint(geo)
+        shop.set('geo', point)
+      }
+      shop.set('geoCity', geoCity)
+      shop.set('geoDistrict', geoDistrict)
+      shop.set('user', currentUser)
+      shop.set('inviter', inviterInfo)
+      currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
+      currentUser.save().then(() => {
+        return shop.save()
+      }).then((shopInfo) => {
+        console.log("shopInfo", shopInfo)
+        response.success({
+        errcode: 0,
+        message: '店铺注册认证成功',
+        shop: shopInfo,
+        })
+      }).catch((error) => {
+        console.log("shopCertificate", error.Error)
+        response.error({
+          errcode: 1,
+          message: '店铺注册认证失败，请与客服联系',
+        })
+      })
+      // currentUser.save().then(() => {
+      //   shop.save().then((shopInfo) => {
+      //     console.log("shopInfo", shopInfo)
+      //     response.success({
+      //     errcode: 0,
+      //     message: '店铺注册认证成功',
+      //     shop: shopInfo,
+      //     })
+      //   }).catch((error) => {
+      //     console.log("shopCertificate", error)
+      //     response.error({
+      //     errcode: 1,
+      //     message: '店铺注册认证失败，请与客服联系',
+      //     })
+      //   })
+      // }).catch((error) => {
+      // console.log("shopCertificate", error)
+      //   response.error({
+      //     errcode: 1,
+      //     message: '店铺注册认证失败，请与客服联系',
+      //   })
+      // })
+    })
+  })
 }
 
-module.exports = authFunc
+/**
+ * 获取店铺注册邀请人
+ * @param request
+ * @param response
+ */
+function getShopInviter(request, response) {
+  response.success({
+    errcode: 0,
+    message: '接口暂未实现',
+  })
+}
+
+var shopFunc = {
+  fetchShopCommentList: fetchShopCommentList,
+  fetchShopCommentReplyList: fetchShopCommentReplyList,
+  fetchShopCommentUpedUserList: fetchShopCommentUpedUserList,
+  shopCertificate: shopCertificate,
+  getShopInviter: getShopInviter,
+}
+
+module.exports = shopFunc
