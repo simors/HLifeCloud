@@ -136,22 +136,64 @@ function createBanner(request, response) {
 
 }
 function updateBanner(request, response) {
+  var pushTargetDistrict = request.params.pushTargetDistrict;
+  var pushTargetDistrictLabel = request.params.pushTargetDistrictLabel;
   var title = request.params.title
-  var geoCity = request.params.geoCity
+  // var geoCity = request.params.geoCity
   var type = request.params.type
   var actionType = request.params.actionType
   var image = request.params.image
-  var geoDistrict = request.params.geoDistrict
+  // var geoDistrict = request.params.geoDistrict
   var action = request.params.action
   console.log('request',request.params)
+  var cityList=[]
+  var provinceList=[]
+  var geoCityCodes=[]
+  var geoProvinceCodes=[]
+  if(pushTargetDistrictLabel&&pushTargetDistrictLabel.length>0){
+    pushTargetDistrictLabel.forEach(function(item){
+      var areaInfoArr = item.split('-');
+      if('1' == areaInfoArr[0]) {
+        provinceList.push (areaInfoArr[1])
+      }else if('2' == areaInfoArr[0]) {
+        cityList.push (areaInfoArr[1])
+      }
+
+    })
+  }
+  if(pushTargetDistrict&&pushTargetDistrictLabel.length>0){
+    pushTargetDistrict.forEach(function(item){
+      var areaInfoArr = item.split('-');
+      if('1' == areaInfoArr[0]) {
+        geoProvinceCodes.push (areaInfoArr[1])
+      }else if('2' == areaInfoArr[0]) {
+        geoCityCodes.push (areaInfoArr[1])
+      }
+
+    })
+
+  }
+
   var banner = AV.Object.createWithoutData('Banners', request.params.id)
+  if(geoCityCodes){
+    banner.set('getCityCodes',geoCityCodes)
+  }
+  if(geoProvinceCodes){
+    banner.set('geoProvinceCodes',geoProvinceCodes)
+  }
+  if(provinceList){
+    banner.set('provinceList',provinceList)
+  }
+  if(cityList){
+    banner.set('cityList',cityList)
+  }
   if (title) {
     banner.set('title', request.params.title)
   }
-  if (geoCity) {
-    banner.set('geoCity', request.params.geoCity)
-
-  }
+  // if (geoCity) {
+  //   banner.set('geoCity', request.params.geoCity)
+  //
+  // }
   if (type!==undefined) {
     banner.set('type', request.params.type)
 
@@ -164,10 +206,10 @@ function updateBanner(request, response) {
     banner.set('image', request.params.image)
 
   }
-  if (geoDistrict) {
-    banner.set('geoDistrict', request.params.geoDistrict)
-
-  }
+  // if (geoDistrict) {
+  //   banner.set('geoDistrict', request.params.geoDistrict)
+  //
+  // }
   if (action) {
     banner.set('action', request.params.action)
 
