@@ -272,7 +272,7 @@ function getShopList(request, response) {
         grade:result.attributes.grade,
         createdAt:result.createdAt
       }
-       console.log('hahahah',shop)
+       // console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
       shopList.push(shop)
     })
