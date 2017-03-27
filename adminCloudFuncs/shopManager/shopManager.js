@@ -102,15 +102,31 @@ function createShopCategory(request, response) {
 
 function updateShopCategory(request, response) {
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
-
-  category.set('imageSource', request.params.imageSource)
-  category.set('status', request.params.status)
+if(request.params.tagList){
   category.set('containedTag', request.params.tagList)
+}
+if(request.params.imageSource){
+  category.set('imageSource', request.params.imageSource)
+}
+if( request.params.status){
+  category.set('status', request.params.status)
+}
+if(request.params.text){
   category.set('text', request.params.text)
+}
+if(request.params.displaySort){
   category.set('displaySort', request.params.displaySort)
+}
+if(request.params.describe){
   category.set('describe', request.params.describe)
+}
+if(request.params.showPictureSource){
   category.set('showPictureSource', request.params.showPictureSource)
+
+}
+if(request.params.textColor){
   category.set('textColor', request.params.textColor)
+}
   category.save().then(()=> {
     response.success()
   }, (err)=> {
