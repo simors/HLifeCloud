@@ -16,7 +16,6 @@ function getTopicList(request, response) {
   var filterValue = request.params.filterValue
   var topicQuery = new AV.Query('Topics')
   var innerQuery = new AV.Query('TopicCategory');
-
   if (orderMode == 'createTimeDescend') {
     topicQuery.descending('createdAt');
   }
@@ -44,17 +43,25 @@ function getTopicList(request, response) {
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
   }
+  if(filterValue){
+    topicQuery.contains('title', filterValue);
 
-  topicQuery.contains('title', filterValue);
-  innerQuery.contains('title', categoryName);
+  }
+
+  if(categoryName){
+    innerQuery.contains('title', categoryName);
+  }
 
   topicQuery.include(['user'])
   topicQuery.include(['category'])
+
   topicQuery.matchesQuery('category', innerQuery);
 
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
+      // console.log('here is code ===============>',result.attributes)
+
       topicList.push({
         id: result.id,
         title: result.attributes.title,
@@ -66,6 +73,8 @@ function getTopicList(request, response) {
         category: result.attributes.category.attributes.title,
         createdAt: result.createdAt
       })
+      // console.log('here is code ===============>',result.attributes)
+
     })
     response.success(topicList)
   }), (err)=> {

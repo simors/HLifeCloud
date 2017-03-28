@@ -6,9 +6,9 @@ var Promise = require('bluebird');
 
 
 //去掉空格
-function Trim(str) {
-  return str.replace(/(^\s*)|(\s*$)/g, "");
-}
+// function Trim(str) {
+//   return str.replace(/(^\s*)|(\s*$)/g, "");
+// }
 
 //获取人员名单
 function getUserList(request, response) {

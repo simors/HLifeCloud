@@ -102,15 +102,31 @@ function createShopCategory(request, response) {
 
 function updateShopCategory(request, response) {
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
-
-  category.set('imageSource', request.params.imageSource)
-  category.set('status', request.params.status)
+if(request.params.tagList){
   category.set('containedTag', request.params.tagList)
+}
+if(request.params.imageSource){
+  category.set('imageSource', request.params.imageSource)
+}
+if( request.params.status){
+  category.set('status', request.params.status)
+}
+if(request.params.text){
   category.set('text', request.params.text)
+}
+if(request.params.displaySort){
   category.set('displaySort', request.params.displaySort)
+}
+if(request.params.describe){
   category.set('describe', request.params.describe)
+}
+if(request.params.showPictureSource){
   category.set('showPictureSource', request.params.showPictureSource)
+
+}
+if(request.params.textColor){
   category.set('textColor', request.params.textColor)
+}
   category.save().then(()=> {
     response.success()
   }, (err)=> {
@@ -144,7 +160,7 @@ function getShopList(request, response) {
   var geoCity = request.params.geoCity
   var username = request.params.username
   var status = request.params.status?1:0
-
+  // var id = request.params.id
   var shopTagId = request.params.shopTagId
   var query = new AV.Query('Shop')
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
@@ -221,7 +237,7 @@ function getShopList(request, response) {
     var point = null
     var shopList = []
     results.forEach((result) => {
-      // console.log('result',result)
+      // console.log('result', result.attributes)
 
       // console.log('count', result.attributes.containedTag)
       var tags = []
@@ -235,18 +251,22 @@ function getShopList(request, response) {
           tags.push(tagInfo)
         })
       }
-      var targetShopCategory={}
-      if (result.attributes.targetShopCategory){
-        targetShopCategory ={
-          text:result.attributes.targetShopCategory.attributes.text,
-          id:result.attributes.targetShopCategory.id
+      var targetShopCategory = {}
+      if (result.attributes.targetShopCategory) {
+        targetShopCategory = {
+          text: result.attributes.targetShopCategory.attributes.text,
+          id: result.attributes.targetShopCategory.id
+        }
+      }
+      // console.log('result', result.attributes.owner)
+      var owner={}
+      if (result.attributes.owner) {
+         owner = {
+          id: result.attributes.owner.id,
+          username: result.attributes.owner.attributes.username
         }
       }
 
-      var owner = {
-        id : result.attributes.owner.id,
-        username:result.attributes.owner.attributes.username
-      }
       var shop={
         id:result.id,
         shopName:result.attributes.shopName,
@@ -268,7 +288,7 @@ function getShopList(request, response) {
         grade:result.attributes.grade,
         createdAt:result.createdAt
       }
-      // console.log('hahahah',shop)
+       // console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
       shopList.push(shop)
     })
