@@ -11,6 +11,7 @@ var ShopManagerFunc = require('./adminCloudFuncs/shopManager/shopManager')
 var ActionManagerFunc = require('./adminCloudFuncs/actionManager/actionManager')
 var PointsMallFunc = require('./cloudFuncs/PointsMall')
 var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
+var SmsManagerFunc = require('./adminCloudFuncs/SmsManager/smsManger')
 var baiduFunc = require('./cloudFuncs/baidu')
 var PromoterFunc = require('./cloudFuncs/Promoter')
 
@@ -76,6 +77,7 @@ AV.Cloud.define('updateBannersStatus',ActionManagerFunc.updateBannersStatus)
 AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 AV.Cloud.define('updateBanner',ActionManagerFunc.updateBanner)
 AV.Cloud.define('hLifePush',PushManagerFunc.push)
+AV.Cloud.define('hLifeFetchSmsUserList',SmsManagerFunc.fetchSmsUserList)
 
 
 AV.Cloud.define('hLifeGetSubAreaList', baiduFunc.getSubAreaList)
@@ -99,5 +101,7 @@ AV.Cloud.define('pointsCalInviteShoper', PointsMallFunc.calInviteShoper)
 // 推广人
 AV.Cloud.define('promoterCertificate', PromoterFunc.promoterCertificate)
 AV.Cloud.define('promoterGetUpPromoter', PromoterFunc.getUpPromoter)
+AV.Cloud.define('promoterFinishPayment', PromoterFunc.finishPromoterPayment)
+AV.Cloud.define('promoterFetchByUser', PromoterFunc.fetchPromoterByUser)
 
 module.exports = AV.Cloud;

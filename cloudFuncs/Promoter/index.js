@@ -39,6 +39,7 @@ function promoterCertificate(request, response) {
       promoter.set('user', currentUser)
       promoter.set('address', address)
       promoter.set('upUser', upUserInfo)
+      promoter.set('payment', 0)      // 表示未完成支付
 
       currentUser.addUnique('identity', IDENTITY_PROMOTER)
       currentUser.save().then(() => {
@@ -96,9 +97,47 @@ function getUpPromoter(request, response) {
   })
 }
 
+function finishPromoterPayment(request, response) {
+  var promoterId = request.params.promoterId
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.set('payment', 1)
+  promoter.save().then((promoterInfo) => {
+    response.success({
+      errcode: 0,
+      message: '完成支付',
+      promoter: promoterInfo,
+    })
+  }, (err) => {
+    response.error({
+      errcode: 1,
+      message: '支付异常',
+    })
+  })
+}
+
+function fetchPromoterByUser(request, response) {
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('Promoter')
+  query.equalTo('user', user)
+  query.first().then((promoterInfo) => {
+    response.success({
+      errcode: 0,
+      promoter: promoterInfo,
+    })
+  }, (err) => {
+    response.error({
+      errcode: 1,
+      message: "获取用户推广信息失败"
+    })
+  })
+}
+
 var PromoterFunc = {
   promoterCertificate: promoterCertificate,
   getUpPromoter: getUpPromoter,
+  finishPromoterPayment: finishPromoterPayment,
+  fetchPromoterByUser: fetchPromoterByUser,
 }
 
 module.exports = PromoterFunc
