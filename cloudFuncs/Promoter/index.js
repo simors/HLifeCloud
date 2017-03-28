@@ -108,9 +108,26 @@ function finishPromoterPayment(request, response) {
       promoter: promoterInfo,
     })
   }, (err) => {
-    response.success({
+    response.error({
       errcode: 1,
       message: '支付异常',
+    })
+  })
+}
+
+function fetchPromoterByUser(request, response) {
+  var currentUser = request.currentUser
+  var query = new AV.Query('Promoter')
+  query.equalTo('user', currentUser)
+  query.first().then((promoterInfo) => {
+    response.success({
+      errcode: 0,
+      promoter: promoterInfo,
+    })
+  }, (err) => {
+    response.error({
+      errcode: 1,
+      message: "获取用户推广信息失败"
     })
   })
 }
@@ -119,6 +136,7 @@ var PromoterFunc = {
   promoterCertificate: promoterCertificate,
   getUpPromoter: getUpPromoter,
   finishPromoterPayment: finishPromoterPayment,
+  fetchPromoterByUser: fetchPromoterByUser,
 }
 
 module.exports = PromoterFunc
