@@ -94,5 +94,6 @@ AV.Cloud.define('pointsCalInviteShoper', PointsMallFunc.calInviteShoper)
 // 推广人
 AV.Cloud.define('promoterCertificate', PromoterFunc.promoterCertificate)
 AV.Cloud.define('promoterGetUpPromoter', PromoterFunc.getUpPromoter)
+AV.Cloud.define('promoterFinishPayment', PromoterFunc.finishPromoterPayment)
 
 module.exports = AV.Cloud;
