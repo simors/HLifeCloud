@@ -32,7 +32,6 @@ function promoterCertificate(request, response) {
     var upUser = AV.Object.createWithoutData('_User', upUserId)
 
     upUser.fetch().then((upUserInfo) => {
-      console.log('upUserInfo', upUserInfo)
       promoter.set('name', name)
       promoter.set('phone', phone)
       promoter.set('cardId', cardId)
@@ -40,9 +39,19 @@ function promoterCertificate(request, response) {
       promoter.set('address', address)
       promoter.set('upUser', upUserInfo)
       promoter.set('payment', 0)      // 表示未完成支付
+      promoter.set('shopEarnings', 0)
+      promoter.set('royaltyEarnings', 0)
+      promoter.set('inviteShopNum', 0)
+      promoter.set('teamMemNum', 0)
+      promoter.set('level', 1)
 
       currentUser.addUnique('identity', IDENTITY_PROMOTER)
-      currentUser.save().then(() => {
+
+      var incTeamMem = getPromoterByUserId(upUserId).then((upPromoter) => {
+        incrementTeamMem(upPromoter.id)
+      })
+
+      Promise.all([currentUser.save(), incTeamMem]).then(() => {
         return promoter.save()
       }).then((promoterInfo) => {
         response.success({
@@ -97,6 +106,11 @@ function getUpPromoter(request, response) {
   })
 }
 
+/**
+ * 完成推广认证支付流程
+ * @param request
+ * @param response
+ */
 function finishPromoterPayment(request, response) {
   var promoterId = request.params.promoterId
   var promoter = AV.Object.createWithoutData('Promoter', promoterId)
@@ -115,12 +129,28 @@ function finishPromoterPayment(request, response) {
   })
 }
 
-function fetchPromoterByUser(request, response) {
-  var userId = request.params.userId
+/**
+ * 根据用户id获取推广员信息的云函数内部调用函数
+ * @param userId
+ * @returns {Promise.<TResult>}
+ */
+function getPromoterByUserId(userId) {
   var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
   query.equalTo('user', user)
-  query.first().then((promoterInfo) => {
+  return query.first().then((promoterInfo) => {
+    return promoterInfo
+  })
+}
+
+/**
+ * 通过用户id获取推广员信息
+ * @param request
+ * @param response
+ */
+function fetchPromoterByUser(request, response) {
+  var userId = request.params.userId
+  getPromoterByUserId(userId).then((promoterInfo) => {
     response.success({
       errcode: 0,
       promoter: promoterInfo,
@@ -130,6 +160,20 @@ function fetchPromoterByUser(request, response) {
       errcode: 1,
       message: "获取用户推广信息失败"
     })
+  })
+}
+
+/**
+ * 增加团队成员计数
+ * @param promoterId
+ * @returns {Promise.<TResult>}
+ */
+function incrementTeamMem(promoterId) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.increment('teamMemNum', 1)
+  promoter.fetchWhenSave(true)
+  return promoter.save().then((promoterInfo) => {
+    return promoterInfo
   })
 }
 
