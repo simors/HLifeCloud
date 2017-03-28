@@ -116,9 +116,10 @@ function finishPromoterPayment(request, response) {
 }
 
 function fetchPromoterByUser(request, response) {
-  var currentUser = request.currentUser
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
-  query.equalTo('user', currentUser)
+  query.equalTo('user', user)
   query.first().then((promoterInfo) => {
     response.success({
       errcode: 0,
