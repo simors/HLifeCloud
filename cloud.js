@@ -79,6 +79,7 @@ AV.Cloud.define('createBanner',ActionManagerFunc.createBanner)
 AV.Cloud.define('updateBanner',ActionManagerFunc.updateBanner)
 AV.Cloud.define('hLifePush',PushManagerFunc.push)
 AV.Cloud.define('hLifeFetchSmsUserList',SmsManagerFunc.fetchSmsUserList)
+AV.Cloud.define('hLifeSendSms',SmsManagerFunc.sendSms)
 
 
 AV.Cloud.define('hLifeGetSubAreaList', baiduFunc.getSubAreaList)

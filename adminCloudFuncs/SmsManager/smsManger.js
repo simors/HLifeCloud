@@ -4,6 +4,7 @@
 var AV = require('leanengine');
 var util = require('../../utils/util');
 var numberUtils = require('../../utils/numberUtils');
+var Promise = require('bluebird');
 
 function fetchSmsUserList(request, response) {
   // console.log('fetchSmsUserList------>>>>', request.params)
@@ -126,8 +127,34 @@ function queryUserList(query) {
   })
 }
 
+function sendSms(request, response) {
+  // console.log('sendSms------>>>>', request.params)
+  var params = request.params;
+  var smsTemplateName = params.smsTemplateName;
+  var mobilePhoneNumbers = params.mobilePhoneNumbers;
+
+  if(smsTemplateName && mobilePhoneNumbers && mobilePhoneNumbers.length) {
+    var promises = []
+    mobilePhoneNumbers.forEach(function(mobilePhoneNumber){
+      var promise = AV.Cloud.requestSmsCode({
+        mobilePhoneNumber: mobilePhoneNumber,
+        template: smsTemplateName
+      })
+      promises.push(promise)
+    })
+
+    Promise.all(promises).then(function(){
+      response.success(true)
+    }, function(){
+      response.success(false)
+    })
+  }else {
+    response.success(false)
+  }
+}
 
 var smsManageFunc = {
-  fetchSmsUserList: fetchSmsUserList
+  fetchSmsUserList: fetchSmsUserList,
+  sendSms: sendSms
 }
 module.exports = smsManageFunc
