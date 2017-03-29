@@ -2,9 +2,113 @@
  * Created by yangyang on 2017/3/23.
  */
 var AV = require('leanengine');
+var redis = require('redis');
 var Promise = require('bluebird');
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
+var GLOBAL_CONFIG = require('../../config')
+var APPCONST = require('../../constants/appConst')
+
+const PREFIX = 'promoter:'
+const AGENT_TABLE = 'agentTable'
+const UPGRADE_TABLE = 'upgradeTable'
+
+var globalPromoterCfg = undefined     // 记录推广员系统配置参数
+
+const defaultPromoterConfig = {
+  agentTable: {
+    province_agent: 0.1,
+    city_agent: 0.2,
+    district_agent: 0.3,
+    street_agent: 0.4
+  },
+  upgradeTable: {
+    promoter_level_1: {
+      team: 100,
+      shop: 200,
+      royalty: [0.5, 0.1, 0.02]
+    },
+    promoter_level_2: {
+      team: 500,
+      shop: 1000,
+      royalty: [0.5, 0.12, 0.02]
+    },
+    promoter_level_3: {
+      team: 1000,
+      shop: 3000,
+      royalty: [0.5, 0.14, 0.02]
+    },
+    promoter_level_4: {
+      team: 5000,
+      shop: 10000,
+      royalty: [0.5, 0.16, 0.02]
+    },
+    promoter_level_5: {
+      team: 10000,
+      shop: 30000,
+      royalty: [0.5, 0.18, 0.02]
+    },
+  }
+}
+
+/**
+ * 配置推广系统参数
+ * @param request
+ * @param response
+ */
+function setPromoterSysConfig(request, response) {
+  var syscfg = request.params.promoterSysCfg
+  if (!syscfg) {
+    syscfg = defaultPromoterConfig
+  }
+
+  Promise.promisifyAll(redis.RedisClient.prototype)
+  var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.select(GLOBAL_CONFIG.REDIS_DB)
+  // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
+  // 主从切换等原因造成短暂不可用导致应用进程退出。
+  client.on('error', function (err) {
+    response.error({errcode: 1, message: '设置推广参数失败，请重试！'})
+  })
+
+  client.setAsync(PREFIX + "syscfg", JSON.stringify(syscfg)).then(() => {
+    globalPromoterCfg = syscfg
+
+    response.success({
+      errcode: 0,
+      message: '设置推广参数成功！',
+    })
+  })
+}
+
+function getPromoterConfig() {
+  Promise.promisifyAll(redis.RedisClient.prototype)
+  var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.select(GLOBAL_CONFIG.REDIS_DB)
+  client.on('error', function (err) {
+    console.log(err)
+  })
+
+  return client.getAsync(PREFIX + "syscfg").then((syscfg) => {
+    globalPromoterCfg = syscfg
+    return syscfg
+  })
+}
+
+/**
+ * 获取推广系统参数
+ * @param request
+ * @param response
+ */
+function fetchPromoterSysConfig(request, response) {
+  getPromoterConfig().then((syscfg) => {
+    if (syscfg) {
+      response.success({errcode: 0, config: syscfg})
+    } else{
+      response.error({errcode: 1, message: '获取推广系统配置失败'})
+    }
+  })
+}
 
 /**
  * 用户认证为推广员
@@ -192,7 +296,42 @@ function incrementInviteShopNum(promoterId) {
   })
 }
 
+/**
+ * 默认的判断推广员是否可以升级的方法
+ * @param promoter
+ * @returns {*}
+ */
+function defaultUpgradeStandard(promoter) {
+  let level = promoter.attributes.level
+  let teamMemNum = promoter.attributes.teamMemNum
+  let inviteShopNum = promoter.attributes.inviteShopNum
+  return level
+}
+
+/**
+ * 判断推广员是否可升级，如果可以升级，则直接完成升级操作
+ * @param promoterId
+ */
+function judgePromoterUpgrade(promoter, upgradeStandard) {
+  if (upgradeStandard) {
+    let newLevel = upgradeStandard(promoter)
+    if (newLevel > promoter.attributes.level) {
+      var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
+      newPromoter.set('level', newLevel)
+      return newPromoter.save().then((promoterInfo) => {
+        return promoterInfo
+      })
+    } else {
+      return promoter
+    }
+  } else {
+    return promoter
+  }
+}
+
 var PromoterFunc = {
+  fetchPromoterSysConfig: fetchPromoterSysConfig,
+  setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
   getUpPromoter: getUpPromoter,
   finishPromoterPayment: finishPromoterPayment,
