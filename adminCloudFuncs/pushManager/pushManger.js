@@ -110,6 +110,7 @@ function _push(data, query) {
 function buildPushData(params) {
   var data = {}
 
+  var prod = params.prod;
   var pushCondition = params.pushCondition;
 
   var pushTimeType = params.pushTimeType;
@@ -123,6 +124,12 @@ function buildPushData(params) {
   var pushContentType = params.pushContentType;
   var pushContent = params.pushContent;
   var message_cover_url = params.message_cover_url;
+
+  if(prod == 'dev') {
+    data.prod = 'dev'
+  }else{
+    data.prod = 'prod'
+  }
 
   if(pushCondition == 2) {
     if(pushTimeType == 2) {
