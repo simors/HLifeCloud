@@ -14,6 +14,7 @@ var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
 var SmsManagerFunc = require('./adminCloudFuncs/SmsManager/smsManger')
 var baiduFunc = require('./cloudFuncs/baidu')
 var PromoterFunc = require('./cloudFuncs/Promoter')
+var PingppFunc = require('./cloudFuncs/Pingpp')
 
 /**
  * 云函数
@@ -103,5 +104,9 @@ AV.Cloud.define('promoterCertificate', PromoterFunc.promoterCertificate)
 AV.Cloud.define('promoterGetUpPromoter', PromoterFunc.getUpPromoter)
 AV.Cloud.define('promoterFinishPayment', PromoterFunc.finishPromoterPayment)
 AV.Cloud.define('promoterFetchByUser', PromoterFunc.fetchPromoterByUser)
+
+//Ping++支付
+AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)
+
 
 module.exports = AV.Cloud;
