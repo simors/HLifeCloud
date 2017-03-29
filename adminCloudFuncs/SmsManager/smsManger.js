@@ -2,6 +2,8 @@
  * Created by zachary on 2017/3/22.
  */
 var AV = require('leanengine');
+var util = require('../../utils/util');
+var numberUtils = require('../../utils/numberUtils');
 
 function fetchSmsUserList(request, response) {
   // console.log('fetchSmsUserList------>>>>', request.params)
@@ -12,6 +14,8 @@ function fetchSmsUserList(request, response) {
   var nickname = params.nickname;
   var userType = params.userType;
   var username = params.username;
+  var pageNo = params.pageNo || 1;
+  var pageSize = params.pageSize || 10;
 
   var geoProvinceCode = '';
   var geoCityCode = '';
@@ -62,29 +66,63 @@ function fetchSmsUserList(request, response) {
     query.contains('geoDistrictCode', geoDistrictCode)
   }
 
-  query.equalTo('status', 1)
+  if(pageNo > 1) {
+    query.skip( (pageNo - 1) * pageSize )
+  }
 
-  query.find().then(function(results){
+  query.limit(pageSize)
+
+  query.equalTo('status', 1)
+  query.addDescending('createdAt')
+
+  query.count().then(function(total){
+    queryUserList(query).then(function(results){
+      response.success({
+        total: total,
+        data: results,
+        pageNo: pageNo,
+        pageSize: pageSize
+      })
+    })
+  }, function(error){
+    queryUserList(query).then(function(results){
+      response.success({
+        total: results.total,
+        data: results,
+        pageNo: pageNo,
+        pageSize: pageSize
+      })
+    })
+  })
+}
+
+function queryUserList(query) {
+  var userList = []
+  return query.find().then(function(results){
     if(results && results.length) {
-      var userList = []
       results.forEach(function(item){
+        var createdAt = util.parseDate(item.createdAt)
+        var updatedAt = util.parseDate(item.updatedAt)
+        var createdAtFormat = numberUtils.formatLeancloudTime(createdAt, 'YYYY-MM-DD HH:mm:SS')
+        var updatedAtFormat = numberUtils.formatLeancloudTime(updatedAt, 'YYYY-MM-DD HH:mm:SS')
         var userInfo = {
-          id: item.id
+          id: item.id,
+          createdAt:  createdAt.valueOf(),
+          updatedAt:  updatedAt.valueOf(),
+          createdAtFormat: createdAtFormat,
+          updatedAtFormat: updatedAtFormat
         }
         for(var key in item.attributes) {
           userInfo[key] = item.attributes[key]
         }
         userList.push(userInfo)
       })
-      response.success(userList)
-    }else {
-      response.success([])
     }
-    
+    return userList
   }, function(reason){
-    response.success([])
+    return userList
   }).catch(function(error){
-    response.success([])
+    return userList
   })
 }
 
