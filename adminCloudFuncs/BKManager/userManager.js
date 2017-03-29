@@ -316,6 +316,70 @@ function updateAppUserEnable(request,response){
   })
 }
 
+function getShopByUserId(request,response) {
+  var userid = request.params.id
+  var user = AV.Object.createWithoutData('_User',userid)
+  var query = new AV.Query('Shop')
+  query.equalTo('owner',user)
+  query.include('owner')
+  query.include('targetShopCategory')
+  query.include('containedTag')
+  query.first().then((result)=>{
+
+    var tags = []
+    // console.log('containedTag', result.attributes.containedTag)
+    if (result.attributes.containedTag) {
+      result.attributes.containedTag.forEach((tag)=> {
+        var tagInfo = {
+          id: tag.id,
+          name: tag.attributes.name
+        }
+        tags.push(tagInfo)
+      })
+    }
+    var targetShopCategory = {}
+    if (result.attributes.targetShopCategory) {
+      targetShopCategory = {
+        text: result.attributes.targetShopCategory.attributes.text,
+        id: result.attributes.targetShopCategory.id
+      }
+    }
+    // console.log('result', result.attributes.owner)
+    // var owner={}
+    // if (result.attributes.owner) {
+     var owner = {
+        id: result.attributes.owner.id,
+        username: result.attributes.owner.attributes.username
+      }
+    // }
+
+    var shop={
+      id:result.id,
+      shopName:result.attributes.shopName,
+      shopAddress:result.attributes.shopAddress,
+      status:result.attributes.status,
+      coverUrl:result.attributes.coverUrl,
+      contactNumber:result.attributes.contactNumber,
+      targetShopCategory:targetShopCategory,
+      containedTag:tags,
+      score:result.attributes.score,
+      pv:result.attributes.pv,
+      phone:result.attributes.phone,
+      geoCity:result.attributes.geoCity,
+      name:result.attributes.name,
+      openTime:result.attributes.openTime,
+      geoDistrict:result.attributes.geoDistrict,
+      album:result.attributes.album,
+      owner:owner,
+      grade:result.attributes.grade,
+      createdAt:result.createdAt
+    }
+    response.success(shop)
+  },(err)=>{
+    repsonse.error(err)
+  })
+}
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
@@ -324,6 +388,7 @@ var UserManagerFunc = {
   updateUserFromAdmin: updateUserFromAdmin,
   updateMyPassword:updateMyPassword,
   getAppUserList:getAppUserList,
-  updateAppUserEnable:updateAppUserEnable
+  updateAppUserEnable:updateAppUserEnable,
+  getShopByUserId:getShopByUserId
 }
 module.exports = UserManagerFunc

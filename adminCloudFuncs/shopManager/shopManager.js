@@ -232,7 +232,7 @@ function getShopList(request, response) {
 
   // console.log('getShopList.query===', query)
   query.find().then(function (results) {
-     console.log('count', results.length)
+     // console.log('count', results.length)
     // console.log('getShopList.results=', results)
     var point = null
     var shopList = []
@@ -484,6 +484,7 @@ function deleteShopCoverImg(request,response){
     response.error(err)
   })
 }
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
