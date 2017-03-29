@@ -48,7 +48,8 @@ const defaultPromoterConfig = {
       shop: 30000,
       royalty: [0.5, 0.18, 0.02]
     },
-  }
+  },
+  invitePromoterRoyalty: 0.2,
 }
 
 /**
