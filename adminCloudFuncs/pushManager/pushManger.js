@@ -145,6 +145,7 @@ function buildPushData(params) {
   if(pushContentType == 2) {
     // console.log('pushContent....---->>>', pushContent)
     // console.log('pushContent....---->>>', typeof pushContent)
+    pushContent = JSON.parse(pushContent)
     Object.assign(data, pushContent);
     // console.log('data....--****-->>>', data)
   }else {
