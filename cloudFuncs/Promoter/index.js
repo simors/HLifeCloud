@@ -302,9 +302,9 @@ function incrementInviteShopNum(promoterId) {
  * @returns {*}
  */
 function defaultUpgradeStandard(promoter) {
-  let level = promoter.attributes.level
-  let teamMemNum = promoter.attributes.teamMemNum
-  let inviteShopNum = promoter.attributes.inviteShopNum
+  var level = promoter.attributes.level
+  var teamMemNum = promoter.attributes.teamMemNum
+  var inviteShopNum = promoter.attributes.inviteShopNum
   return level
 }
 
@@ -314,7 +314,7 @@ function defaultUpgradeStandard(promoter) {
  */
 function judgePromoterUpgrade(promoter, upgradeStandard) {
   if (upgradeStandard) {
-    let newLevel = upgradeStandard(promoter)
+    var newLevel = upgradeStandard(promoter)
     if (newLevel > promoter.attributes.level) {
       var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
       newPromoter.set('level', newLevel)
