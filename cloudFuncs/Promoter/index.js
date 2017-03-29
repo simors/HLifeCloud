@@ -19,6 +19,7 @@ function promoterCertificate(request, response) {
         errcode: 1,
         message: '验证码无效，请向推广员重新获取验证码',
       })
+      return
     }
     var currentUser = request.currentUser
     var name = request.params.name
@@ -177,11 +178,27 @@ function incrementTeamMem(promoterId) {
   })
 }
 
+/**
+ * 增加邀请的店铺计数
+ * @param promoterId
+ * @returns {Promise.<TResult>}
+ */
+function incrementInviteShopNum(promoterId) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.increment('inviteShopNum', 1)
+  promoter.fetchWhenSave(true)
+  return promoter.save().then((promoterInfo) => {
+    return promoterInfo
+  })
+}
+
 var PromoterFunc = {
   promoterCertificate: promoterCertificate,
   getUpPromoter: getUpPromoter,
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
+  incrementInviteShopNum, incrementInviteShopNum,
+  getPromoterByUserId, getPromoterByUserId
 }
 
 module.exports = PromoterFunc

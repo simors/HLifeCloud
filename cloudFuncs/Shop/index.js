@@ -2,10 +2,12 @@
  * Created by zachary on 2017/01/04.
  */
 
+var Promise = require('bluebird')
 var AV = require('leanengine');
 var shopUtil = require('../../utils/shopUtil');
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_SHOPKEEPER = require('../../constants/appConst').IDENTITY_SHOPKEEPER
+var PromoterFunc = require('../Promoter')
 
 
 function fetchShopCommentList(request, response) {
@@ -139,6 +141,7 @@ function shopCertificate(request, response) {
         errcode: 1,
         message: '验证码无效，请向推广员重新获取验证码',
       })
+      return
     }
     var currentUser = request.currentUser
     var name = request.params.name
@@ -169,10 +172,14 @@ function shopCertificate(request, response) {
       shop.set('user', currentUser)
       shop.set('inviter', inviterInfo)
       currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
-      currentUser.save().then(() => {
+
+      var incShopInvite = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
+        PromoterFunc.incrementInviteShopNum(upPromoter.id)
+      })
+
+      Promise.all([currentUser.save(), incShopInvite]).then(() => {
         return shop.save()
       }).then((shopInfo) => {
-        console.log("shopInfo", shopInfo)
         response.success({
         errcode: 0,
         message: '店铺注册认证成功',
@@ -185,28 +192,6 @@ function shopCertificate(request, response) {
           message: '店铺注册认证失败，请与客服联系',
         })
       })
-      // currentUser.save().then(() => {
-      //   shop.save().then((shopInfo) => {
-      //     console.log("shopInfo", shopInfo)
-      //     response.success({
-      //     errcode: 0,
-      //     message: '店铺注册认证成功',
-      //     shop: shopInfo,
-      //     })
-      //   }).catch((error) => {
-      //     console.log("shopCertificate", error)
-      //     response.error({
-      //     errcode: 1,
-      //     message: '店铺注册认证失败，请与客服联系',
-      //     })
-      //   })
-      // }).catch((error) => {
-      // console.log("shopCertificate", error)
-      //   response.error({
-      //     errcode: 1,
-      //     message: '店铺注册认证失败，请与客服联系',
-      //   })
-      // })
     })
   })
 }
