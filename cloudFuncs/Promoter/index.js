@@ -10,8 +10,6 @@ var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
 
 const PREFIX = 'promoter:'
-const AGENT_TABLE = 'agentTable'
-const UPGRADE_TABLE = 'upgradeTable'
 
 var globalPromoterCfg = undefined     // 记录推广员系统配置参数
 
@@ -50,6 +48,16 @@ const defaultPromoterConfig = {
     },
   },
   invitePromoterRoyalty: 0.2,
+}
+
+// 初始化时获取配置信息
+if (!globalPromoterCfg) {
+  getPromoterConfig().then((syscfg) => {
+    if (syscfg) {
+      globalPromoterCfg = syscfg
+      console.log('init global promoter config: ', globalPromoterCfg)
+    }
+  })
 }
 
 /**
@@ -91,8 +99,7 @@ function getPromoterConfig() {
   })
 
   return client.getAsync(PREFIX + "syscfg").then((syscfg) => {
-    globalPromoterCfg = syscfg
-    return syscfg
+    return JSON.parse(syscfg)
   })
 }
 
@@ -166,7 +173,7 @@ function promoterCertificate(request, response) {
           promoter: promoterInfo,
         })
       }).catch((err) => {
-        console.log("promoterCertificate", err.Error)
+        console.log("promoterCertificate", err)
         response.error({
           errcode: 1,
           message: '注册推广员失败，请与客服联系',
@@ -193,7 +200,6 @@ function getUpPromoter(request, response) {
     upQuery.equalTo('user', promoter.attributes.upUser)
     upQuery.include('user')
     upQuery.first().then((upPromoter) => {
-      console.log(upPromoter)
       response.success({
         errcode: 0,
         promoter: upPromoter,
@@ -270,30 +276,34 @@ function fetchPromoterByUser(request, response) {
 }
 
 /**
- * 增加团队成员计数
+ * 增加团队成员计数，同时判断推广员是否可以升级
  * @param promoterId
  * @returns {Promise.<TResult>}
  */
 function incrementTeamMem(promoterId) {
   var promoter = AV.Object.createWithoutData('Promoter', promoterId)
   promoter.increment('teamMemNum', 1)
-  promoter.fetchWhenSave(true)
-  return promoter.save().then((promoterInfo) => {
-    return promoterInfo
+  return promoter.save(null, {fetchWhenSave: true}).then((promoterInfo) => {
+    var query = new AV.Query('Promoter')
+    query.get(promoterInfo.id).then((newPromoter) => {
+      judgePromoterUpgrade(newPromoter, defaultUpgradeStandard)
+    })
   })
 }
 
 /**
- * 增加邀请的店铺计数
+ * 增加邀请的店铺计数，同时判断推广员是否可以升级
  * @param promoterId
  * @returns {Promise.<TResult>}
  */
 function incrementInviteShopNum(promoterId) {
   var promoter = AV.Object.createWithoutData('Promoter', promoterId)
   promoter.increment('inviteShopNum', 1)
-  promoter.fetchWhenSave(true)
-  return promoter.save().then((promoterInfo) => {
-    return promoterInfo
+  return promoter.save(null, {fetchWhenSave: true}).then((promoterInfo) => {
+    var query = new AV.Query('Promoter')
+    query.get(promoterInfo.id).then((newPromoter) => {
+      judgePromoterUpgrade(newPromoter, defaultUpgradeStandard)
+    })
   })
 }
 
@@ -306,6 +316,31 @@ function defaultUpgradeStandard(promoter) {
   var level = promoter.attributes.level
   var teamMemNum = promoter.attributes.teamMemNum
   var inviteShopNum = promoter.attributes.inviteShopNum
+  var team = 0
+  var shop = 0
+  switch (level) {
+    case 1:
+      team = globalPromoterCfg.upgradeTable.promoter_level_1.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_1.shop
+      break
+    case 2:
+      team = globalPromoterCfg.upgradeTable.promoter_level_2.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_2.shop
+      break
+    case 3:
+      team = globalPromoterCfg.upgradeTable.promoter_level_3.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_3.shop
+      break
+    case 4:
+      team = globalPromoterCfg.upgradeTable.promoter_level_4.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_4.shop
+      break
+    default:    // 已经是最高级别
+      return level
+  }
+  if (teamMemNum >= team && inviteShopNum >= shop) {
+    level = level + 1
+  }
   return level
 }
 
@@ -323,10 +358,14 @@ function judgePromoterUpgrade(promoter, upgradeStandard) {
         return promoterInfo
       })
     } else {
-      return promoter
+      return new Promise((resolve) => {
+        resolve(promoter)
+      })
     }
   } else {
-    return promoter
+    return new Promise((resolve) => {
+      resolve(promoter)
+    })
   }
 }
 
