@@ -34,6 +34,7 @@ function getInvitationCodeOnce(userId, response) {
   var id = uuid.v4().substring(0, 8);
   // var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.auth(GLOBAL_CONFIG.REDIS_AUTH)
   client.select(GLOBAL_CONFIG.REDIS_DB)
   // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
   // 主从切换等原因造成短暂不可用导致应用进程退出。
@@ -72,6 +73,7 @@ function verifyCode(code) {
   Promise.promisifyAll(redis.RedisClient.prototype);
   // var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.auth(GLOBAL_CONFIG.REDIS_AUTH)
   client.select(GLOBAL_CONFIG.REDIS_DB)
   // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
   // 主从切换等原因造成短暂不可用导致应用进程退出。

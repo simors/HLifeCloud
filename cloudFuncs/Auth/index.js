@@ -12,29 +12,6 @@ function modifyMobilePhoneVerified(request, response) {
   response.success()
 }
 
-function verifyInvitationCode(request, response) {
-  var redis = require('redis');
-  Promise.promisifyAll(redis.RedisClient.prototype);
-  var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
-// 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server 主从切换等原因造成短暂不可用导致应用进程退出。
-  client.on('error', function(err) {
-    console.log("error:", err)
-  });
-  var invitationsCode = request.params.invitationsCode
-  if (invitationsCode) {
-    client.getAsync(invitationsCode).then((reply) => {
-      if (reply != null) {
-        client.del(invitationsCode)
-        response.success('success')
-      }else {
-        response.error('error')
-      }
-    })
-  } else {
-    response.error('error')
-  }
-}
-
 function updateUserLocationInfo(request, response) {
   // console.log('updateUserLocationInfo.request.params=====', request.params)
 
@@ -80,24 +57,6 @@ function updateUserLocationInfo(request, response) {
     response.error('update fail', error)
   })
 }
-
-// function getDocterList(request, response) {
-//   var query = new AV.Query('_User')
-//   query.find().then((results) => {
-//     var userInfoList = []
-//     results.forEach((result) => {
-//       var userInfo = result.attributes
-//       userInfoList.push({
-//         id: result.id,
-//         username: userInfo.username,
-//         nickname: userInfo.nickname,
-//         phone: userInfo.mobilePhoneNumber,
-//         avatar: userInfo.avatar
-//       })
-//     })
-//     response.success(userInfoList)
-//   })
-// }
 
 function getDocterList(request, response) {
   var query = new AV.Query('Doctor')

@@ -8,6 +8,7 @@ var DEBUG_REDIS = 0
 var PRE_REDIS = 1
 var PROD_REDIS = 2
 var REDIS_DB = 0
+var REDIS_AUTH = "Simors2017"
 
 var PINGPP_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 邻家优店应用Id
 var PINGPP_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
@@ -22,6 +23,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 }
 
 var GLOBAL_CONFIG = {
+  REDIS_AUTH: REDIS_AUTH,
   REDIS_URL: REDIS_URL,
   REDIS_PORT: REDIS_PORT,
   REDIS_DB: REDIS_DB,
