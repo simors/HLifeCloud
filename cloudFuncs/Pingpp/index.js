@@ -49,9 +49,19 @@ function createPayment(request,response) {
   })
 }
 
+function paymentEvent(request,response) {
+  console.log("paymentEvent request.params:", request.params)
+
+  response.success({
+    errcode: 0,
+    message: 'paymentEvent response success!',
+  })
+}
+
 
 var PingppFunc = {
   createPayment: createPayment,
+  paymentEvent: paymentEvent,
 
 }
 
