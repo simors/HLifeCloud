@@ -110,6 +110,7 @@ AV.Cloud.define('promoterFetchByUser', PromoterFunc.fetchPromoterByUser)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)
+AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
 
 
 module.exports = AV.Cloud;
