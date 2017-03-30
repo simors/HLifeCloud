@@ -47,7 +47,9 @@ const defaultPromoterConfig = {
       royalty: [0.5, 0.18, 0.02]
     },
   },
-  invitePromoterRoyalty: 0.2,
+  invitePromoterRoyalty: 0.2,       // 推广员入驻费提成比例
+  promoterCharge: 8.8,              // 推广员入驻费
+  minShopkeeperCharge: 58,          // 店铺入驻最低费用
 }
 
 // 初始化时获取配置信息
