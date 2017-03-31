@@ -463,11 +463,9 @@ function setPromoterAgent(request, response) {
 
   var query = new AV.Query.and(identityQuery, areaQuery)
   query.first().then((oldAgentPromoter) => {
-    console.log('oldAgentPromoter', oldAgentPromoter)
     if (oldAgentPromoter) {
       saveAgentPromoter(oldAgentPromoter.id, APPCONST.AGENT_NONE).then(() => {
         saveAgentPromoter(promoterId, newIdentity, province, city, district, street).then((newPromoter) => {
-          console.log('newPromoter:', newPromoter)
           response.success({
             errcode: 0,
             message: '代理设置成功',
@@ -504,6 +502,46 @@ function setPromoterAgent(request, response) {
 }
 
 /**
+ * 获取各级代理信息
+ * @param request
+ * @param response
+ */
+function fetchPromoterAgent(request, response) {
+  var identity = request.params.identity
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var street = request.params.street
+
+  var query = new AV.Query('Promoter')
+  if (province) {
+    query.equalTo('province', province)
+  }
+  if (city) {
+    query.equalTo('city', city)
+  }
+  if (district) {
+    query.equalTo('district', district)
+  }
+  if (street) {
+    query.equalTo('street', street)
+  }
+
+  if (!identity) {
+    console.log(identity)
+    query.notEqualTo('identity', APPCONST.AGENT_NONE)
+  } else {
+    query.equalTo('identity', identity)
+  }
+
+  query.find().then((promoters) => {
+    response.success({errcode: 0, promoters: promoters})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '获取推广员信息失败'})
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -528,6 +566,7 @@ var PromoterFunc = {
   incrementInviteShopNum, incrementInviteShopNum,
   getPromoterByUserId, getPromoterByUserId,
   setPromoterAgent: setPromoterAgent,
+  fetchPromoterAgent: fetchPromoterAgent,
   calPromoterEarnings, calPromoterEarnings,
 }
 
