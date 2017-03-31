@@ -108,6 +108,7 @@ AV.Cloud.define('promoterCertificate', PromoterFunc.promoterCertificate)
 AV.Cloud.define('promoterGetUpPromoter', PromoterFunc.getUpPromoter)
 AV.Cloud.define('promoterFinishPayment', PromoterFunc.finishPromoterPayment)
 AV.Cloud.define('promoterFetchByUser', PromoterFunc.fetchPromoterByUser)
+AV.Cloud.define('promoterSetAgent', PromoterFunc.setPromoterAgent)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)

@@ -7,10 +7,11 @@ const IDENTITY_SHOPKEEPER = 'shopkeeper'
 const IDENTITY_PROMOTER= 'promoter'
 
 // 各级代理名称
-const AGENT_PROVINCE = 'province_agent'
-const AGENT_CITY = 'city_agent'
-const AGENT_DISTRICT = 'district_agent'
-const AGENT_STREET = 'street_agent'
+const AGENT_NONE = 0
+const AGENT_PROVINCE = 1
+const AGENT_CITY = 2
+const AGENT_DISTRICT = 3
+const AGENT_STREET = 4
 
 // 推广员级别设定
 const PROMOTER_LEVEL_1 = 'promoter_level_1'
@@ -23,6 +24,7 @@ module.exports = {
   IDENTITY_SHOPKEEPER: IDENTITY_SHOPKEEPER,
   IDENTITY_PROMOTER: IDENTITY_PROMOTER,
 
+  AGENT_NONE: AGENT_NONE,
   AGENT_PROVINCE: AGENT_PROVINCE,
   AGENT_CITY: AGENT_CITY,
   AGENT_DISTRICT: AGENT_DISTRICT,

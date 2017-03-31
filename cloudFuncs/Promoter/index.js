@@ -162,6 +162,11 @@ function promoterCertificate(request, response) {
       promoter.set('inviteShopNum', 0)
       promoter.set('teamMemNum', 0)
       promoter.set('level', 1)
+      promoter.set('identity', APPCONST.AGENT_NONE)
+      promoter.set('province', "")
+      promoter.set('city', "")
+      promoter.set('district', "")
+      promoter.set('street', "")
 
       currentUser.addUnique('identity', IDENTITY_PROMOTER)
 
@@ -397,11 +402,114 @@ function judgePromoterUpgrade(promoter, upgradeStandard) {
 }
 
 /**
+ * 保存推广员代理信息
+ * @param promoterId
+ * @param identity
+ * @param province
+ * @param city
+ * @param district
+ * @param street
+ */
+function saveAgentPromoter(promoterId, identity, province, city, district, street) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.set('province', province ? province : '')
+  promoter.set('city', city ? city : '')
+  promoter.set('district', district ? district : '')
+  promoter.set('street', street ? street : '')
+  promoter.set('identity', identity)
+  return promoter.save()
+}
+
+/**
+ * 设置代理，如果已经存在同一个地区的省级代理，那么原本的那个代理将被取消
+ * @param request
+ * @param response
+ */
+function setPromoterAgent(request, response) {
+  var promoterId = request.params.promoterId
+  var newIdentity = request.params.identity
+  var province = request.params.province ? request.params.province : ''
+  var city = request.params.city ? request.params.city : ''
+  var district = request.params.district ? request.params.district : ''
+  var street = request.params.street ? request.params.street : ''
+  var identityQuery = new AV.Query('Promoter')
+  identityQuery.equalTo('identity', newIdentity)
+  var areaQuery = new AV.Query('Promoter')
+  switch (newIdentity) {
+    case APPCONST.AGENT_PROVINCE:
+      areaQuery.equalTo('province', province)
+      break
+    case APPCONST.AGENT_CITY:
+      areaQuery.equalTo('province', province)
+      areaQuery.equalTo('city', city)
+      break
+    case APPCONST.AGENT_DISTRICT:
+      areaQuery.equalTo('province', province)
+      areaQuery.equalTo('city', city)
+      areaQuery.equalTo('district', district)
+      break
+    case APPCONST.AGENT_STREET:
+      areaQuery.equalTo('province', province)
+      areaQuery.equalTo('city', city)
+      areaQuery.equalTo('district', district)
+      areaQuery.equalTo('street', street)
+      break
+    default:
+      response.success({
+        errcode: 0,
+        message: '无需设置',
+      })
+  }
+
+  var query = new AV.Query.and(identityQuery, areaQuery)
+  query.first().then((oldAgentPromoter) => {
+    console.log('oldAgentPromoter', oldAgentPromoter)
+    if (oldAgentPromoter) {
+      saveAgentPromoter(oldAgentPromoter.id, APPCONST.AGENT_NONE).then(() => {
+        saveAgentPromoter(promoterId, newIdentity, province, city, district, street).then((newPromoter) => {
+          console.log('newPromoter:', newPromoter)
+          response.success({
+            errcode: 0,
+            message: '代理设置成功',
+            promoter: newPromoter
+          })
+        }).catch((err) => {
+          response.error({
+            errcode: 1,
+            message: '代理设置失败，请重试',
+          })
+        })
+      }).catch((err) => {
+        response.error({
+          errcode: 1,
+          message: '代理设置失败，请重试',
+        })
+      })
+    } else {
+      saveAgentPromoter(promoterId, newIdentity, province, city, district, street).then((newPromoter) => {
+        console.log('newPromoter:', newPromoter)
+        response.success({
+          errcode: 0,
+          message: '代理设置成功',
+          promoter: newPromoter
+        })
+      }).catch((err) => {
+        response.error({
+          errcode: 1,
+          message: '代理设置失败，请重试',
+        })
+      })
+    }
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
  */
 function calPromoterEarnings(promoter, income) {
+  // TODO:
   var level = promoter.attributes.level
   mysqlUtil.getConnection().then((conn) => {
 
@@ -419,6 +527,7 @@ var PromoterFunc = {
   fetchPromoterByUser: fetchPromoterByUser,
   incrementInviteShopNum, incrementInviteShopNum,
   getPromoterByUserId, getPromoterByUserId,
+  setPromoterAgent: setPromoterAgent,
   calPromoterEarnings, calPromoterEarnings,
 }
 
