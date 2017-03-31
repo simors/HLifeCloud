@@ -208,12 +208,20 @@ function getShopInviter(request, response) {
   })
 }
 
+function getShopPromotionMaxNum(request, response) {
+  response.success({
+    errcode: 0,
+    message: 3
+  })
+}
+
 var shopFunc = {
   fetchShopCommentList: fetchShopCommentList,
   fetchShopCommentReplyList: fetchShopCommentReplyList,
   fetchShopCommentUpedUserList: fetchShopCommentUpedUserList,
   shopCertificate: shopCertificate,
   getShopInviter: getShopInviter,
+  getShopPromotionMaxNum: getShopPromotionMaxNum,
 }
 
 module.exports = shopFunc
