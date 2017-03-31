@@ -8,6 +8,7 @@ var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
+var mysqlUtil = require('../util/mysqlUtil')
 
 const PREFIX = 'promoter:'
 
@@ -171,6 +172,7 @@ function promoterCertificate(request, response) {
       Promise.all([currentUser.save(), incTeamMem]).then(() => {
         return promoter.save()
       }).then((promoterInfo) => {
+        insertPromoterInMysql(promoterInfo.id)
         response.success({
           errcode: 0,
           message: '注册推广员成功',
@@ -184,6 +186,27 @@ function promoterCertificate(request, response) {
         })
       })
     })
+  })
+}
+
+function insertPromoterInMysql(promoterId) {
+  var sql = ""
+  return mysqlUtil.getConnection().then((conn) => {
+    sql = "SELECT count(1) as cnt FROM `PromoterEarnings` WHERE `promoterId` = ? LIMIT 1"
+    mysqlUtil.query(conn, sql, [promoterId]).then((results, fields) => {
+      if (results[0].cnt == 0) {
+        sql = "INSERT INTO `PromoterEarnings` (`promoterId`, `shop_earnings`, `royalty_earnings`) VALUES (?, 0, 0)"
+        mysqlUtil.query(conn, sql, [promoterId]).then((insertResults) => {
+          if (insertResults.insertId) {
+            console.log('add promoter in mysql success.')
+          }
+        }).catch((err) => {
+          console.log(err)
+        })
+      }
+    })
+  }).catch((err) => {
+    console.log(err)
   })
 }
 
@@ -373,6 +396,20 @@ function judgePromoterUpgrade(promoter, upgradeStandard) {
   }
 }
 
+/**
+ * 计数推广员收益
+ * @param promoter 一级推广员
+ * @param income 店铺上交的费用
+ */
+function calPromoterEarnings(promoter, income) {
+  var level = promoter.attributes.level
+  mysqlUtil.getConnection().then((conn) => {
+
+  }, (err) => {
+    
+  })
+}
+
 var PromoterFunc = {
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
@@ -381,7 +418,8 @@ var PromoterFunc = {
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
   incrementInviteShopNum, incrementInviteShopNum,
-  getPromoterByUserId, getPromoterByUserId
+  getPromoterByUserId, getPromoterByUserId,
+  calPromoterEarnings, calPromoterEarnings,
 }
 
 module.exports = PromoterFunc

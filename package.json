@@ -26,6 +26,7 @@
     "leancloud-realtime": "^3.3.4",
     "leancloud-realtime-plugin-typed-messages": "^1.0.0",
     "leanengine": "^1.0.0-beta",
+    "mysql": "^2.13.0",
     "node-uuid": "^1.4.8",
     "pingpp": "^2.0.10",
     "pinyin": "^2.8.2",
