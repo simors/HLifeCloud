@@ -151,6 +151,7 @@ function shopCertificate(request, response) {
     var geo = request.params.geo
     var geoCity = request.params.geoCity
     var geoDistrict = request.params.geoDistrict
+    var certification = request.params.certification
     var inviterId = reply
 
 
@@ -169,6 +170,8 @@ function shopCertificate(request, response) {
       }
       shop.set('geoCity', geoCity)
       shop.set('geoDistrict', geoDistrict)
+      shop.set('certification', certification)
+
       shop.set('user', currentUser)
       shop.set('inviter', inviterInfo)
       currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
@@ -208,12 +211,20 @@ function getShopInviter(request, response) {
   })
 }
 
+function getShopPromotionMaxNum(request, response) {
+  response.success({
+    errcode: 0,
+    message: 3
+  })
+}
+
 var shopFunc = {
   fetchShopCommentList: fetchShopCommentList,
   fetchShopCommentReplyList: fetchShopCommentReplyList,
   fetchShopCommentUpedUserList: fetchShopCommentUpedUserList,
   shopCertificate: shopCertificate,
   getShopInviter: getShopInviter,
+  getShopPromotionMaxNum: getShopPromotionMaxNum,
 }
 
 module.exports = shopFunc
