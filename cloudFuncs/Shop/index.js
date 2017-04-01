@@ -169,7 +169,7 @@ function shopCertificate(request, response) {
       }
       shop.set('geoCity', geoCity)
       shop.set('geoDistrict', geoDistrict)
-      shop.set('user', currentUser)
+      shop.set('owner', currentUser)
       shop.set('inviter', inviterInfo)
       currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
 
