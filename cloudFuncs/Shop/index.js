@@ -177,6 +177,12 @@ function shopCertificate(request, response) {
 
       var incShopInvite = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
         PromoterFunc.incrementInviteShopNum(upPromoter.id)
+      }).catch((err) => {
+        console.log(err)
+        response.error({
+          errcode: 1,
+          message: '店铺注册失败，找不到推荐好友的信息',
+        })
       })
 
       Promise.all([currentUser.save(), incShopInvite]).then(() => {
