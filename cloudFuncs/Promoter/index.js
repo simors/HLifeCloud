@@ -724,6 +724,24 @@ function fetchPromoter(request, response) {
 }
 
 /**
+ * 根据推广员id获取推广员详情
+ * @param request
+ * @param response
+ */
+function fetchPromoterDetail(request, response) {
+  var promoterId = request.params.promoterId
+  var query = new AV.Query('Promoter')
+  query.include('user')
+  query.include('upUser')
+  query.get(promoterId).then((promoter) => {
+    response.success({errcode: 0, promoter: promoter})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取推广员详情失败'})
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -751,6 +769,7 @@ var PromoterFunc = {
   fetchPromoterAgent: fetchPromoterAgent,
   cancelPromoterAgent: cancelPromoterAgent,
   fetchPromoter: fetchPromoter,
+  fetchPromoterDetail: fetchPromoterDetail,
   calPromoterEarnings, calPromoterEarnings,
 }
 
