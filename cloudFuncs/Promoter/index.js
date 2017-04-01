@@ -542,6 +542,24 @@ function fetchPromoterAgent(request, response) {
 }
 
 /**
+ * 取消某个代理的资格
+ * @param request
+ * @param response
+ */
+function cancelPromoterAgent(request, response) {
+  var promoterId = request.params.promoterId
+  saveAgentPromoter(promoterId, APPCONST.AGENT_NONE).then((promoter) => {
+    if (promoter.attributes.identity == APPCONST.AGENT_NONE) {
+      response.success({errcode: 0, message: '取消代理资格成功'})
+    } else {
+      response.error({errcode: 1, message: '取消代理资格失败，请重试'})
+    }
+  }).catch((err) => {
+    response.error({errcode: 2, message: '取消代理资格失败，请重试'})
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -567,6 +585,7 @@ var PromoterFunc = {
   getPromoterByUserId, getPromoterByUserId,
   setPromoterAgent: setPromoterAgent,
   fetchPromoterAgent: fetchPromoterAgent,
+  cancelPromoterAgent: cancelPromoterAgent,
   calPromoterEarnings, calPromoterEarnings,
 }
 
