@@ -113,6 +113,7 @@ AV.Cloud.define('promoterGetAgent', PromoterFunc.fetchPromoterAgent)
 AV.Cloud.define('promoterCancelAgent', PromoterFunc.cancelPromoterAgent)
 AV.Cloud.define('promoterFetchPromoter', PromoterFunc.fetchPromoter)
 AV.Cloud.define('promoterGetPromoterDetail', PromoterFunc.fetchPromoterDetail)
+AV.Cloud.define('promoterDirectSetPromoter', PromoterFunc.directSetPromoter)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)

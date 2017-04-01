@@ -172,6 +172,12 @@ function promoterCertificate(request, response) {
 
       var incTeamMem = getPromoterByUserId(upUserId).then((upPromoter) => {
         incrementTeamMem(upPromoter.id)
+      }).catch((err) => {
+        console.log(err)
+        response.error({
+          errcode: 1,
+          message: '注册推广员失败，找不到上级好友的推广信息',
+        })
       })
 
       Promise.all([currentUser.save(), incTeamMem]).then(() => {
@@ -283,7 +289,11 @@ function getPromoterByUserId(userId) {
   var query = new AV.Query('Promoter')
   query.equalTo('user', user)
   return query.first().then((promoterInfo) => {
-    return promoterInfo
+    if (promoterInfo) {
+      return promoterInfo
+    } else {
+      throw new Error('can not find promoter info by this user.')
+    }
   })
 }
 
@@ -742,6 +752,72 @@ function fetchPromoterDetail(request, response) {
 }
 
 /**
+ * 推广员直通车，直接将普通用户设置为推广员。此方法专为后台使用，
+ * 当系统处于初始状态，一个推广员都没有时使用
+ * @param request
+ * @param response
+ */
+function directSetPromoter(request, response) {
+  var userId = request.params.userId
+  var liveProvince = request.params.liveProvince
+  var liveCity = request.params.liveCity
+  var liveDistrict = request.params.liveDistrict
+  var name = request.params.name
+  var phone = request.params.phone
+  var cardId = request.params.cardId
+  var identity = request.params.identity
+  var province = request.params.province || ''
+  var city = request.params.city || ''
+  var district = request.params.district || ''
+  var street = request.params.street || ''
+
+  var Promoter = AV.Object.extend('Promoter')
+  var promoter = new Promoter()
+  var user = AV.Object.createWithoutData('_User', userId)
+
+  if (identity == undefined) {
+    identity = APPCONST.AGENT_NONE
+  }
+
+  getPromoterByUserId(userId).then((promoter) => {
+    response.error({errcode: 1, message: '此用户已经是推广员，不需要再次设置'})
+  }).catch((err) => {
+    user.addUnique('identity', IDENTITY_PROMOTER)
+    user.save().then(() => {
+      promoter.set('name', name)
+      promoter.set('phone', phone)
+      promoter.set('cardId', cardId)
+      promoter.set('user', user)
+      promoter.set('liveProvince', liveProvince)
+      promoter.set('liveCity', liveCity)
+      promoter.set('liveDistrict', liveDistrict)
+      promoter.set('payment', 1)
+      promoter.set('shopEarnings', 0)
+      promoter.set('royaltyEarnings', 0)
+      promoter.set('inviteShopNum', 0)
+      promoter.set('teamMemNum', 0)
+      promoter.set('level', 1)
+      promoter.set('identity', identity)
+      if (identity > APPCONST.AGENT_NONE) {
+        promoter.set('province', province)
+        promoter.set('city', city)
+        promoter.set('district', district)
+        promoter.set('street', street)
+      }
+      promoter.save().then((promoterInfo) => {
+        response.success({errcode: 0, promoter: promoterInfo})
+      }).catch((err) => {
+        console.log(err)
+        response.error({errcode: 1, message: '保存推广员信息失败'})
+      })
+    }).catch((err) => {
+      console.log(err)
+      response.error({errcode: 1, message: '更新用户信息失败'})
+    })
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -770,6 +846,7 @@ var PromoterFunc = {
   cancelPromoterAgent: cancelPromoterAgent,
   fetchPromoter: fetchPromoter,
   fetchPromoterDetail: fetchPromoterDetail,
+  directSetPromoter: directSetPromoter,
   calPromoterEarnings, calPromoterEarnings,
 }
 
