@@ -527,9 +527,8 @@ function fetchPromoterAgent(request, response) {
     query.equalTo('street', street)
   }
 
-  if (!identity) {
-    console.log(identity)
-    query.notEqualTo('identity', APPCONST.AGENT_NONE)
+  if (identity == undefined) {
+    query.greaterThan('identity', APPCONST.AGENT_NONE)
   } else {
     query.equalTo('identity', identity)
   }
@@ -560,6 +559,171 @@ function cancelPromoterAgent(request, response) {
 }
 
 /**
+ * 查询推广员信息，支持分页
+ * @param request
+ * @param response
+ */
+function fetchPromoter(request, response) {
+  var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
+  var identity = request.params.identity
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var street = request.params.street
+  var liveProvince = request.params.liveProvince
+  var liveCity = request.params.liveCity
+  var liveDistrict = request.params.liveDistrict
+  var phone = request.params.phone
+  var payment = request.params.payment
+  var name = request.params.name
+  var cardId = request.params.cardId
+  var level = request.params.level
+  var minShopEarnings = request.params.minShopEarnings
+  var maxShopEarnings = request.params.maxShopEarnings
+  var minInviteShopNum = request.params.minInviteShopNum
+  var maxInviteShopNum = request.params.maxInviteShopNum
+  var minRoyaltyEarnings = request.params.mingRoyaltyEarnings
+  var maxRoyaltyEarnings = request.params.maxRoyaltyEarnings
+  var minTeamMemNum = request.params.minTeamMemNum
+  var maxTeamMemNum = request.params.maxTeamMemNum
+  var orderRule = request.params.orderRule
+  var descend = true
+
+  if (!request.params.descend) {
+    descend = true
+  } else {
+    if ('descend' == request.params.descend) {
+      descend = true
+    } else {
+      descend = false
+    }
+  }
+
+  var normalQuery = new AV.Query('Promoter')
+  if (province) {
+    normalQuery.equalTo('province', province)
+  }
+  if (city) {
+    normalQuery.equalTo('city', city)
+  }
+  if (district) {
+    normalQuery.equalTo('district', district)
+  }
+  if (street) {
+    normalQuery.equalTo('street', street)
+  }
+  if (identity != undefined) {
+    normalQuery.equalTo('identity', identity)
+  }
+  if (liveProvince) {
+    normalQuery.equalTo('liveProvince', liveProvince)
+  }
+  if (liveCity) {
+    normalQuery.equalTo('liveCity', liveCity)
+  }
+  if (liveDistrict) {
+    normalQuery.equalTo('liveDistrict', liveDistrict)
+  }
+  if (phone) {
+    normalQuery.equalTo('phone', phone)
+  }
+  if (payment != undefined) {
+    normalQuery.equalTo('payment', payment)
+  }
+  if (name) {
+    normalQuery.startsWith('name', name)
+  }
+  if (cardId) {
+    normalQuery.equalTo('cardId', cardId)
+  }
+  if (level != undefined) {
+    normalQuery.equalTo('level', level)
+  }
+
+  var startShopEarningsQuery = new AV.Query('Promoter')
+  var endShopEarningsQuery = new AV.Query('Promoter')
+  if (minShopEarnings && maxShopEarnings) {
+    startShopEarningsQuery.greaterThanOrEqualTo('shopEarnings', minShopEarnings)
+    endShopEarningsQuery.lessThanOrEqualTo('shopEarnings', maxShopEarnings)
+  }
+  var startInviteShopQuery = new AV.Query('Promoter')
+  var endInviteShopQuery = new AV.Query('Promoter')
+  if (minInviteShopNum && maxInviteShopNum) {
+    startInviteShopQuery.greaterThanOrEqualTo('inviteShopNum', minInviteShopNum)
+    endInviteShopQuery.lessThanOrEqualTo('inviteShopNum', maxInviteShopNum)
+  }
+  var startRoyaltyEarningsQuery = new AV.Query('Promoter')
+  var endRoyaltyEarningsQuery = new AV.Query('Promoter')
+  if (minRoyaltyEarnings && maxRoyaltyEarnings) {
+    startRoyaltyEarningsQuery.greaterThanOrEqualTo('royaltyEarnings', minRoyaltyEarnings)
+    endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
+  }
+  var startTeamMemNumQuery = new AV.Query('Promoter')
+  var endTeamMemNumQuery = new AV.Query('Promoter')
+  if (minTeamMemNum && maxTeamMemNum) {
+    startTeamMemNumQuery.greaterThanOrEqualTo('teamMemNum', minTeamMemNum)
+    endTeamMemNumQuery.lessThanOrEqualTo('teamMemNum', maxTeamMemNum)
+  }
+
+  var query = AV.Query.and(
+    normalQuery,
+    startShopEarningsQuery,
+    endShopEarningsQuery,
+    startInviteShopQuery,
+    endInviteShopQuery,
+    startRoyaltyEarningsQuery,
+    endRoyaltyEarningsQuery,
+    startTeamMemNumQuery,
+    endTeamMemNumQuery
+  )
+  query.limit(limit)
+  if (!orderRule) {
+    if (descend) {
+      query.addDescending('royaltyEarnings')
+      query.addDescending('shopEarnings')
+    } else {
+      query.addAscending('royaltyEarnings')
+      query.addAscending('shopEarnings')
+    }
+  } else {
+    if (descend) {
+      if (orderRule == 'royaltyOrder') {
+        query.descending('royaltyEarnings')
+      } else if (orderRule == 'shopEarnOrder') {
+        query.descending('shopEarnings')
+      } else if (orderRule == 'inviteShopOrder') {
+        query.descending('inviteShopNum')
+      } else if (orderRule == 'teamNumOrder') {
+        query.descending('teamMemNum')
+      } else {
+        query.addDescending('royaltyEarnings')
+        query.addDescending('shopEarnings')
+      }
+    } else {
+      if (orderRule == 'royaltyOrder') {
+        query.ascending('royaltyEarnings')
+      } else if (orderRule == 'shopEarnOrder') {
+        query.ascending('shopEarnings')
+      } else if (orderRule == 'inviteShopOrder') {
+        query.ascending('inviteShopNum')
+      } else if (orderRule == 'teamNumOrder') {
+        query.ascending('teamMemNum')
+      } else {
+        query.addAscending('royaltyEarnings')
+        query.addAscending('shopEarnings')
+      }
+    }
+  }
+
+  query.find().then((promoters) => {
+    response.success({errcode: 0, promoters: promoters})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取推广员信息失败'})
+  })
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -586,6 +750,7 @@ var PromoterFunc = {
   setPromoterAgent: setPromoterAgent,
   fetchPromoterAgent: fetchPromoterAgent,
   cancelPromoterAgent: cancelPromoterAgent,
+  fetchPromoter: fetchPromoter,
   calPromoterEarnings, calPromoterEarnings,
 }
 
