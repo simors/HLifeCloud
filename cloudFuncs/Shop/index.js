@@ -161,7 +161,7 @@ function shopCertificate(request, response) {
 
     inviter.fetch().then((inviterInfo) => {
       shop.set('name', name)
-      shop.set('phone', phone)
+      shop.set('phone', phone + '')
       shop.set('shopName', shopName)
       shop.set('shopAddress', shopAddress)
       if(geo) {
@@ -194,7 +194,7 @@ function shopCertificate(request, response) {
         shop: shopInfo,
         })
       }).catch((error) => {
-        console.log("shopCertificate", error.Error)
+        console.log("shopCertificate", error)
         response.error({
           errcode: 1,
           message: '店铺注册认证失败，请与客服联系',
