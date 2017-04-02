@@ -64,6 +64,28 @@ if (!globalPromoterCfg) {
 }
 
 /**
+ * 构造response要返回的User信息
+ * @param user
+ */
+function constructUserInfo(user) {
+  var userInfo = {}
+  console.log(user)
+  userInfo.id = user.id
+  userInfo.nickname = user.attributes.nickname
+  userInfo.username = user.attributes.username
+  userInfo.birthday = user.attributes.birthday
+  userInfo.phone = user.attributes.mobilePhoneNumber
+  userInfo.status = user.attributes.status
+  userInfo.avatar = user.attributes.avatar
+  userInfo.gender = user.attributes.gender
+  userInfo.identity = user.attributes.identity
+  userInfo.geoProvince = user.attributes.geoProvince
+  userInfo.geoCity = user.attributes.getCity
+  userInfo.geoDistrict = user.attributes.geoDistrict
+  return userInfo
+}
+
+/**
  * 配置推广系统参数
  * @param request
  * @param response
@@ -204,6 +226,11 @@ function promoterCertificate(request, response) {
   })
 }
 
+/**
+ * 在mysql中插入推广员记录
+ * @param promoterId
+ * @returns {Promise.<T>}
+ */
 function insertPromoterInMysql(promoterId) {
   var sql = ""
   return mysqlUtil.getConnection().then((conn) => {
@@ -226,11 +253,26 @@ function insertPromoterInMysql(promoterId) {
 }
 
 /**
+ * 获取到上级推广员
+ * @param promoter
+ * @param includeUser  是否关联查询用户及上级推广员用户信息
+ */
+function getUpPromoter(promoter, includeUser = false) {
+  var upQuery = new AV.Query('Promoter')
+  upQuery.equalTo('user', promoter.attributes.upUser)
+  if (includeUser) {
+    upQuery.include('user')
+    upQuery.include('upUser')
+  }
+  return upQuery.first()
+}
+
+/**
  * 获取到用户的上一级推广好友
  * @param request
  * @param response
  */
-function getUpPromoter(request, response) {
+function getUpPromoterByUserId(request, response) {
   var userId = request.params.userId
   var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
@@ -238,10 +280,7 @@ function getUpPromoter(request, response) {
   query.include('upUser')
 
   query.first().then((promoter) => {
-    var upQuery = new AV.Query('Promoter')
-    upQuery.equalTo('user', promoter.attributes.upUser)
-    upQuery.include('user')
-    upQuery.first().then((upPromoter) => {
+    getUpPromoter(promoter, true).then((upPromoter) => {
       response.success({
         errcode: 0,
         promoter: upPromoter,
@@ -299,6 +338,20 @@ function getPromoterByUserId(userId) {
       throw new Error('can not find promoter info by this user.')
     }
   })
+}
+
+/**
+ * 根据推广员id获取推广员详情
+ * @param promoterId
+ * @param includeUser   是否要关联查询用户及上级好友信息
+ */
+function getPromoterById(promoterId, includeUser = false) {
+  var query = new AV.Query('Promoter')
+  if (includeUser) {
+    query.include('user')
+    query.include('upUser')
+  }
+  return query.get(promoterId)
 }
 
 /**
@@ -748,7 +801,12 @@ function fetchPromoterDetail(request, response) {
   query.include('user')
   query.include('upUser')
   query.get(promoterId).then((promoter) => {
-    response.success({errcode: 0, promoter: promoter})
+    response.success({
+      errcode: 0,
+      promoter: promoter,
+      user: constructUserInfo(promoter.attributes.user),
+      upUser: constructUserInfo(promoter.attributes.upUser)
+    })
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取推广员详情失败'})
@@ -822,6 +880,17 @@ function directSetPromoter(request, response) {
 }
 
 /**
+ * 根据推广员获取推广员所在地区的所有代理列表
+ * @param promoter
+ */
+function getLocalAgents(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+  var agentQuery = new AV.Query('Promoter')
+  agentQuery.equalTo('province', liveProvince)
+  return agentQuery.find()
+}
+
+/**
  * 计数推广员收益
  * @param promoter 一级推广员
  * @param income 店铺上交的费用
@@ -829,10 +898,27 @@ function directSetPromoter(request, response) {
 function calPromoterEarnings(promoter, income) {
   // TODO:
   var level = promoter.attributes.level
-  mysqlUtil.getConnection().then((conn) => {
+  switch (level) {
+    case 1:
+  }
+  // mysqlUtil.getConnection().then((conn) => {
+  //
+  // }, (err) => {
+  //
+  // })
+}
 
-  }, (err) => {
-    
+/**
+ * 分配收益
+ * @param request
+ * @param response
+ */
+function distributeEarnings(request, response) {
+  var income = request.params.income
+  var promoterId = request.params.promoterId
+
+  getPromoterById(promoterId).then((promoter) => {
+    calPromoterEarnings(promoter, income)
   })
 }
 
@@ -840,7 +926,7 @@ var PromoterFunc = {
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
-  getUpPromoter: getUpPromoter,
+  getUpPromoterByUserId: getUpPromoterByUserId,
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
   incrementInviteShopNum, incrementInviteShopNum,
@@ -852,6 +938,7 @@ var PromoterFunc = {
   fetchPromoterDetail: fetchPromoterDetail,
   directSetPromoter: directSetPromoter,
   calPromoterEarnings, calPromoterEarnings,
+  distributeEarnings, distributeEarnings,
 }
 
 module.exports = PromoterFunc
