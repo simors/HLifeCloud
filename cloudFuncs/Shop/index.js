@@ -204,6 +204,44 @@ function shopCertificate(request, response) {
   })
 }
 
+function unregistShop(request, response) {
+  var shopId = request.params.shopId
+  var currentUser = request.currentUser
+  if(!shopId || !currentUser) {
+    response.error({
+      errcode: 1,
+      message: '店铺id为空或用户为登陆'
+    })
+  }else{
+    var shop = AV.Object.createWithoutData('Shop', shopId)
+    shop.set('status', 0)
+
+    var user = AV.Object.createWithoutData('_User', currentUser.id)
+    user.remove('identity', IDENTITY_SHOPKEEPER)
+
+    Promise.all([shop.save(), user.save()]).then(()=>{
+        response.success({
+          errcode: 0,
+          message: '注销店铺成功',
+        })
+    }, (reason)=>{
+      console.log('unregistShop.reason==>>', reason)
+      response.error({
+        errcode: 1,
+        message: '注销店铺失败，请稍后再试',
+      })
+    }).catch((error) => {
+      console.log('unregistShop.error==>>', error)
+      response.error({
+        errcode: 1,
+        message: '注销店铺网络异常，请稍后再试',
+      })
+    })
+
+  }
+  
+}
+
 /**
  * 获取店铺注册邀请人
  * @param request
@@ -230,6 +268,7 @@ var shopFunc = {
   shopCertificate: shopCertificate,
   getShopInviter: getShopInviter,
   getShopPromotionMaxNum: getShopPromotionMaxNum,
+  unregistShop: unregistShop
 }
 
 module.exports = shopFunc
