@@ -69,7 +69,6 @@ if (!globalPromoterCfg) {
  */
 function constructUserInfo(user) {
   var userInfo = {}
-  console.log(user)
   userInfo.id = user.id
   userInfo.nickname = user.attributes.nickname
   userInfo.username = user.attributes.username
@@ -257,9 +256,12 @@ function insertPromoterInMysql(promoterId) {
  * @param promoter
  * @param includeUser  是否关联查询用户及上级推广员用户信息
  */
-function getUpPromoter(promoter, includeUser = false) {
+function getUpPromoter(promoter, includeUser) {
   var upQuery = new AV.Query('Promoter')
   upQuery.equalTo('user', promoter.attributes.upUser)
+  if (!includeUser) {
+    includeUser = false
+  }
   if (includeUser) {
     upQuery.include('user')
     upQuery.include('upUser')
@@ -345,8 +347,11 @@ function getPromoterByUserId(userId) {
  * @param promoterId
  * @param includeUser   是否要关联查询用户及上级好友信息
  */
-function getPromoterById(promoterId, includeUser = false) {
+function getPromoterById(promoterId, includeUser) {
   var query = new AV.Query('Promoter')
+  if (!includeUser) {
+    includeUser = false
+  }
   if (includeUser) {
     query.include('user')
     query.include('upUser')
