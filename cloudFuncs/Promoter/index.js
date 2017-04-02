@@ -142,7 +142,9 @@ function promoterCertificate(request, response) {
     var name = request.params.name
     var phone = request.params.phone
     var cardId = request.params.cardId
-    var address = request.params.address
+    var liveProvince = request.params.liveProvince
+    var liveCity = request.params.liveCity
+    var liveDistrict = request.params.liveDistrict
     var upUserId = reply
 
     var Promoter = AV.Object.extend('Promoter')
@@ -154,7 +156,9 @@ function promoterCertificate(request, response) {
       promoter.set('phone', phone)
       promoter.set('cardId', cardId)
       promoter.set('user', currentUser)
-      promoter.set('address', address)
+      promoter.set('liveProvince', liveProvince)
+      promoter.set('liveCity', liveCity)
+      promoter.set('liveDistrict', liveDistrict)
       promoter.set('upUser', upUserInfo)
       promoter.set('payment', 0)      // 表示未完成支付
       promoter.set('shopEarnings', 0)
