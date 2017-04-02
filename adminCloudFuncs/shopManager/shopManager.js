@@ -62,7 +62,13 @@ function getShopCategoryList(request, response) {
 }
 
 function getShopTagList(request, response) {
+  var categoryId = request.params.categoryId
+
   var query = new AV.Query('ShopTag')
+  if(categoryId){
+    var category = AV.Object.createWithoutData('ShopCategory',categoryId)
+    query.equalTo('upCategory',category)
+  }
   query.include('upCategory')
   var tagList = []
   query.find().then((results)=> {
