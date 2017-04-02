@@ -50,6 +50,8 @@ AV.Cloud.define('getAllRoleList',userManagerFunc.getAllRoleList)
 AV.Cloud.define('addUserFromAdmin',userManagerFunc.addUserFromAdmin)
 AV.Cloud.define('deleteUserFromAdmin',userManagerFunc.deleteUserFromAdmin)
 AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
+
+
 AV.Cloud.define('getAdminTopicCategoryList',TopicManagerFunc.getTopicCategoryList)
 AV.Cloud.define('getPickedTopicList',TopicManagerFunc.getPickedTopicList)
 AV.Cloud.define('updateTopicPicked',TopicManagerFunc.updateTopicPicked)

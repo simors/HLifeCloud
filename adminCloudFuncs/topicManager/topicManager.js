@@ -11,6 +11,7 @@ function Trim(str) {
 //获取话题名单
 function getTopicList(request, response) {
   var topicList = []
+  var status = request.params.status
   var orderMode = request.params.orderMode
   var categoryName = request.params.categoryName
   var filterValue = request.params.filterValue
@@ -39,7 +40,9 @@ function getTopicList(request, response) {
     topicQuery.greaterThanOrEqualTo('createdAt', request.params.startTime);
     topicQuery.lessThan('createdAt', request.params.endTime);
   }
-
+  if(status){
+    topicQuery.equalTo('status',status)
+  }
   if (request.params.picked) {
     topicQuery.equalTo('picked', true);
   }
@@ -68,6 +71,7 @@ function getTopicList(request, response) {
         content: result.attributes.content,
         commentNum: result.attributes.commentNum,
         likeCount: result.attributes.likeCount,
+        status:result.attributes.status,
         picked: result.attributes.picked,
         username: result.attributes.user.attributes.nickname,
         category: result.attributes.category.attributes.title,
@@ -81,8 +85,20 @@ function getTopicList(request, response) {
     response.error(err)
   }
 }
-
-
+//测试增加所有话题的status
+function fetchAllTopicStatus(request,response) {
+  var query = new AV.Query('Topics')
+  query.find().then((results)=>{
+    results.forEach((result)=>{
+      result.set('status',1)
+    })
+    return AV.Object.saveAll(results).then((todos)=>{
+      response.success({success:true})
+    },(err)=>{
+      response.error(err)
+    })
+  })
+}
 //获取精选话题名单
 function getPickedTopicList(request, response) {
   var topicList = []
@@ -232,7 +248,8 @@ var TopicManagerFunc = {
   getTopicCategoryList: getTopicCategoryList,
   updateTopicCategoryPicked:updateTopicCategoryPicked,
   createNewTopicCategory:createNewTopicCategory,
-  getPickedTopicList:getPickedTopicList
+  getPickedTopicList:getPickedTopicList,
+  fetchAllTopicStatus:fetchAllTopicStatus
 }
 
 module.exports = TopicManagerFunc
