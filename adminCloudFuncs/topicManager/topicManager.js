@@ -8,6 +8,18 @@ function Trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, "");
 }
 
+//更新话题状态
+function updateTopicStatus(request,response){
+  var id = request.params.id
+  var status = request.params.status
+  var topic = AV.Object.createWithoutData('Topics',id)
+  topic.set('status',status)
+  topic.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 //获取话题名单
 function getTopicList(request, response) {
   var topicList = []
@@ -249,7 +261,8 @@ var TopicManagerFunc = {
   updateTopicCategoryPicked:updateTopicCategoryPicked,
   createNewTopicCategory:createNewTopicCategory,
   getPickedTopicList:getPickedTopicList,
-  fetchAllTopicStatus:fetchAllTopicStatus
+  fetchAllTopicStatus:fetchAllTopicStatus,
+  updateTopicStatus:updateTopicStatus
 }
 
 module.exports = TopicManagerFunc
