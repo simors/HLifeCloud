@@ -62,13 +62,23 @@ function getShopCategoryList(request, response) {
 }
 
 function getShopTagList(request, response) {
+  var categoryId = request.params.categoryId
+
   var query = new AV.Query('ShopTag')
+  if(categoryId){
+    var category = AV.Object.createWithoutData('ShopCategory',categoryId)
+    query.equalTo('upCategory',category)
+  }
+  query.include('upCategory')
   var tagList = []
   query.find().then((results)=> {
     results.forEach((result)=> {
+      console.log('category',result.attributes.upCategory)
       tagList.push({
         id: result.id,
-        name: result.attributes.name
+        name: result.attributes.name,
+        categoryId:result.attributes.upCategory.id,
+        categoryName:result.attributes.upCategory.attributes.text
       })
     })
     response.success(tagList)
@@ -136,7 +146,11 @@ if(request.params.textColor){
 function createShopTag(request, response) {
   var Tag = AV.Object.extend('ShopTag')
   var tag = new Tag()
+  var category = AV.Object.createWithoutData('ShopCategory', request.params.categoryId)
+
   tag.set('name', request.params.name)
+  tag.set('upCategory', category)
+
   tag.save().then(()=> {
       response.success()
     }, (err)=> {
@@ -145,9 +159,16 @@ function createShopTag(request, response) {
   )
 }
 function updateShopTag(request, response) {
-  var category = AV.Object.createWithoutData('ShopTag', request.params.key)
-  category.set('name', request.params.name)
-  category.save().then(()=> {
+  var tag = AV.Object.createWithoutData('ShopTag', request.params.key)
+  var category = AV.Object.createWithoutData('ShopCategory', request.params.categoryId)
+  var name = request.params.name
+  if(category){
+    tag.set('upCategory',category)
+  }
+  if(name){
+    tag.set('name', request.params.name)
+  }
+  tag.save().then(()=> {
     response.success()
   }, (err)=> {
     response.error(err)
