@@ -214,7 +214,7 @@ function unregistShop(request, response) {
     })
   }else{
     var shop = AV.Object.createWithoutData('Shop', shopId)
-    shop.set('status', 0)
+    shop.set('status', 2)
 
     var user = AV.Object.createWithoutData('_User', currentUser.id)
     user.remove('identity', IDENTITY_SHOPKEEPER)
