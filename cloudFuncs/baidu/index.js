@@ -146,7 +146,7 @@ function areaAbbr(level, area) {
   var i = 0
   if (level == 1) {
     areaJson = abbrProvince(area)
-  } else if (level == 2) {
+  } else {
     areaJson = abbrProvince(area)
     for (i = 0; i < areaJson.sub.length; i++) {
       areaJson.sub[i] = abbrCity(areaJson.sub[i])
