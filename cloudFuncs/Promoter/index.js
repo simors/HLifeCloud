@@ -155,7 +155,7 @@ function promoterCertificate(request, response) {
     if (!reply) {
       response.error({
         errcode: 1,
-        message: '验证码无效，请向推广员重新获取验证码',
+        message: '邀请码无效，请向推广员重新获取邀请码',
       })
       return
     }
@@ -872,6 +872,7 @@ function directSetPromoter(request, response) {
         promoter.set('street', street)
       }
       promoter.save().then((promoterInfo) => {
+        insertPromoterInMysql(promoterInfo.id)
         response.success({errcode: 0, promoter: promoterInfo})
       }).catch((err) => {
         console.log(err)
