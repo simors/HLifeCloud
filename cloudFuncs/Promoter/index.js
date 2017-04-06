@@ -162,7 +162,6 @@ function promoterCertificate(request, response) {
     var currentUser = request.currentUser
     var name = request.params.name
     var phone = request.params.phone
-    var cardId = request.params.cardId
     var liveProvince = request.params.liveProvince
     var liveCity = request.params.liveCity
     var liveDistrict = request.params.liveDistrict
@@ -175,7 +174,6 @@ function promoterCertificate(request, response) {
     upUser.fetch().then((upUserInfo) => {
       promoter.set('name', name)
       promoter.set('phone', phone)
-      promoter.set('cardId', cardId)
       promoter.set('user', currentUser)
       promoter.set('liveProvince', liveProvince)
       promoter.set('liveCity', liveCity)
