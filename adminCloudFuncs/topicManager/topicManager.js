@@ -242,16 +242,31 @@ function getTopicCategoryList(request, response) {
 function createNewTopicCategory(request, response) {
   var name = request.params.name
   var introduction = request.params.introduction
-
-  var TopicCategory = AV.Object.extend('TopicCategory')
-  var topicCategory = new TopicCategory()
-  topicCategory.set('title', name)
-  topicCategory.set('introduction', introduction)
-  topicCategory.save().then((result)=> {
-    response.success(result)
-  }, (err)=> {
-    response.error(err)
-  })
+  var id = request.params.id
+  if(id&&id!=''){
+    var topicCategory = AV.Object.createWithoutData('TopicCategory',id)
+    if(name){
+      topicCategory.set('title',name)
+    }
+    if(introduction){
+      topicCategory.set('introduction',introduction)
+    }
+    topicCategory.save().then(()=>{
+      response.success()
+    },(err)=>{
+      response.error(err)
+    })
+  }else{
+    var TopicCategory = AV.Object.extend('TopicCategory')
+    var topicCategory = new TopicCategory()
+    topicCategory.set('title', name)
+    topicCategory.set('introduction', introduction)
+    topicCategory.save().then((result)=> {
+      response.success(result)
+    }, (err)=> {
+      response.error(err)
+    })
+  }
 }
 
 var TopicManagerFunc = {
