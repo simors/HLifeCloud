@@ -9,8 +9,13 @@ var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
 var mysqlUtil = require('../util/mysqlUtil')
+var getShopById = require('../Shop').getShopById
 
 const PREFIX = 'promoter:'
+
+// 收益分类
+const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
+const INVITE_SHOP = 2           // 邀请店铺获得的收益
 
 var globalPromoterCfg = undefined     // 记录推广员系统配置参数
 
@@ -230,22 +235,26 @@ function promoterCertificate(request, response) {
  */
 function insertPromoterInMysql(promoterId) {
   var sql = ""
+  var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
     sql = "SELECT count(1) as cnt FROM `PromoterEarnings` WHERE `promoterId` = ? LIMIT 1"
-    mysqlUtil.query(conn, sql, [promoterId]).then((results, fields) => {
-      if (results[0].cnt == 0) {
-        sql = "INSERT INTO `PromoterEarnings` (`promoterId`, `shop_earnings`, `royalty_earnings`) VALUES (?, 0, 0)"
-        mysqlUtil.query(conn, sql, [promoterId]).then((insertResults) => {
-          if (insertResults.insertId) {
-            console.log('add promoter in mysql success.')
-          }
-        }).catch((err) => {
-          console.log(err)
-        })
-      }
-    })
+    return mysqlUtil.query(conn, sql, [promoterId])
+  }).then((queryRes) => {
+    if (queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PromoterEarnings` (`promoterId`, `shop_earnings`, `royalty_earnings`) VALUES (?, 0, 0)"
+      return mysqlUtil.query(queryRes.conn, sql, [promoterId])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
   }).catch((err) => {
-    console.log(err)
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
   })
 }
 
@@ -889,11 +898,12 @@ function getLocalAgents(promoter) {
 }
 
 /**
- * 计数推广员收益
+ * 计算推广员邀请店铺的收益
  * @param promoter 一级推广员
+ * @param shop 被邀请的店铺信息
  * @param income 店铺上交的费用
  */
-function calPromoterEarnings(promoter, income) {
+function calPromoterShopEarnings(promoter, shop, income) {
   // TODO:
   var level = promoter.attributes.level
   switch (level) {
@@ -907,16 +917,100 @@ function calPromoterEarnings(promoter, income) {
 }
 
 /**
+ * 计算推广员邀请新的推广员的收益
+ * @param promoter 一级推广员
+ * @param invitedPromoter 被邀请的推广员
+ * @param income 新推广员上交的费用
+ */
+function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
+  var royalty = globalPromoterCfg.invitePromoterRoyalty
+  var royaltyEarnings = royalty * income
+
+  var mysqlConn = undefined
+
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    return mysqlUtil.beginTransaction(conn)
+  }).then((conn) => {
+    var earnSql = 'UPDATE `PromoterEarnings` SET `royalty_earnings` = `royalty_earnings` + ? WHERE `promoterId` = ?'
+    return mysqlUtil.query(conn, earnSql, [royaltyEarnings, promoter.id])
+  }).then((updateRes) => {
+    if (0 == updateRes.results.changedRows) {
+      throw new Error('Update PromoterEarnings error')
+    }
+    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
+    return mysqlUtil.query(updateRes.conn, recordSql, [invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER])
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Insert new record for PromoterDeal error')
+    }
+    var platformSql = 'INSERT INTO `PlatformEarnings` (`from`, `promoter`, `earning`, `deal_type`) VALUES (?, ?, ?, ?)'
+    return mysqlUtil.query(insertRes.conn, platformSql, [invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER])
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Insert new record for PlatformEarnings error')
+    }
+    return mysqlUtil.commit(insertRes.conn)
+  }).then(() => {
+    var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
+    newPromoter.increment('royaltyEarnings', royaltyEarnings)
+    return newPromoter.save(null, {fetchWhenSave: true})
+  }).catch((err) => {
+    if (mysqlConn) {
+      console.log('transaction rollback')
+      mysqlUtil.rollback(mysqlConn)
+    }
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+/**
  * 分配收益
  * @param request
  * @param response
  */
-function distributeEarnings(request, response) {
+function distributeInviteShopEarnings(request, response) {
   var income = request.params.income
   var promoterId = request.params.promoterId
+  var shopId = request.params.shopId
 
   getPromoterById(promoterId).then((promoter) => {
-    calPromoterEarnings(promoter, income)
+    getShopById(shopId).then((shop) => {
+      calPromoterShopEarnings(promoter, shop, income)
+    }).catch((err) => {
+      console.log(err)
+      response.error({errcode: 1, message: '获取邀请的店铺信息失败'})
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 2, message: '获取推广员信息失败'})
+  })
+}
+
+function distributeInvitePromoterEarnings(request, response) {
+  var income = request.params.income
+  var promoterId = request.params.promoterId
+  var invitedPromoterId = request.params.invitedPromoterId
+
+  getPromoterById(promoterId).then((promoter) => {
+    getPromoterById(invitedPromoterId).then((invitedPromoter) => {
+      calPromoterInviterEarnings(promoter, invitedPromoter, income).then((promoter) => {
+        response.success({errcode: 0, message: '邀请推广员收益分配成功', promoter})
+      }).catch((err) => {
+        console.log(err)
+        response.error({errcode: 1, message: '邀请推广员收益分配失败'})
+      })
+    }).catch((err) => {
+      console.log(err)
+      response.error({errcode: 1, message: '获取被邀请的推广员信息失败'})
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取邀请的店铺信息失败'})
   })
 }
 
@@ -927,16 +1021,18 @@ var PromoterFunc = {
   getUpPromoterByUserId: getUpPromoterByUserId,
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
-  incrementInviteShopNum, incrementInviteShopNum,
-  getPromoterByUserId, getPromoterByUserId,
+  incrementInviteShopNum: incrementInviteShopNum,
+  getPromoterByUserId: getPromoterByUserId,
   setPromoterAgent: setPromoterAgent,
   fetchPromoterAgent: fetchPromoterAgent,
   cancelPromoterAgent: cancelPromoterAgent,
   fetchPromoter: fetchPromoter,
   fetchPromoterDetail: fetchPromoterDetail,
   directSetPromoter: directSetPromoter,
-  calPromoterEarnings, calPromoterEarnings,
-  distributeEarnings, distributeEarnings,
+  calPromoterShopEarnings: calPromoterShopEarnings,
+  calPromoterInviterEarnings: calPromoterInviterEarnings,
+  distributeInviteShopEarnings: distributeInviteShopEarnings,
+  distributeInvitePromoterEarnings: distributeInvitePromoterEarnings,
 }
 
 module.exports = PromoterFunc

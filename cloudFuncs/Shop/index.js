@@ -261,6 +261,23 @@ function getShopPromotionMaxNum(request, response) {
   })
 }
 
+/**
+ * 根据店铺id获取店铺信息
+ * @param shopId  店铺id
+ * @param includeOwner 是否同时获取店主信息
+ * @returns {*}
+ */
+function getShopById(shopId, includeOwner) {
+  var query = new AV.Query('Shop')
+  if (!includeOwner) {
+    includeOwner = false
+  }
+  if (includeOwner) {
+    query.include('owner')
+  }
+  return query.get(shopId)
+}
+
 var shopFunc = {
   fetchShopCommentList: fetchShopCommentList,
   fetchShopCommentReplyList: fetchShopCommentReplyList,
@@ -268,7 +285,8 @@ var shopFunc = {
   shopCertificate: shopCertificate,
   getShopInviter: getShopInviter,
   getShopPromotionMaxNum: getShopPromotionMaxNum,
-  unregistShop: unregistShop
+  unregistShop: unregistShop,
+  getShopById: getShopById
 }
 
 module.exports = shopFunc
