@@ -301,6 +301,7 @@ function getAppUserList(request,response) {
         authData:result.attributes.authData,
         MobilePhoneVerified:result.attributes.mobilePhoneVerified,
         // detailId:result.attributes.detail.id,
+        geoProvince:result.attributes.geoProvince,
         createdAt:result.createdAt
     }
     userList.push(userInfo)
