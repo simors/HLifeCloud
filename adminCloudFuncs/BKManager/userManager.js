@@ -256,11 +256,11 @@ function getAppUserList(request,response) {
   }
   if(liveArea){
     if(liveArea.length==2){
-      query.contains('province',liveArea[1])
+      query.contains('geoProvince',liveArea[1])
     }else if(liveArea.length==3){
-      query.contains('city',liveArea[2])
+      query.contains('geoCity',liveArea[2])
     }else if(liveArea.length==4){
-      query.contains('district',liveArea[3])
+      query.contains('geoDistrict',liveArea[3])
     }
   }
   if (orderMode == 'createTimeDescend') {
