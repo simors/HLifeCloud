@@ -235,7 +235,7 @@ function getAppUserList(request,response) {
   var username=request.params.username
   var geoCity = request.params.geoCity
   var query = new AV.Query('_User')
-
+  var liveArea = request.params.liveArea
   query.include('detail')
   if(status==1){
     query.equalTo('status',status)
@@ -253,6 +253,15 @@ function getAppUserList(request,response) {
   }
   if(geoCity){
     query.contains('geoCity',geoCity)
+  }
+  if(liveArea){
+    if(liveArea.length==2){
+      query.contains('geoProvince',liveArea[1])
+    }else if(liveArea.length==3){
+      query.contains('geoCity',liveArea[2])
+    }else if(liveArea.length==4){
+      query.contains('geoDistrict',liveArea[3])
+    }
   }
   if (orderMode == 'createTimeDescend') {
     query.descending('createdAt');
@@ -292,6 +301,7 @@ function getAppUserList(request,response) {
         authData:result.attributes.authData,
         MobilePhoneVerified:result.attributes.mobilePhoneVerified,
         // detailId:result.attributes.detail.id,
+        geoProvince:result.attributes.geoProvince,
         createdAt:result.createdAt
     }
     userList.push(userInfo)
