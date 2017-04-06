@@ -646,7 +646,6 @@ function fetchPromoter(request, response) {
   var phone = request.params.phone
   var payment = request.params.payment
   var name = request.params.name
-  var cardId = request.params.cardId
   var level = request.params.level
   var minShopEarnings = request.params.minShopEarnings
   var maxShopEarnings = request.params.maxShopEarnings
@@ -702,9 +701,6 @@ function fetchPromoter(request, response) {
   }
   if (name) {
     normalQuery.startsWith('name', name)
-  }
-  if (cardId) {
-    normalQuery.equalTo('cardId', cardId)
   }
   if (level != undefined) {
     normalQuery.equalTo('level', level)
@@ -829,7 +825,6 @@ function directSetPromoter(request, response) {
   var liveDistrict = request.params.liveDistrict
   var name = request.params.name
   var phone = request.params.phone
-  var cardId = request.params.cardId
   var identity = request.params.identity
   var province = request.params.province || ''
   var city = request.params.city || ''
@@ -851,7 +846,6 @@ function directSetPromoter(request, response) {
     user.save().then(() => {
       promoter.set('name', name)
       promoter.set('phone', phone)
-      promoter.set('cardId', cardId)
       promoter.set('user', user)
       promoter.set('liveProvince', liveProvince)
       promoter.set('liveCity', liveCity)
