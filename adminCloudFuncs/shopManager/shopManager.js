@@ -65,7 +65,7 @@ function getShopTagList(request, response) {
   var categoryId = request.params.categoryId
 
   var query = new AV.Query('ShopTag')
-  if(categoryId){
+  if(categoryId&&categoryId!='all'){
     var category = AV.Object.createWithoutData('ShopCategory',categoryId)
     query.equalTo('upCategory',category)
   }
