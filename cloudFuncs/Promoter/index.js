@@ -978,6 +978,12 @@ function calPromoterShopEarnings(promoter, shop, income) {
   var mysqlConn = undefined
   var platformEarn = income
   var shopOwner = shop.attributes.owner.id
+  var localAgents = []
+  var upPro = undefined
+  var upUpPro = undefined
+  var selfEarn = 0
+  var onePromoterEarn = 0
+  var twoPromoterEarn = 0
 
   var royalty = getPromoterRoyalty(level)
   if (royalty.length == 0) {
@@ -996,6 +1002,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
   }).then(() => {
     return getLocalAgents(promoter)
   }).then((agents) => {
+    localAgents = agents
     var agentsEarnUpdate = []
     agents.forEach((agent) => {
       var identity = agent.attributes.identity
@@ -1007,7 +1014,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return Promise.all(agentsEarnUpdate)    // 更新所有代理的分成收益
   }).then(() => {
     // 更新推广员自己的收益
-    var selfEarn = income * royalty[0]
+    selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
     return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
   }).then((insertRes) => {
@@ -1018,8 +1025,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
     var newUpPromoter = undefined
     return getUpPromoter(promoter, false).then((upPromoter) => {
       newUpPromoter = upPromoter
+      upPro = upPromoter
       if (upPromoter) {
-        var onePromoterEarn = income * royalty[1]
+        onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
         return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
       } else {
@@ -1037,8 +1045,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
     // 更新二级好友（上上级推广员）的分成收益
     if (upPromoter) {
       return getUpPromoter(upPromoter, false).then((upupPromoter) => {
+        upUpPro = upupPromoter
         if (upupPromoter) {
-          var twoPromoterEarn = income * royalty[2]
+          twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
           return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
         } else {
@@ -1058,6 +1067,21 @@ function calPromoterShopEarnings(promoter, shop, income) {
     if (!insertRes.results.insertId) {
       throw new Error('Update platform earnings error')
     }
+
+    // 更新leancloud上的数据
+    var leanAction = []
+    localAgents.forEach((agent) => {
+      var identity = agent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      var agentAction = updateLeanPromoterEarning(agent.id, agentEarn, EARN_ROYALTY)
+      leanAction.push(agentAction)
+    })
+    var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
+    var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+    var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
+    leanAction.push(selfAction, onePromoter, twoPromoter)
+    return Promise.all(leanAction)
+  }).then(() => {
     return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
     if (mysqlConn) {
@@ -1102,9 +1126,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
-    var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
-    newPromoter.increment('royaltyEarnings', royaltyEarnings)
-    return newPromoter.save(null, {fetchWhenSave: true})
+    return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
@@ -1118,6 +1140,23 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
       mysqlUtil.release(mysqlConn)
     }
   })
+}
+
+/**
+ * 更新leancloud中的收益数据
+ * @param promoterId
+ * @param earn
+ * @param earn_type
+ * @returns {Promise.<Conversation>|Promise<Conversation>|*}
+ */
+function updateLeanPromoterEarning(promoterId, earn, earn_type) {
+  var newPromoter = AV.Object.createWithoutData('Promoter', promoterId)
+  if (earn_type == EARN_ROYALTY) {
+    newPromoter.increment('royaltyEarnings', earn)
+  } else {
+    newPromoter.increment('shopEarnings', earn)
+  }
+  return newPromoter.save(null, {fetchWhenSave: true})
 }
 
 /**
@@ -1171,7 +1210,9 @@ function distributeInviteShopEarnings(request, response) {
 
   getPromoterById(promoterId).then((promoter) => {
     getShopById(shopId).then((shop) => {
-      calPromoterShopEarnings(promoter, shop, income)
+      calPromoterShopEarnings(promoter, shop, income).then(() => {
+        response.success({errcode: 0, message: '邀请店铺收益分配成功'})
+      })
     }).catch((err) => {
       console.log(err)
       response.error({errcode: 1, message: '获取邀请的店铺信息失败'})
