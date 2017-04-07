@@ -936,7 +936,9 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
 
   var mysqlConn = undefined
 
-  return mysqlUtil.getConnection().then((conn) => {
+  return insertPromoterInMysql(promoter.id).then(() => {
+    return mysqlUtil.getConnection()
+  }).then((conn) => {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
