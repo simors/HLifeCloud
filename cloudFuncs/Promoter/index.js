@@ -1102,11 +1102,11 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
-    return mysqlUtil.commit(insertRes.conn)
-  }).then(() => {
     var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
     newPromoter.increment('royaltyEarnings', royaltyEarnings)
     return newPromoter.save(null, {fetchWhenSave: true})
+  }).then(() => {
+    return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
     if (mysqlConn) {
       console.log('transaction rollback')
@@ -1189,8 +1189,8 @@ function distributeInvitePromoterEarnings(request, response) {
 
   getPromoterById(promoterId).then((promoter) => {
     getPromoterById(invitedPromoterId).then((invitedPromoter) => {
-      calPromoterInviterEarnings(promoter, invitedPromoter, income).then((promoter) => {
-        response.success({errcode: 0, message: '邀请推广员收益分配成功', promoter})
+      calPromoterInviterEarnings(promoter, invitedPromoter, income).then(() => {
+        response.success({errcode: 0, message: '邀请推广员收益分配成功'})
       }).catch((err) => {
         console.log(err)
         response.error({errcode: 1, message: '邀请推广员收益分配失败'})
