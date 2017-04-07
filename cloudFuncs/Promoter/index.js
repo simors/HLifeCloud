@@ -207,15 +207,18 @@ function promoterCertificate(request, response) {
           message: '注册推广员失败，找不到上级好友的推广信息',
         })
       })
+      var newPromoter = undefined
 
       Promise.all([currentUser.save(), incTeamMem]).then(() => {
         return promoter.save()
       }).then((promoterInfo) => {
-        insertPromoterInMysql(promoterInfo.id)
+        newPromoter = promoterInfo
+        return insertPromoterInMysql(promoterInfo.id)
+      }).then(() => {
         response.success({
           errcode: 0,
           message: '注册推广员成功',
-          promoter: promoterInfo,
+          promoter: newPromoter,
         })
       }).catch((err) => {
         console.log("promoterCertificate", err)
