@@ -875,9 +875,14 @@ function directSetPromoter(request, response) {
         promoter.set('district', district)
         promoter.set('street', street)
       }
+
+      var newPromoter = undefined
+
       promoter.save().then((promoterInfo) => {
-        insertPromoterInMysql(promoterInfo.id)
-        response.success({errcode: 0, promoter: promoterInfo})
+        newPromoter = promoterInfo
+        return insertPromoterInMysql(promoterInfo.id)
+      }).then(() => {
+        response.success({errcode: 0, promoter: newPromoter})
       }).catch((err) => {
         console.log(err)
         response.error({errcode: 1, message: '保存推广员信息失败'})
