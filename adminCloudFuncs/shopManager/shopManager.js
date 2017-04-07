@@ -523,7 +523,7 @@ function fetchAllShopStatus(request,response) {
   })
 }
 
-function updateCommentStatus(){
+function updateCommentStatus(request,response){
   var shop = AV.Object.createWithoutData('ShopComment',request.params.id)
   shop.set('status',request.params.status)
   shop.save().then(()=>{
@@ -533,7 +533,7 @@ function updateCommentStatus(){
   })
 }
 
-function updateReplyStatus(){
+function updateReplyStatus(request,response){
   var shop = AV.Object.createWithoutData('ShopCommentReply',request.params.id)
   shop.set('status',request.params.status)
   shop.save().then(()=>{
