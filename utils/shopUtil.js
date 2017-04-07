@@ -22,7 +22,7 @@ function shopCommentFromLeancloudObject(results) {
       shopComment.content = attrs.content
       shopComment.blueprints = attrs.blueprints
       shopComment.score = attrs.score
-      shopComment.enable = attrs.enable
+      shopComment.status = attrs.status
 
       var targetShop = {}
       var targetShopAttrs = attrs.targetShop.attributes
@@ -53,6 +53,7 @@ function shopCommentReplyFromLeancloudObject(results) {
     results.forEach(function(item, index) {
       var shopCommentReply = {}
       shopCommentReply.id = item.id
+      shopCommentReply.status= item.attributes.status
       var createdAt = util.parseDate(item.createdAt)
       shopCommentReply.createdAt = createdAt.valueOf()
       shopCommentReply.createdDate = numberUtils.formatLeancloudTime(createdAt, 'YYYY-MM-DD HH:mm:SS')

@@ -400,7 +400,7 @@ function AdminShopCommentList(request, response) {
   var shopId = request.params.id
   var isRefresh = request.params.isRefresh
   var lastCreatedAt = request.params.lastCreatedAt
-
+  var status = request.params.status
   var query = new AV.Query('ShopComment')
 
 
@@ -414,6 +414,9 @@ function AdminShopCommentList(request, response) {
   //执行内嵌查询
   query.matchesQuery('targetShop', innerQuery)
 
+  if(status){
+    query.equalTo('status',status)
+  }
   query.include(['targetShop', 'user'])
 
   query.addDescending('createdAt')
@@ -505,6 +508,20 @@ function deleteShopCoverImg(request,response){
     response.error(err)
   })
 }
+//增加所有店铺评论的status
+function fetchAllShopStatus(request,response) {
+  var query = new AV.Query('ShopCommentReply')
+  query.find().then((results)=>{
+    results.forEach((result)=>{
+      result.set('status',1)
+    })
+    return AV.Object.saveAll(results).then((todos)=>{
+      response.success({success:true})
+    },(err)=>{
+      response.error(err)
+    })
+  })
+}
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
@@ -521,7 +538,7 @@ var ShopManagerFunc = {
   disableShopComment:disableShopComment,
   enableShopComment:enableShopComment,
   deleteShopCoverImg:deleteShopCoverImg,
-  updateCategoryStatus:updateCategoryStatus
+  updateCategoryStatus:updateCategoryStatus,
 
 }
 module.exports = ShopManagerFunc
