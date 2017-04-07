@@ -974,7 +974,6 @@ function getAgentEarning(identity, income) {
  * @param income 店铺上交的费用
  */
 function calPromoterShopEarnings(promoter, shop, income) {
-  // TODO:
   var level = promoter.attributes.level
   var mysqlConn = undefined
   var platformEarn = income
@@ -1011,15 +1010,28 @@ function calPromoterShopEarnings(promoter, shop, income) {
     var selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
     return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
-  }).then(() => {
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Update promoter earning error')
+    }
     // 更新一级好友（上级推广员）的分成收益
+    var newUpPromoter = undefined
     return getUpPromoter(promoter, false).then((upPromoter) => {
+      newUpPromoter = upPromoter
       if (upPromoter) {
         var onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
-        updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+      } else {
+        return new Promise((resolve) => {
+          resolve()
+        })
       }
-      return upPromoter
+    }).then((insertRes) => {
+      if (insertRes && !insertRes.results.insertId) {
+        throw new Error('Update promoter earning of level one friend error')
+      }
+      return newUpPromoter
     })
   }).then((upPromoter) => {
     // 更新二级好友（上上级推广员）的分成收益
@@ -1028,13 +1040,25 @@ function calPromoterShopEarnings(promoter, shop, income) {
         if (upupPromoter) {
           var twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
-          updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+        } else {
+          return new Promise((resolve) => {
+            resolve()
+          })
         }
       })
     }
-  }).then(() => {
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update promoter earning of level two friend error')
+    }
     // 更新平台分成收益
     return updatePlatformEarning(mysqlConn, shopOwner, promoter.id, platformEarn, INVITE_SHOP)
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Update platform earnings error')
+    }
+    return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
     if (mysqlConn) {
       console.log('transaction rollback')
