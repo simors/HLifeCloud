@@ -936,6 +936,8 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
 
   var mysqlConn = undefined
 
+  // 第一步先在mysql中插入数据是为了检查mysql中的推广员数据是否存在，如果存在不做任何操作，不存在也插入一条新的记录。这么做为了防止
+  // 推广员在注册阶段mysql数据记录没有插入成功导致后面出问题
   return insertPromoterInMysql(promoter.id).then(() => {
     return mysqlUtil.getConnection()
   }).then((conn) => {
