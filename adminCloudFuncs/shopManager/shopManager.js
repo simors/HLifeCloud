@@ -523,6 +523,26 @@ function fetchAllShopStatus(request,response) {
   })
 }
 
+function updateCommentStatus(){
+  var shop = AV.Object.createWithoutData('ShopComment',request.params.id)
+  shop.set('status',request.params.status)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
+function updateReplyStatus(){
+  var shop = AV.Object.createWithoutData('ShopCommentReply',request.params.id)
+  shop.set('status',request.params.status)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -535,8 +555,8 @@ var ShopManagerFunc = {
   updateShopStatus:updateShopStatus,
   getAnnouncementsByShopId:getAnnouncementsByShopId,
   AdminShopCommentList:AdminShopCommentList,
-  disableShopComment:disableShopComment,
-  enableShopComment:enableShopComment,
+  updateReplyStatus:updateReplyStatus,
+  updateCommentStatus:updateCommentStatus,
   deleteShopCoverImg:deleteShopCoverImg,
   updateCategoryStatus:updateCategoryStatus,
 

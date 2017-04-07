@@ -168,6 +168,7 @@ function shopCommentsConcatReplys(shopComments, replys) {
   return shopComments
 }
 
+
 var shopUtil = {
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
   shopCommentReplyFromLeancloudObject: shopCommentReplyFromLeancloudObject,
