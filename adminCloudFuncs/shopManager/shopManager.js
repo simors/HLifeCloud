@@ -23,7 +23,7 @@ function getShopCategoryList(request, response) {
   }
   query.include('containedTag')
   query.ascending('shopCategoryId')
-  query.ascending('displaySort')
+  // query.descending('displaySort'
   query.find().then((results)=> {
     results.forEach((result)=> {
       var tags = []
