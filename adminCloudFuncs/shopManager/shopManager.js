@@ -23,6 +23,7 @@ function getShopCategoryList(request, response) {
   }
   query.include('containedTag')
   query.ascending('shopCategoryId')
+  // query.descending('displaySort'
   query.find().then((results)=> {
     results.forEach((result)=> {
       var tags = []
@@ -65,7 +66,7 @@ function getShopTagList(request, response) {
   var categoryId = request.params.categoryId
 
   var query = new AV.Query('ShopTag')
-  if(categoryId){
+  if(categoryId&&categoryId!='all'){
     var category = AV.Object.createWithoutData('ShopCategory',categoryId)
     query.equalTo('upCategory',category)
   }
@@ -77,6 +78,7 @@ function getShopTagList(request, response) {
       tagList.push({
         id: result.id,
         name: result.attributes.name,
+        status:result.attributes.atatus,
         categoryId:result.attributes.upCategory.id,
         categoryName:result.attributes.upCategory.attributes.text
       })
@@ -400,7 +402,7 @@ function AdminShopCommentList(request, response) {
   var shopId = request.params.id
   var isRefresh = request.params.isRefresh
   var lastCreatedAt = request.params.lastCreatedAt
-
+  var status = request.params.status
   var query = new AV.Query('ShopComment')
 
 
@@ -414,6 +416,9 @@ function AdminShopCommentList(request, response) {
   //执行内嵌查询
   query.matchesQuery('targetShop', innerQuery)
 
+  if(status){
+    query.equalTo('status',status)
+  }
   query.include(['targetShop', 'user'])
 
   query.addDescending('createdAt')
@@ -505,6 +510,40 @@ function deleteShopCoverImg(request,response){
     response.error(err)
   })
 }
+//增加所有店铺评论的status
+function fetchAllShopStatus(request,response) {
+  var query = new AV.Query('ShopCommentReply')
+  query.find().then((results)=>{
+    results.forEach((result)=>{
+      result.set('status',1)
+    })
+    return AV.Object.saveAll(results).then((todos)=>{
+      response.success({success:true})
+    },(err)=>{
+      response.error(err)
+    })
+  })
+}
+
+function updateCommentStatus(request,response){
+  var shop = AV.Object.createWithoutData('ShopComment',request.params.id)
+  shop.set('status',request.params.status)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
+
+function updateReplyStatus(request,response){
+  var shop = AV.Object.createWithoutData('ShopCommentReply',request.params.id)
+  shop.set('status',request.params.status)
+  shop.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
@@ -518,10 +557,10 @@ var ShopManagerFunc = {
   updateShopStatus:updateShopStatus,
   getAnnouncementsByShopId:getAnnouncementsByShopId,
   AdminShopCommentList:AdminShopCommentList,
-  disableShopComment:disableShopComment,
-  enableShopComment:enableShopComment,
+  updateReplyStatus:updateReplyStatus,
+  updateCommentStatus:updateCommentStatus,
   deleteShopCoverImg:deleteShopCoverImg,
-  updateCategoryStatus:updateCategoryStatus
+  updateCategoryStatus:updateCategoryStatus,
 
 }
 module.exports = ShopManagerFunc

@@ -130,6 +130,13 @@ function getUserinfoById(request, response) {
       gender: user.gender,
       birthday: user.birthday,
       identity: user.identity,
+      geo: user.geo,
+      geoProvince: user.geoProvince,
+      geoProvinceCode: user.geoProvinceCode,
+      geoCity: user.geoCity,
+      geoCityCode: user.geoCityCode,
+      geoDistrict: user.geoDistrict,
+      geoDistrictCode: user.geoDistrictCode
     }
     rsp.userInfo = userInfo
     response.success(rsp)
@@ -157,6 +164,13 @@ function getUsers(request, response) {
         gender: user.gender,
         birthday: user.birthday,
         identity: user.identity,
+        geo: user.geo,
+        geoProvince: user.geoProvince,
+        geoProvinceCode: user.geoProvinceCode,
+        geoCity: user.geoCity,
+        geoCityCode: user.geoCityCode,
+        geoDistrict: user.geoDistrict,
+        geoDistrictCode: user.geoDistrictCode
       }
       rsp.users.push(userInfo)
     })

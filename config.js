@@ -28,7 +28,8 @@ var MYSQL_PROD_DB = 'hlife_prod'
 
 
 var PINGPP_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 邻家优店应用Id
-var PINGPP_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
+var PINGPP_TEST_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
+var PINGPP_LIVE_API_KEY = "sk_live_P044i19GCS8SyT84eTvbHmbH" //Secret Key
 
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
@@ -60,7 +61,7 @@ var GLOBAL_CONFIG = {
   MYSQL_DB: MYSQL_DB,
 
   PINGPP_APP_ID: PINGPP_APP_ID,
-  PINGPP_API_KEY: PINGPP_API_KEY,
+  PINGPP_API_KEY: PINGPP_LIVE_API_KEY,
 }
 
 module.exports = GLOBAL_CONFIG
