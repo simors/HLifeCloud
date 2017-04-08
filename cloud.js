@@ -126,6 +126,7 @@ AV.Cloud.define('promoterDistributeInvitePromoterEarnings', PromoterFunc.distrib
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)
 AV.Cloud.define('promoterGetShopTenantByCity', TenantFeeFunc.getShopTenantByCity)
+AV.Cloud.define('promoterSetShopTenant', TenantFeeFunc.setShopTenantFee)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)
