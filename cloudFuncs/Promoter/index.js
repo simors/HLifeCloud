@@ -315,15 +315,24 @@ function getUpPromoterByUserId(request, response) {
 }
 
 /**
+ * 推广员注册完成支付
+ * @param promoterId
+ * @returns {Promise.<Conversation>|Promise<Conversation>|*}
+ */
+function promoterPaid(promoterId) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.set('payment', 1)
+  return promoter.save()
+}
+
+/**
  * 完成推广认证支付流程
  * @param request
  * @param response
  */
 function finishPromoterPayment(request, response) {
   var promoterId = request.params.promoterId
-  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
-  promoter.set('payment', 1)
-  promoter.save().then((promoterInfo) => {
+  promoterPaid(promoterId).then((promoterInfo) => {
     response.success({
       errcode: 0,
       message: '完成支付',
@@ -1369,6 +1378,7 @@ var PromoterFunc = {
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
   getUpPromoterByUserId: getUpPromoterByUserId,
+  promoterPaid: promoterPaid,
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
   incrementInviteShopNum: incrementInviteShopNum,
