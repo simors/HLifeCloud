@@ -5,7 +5,7 @@ var AV = require('leanengine');
 var Promise = require('bluebird');
 function getAdviseList(request,response){
     var query = new AV.Query('UserFeedBack')
-    query.ascending('createdAt')
+    query.descending('createdAt')
     query.include('user')
     query.find().then((results)=>{
       var adviseList=[]
