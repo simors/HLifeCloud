@@ -134,12 +134,13 @@ function fetchShopCommentUpedUserList(request, response) {
  * @param response
  */
 function shopCertificate(request, response) {
+  console.log('shopCertificate====', request.params)
   var inviteCode = request.params.inviteCode
   inviteCodeFunc.verifyCode(inviteCode).then((reply) => {
     if (!reply) {
       response.error({
         errcode: 1,
-        message: '验证码无效，请向推广员重新获取验证码',
+        message: '邀请码无效，请向推广员重新获取邀请码',
       })
       return
     }
@@ -160,6 +161,7 @@ function shopCertificate(request, response) {
     var inviter = AV.Object.createWithoutData('_User', inviterId)
 
     inviter.fetch().then((inviterInfo) => {
+      console.log('shopCertificate==inviterInfo==', inviterInfo)
       shop.set('name', name)
       shop.set('phone', phone + '')
       shop.set('shopName', shopName)
@@ -176,6 +178,7 @@ function shopCertificate(request, response) {
       currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
 
       var incShopInvite = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
+        console.log('shopCertificate==upPromoter==', upPromoter)
         PromoterFunc.incrementInviteShopNum(upPromoter.id)
       }).catch((err) => {
         console.log(err)
@@ -185,22 +188,26 @@ function shopCertificate(request, response) {
         })
       })
 
-      Promise.all([currentUser.save(), incShopInvite]).then(() => {
-        return shop.save()
-      }).then((shopInfo) => {
+      Promise.all([currentUser.save(), incShopInvite, shop.save()]).then(() => {
+        console.log('shopCertificate==success==')
         response.success({
-        errcode: 0,
-        message: '店铺注册认证成功',
-        shop: shopInfo,
+          errcode: 0,
+          message: '店铺注册认证成功'
         })
       }).catch((error) => {
         console.log("shopCertificate", error)
+        console.log(error)
         response.error({
           errcode: 1,
           message: '店铺注册认证失败，请与客服联系',
         })
       })
     })
+  }, function(error){
+      response.error({
+        errcode: 1,
+        message: '邀请码验证异常',
+      })
   })
 }
 

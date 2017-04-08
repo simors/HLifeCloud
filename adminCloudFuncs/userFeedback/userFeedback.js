@@ -7,7 +7,7 @@ function getAdviseList(request,response){
     var query = new AV.Query('UserFeedBack')
     query.ascending('createdAt')
     query.find().then((results)=>{
-      let adviseList=[]
+      var adviseList=[]
       results.forEach((result)=>{
         adviseList.push({
           id: result.id,
