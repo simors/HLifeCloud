@@ -9,7 +9,6 @@ var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
 var mysqlUtil = require('../util/mysqlUtil')
-var getShopById = require('../Shop').getShopById
 
 const PREFIX = 'promoter:'
 
@@ -904,9 +903,28 @@ function directSetPromoter(request, response) {
  */
 function getLocalAgents(promoter) {
   var liveProvince = promoter.attributes.liveProvince
-  var agentQuery = new AV.Query('Promoter')
-  agentQuery.equalTo('province', liveProvince)
-  return agentQuery.find()
+  var liveCity = promoter.attributes.liveCity
+  var liveDistrict = promoter.attributes.liveDistrict
+
+  var provinceQuery = new AV.Query('Promoter')
+  provinceQuery.equalTo('province', liveProvince)
+  provinceQuery.equalTo('identity', 1)
+  var provinceAgent = provinceQuery.first()
+
+  var cityQuery = new AV.Query('Promoter')
+  cityQuery.equalTo('province', liveProvince)
+  cityQuery.equalTo('city', liveCity)
+  cityQuery.equalTo('identity', 2)
+  var cityAgent = cityQuery.first()
+
+  var districtQuery = new AV.Query('Promoter')
+  districtQuery.equalTo('province', liveProvince)
+  districtQuery.equalTo('city', liveCity)
+  districtQuery.equalTo('district', liveDistrict)
+  districtQuery.equalTo('identity', 3)
+  var districtAgent = districtQuery.first()
+
+  return Promise.all([provinceAgent, cityAgent, districtAgent])
 }
 
 /**
@@ -1011,11 +1029,13 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var updateAction = updatePromoterEarning(mysqlConn, shopOwner, agent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       agentsEarnUpdate.push(updateAction)
     })
+    console.log('update agents')
     return Promise.all(agentsEarnUpdate)    // 更新所有代理的分成收益
   }).then(() => {
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
+    console.log('update self')
     return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
@@ -1023,6 +1043,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
     }
     // 更新一级好友（上级推广员）的分成收益
     var newUpPromoter = undefined
+    console.log('update one promoter')
     return getUpPromoter(promoter, false).then((upPromoter) => {
       newUpPromoter = upPromoter
       upPro = upPromoter
@@ -1181,7 +1202,14 @@ function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_ty
       throw new Error('Update PromoterEarnings error')
     }
     var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
-    return mysqlUtil.query(updateRes.conn, recordSql, [fromPromoterId, toPromoterId, earn, deal_type])
+    return mysqlUtil.query(conn, recordSql, [fromPromoterId, toPromoterId, earn, deal_type])
+  }).catch((err) => {
+    console.log("update promoter earnings error: ", err)
+    if (conn) {
+      console.log('transaction rollback')
+      mysqlUtil.rollback(conn)
+    }
+    throw err
   })
 }
 
@@ -1207,9 +1235,10 @@ function distributeInviteShopEarnings(request, response) {
   var income = request.params.income
   var promoterId = request.params.promoterId
   var shopId = request.params.shopId
+  var getShopById = require('../Shop').getShopById
 
   getPromoterById(promoterId).then((promoter) => {
-    getShopById(shopId).then((shop) => {
+    getShopById(shopId, false).then((shop) => {
       calPromoterShopEarnings(promoter, shop, income).then(() => {
         response.success({errcode: 0, message: '邀请店铺收益分配成功'})
       })
