@@ -14,6 +14,7 @@ var PushManagerFunc = require('./adminCloudFuncs/pushManager/pushManger')
 var SmsManagerFunc = require('./adminCloudFuncs/SmsManager/smsManger')
 var baiduFunc = require('./cloudFuncs/baidu')
 var PromoterFunc = require('./cloudFuncs/Promoter')
+var TenantFeeFunc = require('./cloudFuncs/Promoter/TenantFee')
 var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
 /**
@@ -122,6 +123,10 @@ AV.Cloud.define('promoterGetPromoterDetail', PromoterFunc.fetchPromoterDetail)
 AV.Cloud.define('promoterDirectSetPromoter', PromoterFunc.directSetPromoter)
 AV.Cloud.define('promoterDistributeInviteShopEarnings', PromoterFunc.distributeInviteShopEarnings)
 AV.Cloud.define('promoterDistributeInvitePromoterEarnings', PromoterFunc.distributeInvitePromoterEarnings)
+
+// 店铺入驻费用
+AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)
+AV.Cloud.define('promoterGetShopTenantByCity', TenantFeeFunc.getShopTenantByCity)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)

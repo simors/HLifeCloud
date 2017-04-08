@@ -9,13 +9,16 @@ var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
 var mysqlUtil = require('../util/mysqlUtil')
-var getShopById = require('../Shop').getShopById
 
 const PREFIX = 'promoter:'
 
-// 收益分类
+// 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
 const INVITE_SHOP = 2           // 邀请店铺获得的收益
+
+// 收益类型分类
+const EARN_ROYALTY = 'royalty'  // 收入分成获取的收益
+const EARN_SHOP_INVITE = 'shopinvite'   // 直接邀请店铺获得的收益
 
 var globalPromoterCfg = undefined     // 记录推广员系统配置参数
 
@@ -312,15 +315,24 @@ function getUpPromoterByUserId(request, response) {
 }
 
 /**
+ * 推广员注册完成支付
+ * @param promoterId
+ * @returns {Promise.<Conversation>|Promise<Conversation>|*}
+ */
+function promoterPaid(promoterId) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.set('payment', 1)
+  return promoter.save()
+}
+
+/**
  * 完成推广认证支付流程
  * @param request
  * @param response
  */
 function finishPromoterPayment(request, response) {
   var promoterId = request.params.promoterId
-  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
-  promoter.set('payment', 1)
-  promoter.save().then((promoterInfo) => {
+  promoterPaid(promoterId).then((promoterInfo) => {
     response.success({
       errcode: 0,
       message: '完成支付',
@@ -900,9 +912,134 @@ function directSetPromoter(request, response) {
  */
 function getLocalAgents(promoter) {
   var liveProvince = promoter.attributes.liveProvince
-  var agentQuery = new AV.Query('Promoter')
-  agentQuery.equalTo('province', liveProvince)
-  return agentQuery.find()
+  var liveCity = promoter.attributes.liveCity
+  var liveDistrict = promoter.attributes.liveDistrict
+
+  var provinceQuery = new AV.Query('Promoter')
+  provinceQuery.equalTo('province', liveProvince)
+  provinceQuery.equalTo('identity', 1)
+  var provinceAgent = provinceQuery.first()
+
+  var cityQuery = new AV.Query('Promoter')
+  cityQuery.equalTo('province', liveProvince)
+  cityQuery.equalTo('city', liveCity)
+  cityQuery.equalTo('identity', 2)
+  var cityAgent = cityQuery.first()
+
+  var districtQuery = new AV.Query('Promoter')
+  districtQuery.equalTo('province', liveProvince)
+  districtQuery.equalTo('city', liveCity)
+  districtQuery.equalTo('district', liveDistrict)
+  districtQuery.equalTo('identity', 3)
+  var districtAgent = districtQuery.first()
+
+  return Promise.all([provinceAgent, cityAgent, districtAgent])
+}
+
+/**
+ * 获取推广员所在地区的省级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getProvinceAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+
+  var provinceQuery = new AV.Query('Promoter')
+  provinceQuery.equalTo('province', liveProvince)
+  provinceQuery.equalTo('identity', 1)
+  return provinceQuery.first()
+}
+
+/**
+ * 获取推广员所在地区的市级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getCityAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+  var liveCity = promoter.attributes.liveCity
+
+  var cityQuery = new AV.Query('Promoter')
+  cityQuery.equalTo('province', liveProvince)
+  cityQuery.equalTo('city', liveCity)
+  cityQuery.equalTo('identity', 2)
+  return cityQuery.first()
+}
+
+/**
+ * 获取推广员所在地区的区县级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getDistrictAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+  var liveCity = promoter.attributes.liveCity
+  var liveDistrict = promoter.attributes.liveDistrict
+
+  var districtQuery = new AV.Query('Promoter')
+  districtQuery.equalTo('province', liveProvince)
+  districtQuery.equalTo('city', liveCity)
+  districtQuery.equalTo('district', liveDistrict)
+  districtQuery.equalTo('identity', 3)
+  return districtQuery.first()
+}
+
+/**
+ * 获取推广员收益分成比例
+ * @param level
+ * @returns {Array}
+ */
+function getPromoterRoyalty(level) {
+  var royalty = []
+  switch (level) {
+    case 1:
+      royalty = globalPromoterCfg.upgradeTable.promoter_level_1.royalty
+      break
+    case 2:
+      royalty = globalPromoterCfg.upgradeTable.promoter_level_2.royalty
+      break
+    case 3:
+      royalty = globalPromoterCfg.upgradeTable.promoter_level_3.royalty
+      break
+    case 4:
+      royalty = globalPromoterCfg.upgradeTable.promoter_level_4.royalty
+      break
+    case 5:
+      royalty = globalPromoterCfg.upgradeTable.promoter_level_5.royalty
+      break
+  }
+  return royalty
+}
+
+/**
+ * 获取代理分成收益
+ * @param identity
+ * @param income
+ * @returns {number}
+ */
+function getAgentEarning(identity, income) {
+  var provinceEarning = globalPromoterCfg.agentTable.province_agent * income
+  var cityEarning = globalPromoterCfg.agentTable.city_agent * income
+  var districtEarning = globalPromoterCfg.agentTable.district_agent * income
+  var streetEarning = globalPromoterCfg.agentTable * income
+
+  var agentEarn = 0
+
+  switch (identity) {
+    case APPCONST.AGENT_PROVINCE:
+      agentEarn = provinceEarning
+      break
+    case APPCONST.AGENT_CITY:
+      agentEarn = cityEarning
+      break
+    case APPCONST.AGENT_DISTRICT:
+      agentEarn = districtEarning
+      break
+    case APPCONST.AGENT_STREET:
+      agentEarn = streetEarning
+      break
+  }
+  return agentEarn
 }
 
 /**
@@ -912,16 +1049,175 @@ function getLocalAgents(promoter) {
  * @param income 店铺上交的费用
  */
 function calPromoterShopEarnings(promoter, shop, income) {
-  // TODO:
   var level = promoter.attributes.level
-  switch (level) {
-    case 1:
+  var mysqlConn = undefined
+  var platformEarn = income
+  var shopOwner = shop.attributes.owner.id
+  var localAgents = []
+  var upPro = undefined
+  var upUpPro = undefined
+  var selfEarn = 0
+  var onePromoterEarn = 0
+  var twoPromoterEarn = 0
+
+  var royalty = getPromoterRoyalty(level)
+  if (royalty.length == 0) {
+    return new Promise((resolve, reject) => {
+      reject(new Error('Promoter level error'))
+    })
   }
-  // mysqlUtil.getConnection().then((conn) => {
-  //
-  // }, (err) => {
-  //
-  // })
+
+  // 第一步先在mysql中插入数据是为了检查mysql中的推广员数据是否存在，如果存在不做任何操作，不存在也插入一条新的记录。这么做为了防止
+  // 推广员在注册阶段mysql数据记录没有插入成功导致后面出问题
+  return insertPromoterInMysql(promoter.id).then(() => {
+    return mysqlUtil.getConnection()
+  }).then((conn) => {
+    mysqlConn = conn
+    return mysqlUtil.beginTransaction(conn)
+  }).then(() => {
+    return getProvinceAgent(promoter)
+  }).then((provinceAgent) => {
+    if (provinceAgent) {
+      localAgents.push(provinceAgent)
+      var identity = provinceAgent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      platformEarn = platformEarn - agentEarn
+      return insertPromoterInMysql(provinceAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update province promoter earning error')
+    }
+    return getCityAgent(promoter)
+  }).then((cityAgent) => {
+    if (cityAgent) {
+      localAgents.push(cityAgent)
+      var identity = cityAgent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      platformEarn = platformEarn - agentEarn
+      return insertPromoterInMysql(cityAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update city promoter earning error')
+    }
+    return getDistrictAgent(promoter)
+  }).then((districtAgent) => {
+    if (districtAgent) {
+      localAgents.push(districtAgent)
+      var identity = districtAgent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      platformEarn = platformEarn - agentEarn
+      return insertPromoterInMysql(districtAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update district promoter earning error')
+    }
+    // 更新推广员自己的收益
+    selfEarn = income * royalty[0]
+    platformEarn = platformEarn - selfEarn
+    return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Update promoter earning error')
+    }
+    // 更新一级好友（上级推广员）的分成收益
+    var newUpPromoter = undefined
+    return getUpPromoter(promoter, false).then((upPromoter) => {
+      newUpPromoter = upPromoter
+      upPro = upPromoter
+      if (upPromoter) {
+        onePromoterEarn = income * royalty[1]
+        platformEarn = platformEarn - onePromoterEarn
+        return insertPromoterInMysql(upPromoter.id).then(() => {
+          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+        })
+      } else {
+        return new Promise((resolve) => {
+          resolve()
+        })
+      }
+    }).then((insertRes) => {
+      if (insertRes && !insertRes.results.insertId) {
+        throw new Error('Update promoter earning of level one friend error')
+      }
+      return newUpPromoter
+    })
+  }).then((upPromoter) => {
+    // 更新二级好友（上上级推广员）的分成收益
+    if (upPromoter) {
+      return getUpPromoter(upPromoter, false).then((upupPromoter) => {
+        upUpPro = upupPromoter
+        if (upupPromoter) {
+          twoPromoterEarn = income * royalty[2]
+          platformEarn = platformEarn - twoPromoterEarn
+          return insertPromoterInMysql(upupPromoter.id).then(() => {
+            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          })
+        } else {
+          return new Promise((resolve) => {
+            resolve()
+          })
+        }
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update promoter earning of level two friend error')
+    }
+    // 更新平台分成收益
+    return updatePlatformEarning(mysqlConn, shopOwner, promoter.id, platformEarn, INVITE_SHOP)
+  }).then((insertRes) => {
+    if (!insertRes.results.insertId) {
+      throw new Error('Update platform earnings error')
+    }
+
+    // 更新leancloud上的数据
+    var leanAction = []
+    localAgents.forEach((agent) => {
+      var identity = agent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      var agentAction = updateLeanPromoterEarning(agent.id, agentEarn, EARN_ROYALTY)
+      leanAction.push(agentAction)
+    })
+    var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
+    var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+    var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
+    leanAction.push(selfAction, onePromoter, twoPromoter)
+    return Promise.all(leanAction)
+  }).then(() => {
+    return mysqlUtil.commit(mysqlConn)
+  }).catch((err) => {
+    console.log(err)
+    if (mysqlConn) {
+      console.log('transaction rollback')
+      mysqlUtil.rollback(mysqlConn)
+    }
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
 }
 
 /**
@@ -944,29 +1240,19 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
-    var earnSql = 'UPDATE `PromoterEarnings` SET `royalty_earnings` = `royalty_earnings` + ? WHERE `promoterId` = ?'
-    return mysqlUtil.query(conn, earnSql, [royaltyEarnings, promoter.id])
-  }).then((updateRes) => {
-    if (0 == updateRes.results.changedRows) {
-      throw new Error('Update PromoterEarnings error')
-    }
-    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
-    return mysqlUtil.query(updateRes.conn, recordSql, [invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER])
+    return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
     }
-    var platformSql = 'INSERT INTO `PlatformEarnings` (`from`, `promoter`, `earning`, `deal_type`) VALUES (?, ?, ?, ?)'
-    return mysqlUtil.query(insertRes.conn, platformSql, [invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER])
+    return updatePlatformEarning(insertRes.conn, invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
-    return mysqlUtil.commit(insertRes.conn)
+    return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
-    var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
-    newPromoter.increment('royaltyEarnings', royaltyEarnings)
-    return newPromoter.save(null, {fetchWhenSave: true})
+    return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
     if (mysqlConn) {
       console.log('transaction rollback')
@@ -981,6 +1267,62 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
 }
 
 /**
+ * 更新leancloud中的收益数据
+ * @param promoterId
+ * @param earn
+ * @param earn_type
+ * @returns {Promise.<Conversation>|Promise<Conversation>|*}
+ */
+function updateLeanPromoterEarning(promoterId, earn, earn_type) {
+  var newPromoter = AV.Object.createWithoutData('Promoter', promoterId)
+  if (earn_type == EARN_ROYALTY) {
+    newPromoter.increment('royaltyEarnings', earn)
+  } else {
+    newPromoter.increment('shopEarnings', earn)
+  }
+  return newPromoter.save(null, {fetchWhenSave: true})
+}
+
+/**
+ * 更新推广员的收益记录
+ * @param conn
+ * @param fromPromoterId
+ * @param toPromoterId
+ * @param earn
+ * @param deal_type 交易类型，直接或者间接的提成收益或者直接邀请店铺获得的收益（INVITE_SHOP ／ INVITE_PROMOTER）
+ * @param earn_type 收益类型，邀请店铺或者邀请推广员(EARN_ROYALTY / EARN_SHOP_INVITE)
+ * @returns {*|Promise.<TResult>}
+ */
+function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_type, earn_type) {
+  var earnSql = ''
+  if (earn_type == EARN_ROYALTY) {
+    earnSql = 'UPDATE `PromoterEarnings` SET `royalty_earnings` = `royalty_earnings` + ? WHERE `promoterId` = ?'
+  } else {
+    earnSql = 'UPDATE `PromoterEarnings` SET `shop_earnings` = `shop_earnings` + ? WHERE `promoterId` = ?'
+  }
+  return mysqlUtil.query(conn, earnSql, [earn, toPromoterId]).then((updateRes) => {
+    if (0 == updateRes.results.changedRows) {
+      throw new Error('Update PromoterEarnings error')
+    }
+    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
+    return mysqlUtil.query(conn, recordSql, [fromPromoterId, toPromoterId, earn, deal_type])
+  })
+}
+
+/**
+ * 更新平台收益记录
+ * @param conn
+ * @param from      分成收益的来源，可能是店铺或者推广员的id
+ * @param promoter  属于哪个推广员的业务，记录推广员的id
+ * @param earn      收益数额
+ * @param deal_type 收益类型，邀请店铺或者邀请推广员（INVITE_SHOP ／ INVITE_PROMOTER）
+ */
+function updatePlatformEarning(conn, from, promoter, earn, deal_type) {
+  var platformSql = 'INSERT INTO `PlatformEarnings` (`from`, `promoter`, `earning`, `deal_type`) VALUES (?, ?, ?, ?)'
+  return mysqlUtil.query(conn, platformSql, [from, promoter, earn, deal_type])
+}
+
+/**
  * 分配收益
  * @param request
  * @param response
@@ -989,10 +1331,15 @@ function distributeInviteShopEarnings(request, response) {
   var income = request.params.income
   var promoterId = request.params.promoterId
   var shopId = request.params.shopId
+  var getShopById = require('../Shop').getShopById
 
   getPromoterById(promoterId).then((promoter) => {
-    getShopById(shopId).then((shop) => {
-      calPromoterShopEarnings(promoter, shop, income)
+    getShopById(shopId, false).then((shop) => {
+      calPromoterShopEarnings(promoter, shop, income).then(() => {
+        response.success({errcode: 0, message: '邀请店铺收益分配成功'})
+      }).catch((err) => {
+        response.error({errcode: 1, message: '邀请店铺收益分配失败'})
+      })
     }).catch((err) => {
       console.log(err)
       response.error({errcode: 1, message: '获取邀请的店铺信息失败'})
@@ -1010,8 +1357,8 @@ function distributeInvitePromoterEarnings(request, response) {
 
   getPromoterById(promoterId).then((promoter) => {
     getPromoterById(invitedPromoterId).then((invitedPromoter) => {
-      calPromoterInviterEarnings(promoter, invitedPromoter, income).then((promoter) => {
-        response.success({errcode: 0, message: '邀请推广员收益分配成功', promoter})
+      calPromoterInviterEarnings(promoter, invitedPromoter, income).then(() => {
+        response.success({errcode: 0, message: '邀请推广员收益分配成功'})
       }).catch((err) => {
         console.log(err)
         response.error({errcode: 1, message: '邀请推广员收益分配失败'})
@@ -1027,10 +1374,12 @@ function distributeInvitePromoterEarnings(request, response) {
 }
 
 var PromoterFunc = {
+  getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
   getUpPromoterByUserId: getUpPromoterByUserId,
+  promoterPaid: promoterPaid,
   finishPromoterPayment: finishPromoterPayment,
   fetchPromoterByUser: fetchPromoterByUser,
   incrementInviteShopNum: incrementInviteShopNum,
