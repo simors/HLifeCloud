@@ -1379,7 +1379,7 @@ function distributeInvitePromoterEarnings(request, response) {
 }
 
 /**
- * 根据推广员id获取其团队成员
+ * 根据登录用户获取其团队成员
  * @param request
  * @param response
  */
@@ -1389,6 +1389,26 @@ function fetchPromoterTeam(request, response) {
   var query = new AV.Query('Promoter')
   query.equalTo('upUser', currentUser)
   query.find().then((promoters) => {
+    response.success({errcode: 0, promoters: promoters})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '获取团队成员失败'})
+  })
+}
+
+/**
+ * 根据推广员id获取其团队成员
+ * @param request
+ * @param response
+ */
+function fetchPromoterTeamById(request, response) {
+  var promoterId = request.params.promoterId
+
+  getPromoterById(promoterId, true).then((promoter) => {
+    var user = promoter.attributes.user
+    var query = new AV.Query('Promoter')
+    query.equalTo('upUser', user)
+    return query.find()
+  }).then((promoters) => {
     response.success({errcode: 0, promoters: promoters})
   }).catch((err) => {
     response.error({errcode: 1, message: '获取团队成员失败'})
@@ -1417,6 +1437,7 @@ var PromoterFunc = {
   distributeInviteShopEarnings: distributeInviteShopEarnings,
   distributeInvitePromoterEarnings: distributeInvitePromoterEarnings,
   fetchPromoterTeam: fetchPromoterTeam,
+  fetchPromoterTeamById: fetchPromoterTeamById,
 }
 
 module.exports = PromoterFunc
