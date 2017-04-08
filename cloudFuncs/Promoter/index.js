@@ -1137,16 +1137,19 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
+    console.log('update promoter ')
     return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
     }
-    return updatePlatformEarning(insertRes.conn, invitedPromoter, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
+    console.log('update platform')
+    return updatePlatformEarning(insertRes.conn, invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
+    console.log('update lean promoter')
     return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
@@ -1186,8 +1189,8 @@ function updateLeanPromoterEarning(promoterId, earn, earn_type) {
  * @param fromPromoterId
  * @param toPromoterId
  * @param earn
- * @param deal_type 交易类型，直接或者间接的提成收益或者直接邀请店铺获得的收益(EARN_ROYALTY / EARN_SHOP_INVITE)
- * @param earn_type 收益类型，邀请店铺或者邀请推广员（INVITE_SHOP ／ INVITE_PROMOTER）
+ * @param deal_type 交易类型，直接或者间接的提成收益或者直接邀请店铺获得的收益（INVITE_SHOP ／ INVITE_PROMOTER）
+ * @param earn_type 收益类型，邀请店铺或者邀请推广员(EARN_ROYALTY / EARN_SHOP_INVITE)
  * @returns {*|Promise.<TResult>}
  */
 function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_type, earn_type) {
@@ -1219,11 +1222,11 @@ function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_ty
  * @param from      分成收益的来源，可能是店铺或者推广员的id
  * @param promoter  属于哪个推广员的业务，记录推广员的id
  * @param earn      收益数额
- * @param earn_type 收益类型，邀请店铺或者邀请推广员（INVITE_SHOP ／ INVITE_PROMOTER）
+ * @param deal_type 收益类型，邀请店铺或者邀请推广员（INVITE_SHOP ／ INVITE_PROMOTER）
  */
-function updatePlatformEarning(conn, from, promoter, earn, earn_type) {
+function updatePlatformEarning(conn, from, promoter, earn, deal_type) {
   var platformSql = 'INSERT INTO `PlatformEarnings` (`from`, `promoter`, `earning`, `deal_type`) VALUES (?, ?, ?, ?)'
-  return mysqlUtil.query(conn, platformSql, [from, promoter, earn, earn_type])
+  return mysqlUtil.query(conn, platformSql, [from, promoter, earn, deal_type])
 }
 
 /**
