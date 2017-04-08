@@ -15,7 +15,7 @@ var SmsManagerFunc = require('./adminCloudFuncs/SmsManager/smsManger')
 var baiduFunc = require('./cloudFuncs/baidu')
 var PromoterFunc = require('./cloudFuncs/Promoter')
 var PingppFunc = require('./cloudFuncs/Pingpp')
-
+var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
 /**
  * 云函数
  */
@@ -52,6 +52,7 @@ AV.Cloud.define('deleteUserFromAdmin',userManagerFunc.deleteUserFromAdmin)
 AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
 AV.Cloud.define('updateTopicStatus',TopicManagerFunc.updateTopicStatus)
 
+AV.Cloud.define('getAdviseList',UserFeedback.getAdviseList)
 
 AV.Cloud.define('getAdminTopicCategoryList',TopicManagerFunc.getTopicCategoryList)
 AV.Cloud.define('getPickedTopicList',TopicManagerFunc.getPickedTopicList)
