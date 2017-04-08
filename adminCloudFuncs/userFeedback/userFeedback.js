@@ -29,9 +29,18 @@ function getAdviseList(request,response){
     })
 }
 
+function readAdvise(request,response){
+  var advise = AV.Object.createWithoutData('UserFeedBack',request.params.id)
+  advise.set('status',1)
+  advise.save().then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+}
 var adviseFuncManager = {
   getAdviseList: getAdviseList,
-
+  readAdvise: readAdvise
 }
 
 module.exports = adviseFuncManager
