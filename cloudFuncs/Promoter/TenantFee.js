@@ -97,9 +97,52 @@ function getShopTenantByCity(request, response) {
   })
 }
 
+/**
+ * 设置某地的店铺入驻费
+ * @param request
+ * @param response
+ */
+function setShopTenantFee(request, response) {
+  var province = request.params.province
+  var city = request.params.city
+  var fee = request.params.fee
+  var getPromoterConfig = require('./index').getPromoterConfig
+
+  var query = new AV.Query('PromoterShopTenantFee')
+  query.equalTo('province', province)
+  query.equalTo('city', city)
+
+  getPromoterConfig().then((syscfg) => {
+    var minFee = syscfg.minShopkeeperCharge
+    if (fee < minFee) {
+      response.error({errcode: 1, message: '设置的入驻费不得小于平台设定的最低费用'})
+    }
+    return query.first()
+  }).then((tenant) => {
+    if (!tenant) {
+      var PromoterShopTenantFee = AV.Object.extend('PromoterShopTenantFee')
+      var tenantFee = new PromoterShopTenantFee()
+      tenantFee.set('province', province)
+      tenantFee.set('city', city)
+      tenantFee.set('fee', fee)
+      return tenantFee.save()
+    } else {
+      var newTenant = AV.Object.createWithoutData('PromoterShopTenantFee', tenant.id)
+      newTenant.set('fee', fee)
+      return newTenant.save()
+    }
+  }).then((newTenant) => {
+    response.success({errcode: 0, tenant: newTenant})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取店铺入驻费失败'})
+  })
+}
+
 var tenantFee = {
   fetchShopTenantFee: fetchShopTenantFee,
   getShopTenantByCity: getShopTenantByCity,
+  setShopTenantFee: setShopTenantFee,
 }
 
 module.exports = tenantFee

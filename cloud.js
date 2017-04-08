@@ -54,6 +54,7 @@ AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
 AV.Cloud.define('updateTopicStatus',TopicManagerFunc.updateTopicStatus)
 
 AV.Cloud.define('getAdviseList',UserFeedback.getAdviseList)
+AV.Cloud.define('readAdvise',UserFeedback.readAdvise)
 
 AV.Cloud.define('getAdminTopicCategoryList',TopicManagerFunc.getTopicCategoryList)
 AV.Cloud.define('getPickedTopicList',TopicManagerFunc.getPickedTopicList)
@@ -127,6 +128,7 @@ AV.Cloud.define('promoterDistributeInvitePromoterEarnings', PromoterFunc.distrib
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)
 AV.Cloud.define('promoterGetShopTenantByCity', TenantFeeFunc.getShopTenantByCity)
+AV.Cloud.define('promoterSetShopTenant', TenantFeeFunc.setShopTenantFee)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)
