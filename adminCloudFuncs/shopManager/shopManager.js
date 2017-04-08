@@ -227,7 +227,7 @@ function getShopList(request, response) {
     query.lessThan('createdAt', request.params.endTime);
   }
 
-  if (selectedCategory) {
+  if (selectedCategory&&selectedCategory!='all') {
     //构建内嵌查询
     var category =  AV.Object.createWithoutData('ShopCategory',selectedCategory)
 
