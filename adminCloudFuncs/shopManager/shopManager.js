@@ -381,11 +381,21 @@ function updateChoosenCategory(request, response) {
 
 function updateShopStatus(request,response){
   var shop = AV.Object.createWithoutData('Shop',request.params.id)
+  var user = AV.Object.createWithoutData('_User',request.params.userId)
   var status = request.params.status
-  shop.set('status',status)
-  shop.save().then(()=>{
-    response.success()
-  },(err)=>{response.error(err)})
+  var query = AV.Query('Shop')
+  query.equalTo('owner',user)
+  query.equalTo('status',1)
+  query.count().then((count)=>{
+    if(count>0){
+      response.error({message:'已有店铺',errorCode:'1111'})
+    }else{
+      shop.set('status',status)
+      shop.save().then(()=>{
+        response.success()
+      },(err)=>{response.error(err)})
+    }
+  })
 }
 
 function getAnnouncementsByShopId(request,response){
