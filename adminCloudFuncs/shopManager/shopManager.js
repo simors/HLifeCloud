@@ -179,7 +179,7 @@ function updateShopTag(request, response) {
 
 function getShopList(request, response) {
   var orderMode = request.params.orderMode
-  var shopCategoryName = request.params.shopCategoryName
+  var selectedCategory = request.params.selectedCategory
   var geoCity = request.params.geoCity
   var username = request.params.username
   var status = request.params.status?1:0
@@ -227,13 +227,13 @@ function getShopList(request, response) {
     query.lessThan('createdAt', request.params.endTime);
   }
 
-  if (shopCategoryName) {
+  if (selectedCategory) {
     //构建内嵌查询
-    var innerQuery = new AV.Query('ShopCategory')
+    var category =  AV.Object.createWithoutData('ShopCategory',selectedCategory)
 
-    innerQuery.contains('text', shopCategoryName)
+    // innerQuery.contains('text', shopCategoryName)
     //执行内嵌查询
-    query.matchesQuery('targetShopCategory', innerQuery)
+    query.equalTo('targetShopCategory', category)
   }
   if (username) {
     //构建内嵌查询
