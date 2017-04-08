@@ -36,6 +36,7 @@ function fetchShopCommentList(request, response) {
 
   query.addDescending('createdAt')
   query.limit(5) // 最多返回 5 条结果
+  query.equalTo('status', 1)
   return query.find().then(function(results) {
     console.log('shopComments==', results)
     try{
@@ -48,6 +49,7 @@ function fetchShopCommentList(request, response) {
           var replyQuery = new AV.Query('ShopCommentReply')
           var shopComment = AV.Object.createWithoutData('ShopComment', item.id)
           replyQuery.equalTo('replyShopComment', shopComment)
+          replyQuery.equalTo('status', 1)
           queryArr.push(replyQuery)
 
           var upQuery = new AV.Query('ShopCommentUp')
@@ -103,6 +105,7 @@ function fetchShopCommentReplyList(request, response) {
   query.equalTo('replyShopComment', shopComment)
   query.include(['user', 'parentReply', 'parentReply.user'])
   query.addAscending('createdAt')
+  query.equalTo('status', 1)
 
   return query.find().then(function(results){
     var replys = shopUtil.shopCommentReplyFromLeancloudObject(results)
