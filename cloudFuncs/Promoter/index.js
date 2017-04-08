@@ -928,6 +928,54 @@ function getLocalAgents(promoter) {
 }
 
 /**
+ * 获取推广员所在地区的省级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getProvinceAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+
+  var provinceQuery = new AV.Query('Promoter')
+  provinceQuery.equalTo('province', liveProvince)
+  provinceQuery.equalTo('identity', 1)
+  return provinceQuery.first()
+}
+
+/**
+ * 获取推广员所在地区的市级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getCityAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+  var liveCity = promoter.attributes.liveCity
+
+  var cityQuery = new AV.Query('Promoter')
+  cityQuery.equalTo('province', liveProvince)
+  cityQuery.equalTo('city', liveCity)
+  cityQuery.equalTo('identity', 2)
+  return cityQuery.first()
+}
+
+/**
+ * 获取推广员所在地区的区县级代理
+ * @param promoter
+ * @returns {*}
+ */
+function getDistrictAgent(promoter) {
+  var liveProvince = promoter.attributes.liveProvince
+  var liveCity = promoter.attributes.liveCity
+  var liveDistrict = promoter.attributes.liveDistrict
+
+  var districtQuery = new AV.Query('Promoter')
+  districtQuery.equalTo('province', liveProvince)
+  districtQuery.equalTo('city', liveCity)
+  districtQuery.equalTo('district', liveDistrict)
+  districtQuery.equalTo('identity', 3)
+  return districtQuery.first()
+}
+
+/**
  * 获取推广员收益分成比例
  * @param level
  * @returns {Array}
@@ -1018,20 +1066,63 @@ function calPromoterShopEarnings(promoter, shop, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then(() => {
-    return getLocalAgents(promoter)
-  }).then((agents) => {
-    localAgents = agents
-    var agentsEarnUpdate = []
-    agents.forEach((agent) => {
-      var identity = agent.attributes.identity
+    return getProvinceAgent(promoter)
+  }).then((provinceAgent) => {
+    if (provinceAgent) {
+      console.log('update province agent')
+      localAgents.push(provinceAgent)
+      var identity = provinceAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
-      var updateAction = updatePromoterEarning(mysqlConn, shopOwner, agent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
-      agentsEarnUpdate.push(updateAction)
-    })
-    console.log('update agents')
-    return Promise.all(agentsEarnUpdate)    // 更新所有代理的分成收益
-  }).then(() => {
+      return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+    } else {
+      console.log('did not find province agent')
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update province promoter earning error')
+    }
+    return getCityAgent(promoter)
+  }).then((cityAgent) => {
+    if (cityAgent) {
+      console.log('update city agent')
+      localAgents.push(cityAgent)
+      var identity = cityAgent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      platformEarn = platformEarn - agentEarn
+      return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+    } else {
+      console.log('did not find city agent')
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update city promoter earning error')
+    }
+    return getDistrictAgent(promoter)
+  }).then((districtAgent) => {
+    if (districtAgent) {
+      console.log('update district agent')
+      localAgents.push(districtAgent)
+      var identity = districtAgent.attributes.identity
+      var agentEarn = getAgentEarning(identity, income)
+      platformEarn = platformEarn - agentEarn
+      return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+    } else {
+      console.log('did not find district agent')
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update district promoter earning error')
+    }
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
@@ -1105,6 +1196,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
+    console.log(err)
     if (mysqlConn) {
       console.log('transaction rollback')
       mysqlUtil.rollback(mysqlConn)
@@ -1137,19 +1229,16 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
-    console.log('update promoter ')
     return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
     }
-    console.log('update platform')
     return updatePlatformEarning(insertRes.conn, invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
-    console.log('update lean promoter')
     return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
@@ -1206,13 +1295,6 @@ function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_ty
     }
     var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
     return mysqlUtil.query(conn, recordSql, [fromPromoterId, toPromoterId, earn, deal_type])
-  }).catch((err) => {
-    console.log("update promoter earnings error: ", err)
-    if (conn) {
-      console.log('transaction rollback')
-      mysqlUtil.rollback(conn)
-    }
-    throw err
   })
 }
 
@@ -1244,6 +1326,8 @@ function distributeInviteShopEarnings(request, response) {
     getShopById(shopId, false).then((shop) => {
       calPromoterShopEarnings(promoter, shop, income).then(() => {
         response.success({errcode: 0, message: '邀请店铺收益分配成功'})
+      }).catch((err) => {
+        response.error({errcode: 1, message: '邀请店铺收益分配失败'})
       })
     }).catch((err) => {
       console.log(err)
