@@ -6,14 +6,18 @@ var Promise = require('bluebird');
 function getAdviseList(request,response){
     var query = new AV.Query('UserFeedBack')
     query.ascending('createdAt')
+    query.include('user')
     query.find().then((results)=>{
       var adviseList=[]
       results.forEach((result)=>{
+        // console.log('re',result.attributes.user.id,result.attributes.user.attributes.username)
         adviseList.push({
           id: result.id,
           // title: result.attributes.title,
           content: result.attributes.content,
           status:result.attributes.status,
+          userName:result.attributes.user.attributes.username,
+          userId:result.attributes.user.id,
           // commentNum: result.attributes.commentNum,
           // likeCount: result.attributes.likeCount,
           // status:result.attributes.status,
