@@ -1069,14 +1069,14 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return getProvinceAgent(promoter)
   }).then((provinceAgent) => {
     if (provinceAgent) {
-      console.log('update province agent')
       localAgents.push(provinceAgent)
       var identity = provinceAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
-      return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      return insertPromoterInMysql(provinceAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
     } else {
-      console.log('did not find province agent')
       return new Promise((resolve) => {
         resolve()
       })
@@ -1088,14 +1088,14 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return getCityAgent(promoter)
   }).then((cityAgent) => {
     if (cityAgent) {
-      console.log('update city agent')
       localAgents.push(cityAgent)
       var identity = cityAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
-      return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      return insertPromoterInMysql(cityAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
     } else {
-      console.log('did not find city agent')
       return new Promise((resolve) => {
         resolve()
       })
@@ -1107,14 +1107,14 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return getDistrictAgent(promoter)
   }).then((districtAgent) => {
     if (districtAgent) {
-      console.log('update district agent')
       localAgents.push(districtAgent)
       var identity = districtAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
-      return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      return insertPromoterInMysql(districtAgent.id).then(() => {
+        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+      })
     } else {
-      console.log('did not find district agent')
       return new Promise((resolve) => {
         resolve()
       })
@@ -1126,7 +1126,6 @@ function calPromoterShopEarnings(promoter, shop, income) {
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
-    console.log('update self')
     return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
@@ -1134,14 +1133,15 @@ function calPromoterShopEarnings(promoter, shop, income) {
     }
     // 更新一级好友（上级推广员）的分成收益
     var newUpPromoter = undefined
-    console.log('update one promoter')
     return getUpPromoter(promoter, false).then((upPromoter) => {
       newUpPromoter = upPromoter
       upPro = upPromoter
       if (upPromoter) {
         onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
-        return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+        return insertPromoterInMysql(upPromoter.id).then(() => {
+          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+        })
       } else {
         return new Promise((resolve) => {
           resolve()
@@ -1161,7 +1161,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
         if (upupPromoter) {
           twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
-          return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          return insertPromoterInMysql(upupPromoter.id).then(() => {
+            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          })
         } else {
           return new Promise((resolve) => {
             resolve()
