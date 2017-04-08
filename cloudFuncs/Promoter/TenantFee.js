@@ -69,8 +69,37 @@ function fetchShopTenantFee(request, response) {
   })
 }
 
+/**
+ * 根据城市名获取店铺入驻费
+ * @param request
+ * @param response
+ */
+function getShopTenantByCity(request, response) {
+  var province = request.params.province
+  var city = request.params.city
+  var getPromoterConfig = require('./index').getPromoterConfig
+
+  var query = new AV.Query('PromoterShopTenantFee')
+  query.equalTo('province', province)
+  query.equalTo('city', city)
+
+  query.first().then((tenant) => {
+    if (!tenant) {
+      getPromoterConfig().then((syscfg) => {
+        response.success({errcode: 0, tenant: syscfg.minShopkeeperCharge})
+      })
+    } else {
+      response.success({errcode: 0, tenant: tenant.attributes.fee})
+    }
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取店铺入驻费失败'})
+  })
+}
+
 var tenantFee = {
   fetchShopTenantFee: fetchShopTenantFee,
+  getShopTenantByCity: getShopTenantByCity,
 }
 
 module.exports = tenantFee

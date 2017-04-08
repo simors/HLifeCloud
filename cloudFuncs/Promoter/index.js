@@ -1374,6 +1374,7 @@ function distributeInvitePromoterEarnings(request, response) {
 }
 
 var PromoterFunc = {
+  getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
