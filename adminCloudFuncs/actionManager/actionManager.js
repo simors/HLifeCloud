@@ -12,6 +12,7 @@ function getActionList(request, response) {
   var actionType = request.params.actionType
   var status = request.params.status
   var query = new AV.Query('Banners')
+  var liveArea = request.params.liveArea
 
   if (!request.params.startTime) {
     query.greaterThanOrEqualTo('createdAt', new Date('2016-9-28 00:00:00'));
@@ -35,6 +36,15 @@ function getActionList(request, response) {
   }
   else {
     query.descending('createdAt');
+  }
+  if(liveArea){
+    if(liveArea.length==2){
+      query.contains('geoProvince',liveArea[1])
+    }else if(liveArea.length==3){
+      query.contains('geoCity',liveArea[2])
+    }else if(liveArea.length==4){
+      query.contains('geoDistrict',liveArea[3])
+    }
   }
   if (status) {
     query.equalTo('status', status)
