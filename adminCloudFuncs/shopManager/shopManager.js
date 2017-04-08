@@ -187,12 +187,21 @@ function getShopList(request, response) {
   var shopTagId = request.params.shopTagId
   var query = new AV.Query('Shop')
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
+  var liveArea = request.params.liveArea
 
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
 
-
+  if(liveArea){
+    if(liveArea.length==2){
+      query.contains('geoProvince',liveArea[1])
+    }else if(liveArea.length==3){
+      query.contains('geoCity',liveArea[2])
+    }else if(liveArea.length==4){
+      query.contains('geoDistrict',liveArea[3])
+    }
+  }
   if (orderMode == 'createTimeDescend') {
     query.descending('createdAt');
   }
