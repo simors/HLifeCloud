@@ -1323,7 +1323,7 @@ function updatePlatformEarning(conn, from, promoter, earn, deal_type) {
 }
 
 /**
- * 分配收益
+ * 分配邀请店铺的收益
  * @param request
  * @param response
  */
@@ -1350,6 +1350,11 @@ function distributeInviteShopEarnings(request, response) {
   })
 }
 
+/**
+ * 分配邀请推广员的收益
+ * @param request
+ * @param response
+ */
 function distributeInvitePromoterEarnings(request, response) {
   var income = request.params.income
   var promoterId = request.params.promoterId
@@ -1370,6 +1375,23 @@ function distributeInvitePromoterEarnings(request, response) {
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取邀请的店铺信息失败'})
+  })
+}
+
+/**
+ * 根据推广员id获取其团队成员
+ * @param request
+ * @param response
+ */
+function fetchPromoterTeam(request, response) {
+  var currentUser = request.currentUser
+
+  var query = new AV.Query('Promoter')
+  query.equalTo('upUser', currentUser)
+  query.find().then((promoters) => {
+    response.success({errcode: 0, promoters: promoters})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '获取团队成员失败'})
   })
 }
 
@@ -1394,6 +1416,7 @@ var PromoterFunc = {
   calPromoterInviterEarnings: calPromoterInviterEarnings,
   distributeInviteShopEarnings: distributeInviteShopEarnings,
   distributeInvitePromoterEarnings: distributeInvitePromoterEarnings,
+  fetchPromoterTeam: fetchPromoterTeam,
 }
 
 module.exports = PromoterFunc
