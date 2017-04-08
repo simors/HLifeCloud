@@ -1415,6 +1415,23 @@ function fetchPromoterTeamById(request, response) {
   })
 }
 
+/**
+ * 根据登录用户获取其推广的店铺
+ * @param request
+ * @param response
+ */
+function fetchPromoterShop(request, response) {
+  var currentUser = request.currentUser
+
+  var query = new AV.Query('Shop')
+  query.equalTo('inviter', currentUser)
+  query.find().then((shops) => {
+    response.success({errcode: 0, shops: shops})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '获取团队成员失败'})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -1438,6 +1455,7 @@ var PromoterFunc = {
   distributeInvitePromoterEarnings: distributeInvitePromoterEarnings,
   fetchPromoterTeam: fetchPromoterTeam,
   fetchPromoterTeamById: fetchPromoterTeamById,
+  fetchPromoterShop: fetchPromoterShop,
 }
 
 module.exports = PromoterFunc
