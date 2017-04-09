@@ -1452,6 +1452,15 @@ function fetchPromoterShopById(request, response) {
   })
 }
 
+/**
+ * 获取推广员入驻费
+ * @param request
+ * @param response
+ */
+function getPromoterTenant(request, response) {
+  response.success({tenant: globalPromoterCfg.promoterCharge})
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -1477,6 +1486,7 @@ var PromoterFunc = {
   fetchPromoterTeamById: fetchPromoterTeamById,
   fetchPromoterShop: fetchPromoterShop,
   fetchPromoterShopById: fetchPromoterShopById,
+  getPromoterTenant: getPromoterTenant,
 }
 
 module.exports = PromoterFunc
