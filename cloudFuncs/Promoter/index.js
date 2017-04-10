@@ -299,6 +299,7 @@ function getUpPromoterByUserId(request, response) {
       response.success({
         errcode: 0,
         promoter: upPromoter,
+        user: constructUserInfo(upPromoter.attributes.user)
       })
     }, (err) => {
       response.error({
@@ -309,7 +310,7 @@ function getUpPromoterByUserId(request, response) {
   }, (err) => {
     response.error({
       errcode: 1,
-      message: "无法获取到次用户的推广记录"
+      message: "无法获取到此用户的推广记录"
     })
   })
 }
