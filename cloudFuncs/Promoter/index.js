@@ -1390,9 +1390,16 @@ function distributeInvitePromoterEarnings(request, response) {
  */
 function fetchPromoterTeam(request, response) {
   var currentUser = request.currentUser
+  var limit = request.params.limit
+
+  if (!limit) {
+    limit = 10
+  }
 
   var query = new AV.Query('Promoter')
   query.equalTo('upUser', currentUser)
+  query.descending('updatedAt')
+  query.limit(limit)
   query.find().then((promoters) => {
     response.success({errcode: 0, promoters: promoters})
   }).catch((err) => {
@@ -1407,11 +1414,18 @@ function fetchPromoterTeam(request, response) {
  */
 function fetchPromoterTeamById(request, response) {
   var promoterId = request.params.promoterId
+  var limit = request.params.limit
+
+  if (!limit) {
+    limit = 10
+  }
 
   getPromoterById(promoterId, true).then((promoter) => {
     var user = promoter.attributes.user
     var query = new AV.Query('Promoter')
     query.equalTo('upUser', user)
+    query.descending('updatedAt')
+    query.limit(limit)
     return query.find()
   }).then((promoters) => {
     response.success({errcode: 0, promoters: promoters})
