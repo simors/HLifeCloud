@@ -86,9 +86,13 @@ function constructUserInfo(user) {
   userInfo.avatar = user.attributes.avatar
   userInfo.gender = user.attributes.gender
   userInfo.identity = user.attributes.identity
+  userInfo.geo = user.attributes.geo
   userInfo.geoProvince = user.attributes.geoProvince
+  userInfo.geoProvinceCode = user.attributes.geoProvinceCode
   userInfo.geoCity = user.attributes.getCity
+  userInfo.geoCityCode = user.attributes.geoCityCode
   userInfo.geoDistrict = user.attributes.geoDistrict
+  userInfo.geoDistrictCode = user.attributes.geoDistrictCode
   return userInfo
 }
 
