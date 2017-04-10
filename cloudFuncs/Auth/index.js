@@ -4,6 +4,46 @@
 
 var AV = require('leanengine');
 var Promise = require('bluebird');
+var authUtils = require('../../utils/authUtils');
+
+function login(request, response) {
+  var token = request.params.token;
+  var phone = request.params.phone + '';
+  var password = request.params.password + '';
+
+  if(token) {
+    AV.User.become(token).then((userLcObj) => {
+      console.log('become.userLcObj====', userLcObj)
+      var userInfo = authUtils.userInfoFromLeancloudObject(userLcObj)
+      response.success({
+        code: 1,
+        user: userInfo,
+        message: '自动登陆成功'
+      })
+    }, (err) => {
+      response.error({
+        code: -2,
+        message: '自动登陆失败'
+      })
+    })
+  }else if(phone && password) {
+    AV.User.logInWithMobilePhone(phone, password).then((userLcObj) => {
+      // console.log('logInWithMobilePhone.userLcObj====', userLcObj)
+      var userInfo = authUtils.userInfoFromLeancloudObject(userLcObj)
+      response.success({
+        code: 1,
+        user: userInfo,
+        message: '登陆成功'
+      })
+    }, (err) => {
+      console.log('err====', err)
+      response.error({
+        code: -1,
+        message: '登陆失败'
+      })
+    })
+  }
+}
 
 function modifyMobilePhoneVerified(request, response) {
   var user = AV.Object.createWithoutData('_User', request.params.id)
@@ -222,6 +262,7 @@ function setUserNickname(request, response) {
 }
 
 var authFunc = {
+  login: login,
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   getDocterList: getDocterList,
   getDocterGroup: getDocterGroup,
