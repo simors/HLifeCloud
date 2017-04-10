@@ -1391,6 +1391,7 @@ function distributeInvitePromoterEarnings(request, response) {
 function fetchPromoterTeam(request, response) {
   var currentUser = request.currentUser
   var limit = request.params.limit
+  var lastUpdatedAt = request.params.lastUpdatedAt
 
   if (!limit) {
     limit = 10
@@ -1400,6 +1401,9 @@ function fetchPromoterTeam(request, response) {
   query.equalTo('upUser', currentUser)
   query.descending('updatedAt')
   query.limit(limit)
+  if (lastUpdatedAt) {
+    query.lessThan('updatedAt', new Date(lastUpdatedAt))
+  }
   query.find().then((promoters) => {
     response.success({errcode: 0, promoters: promoters})
   }).catch((err) => {
@@ -1415,6 +1419,7 @@ function fetchPromoterTeam(request, response) {
 function fetchPromoterTeamById(request, response) {
   var promoterId = request.params.promoterId
   var limit = request.params.limit
+  var lastUpdatedAt = request.params.lastUpdatedAt
 
   if (!limit) {
     limit = 10
@@ -1426,6 +1431,9 @@ function fetchPromoterTeamById(request, response) {
     query.equalTo('upUser', user)
     query.descending('updatedAt')
     query.limit(limit)
+    if (lastUpdatedAt) {
+      query.lessThan('updatedAt', new Date(lastUpdatedAt))
+    }
     return query.find()
   }).then((promoters) => {
     response.success({errcode: 0, promoters: promoters})
