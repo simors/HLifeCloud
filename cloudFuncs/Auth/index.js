@@ -13,7 +13,19 @@ function login(request, response) {
 
   if(token) {
     AV.User.become(token).then((userLcObj) => {
-      console.log('become.userLcObj====', userLcObj)
+      
+      var currentDate = new Date()
+
+      //1、即使更新失败，也需要返回用户登录信息，保证app可用性
+      //2、如果新增字段保存用户登录app时间，那么更新此字段时，updatedAt也会更新，
+      //从而新增的字段和updatedAt字段永远相同，因此可直接用updatedAt字段
+      var user = AV.Object.createWithoutData('_User', userLcObj.id)
+      user.set("updatedAt", currentDate)
+      user.save()
+
+      userLcObj.userLoginAppDate = currentDate
+
+      // console.log('become.userLcObj====', userLcObj)
       var userInfo = authUtils.userInfoFromLeancloudObject(userLcObj)
       response.success({
         code: 1,
@@ -21,6 +33,7 @@ function login(request, response) {
         message: '自动登陆成功'
       })
     }, (err) => {
+      console.log('become....err====', err)
       response.error({
         code: -2,
         message: '自动登陆失败'
@@ -28,6 +41,17 @@ function login(request, response) {
     })
   }else if(phone && password) {
     AV.User.logInWithMobilePhone(phone, password).then((userLcObj) => {
+
+      var currentDate = new Date()
+
+      //1、即使更新失败，也需要返回用户登录信息，保证app可用性
+      //2、如果新增字段保存用户登录app时间，那么更新此字段时，updatedAt也会更新，
+      //从而新增的字段和updatedAt字段永远相同，因此可直接用updatedAt字段
+      var user = AV.Object.createWithoutData('_User', userLcObj.id)
+      user.set("updatedAt", currentDate)
+      user.save()
+
+      userLcObj.userLoginAppDate = currentDate
       // console.log('logInWithMobilePhone.userLcObj====', userLcObj)
       var userInfo = authUtils.userInfoFromLeancloudObject(userLcObj)
       response.success({
@@ -36,7 +60,7 @@ function login(request, response) {
         message: '登陆成功'
       })
     }, (err) => {
-      console.log('err====', err)
+      console.log('logInWithMobilePhone.....err====', err)
       response.error({
         code: -1,
         message: '登陆失败'
