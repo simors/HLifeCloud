@@ -1460,9 +1460,20 @@ function fetchPromoterTeamById(request, response) {
  */
 function fetchPromoterShop(request, response) {
   var currentUser = request.currentUser
+  var limit = request.params.limit
+  var lastCreatedAt = request.params.lastCreatedAt
+
+  if (!limit) {
+    limit = 10
+  }
 
   var query = new AV.Query('Shop')
   query.equalTo('inviter', currentUser)
+  query.descending('createdAt')
+  query.limit(limit)
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
   query.find().then((shops) => {
     response.success({errcode: 0, shops: shops})
   }).catch((err) => {
@@ -1477,11 +1488,22 @@ function fetchPromoterShop(request, response) {
  */
 function fetchPromoterShopById(request, response) {
   var promoterId = request.params.promoterId
+  var limit = request.params.limit
+  var lastCreatedAt = request.params.lastCreatedAt
+
+  if (!limit) {
+    limit = 10
+  }
 
   getPromoterById(promoterId, true).then((promoter) => {
     var user = promoter.attributes.user
     var query = new AV.Query('Shop')
     query.equalTo('inviter', user)
+    query.descending('createdAt')
+    query.limit(limit)
+    if (lastCreatedAt) {
+      query.lessThan('createdAt', new Date(lastCreatedAt))
+    }
     return query.find()
   }).then((shops) => {
     response.success({errcode: 0, shops: shops})
