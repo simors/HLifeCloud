@@ -1398,6 +1398,7 @@ function fetchPromoterTeam(request, response) {
   }
 
   var query = new AV.Query('Promoter')
+  query.include('user')
   query.equalTo('upUser', currentUser)
   query.descending('updatedAt')
   query.limit(limit)
@@ -1405,8 +1406,13 @@ function fetchPromoterTeam(request, response) {
     query.lessThan('updatedAt', new Date(lastUpdatedAt))
   }
   query.find().then((promoters) => {
-    response.success({errcode: 0, promoters: promoters})
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
   }).catch((err) => {
+    console.log(err)
     response.error({errcode: 1, message: '获取团队成员失败'})
   })
 }
@@ -1428,6 +1434,7 @@ function fetchPromoterTeamById(request, response) {
   getPromoterById(promoterId, true).then((promoter) => {
     var user = promoter.attributes.user
     var query = new AV.Query('Promoter')
+    query.include('user')
     query.equalTo('upUser', user)
     query.descending('updatedAt')
     query.limit(limit)
@@ -1436,7 +1443,11 @@ function fetchPromoterTeamById(request, response) {
     }
     return query.find()
   }).then((promoters) => {
-    response.success({errcode: 0, promoters: promoters})
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
   }).catch((err) => {
     response.error({errcode: 1, message: '获取团队成员失败'})
   })
