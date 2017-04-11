@@ -5,6 +5,94 @@
 var numberUtils = require('./numberUtils');
 var util = require('./util');
 
+function shopFromLeancloudObject(results) {
+  var shopInfos = []
+
+  try{
+    if(results && results.length) {
+      results.forEach((item, index)=>{
+        var shopInfo = {}
+        shopInfo.id = item.id
+        var createdAt = util.parseDate(item.createdAt)
+        shopInfo.createdAt = createdAt.valueOf()
+        shopInfo.createdDate = numberUtils.formatLeancloudTime(createdAt, 'YYYY-MM-DD HH:mm:SS')
+        var updatedAt = util.parseDate(item.updatedAt)
+        shopInfo.updatedAt = updatedAt.valueOf()
+        shopInfo.updatedDate = numberUtils.formatLeancloudTime(updatedAt, 'YYYY-MM-DD HH:mm:SS')
+
+        var attrs = item.attributes
+
+        for(var key in attrs) {
+          if('targetShopCategory' == key) {
+            var targetShopCategoryInfo = {}
+            var targetShopCategoryAttrs = attrs.targetShopCategory.attributes
+            targetShopCategoryInfo.id = attrs.targetShopCategory.id
+            targetShopCategoryInfo.shopCategoryId = targetShopCategoryAttrs.shopCategoryId
+            targetShopCategoryInfo.text = targetShopCategoryAttrs.text
+
+            shopInfo.targetShopCategory = targetShopCategoryInfo
+          }else if('inviter' == key) {
+            var inviterInfo = {}
+            var inviterAttrs = attrs.inviter.attributes
+            inviterInfo.id = attrs.inviter.id
+            inviterInfo.avatar = inviterAttrs.avatar
+            inviterInfo.nickname = inviterAttrs.nickname
+            shopInfo.inviter = inviterInfo
+          }else if('containedTag' == key) {
+            var containedTagArr = []
+            var containedTagLcArr = attrs.containedTag
+            if(containedTagLcArr && containedTagLcArr.length) {
+              containedTagLcArr.forEach((tag, index) =>{
+                var tagInfo = {}
+                var tagAttrs = tag.attributes
+                tagInfo.id = tag.id
+                tagInfo.name = tagAttrs.name
+                containedTagArr.push(tagInfo)
+              })
+            }
+            shopInfo.containedTag = containedTagArr
+          }else if('containedPromotions' == key) {
+            var containedPromotionsArr = []
+            var containedPromotionsLcArr = attrs.containedPromotions
+            if(containedPromotionsLcArr && containedPromotionsLcArr.length) {
+              containedPromotionsLcArr.forEach((promotion, index) =>{
+                var promotionInfo = {}
+                var promotionAttrs = promotion.attributes
+                promotionInfo.id = promotion.id
+                for(var promotionKey in promotionAttrs) {
+                  promotionInfo[promotionKey] = promotionAttrs[promotionKey]
+                }
+                containedPromotionsArr.push(promotionInfo)
+              })
+            }
+            shopInfo.containedPromotions = containedPromotionsArr
+          }else if (key == 'geo') {
+            if(attrs.geo) {
+              var geo = attrs.geo.toJSON()
+              shopInfo.geo = [geo.latitude, geo.longitude]
+            }else{
+              shopInfo.geo = ''
+            }
+          }else if (key == 'owner') {
+            var owner = {}
+            owner.id = attrs.owner.id
+            shopInfo.owner = owner
+          }else {
+            shopInfo[key] = attrs[key]
+          }
+        }
+
+        shopInfos.push(shopInfo)
+
+      })
+    }
+  }catch(error) {
+    console.log('shopFromLeancloudObject...error====', error)
+  }
+
+  return shopInfos
+}
+
 function shopCommentFromLeancloudObject(results) {
   var shopComments = []
   if(results && results.length) {
@@ -170,6 +258,7 @@ function shopCommentsConcatReplys(shopComments, replys) {
 
 
 var shopUtil = {
+  shopFromLeancloudObject: shopFromLeancloudObject,
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
   shopCommentReplyFromLeancloudObject: shopCommentReplyFromLeancloudObject,
   shopCommentsConcatReplys: shopCommentsConcatReplys,

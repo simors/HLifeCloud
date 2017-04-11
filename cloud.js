@@ -25,6 +25,7 @@ AV.Cloud.define('hLifeUpdateUserLocationInfo', authFunc.updateUserLocationInfo)
 AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
 AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
 
+AV.Cloud.define('hLifeFetchUserFollowees', authFunc.fetchUserFollowees)
 AV.Cloud.define('hLifeLogin', authFunc.login)
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
