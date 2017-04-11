@@ -47,6 +47,7 @@ function fetchUserFollowees(request, response) {
       if(results && results.length) {
         var shopOrQueryArr = []
         var topicOrQueryArr = []
+        var followerQueryArr = []
 
         results.forEach((item, index) => {
           var attrs = item.attributes
@@ -68,6 +69,10 @@ function fetchUserFollowees(request, response) {
           topicQuery.limit(1)//最新发布的话题
           
           topicOrQueryArr.push(topicQuery.find())
+
+          var followerQuery = new AV.Query('_Follower')
+          followerQuery.equalTo('user', owner)
+          followerQueryArr.push(followerQuery.count())
         })
 
         var shopOrQuery = AV.Query.or.apply(null, shopOrQueryArr)
@@ -90,11 +95,26 @@ function fetchUserFollowees(request, response) {
               authUtils.userFolloweesConcatTopicInfo(userFollowees, topicInfos)
             }
 
-            response.success({
-              code: 0,
-              message: '成功',
-              userFollowees: userFollowees,
+            Promise.all(followerQueryArr).then((followersCounts)=>{
+              // console.log('followersCounts====', followersCounts)
+              userFollowees.forEach((item, index)=>{
+                item.followersCounts = followersCounts[index]
+              })
+
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowees: userFollowees,
+              })
+            }, (err)=>{
+              console.log('followerQueryArr===err=', err)
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowees: userFollowees,
+              })
             })
+
           }, (err)=>{
             console.log('topicOrQueryArr===err=', err)
             response.success({
