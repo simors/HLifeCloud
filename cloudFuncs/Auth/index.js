@@ -5,6 +5,157 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 var authUtils = require('../../utils/authUtils');
+var shopUtil = require('../../utils/shopUtil');
+
+function fetchUserFollowees(request, response) {
+  var isRefresh = request.params.isRefresh
+  var lastCreatedAt = request.params.lastCreatedAt
+  var userId = request.params.userId
+
+  var user = null
+  if(userId) {
+    user = AV.Object.createWithoutData('_User', userId)
+  }else {
+    user = request.currentUser
+  }
+
+  var query = new AV.Query('_Followee')
+
+  query.equalTo('user', user)
+  query.include(['followee'])
+  query.addDescending('createdAt')
+  query.limit(5) // 最多返回 5 条结果
+
+  if(!isRefresh) { //分页查询
+    if(!lastCreatedAt) {
+      console.log('分页查询分页查询分页查询分页查询')
+      response.error({
+        code: -3,
+        message: 'lastCreatedAt为空'
+      })
+      return
+    }
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  return query.find().then(function(results) {
+    // console.log('_Followee.results====', results)
+
+    try{
+      var userFollowees = []
+
+      if(results && results.length) {
+        var shopOrQueryArr = []
+        var topicOrQueryArr = []
+        var followerQueryArr = []
+
+        results.forEach((item, index) => {
+          var attrs = item.attributes
+          var followee = attrs.followee
+          var userInfo = authUtils.userInfoFromLeancloudObject(followee)
+          userFollowees.push(userInfo)
+
+          var owner = AV.Object.createWithoutData('_User', userInfo.id)
+
+          var shopQuery = new AV.Query('Shop')
+          shopQuery.equalTo('owner', owner)
+          shopQuery.equalTo('status', 1)
+          shopOrQueryArr.push(shopQuery)
+     
+          var topicQuery = new AV.Query('Topics')
+          topicQuery.equalTo('user', owner)
+          topicQuery.equalTo('status', 1)
+          topicQuery.addDescending('createdAt')
+          topicQuery.limit(1)//最新发布的话题
+          
+          topicOrQueryArr.push(topicQuery.find())
+
+          var followerQuery = new AV.Query('_Follower')
+          followerQuery.equalTo('user', owner)
+          followerQueryArr.push(followerQuery.count())
+        })
+
+        var shopOrQuery = AV.Query.or.apply(null, shopOrQueryArr)
+        shopOrQuery.include(['targetShopCategory', 'inviter', 'containedTag', 'containedPromotions'])
+
+        shopOrQuery.find().then((shopLcInfos)=>{
+          // console.log('shopOrQuery...shopLcInfos=====', shopLcInfos)
+          var shopInfos = shopUtil.shopFromLeancloudObject(shopLcInfos)
+          authUtils.userFolloweesConcatShopInfo(userFollowees, shopInfos)
+          // console.log('shopOrQuery...userFollowees=====', userFollowees)
+
+          Promise.all(topicOrQueryArr).then((topicLcInfos)=>{
+            // console.log('topicLcInfos===************', topicLcInfos)
+            var topicInfos = []
+            if(topicLcInfos && topicLcInfos.length) {
+              topicLcInfos.forEach((topicLcInfo)=>{
+                var topicInfo = authUtils.topicInfoFromLeancloudObject(topicLcInfo[0])
+                topicInfos.push(topicInfo)
+              })
+              authUtils.userFolloweesConcatTopicInfo(userFollowees, topicInfos)
+            }
+
+            Promise.all(followerQueryArr).then((followersCounts)=>{
+              // console.log('followersCounts====', followersCounts)
+              userFollowees.forEach((item, index)=>{
+                item.followersCounts = followersCounts[index]
+              })
+
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowees: userFollowees,
+              })
+            }, (err)=>{
+              console.log('followerQueryArr===err=', err)
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowees: userFollowees,
+              })
+            })
+
+          }, (err)=>{
+            console.log('topicOrQueryArr===err=', err)
+            response.success({
+              code: 0,
+              message: '成功',
+              userFollowees: userFollowees,
+            })
+          })
+
+        }, (err)=>{
+          console.log('shopOrQuery===', err)
+
+          response.success({
+            code: 0,
+            message: '成功',
+            userFollowees: userFollowees,
+          })
+        })
+
+      }else {
+        response.success({
+          code: 0,
+          message: '成功',
+          userFollowees: userFollowees
+        })
+      }
+      
+    }catch(error) {
+      response.error({
+        code: -2,
+        message: err.message || '失败'
+      })
+    }
+
+  }, function(err) {
+    response.error({
+      code: -1,
+      message: err.message || '失败'
+    })
+  })
+}
 
 function login(request, response) {
   var token = request.params.token;
@@ -13,7 +164,7 @@ function login(request, response) {
 
   if(token) {
     AV.User.become(token).then((userLcObj) => {
-      
+
       var currentDate = new Date()
 
       //1、即使更新失败，也需要返回用户登录信息，保证app可用性
@@ -286,6 +437,7 @@ function setUserNickname(request, response) {
 }
 
 var authFunc = {
+  fetchUserFollowees: fetchUserFollowees,
   login: login,
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   getDocterList: getDocterList,
