@@ -139,7 +139,10 @@ AV.Cloud.define('promoterSetShopTenant', TenantFeeFunc.setShopTenantFee)
 
 //Ping++支付
 AV.Cloud.define('hLifeCreatePayment', PingppFunc.createPayment)
+AV.Cloud.define('hLifeCreateTransfers', PingppFunc.createTransfers)
 AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
+AV.Cloud.define('hLifeTransfersEvent', PingppFunc.transfersEvent)
+AV.Cloud.define('hLifeIdNameCardNumberIdentify', PingppFunc.idNameCardNumberIdentify)
 
 
 module.exports = AV.Cloud;

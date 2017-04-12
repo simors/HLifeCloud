@@ -59,11 +59,84 @@ function paymentEvent(request,response) {
   })
 }
 
+function createTransfers(request, response) {
+  console.log("createTransfers request.params:", request.params)
+  var order_no = request.params.order_no
+  var amount = request.params.amount
+  var cardNumber = request.params.cardNumber
+  var userName = request.params.userName
+
+
+  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
+
+  pingpp.transfers.create({
+    order_no:  order_no,
+    app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
+    channel:     "unionpay",// 企业付款（银行卡）
+    amount:    amount,
+    currency:    "cny",
+    type:        "b2c",
+    extra:       {
+      card_number: cardNumber,
+      user_name: userName,
+      open_bank_code: "0102"
+    },
+    description: "Your Description"
+  }, function (err, transfer) {
+    if (err != null) {
+      console.log("pingpp.transfers.create fail:", err)
+      response.error({
+        errcode: 1,
+        message: '[PingPP] create transfers failed!',
+      })
+    }
+    response.success({
+      errcode: 0,
+      message: '[PingPP] create transfers success!',
+      transfer: transfer,
+    })
+  })
+
+}
+
+function transfersEvent(request, response) {
+  console.log("transfersEvent request.params:", request.params)
+
+  response.success({
+    errcode: 0,
+    message: 'transfersEvent response success!',
+  })
+}
+
+function idNameCardNumberIdentify(request, response) {
+  var cardNumber = request.params.cardNumber
+  var userName = request.params.userName
+  var idNumber = reques
+
+  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
+
+  pingpp.identification.identify({
+    type: 'bank_card',
+    app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
+    data: {
+      id_name: userName,
+      id_number: idNumber,
+      card_number: cardNumber
+    }
+  }, function (err, result) {
+    err && console.log(err.message);
+    result && console.log(result);
+    // YOUR CODE
+  })
+}
+
 
 var PingppFunc = {
   createPayment: createPayment,
+  createTransfers: createTransfers,
   paymentEvent: paymentEvent,
-
+  transfersEvent: transfersEvent,
+  idNameCardNumberIdentify: idNameCardNumberIdentify
 }
 
 module.exports = PingppFunc
