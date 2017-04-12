@@ -9,6 +9,85 @@ var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_SHOPKEEPER = require('../../constants/appConst').IDENTITY_SHOPKEEPER
 var PromoterFunc = require('../Promoter')
 
+function constructShopInfo(leanShop) {
+  var shop = {}
+  var shopAttr = leanShop.attributes
+  shop.id = leanShop.id
+  shop.name = shopAttr.name
+  shop.phone = shopAttr.phone
+  shop.shopName = shopAttr.shopName
+  shop.shopAddress = shopAttr.shopAddress
+  shop.coverUrl = shopAttr.coverUrl
+  shop.contactNumber = shopAttr.contactNumber
+  shop.contactNumber2 = shopAttr.contactNumber2
+  shop.certification = shopAttr.certification
+  shop.status = shopAttr.status
+
+  var targetShopCategory = {}
+  if (shopAttr.targetShopCategory && shopAttr.targetShopCategory.attributes) {
+    var targetShopCategoryAttr = shopAttr.targetShopCategory.attributes
+    targetShopCategory.imageSource = targetShopCategoryAttr.imageSource
+    targetShopCategory.shopCategoryId = targetShopCategoryAttr.shopCategoryId
+    targetShopCategory.status = targetShopCategoryAttr.status
+    targetShopCategory.text = targetShopCategoryAttr.text
+    targetShopCategory.id = shopAttr.targetShopCategory.id
+  }
+  shop.targetShopCategory = targetShopCategory
+
+  var owner = {}
+  if (shopAttr.owner && shopAttr.owner.attributes) {
+    var ownerAttrs = shopAttr.owner.attributes
+    owner.nickname = ownerAttrs.nickname
+    owner.avatar = ownerAttrs.avatar
+    owner.id = shopAttr.owner.id
+  }
+  shop.owner = owner
+
+  var containedTag = []
+  if(shopAttr.containedTag && shopAttr.containedTag.length) {
+    shopAttr.containedTag.forEach((item)=>{
+      var containedTagAttrs = item.attributes
+      var tag = {
+        id: item.id,
+        name: containedTagAttrs.name,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }
+      containedTag.push(tag)
+    })
+  }
+  shop.containedTag = containedTag
+
+  var containedPromotions = []
+  if(shopAttr.containedPromotions && shopAttr.containedPromotions.length) {
+    shopAttr.containedPromotions.forEach((promotion)=>{
+      // TODO: 获取推广信息
+      var promotionRecord = {
+        id: promotion.id,
+      }
+      containedPromotions.push(promotionRecord)
+    })
+  }
+  shop.containedPromotions = containedPromotions
+
+  shop.geo = shopAttr.geo
+  shop.geoName = shopAttr.geoName
+  shop.geoCity = shopAttr.geoCity
+  shop.geoDistrict = shopAttr.geoDistrict
+  shop.pv = shopAttr.pv
+  shop.score = shopAttr.score
+  shop.ourSpecial = shopAttr.ourSpecial
+  shop.openTime = shopAttr.openTime
+  shop.album = shopAttr.album
+  shop.payment = shopAttr.payment
+  shop.tenant = shopAttr.tenant
+  shop.createdAt = leanShop.createdAt
+  shop.updatedAt = leanShop.updatedAt
+
+  console.log(shop)
+
+  return shop
+}
 
 function fetchShopCommentList(request, response) {
   var shopId = request.params.id
@@ -305,6 +384,7 @@ function getShopById(shopId, includeOwner) {
 }
 
 var shopFunc = {
+  constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
   fetchShopCommentReplyList: fetchShopCommentReplyList,
   fetchShopCommentUpedUserList: fetchShopCommentUpedUserList,
