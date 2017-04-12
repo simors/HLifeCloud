@@ -268,7 +268,6 @@ function getUpPromoter(promoter, includeUser) {
  */
 function getUpPromoterByUserId(request, response) {
   var userId = request.params.userId
-  var constructUserInfo = require('../Auth').constructUserInfo
 
   var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
@@ -278,6 +277,7 @@ function getUpPromoterByUserId(request, response) {
 
   query.first().then((promoter) => {
     getUpPromoter(promoter, true).then((upPromoter) => {
+      var constructUserInfo = require('../Auth').constructUserInfo
       response.success({
         errcode: 0,
         promoter: upPromoter,
@@ -803,12 +803,12 @@ function fetchPromoter(request, response) {
  */
 function fetchPromoterDetail(request, response) {
   var promoterId = request.params.promoterId
-  var constructUserInfo = require('../Auth').constructUserInfo
 
   var query = new AV.Query('Promoter')
   query.include('user')
   query.include('upUser')
   query.get(promoterId).then((promoter) => {
+    var constructUserInfo = require('../Auth').constructUserInfo
     response.success({
       errcode: 0,
       promoter: promoter,
@@ -1372,7 +1372,6 @@ function fetchPromoterTeam(request, response) {
   var currentUser = request.currentUser
   var limit = request.params.limit
   var lastUpdatedAt = request.params.lastUpdatedAt
-  var constructUserInfo = require('../Auth').constructUserInfo
 
   if (!limit) {
     limit = 10
@@ -1387,6 +1386,7 @@ function fetchPromoterTeam(request, response) {
     query.lessThan('updatedAt', new Date(lastUpdatedAt))
   }
   query.find().then((promoters) => {
+    var constructUserInfo = require('../Auth').constructUserInfo
     var users = []
     promoters.forEach((promoter) => {
       users.push(constructUserInfo(promoter.attributes.user))
@@ -1414,7 +1414,6 @@ function fetchPromoterTeamById(request, response) {
 
   getPromoterById(promoterId, true).then((promoter) => {
     var user = promoter.attributes.user
-    var constructUserInfo = require('../Auth').constructUserInfo
 
     var query = new AV.Query('Promoter')
     query.include('user')
@@ -1426,6 +1425,7 @@ function fetchPromoterTeamById(request, response) {
     }
     return query.find()
   }).then((promoters) => {
+    var constructUserInfo = require('../Auth').constructUserInfo
     var users = []
     promoters.forEach((promoter) => {
       users.push(constructUserInfo(promoter.attributes.user))
