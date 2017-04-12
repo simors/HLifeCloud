@@ -109,15 +109,16 @@ function transfersEvent(request, response) {
 }
 
 function idNameCardNumberIdentify(request, response) {
+  console.log("idNameCardNumberIdentify request.params)", request.params)
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
-  var idNumber = reques
+  var idNumber = request.params.idNumber
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
   pingpp.identification.identify({
     type: 'bank_card',
-    app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
+    app: GLOBAL_CONFIG.PINGPP_APP_ID,
     data: {
       id_name: userName,
       id_number: idNumber,
@@ -127,6 +128,18 @@ function idNameCardNumberIdentify(request, response) {
     err && console.log(err.message);
     result && console.log(result);
     // YOUR CODE
+    if (err != null) {
+      console.log("pingpp.identification.identify fail:", err)
+      response.error({
+        errcode: 1,
+        message: '[PingPP] identification identify failed!',
+      })
+    }
+    response.success({
+      errcode: 0,
+      message: '[PingPP] identification identify success!',
+      result: result,
+    })
   })
 }
 
