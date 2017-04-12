@@ -50,7 +50,6 @@ function constructShopInfo(leanShop) {
       var tag = {
         id: item.id,
         name: containedTagAttrs.name,
-        createdDate: item.createdAt,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       }
