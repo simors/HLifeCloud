@@ -7,6 +7,31 @@ var Promise = require('bluebird');
 var authUtils = require('../../utils/authUtils');
 var shopUtil = require('../../utils/shopUtil');
 
+/**
+ * 构造response要返回的User信息
+ * @param user
+ */
+function constructUserInfo(user) {
+  var userInfo = {}
+  userInfo.id = user.id
+  userInfo.nickname = user.attributes.nickname
+  userInfo.username = user.attributes.username
+  userInfo.birthday = user.attributes.birthday
+  userInfo.phone = user.attributes.mobilePhoneNumber
+  userInfo.status = user.attributes.status
+  userInfo.avatar = user.attributes.avatar
+  userInfo.gender = user.attributes.gender
+  userInfo.identity = user.attributes.identity
+  userInfo.geo = user.attributes.geo
+  userInfo.geoProvince = user.attributes.geoProvince
+  userInfo.geoProvinceCode = user.attributes.geoProvinceCode
+  userInfo.geoCity = user.attributes.getCity
+  userInfo.geoCityCode = user.attributes.geoCityCode
+  userInfo.geoDistrict = user.attributes.geoDistrict
+  userInfo.geoDistrictCode = user.attributes.geoDistrictCode
+  return userInfo
+}
+
 function fetchUserFollowees(request, response) {
   var isRefresh = request.params.isRefresh
   var lastCreatedAt = request.params.lastCreatedAt
@@ -437,6 +462,7 @@ function setUserNickname(request, response) {
 }
 
 var authFunc = {
+  constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
   login: login,
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,

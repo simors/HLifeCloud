@@ -72,31 +72,6 @@ if (!globalPromoterCfg) {
 }
 
 /**
- * 构造response要返回的User信息
- * @param user
- */
-function constructUserInfo(user) {
-  var userInfo = {}
-  userInfo.id = user.id
-  userInfo.nickname = user.attributes.nickname
-  userInfo.username = user.attributes.username
-  userInfo.birthday = user.attributes.birthday
-  userInfo.phone = user.attributes.mobilePhoneNumber
-  userInfo.status = user.attributes.status
-  userInfo.avatar = user.attributes.avatar
-  userInfo.gender = user.attributes.gender
-  userInfo.identity = user.attributes.identity
-  userInfo.geo = user.attributes.geo
-  userInfo.geoProvince = user.attributes.geoProvince
-  userInfo.geoProvinceCode = user.attributes.geoProvinceCode
-  userInfo.geoCity = user.attributes.getCity
-  userInfo.geoCityCode = user.attributes.geoCityCode
-  userInfo.geoDistrict = user.attributes.geoDistrict
-  userInfo.geoDistrictCode = user.attributes.geoDistrictCode
-  return userInfo
-}
-
-/**
  * 配置推广系统参数
  * @param request
  * @param response
@@ -293,8 +268,11 @@ function getUpPromoter(promoter, includeUser) {
  */
 function getUpPromoterByUserId(request, response) {
   var userId = request.params.userId
+  var constructUserInfo = require('../Auth').constructUserInfo
+
   var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
+
   query.equalTo('user', user)
   query.include('upUser')
 
@@ -825,6 +803,8 @@ function fetchPromoter(request, response) {
  */
 function fetchPromoterDetail(request, response) {
   var promoterId = request.params.promoterId
+  var constructUserInfo = require('../Auth').constructUserInfo
+
   var query = new AV.Query('Promoter')
   query.include('user')
   query.include('upUser')
@@ -1392,6 +1372,7 @@ function fetchPromoterTeam(request, response) {
   var currentUser = request.currentUser
   var limit = request.params.limit
   var lastUpdatedAt = request.params.lastUpdatedAt
+  var constructUserInfo = require('../Auth').constructUserInfo
 
   if (!limit) {
     limit = 10
@@ -1433,6 +1414,8 @@ function fetchPromoterTeamById(request, response) {
 
   getPromoterById(promoterId, true).then((promoter) => {
     var user = promoter.attributes.user
+    var constructUserInfo = require('../Auth').constructUserInfo
+
     var query = new AV.Query('Promoter')
     query.include('user')
     query.equalTo('upUser', user)
@@ -1462,6 +1445,7 @@ function fetchPromoterShop(request, response) {
   var currentUser = request.currentUser
   var limit = request.params.limit
   var lastCreatedAt = request.params.lastCreatedAt
+  var constructShopInfo = require('../Shop').constructShopInfo
 
   if (!limit) {
     limit = 10
@@ -1470,13 +1454,19 @@ function fetchPromoterShop(request, response) {
   var query = new AV.Query('Shop')
   query.equalTo('inviter', currentUser)
   query.descending('createdAt')
+  query.include(['targetShopCategory', 'owner', 'containedTag', 'containedPromotions'])
   query.limit(limit)
   if (lastCreatedAt) {
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
   query.find().then((shops) => {
-    response.success({errcode: 0, shops: shops})
+    var retShops = []
+    shops.forEach((shop) => {
+      retShops.push(constructShopInfo(shop))
+    })
+    response.success({errcode: 0, shops: retShops})
   }).catch((err) => {
+    console.log(err)
     response.error({errcode: 1, message: '获取团队成员失败'})
   })
 }
@@ -1490,6 +1480,7 @@ function fetchPromoterShopById(request, response) {
   var promoterId = request.params.promoterId
   var limit = request.params.limit
   var lastCreatedAt = request.params.lastCreatedAt
+  var constructShopInfo = require('../Shop').constructShopInfo
 
   if (!limit) {
     limit = 10
@@ -1500,13 +1491,18 @@ function fetchPromoterShopById(request, response) {
     var query = new AV.Query('Shop')
     query.equalTo('inviter', user)
     query.descending('createdAt')
+    query.include(['targetShopCategory', 'owner', 'containedTag', 'containedPromotions'])
     query.limit(limit)
     if (lastCreatedAt) {
       query.lessThan('createdAt', new Date(lastCreatedAt))
     }
     return query.find()
   }).then((shops) => {
-    response.success({errcode: 0, shops: shops})
+    var retShops = []
+    shops.forEach((shop) => {
+      retShops.push(constructShopInfo(shop))
+    })
+    response.success({errcode: 0, shops: retShops})
   }).catch((err) => {
     response.error({errcode: 1, message: '获取团队成员失败'})
   })
