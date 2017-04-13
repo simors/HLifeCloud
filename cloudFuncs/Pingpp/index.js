@@ -113,6 +113,7 @@ function idNameCardNumberIdentify(request, response) {
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
   var idNumber = request.params.idNumber
+  var phoneNumber = request.params.phoneNumber
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
@@ -122,7 +123,8 @@ function idNameCardNumberIdentify(request, response) {
     data: {
       id_name: userName,
       id_number: idNumber,
-      card_number: cardNumber
+      card_number: cardNumber,
+      phone_number: phoneNumber
     }
   }, function (err, result) {
     err && console.log(err.message);
