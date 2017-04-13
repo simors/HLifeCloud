@@ -106,7 +106,7 @@ function fetchUserFollowees(request, response) {
         shopOrQuery.find().then((shopLcInfos)=>{
           // console.log('shopOrQuery...shopLcInfos=====', shopLcInfos)
           var shopInfos = shopUtil.shopFromLeancloudObject(shopLcInfos)
-          authUtils.userFolloweesConcatShopInfo(userFollowees, shopInfos)
+          authUtils.userInfosConcatShopInfo(userFollowees, shopInfos)
           // console.log('shopOrQuery...userFollowees=====', userFollowees)
 
           Promise.all(topicOrQueryArr).then((topicLcInfos)=>{
@@ -117,7 +117,7 @@ function fetchUserFollowees(request, response) {
                 var topicInfo = authUtils.topicInfoFromLeancloudObject(topicLcInfo[0])
                 topicInfos.push(topicInfo)
               })
-              authUtils.userFolloweesConcatTopicInfo(userFollowees, topicInfos)
+              authUtils.userInfosConcatTopicInfo(userFollowees, topicInfos)
             }
 
             Promise.all(followerQueryArr).then((followersCounts)=>{
@@ -164,6 +164,156 @@ function fetchUserFollowees(request, response) {
           code: 0,
           message: '成功',
           userFollowees: userFollowees
+        })
+      }
+      
+    }catch(error) {
+      response.error({
+        code: -2,
+        message: err.message || '失败'
+      })
+    }
+
+  }, function(err) {
+    response.error({
+      code: -1,
+      message: err.message || '失败'
+    })
+  })
+}
+
+function fetchUserFollowers(request, response) {
+  var isRefresh = request.params.isRefresh
+  var lastCreatedAt = request.params.lastCreatedAt
+  var userId = request.params.userId
+
+  var user = null
+  if(userId) {
+    user = AV.Object.createWithoutData('_User', userId)
+  }else {
+    user = request.currentUser
+  }
+
+  var query = new AV.Query('_Follower')
+
+  query.equalTo('user', user)
+  query.include(['follower'])
+  query.addDescending('createdAt')
+  query.limit(5) // 最多返回 5 条结果
+
+  if(!isRefresh) { //分页查询
+    if(!lastCreatedAt) {
+      console.log('分页查询分页查询分页查询分页查询')
+      response.error({
+        code: -3,
+        message: 'lastCreatedAt为空'
+      })
+      return
+    }
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  return query.find().then(function(results) {
+    // console.log('_Followee.results====', results)
+
+    try{
+      var userFollowers = []
+
+      if(results && results.length) {
+        var shopOrQueryArr = []
+        var topicOrQueryArr = []
+        var followerQueryArr = []
+
+        results.forEach((item, index) => {
+          var attrs = item.attributes
+          var follower = attrs.follower
+          var userInfo = authUtils.userInfoFromLeancloudObject(follower)
+          userFollowers.push(userInfo)
+
+          var owner = AV.Object.createWithoutData('_User', userInfo.id)
+
+          var shopQuery = new AV.Query('Shop')
+          shopQuery.equalTo('owner', owner)
+          shopQuery.equalTo('status', 1)
+          shopOrQueryArr.push(shopQuery)
+     
+          var topicQuery = new AV.Query('Topics')
+          topicQuery.equalTo('user', owner)
+          topicQuery.equalTo('status', 1)
+          topicQuery.addDescending('createdAt')
+          topicQuery.limit(1)//最新发布的话题
+          
+          topicOrQueryArr.push(topicQuery.find())
+
+          var followerQuery = new AV.Query('_Follower')
+          followerQuery.equalTo('user', owner)
+          followerQueryArr.push(followerQuery.count())
+        })
+
+        var shopOrQuery = AV.Query.or.apply(null, shopOrQueryArr)
+        shopOrQuery.include(['targetShopCategory', 'inviter', 'containedTag', 'containedPromotions'])
+
+        shopOrQuery.find().then((shopLcInfos)=>{
+          // console.log('shopOrQuery...shopLcInfos=====', shopLcInfos)
+          var shopInfos = shopUtil.shopFromLeancloudObject(shopLcInfos)
+          authUtils.userInfosConcatShopInfo(userFollowers, shopInfos)
+          // console.log('shopOrQuery...userFollowers=====', userFollowers)
+
+          Promise.all(topicOrQueryArr).then((topicLcInfos)=>{
+            // console.log('topicLcInfos===************', topicLcInfos)
+            var topicInfos = []
+            if(topicLcInfos && topicLcInfos.length) {
+              topicLcInfos.forEach((topicLcInfo)=>{
+                var topicInfo = authUtils.topicInfoFromLeancloudObject(topicLcInfo[0])
+                topicInfos.push(topicInfo)
+              })
+              authUtils.userInfosConcatTopicInfo(userFollowers, topicInfos)
+            }
+
+            Promise.all(followerQueryArr).then((followersCounts)=>{
+              // console.log('followersCounts====', followersCounts)
+              userFollowers.forEach((item, index)=>{
+                item.followersCounts = followersCounts[index]
+              })
+
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowers: userFollowers,
+              })
+            }, (err)=>{
+              console.log('followerQueryArr===err=', err)
+              response.success({
+                code: 0,
+                message: '成功',
+                userFollowers: userFollowers,
+              })
+            })
+
+          }, (err)=>{
+            console.log('topicOrQueryArr===err=', err)
+            response.success({
+              code: 0,
+              message: '成功',
+              userFollowers: userFollowers,
+            })
+          })
+
+        }, (err)=>{
+          console.log('shopOrQuery===', err)
+
+          response.success({
+            code: 0,
+            message: '成功',
+            userFollowers: userFollowers,
+          })
+        })
+
+      }else {
+        response.success({
+          code: 0,
+          message: '成功',
+          userFollowers: userFollowers
         })
       }
       
@@ -464,6 +614,7 @@ function setUserNickname(request, response) {
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
+  fetchUserFollowers: fetchUserFollowers,
   login: login,
   modifyMobilePhoneVerified: modifyMobilePhoneVerified,
   getDocterList: getDocterList,
