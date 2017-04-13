@@ -102,6 +102,7 @@ AV.Cloud.define('hLifeGetProviceList', baiduFunc.getProviceList)
 AV.Cloud.define('hLifeGetCityList', baiduFunc.getCityList)
 AV.Cloud.define('hLifeGetDistrictList', baiduFunc.getDistrictList)
 AV.Cloud.define('hLifeGetAllCityMap', baiduFunc.getAllCityMap)
+AV.Cloud.define('hLifeGetAreaListByAreaName', baiduFunc.getAreaListByAreaName)
 
 // 用户积分
 AV.Cloud.define('pointsGetUserPoint', PointsMallFunc.getUserPoint)
