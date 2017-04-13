@@ -90,9 +90,9 @@ function topicInfoFromLeancloudObject(lcObj) {
 	}
 }
 
-function userFolloweesConcatShopInfo(userFollowees, shopInfos) {
-	if(userFollowees && userFollowees.length) {
-		userFollowees.forEach((item)=>{
+function userInfosConcatShopInfo(userInfos, shopInfos) {
+	if(userInfos && userInfos.length) {
+		userInfos.forEach((item)=>{
 			if(shopInfos && shopInfos.length) {
 				for(var i = 0; i < shopInfos.length; i++) {
 					if(shopInfos[i].owner && item.id == shopInfos[i].owner.id) {
@@ -105,9 +105,9 @@ function userFolloweesConcatShopInfo(userFollowees, shopInfos) {
 	}
 }
 
-function userFolloweesConcatTopicInfo(userFollowees, topicInfos) {
-	if(userFollowees && userFollowees.length) {
-		userFollowees.forEach((item)=>{
+function userInfosConcatTopicInfo(userInfos, topicInfos) {
+	if(userInfos && userInfos.length) {
+		userInfos.forEach((item)=>{
 			if(topicInfos && topicInfos.length) {
 				for(var i = 0; i < topicInfos.length; i++) {
 					if(topicInfos[i].user && item.id == topicInfos[i].user.id) {
@@ -122,9 +122,9 @@ function userFolloweesConcatTopicInfo(userFollowees, topicInfos) {
 
 var authUtils = {
   userInfoFromLeancloudObject: userInfoFromLeancloudObject,
-  userFolloweesConcatShopInfo: userFolloweesConcatShopInfo,
+  userInfosConcatShopInfo: userInfosConcatShopInfo,
   topicInfoFromLeancloudObject: topicInfoFromLeancloudObject,
-  userFolloweesConcatTopicInfo: userFolloweesConcatTopicInfo,
+  userInfosConcatTopicInfo: userInfosConcatTopicInfo,
 }
 
 module.exports = authUtils
