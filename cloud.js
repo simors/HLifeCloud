@@ -26,6 +26,7 @@ AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
 AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
 
 AV.Cloud.define('hLifeFetchUserFollowees', authFunc.fetchUserFollowees)
+AV.Cloud.define('hLifeFetchUserFollowers', authFunc.fetchUserFollowers)
 AV.Cloud.define('hLifeLogin', authFunc.login)
 AV.Cloud.define('hLifeModifyMobilePhoneVerified', authFunc.modifyMobilePhoneVerified)
 AV.Cloud.define('hLifeGetDocterList', authFunc.getDocterList)
@@ -41,6 +42,8 @@ AV.Cloud.define('hLifeShopCertificate',shopFunc.shopCertificate)
 AV.Cloud.define('hLifeGetShopInviter',shopFunc.getShopInviter)
 AV.Cloud.define('hLifeGetShopPromotionMaxNum',shopFunc.getShopPromotionMaxNum)
 AV.Cloud.define('hLifeUnregistShop', shopFunc.unregistShop)
+AV.Cloud.define('hLifeFetchShopFollowers', shopFunc.fetchShopFollowers)
+
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
