@@ -1517,6 +1517,49 @@ function getPromoterTenant(request, response) {
   response.success({tenant: globalPromoterCfg.promoterCharge})
 }
 
+/**
+ * 根据代理级别获取对应的统计数据
+ * @param request
+ * @param response
+ */
+function getTotalPerformanceStat(request, response) {
+  var identity = request.params.identity
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+
+  var query = new AV.Query('Promoter')
+  if (identity == APPCONST.AGENT_PROVINCE) {
+    query.equalTo('liveProvince', province)
+  } else if (identity == APPCONST.AGENT_CITY) {
+    query.equalTo('liveProvince', province)
+    query.equalTo('liveCity', city)
+  } else if (identity == APPCONST.AGENT_DISTRICT) {
+    query.equalTo('liveProvince', province)
+    query.equalTo('liveCity', city)
+    query.equalTo('liveDistrict', district)
+  }
+  query.find().then((promoters) => {
+    var totalInvitedShops = 0
+    var totalTeamMems = 0
+    var totalPerformance = 0
+    promoters.forEach((promoter) => {
+      totalInvitedShops += promoter.attributes.inviteShopNum
+      totalTeamMems += promoter.attributes.teamMemNum
+      totalPerformance += promoter.attributes.shopEarnings + promoter.attributes.royaltyEarnings
+    })
+    response.success({
+      errcode: 0,
+      totalInvitedShops,
+      totalTeamMems,
+      totalPerformance,
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计信息失败'})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -1543,6 +1586,7 @@ var PromoterFunc = {
   fetchPromoterShop: fetchPromoterShop,
   fetchPromoterShopById: fetchPromoterShopById,
   getPromoterTenant: getPromoterTenant,
+  getTotalPerformanceStat: getTotalPerformanceStat,
 }
 
 module.exports = PromoterFunc
