@@ -74,7 +74,11 @@ function constructShopInfo(leanShop) {
   shop.geo = shopAttr.geo
   shop.geoName = shopAttr.geoName
   shop.geoCity = shopAttr.geoCity
+  shop.geoCityCode = shopAttr.geoCityCode
+  shop.geoDistrictCode = shopAttr.geoDistrictCode
   shop.geoDistrict = shopAttr.geoDistrict
+  shop.geoProvince = shopAttr.geoProvince
+  shop.geoProvinceCode = shopAttr.geoProvinceCode
   shop.pv = shopAttr.pv
   shop.score = shopAttr.score
   shop.ourSpecial = shopAttr.ourSpecial
