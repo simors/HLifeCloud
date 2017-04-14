@@ -233,11 +233,14 @@ function shopCertificate(request, response) {
     var shopName = request.params.shopName
     var shopAddress = request.params.shopAddress
     var geo = request.params.geo
+    var geoProvince = request.params.geoProvince
+    var geoProvinceCode = request.params.geoProvinceCode
+    var geoCityCode = request.params.geoCityCode
+    var geoDistrictCode = request.params.geoDistrictCode
     var geoCity = request.params.geoCity
     var geoDistrict = request.params.geoDistrict
     var certification = request.params.certification
     var inviterId = reply
-
 
     var Shop = AV.Object.extend('Shop')
     var shop = new Shop()
@@ -251,8 +254,12 @@ function shopCertificate(request, response) {
       var point = new AV.GeoPoint(geo)
       shop.set('geo', point)
     }
+    shop.set('geoProvince', geoProvince + '')
+    shop.set('geoProvinceCode', geoProvinceCode + '')
     shop.set('geoCity', geoCity + '')
+    shop.set('geoCityCode', geoCityCode + '')
     shop.set('geoDistrict', geoDistrict + '')
+    shop.set('geoDistrictCode', geoDistrictCode + '')
     shop.set('owner', currentUser)
     shop.set('certification', certification + '')
     shop.set('inviter', inviter)
@@ -529,6 +536,53 @@ function fetchShopFollowers(request, response) {
   })
 }
 
+function updateShopLocationInfo(request, response) {
+  // console.log('updateShopLocationInfo.request.params=====', request.params)
+
+  var shopId = request.params.shopId;
+
+  var province = request.params.province;
+  var provinceCode = request.params.provinceCode;
+
+  var city = request.params.city;
+  var cityCode = request.params.cityCode;
+
+  var district = request.params.district;
+  var districtCode = request.params.districtCode;
+
+  var latitude = request.params.latitude;
+  var longitude = request.params.longitude;
+  var geoPoint = null
+  if(latitude && longitude) {
+    geoPoint = new AV.GeoPoint([parseFloat(latitude), parseFloat(longitude)])
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  if(province) {
+    shop.set('geoProvince', province + "")
+    shop.set('geoProvinceCode', provinceCode + "")
+  }
+  if(city) {
+    shop.set('geoCity', city + "")
+    shop.set('geoCityCode', cityCode + "")
+  }
+  if(district) {
+    shop.set('geoDistrict', district + "")
+    shop.set('geoDistrictCode', districtCode + "")
+  }
+
+  if(geoPoint) {
+    shop.set('geo', geoPoint)
+  }
+
+  return shop.save().then(function(result){
+    response.success(result)
+  }, function(error){
+    console.log('updateShopLocationInfo.error====', error)
+    response.error('update fail', error)
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -540,6 +594,7 @@ var shopFunc = {
   unregistShop: unregistShop,
   getShopById: getShopById,
   fetchShopFollowers: fetchShopFollowers,
+  updateShopLocationInfo: updateShopLocationInfo,
 }
 
 module.exports = shopFunc
