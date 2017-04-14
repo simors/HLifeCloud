@@ -1560,6 +1560,15 @@ function getTotalPerformanceStat(request, response) {
   })
 }
 
+/**
+ * 获取区域代理的信息，包括代理的地区，地区的入驻费，代理人信息
+ * @param request
+ * @param response
+ */
+function getAreaAgentMannagers(request, response) {
+  
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,

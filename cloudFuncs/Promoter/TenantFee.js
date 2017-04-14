@@ -70,6 +70,32 @@ function fetchShopTenantFee(request, response) {
 }
 
 /**
+ *
+ * @param province
+ * @param city
+ * @returns {*}
+ */
+function shopTenantByCity(province, city) {
+  var getPromoterConfig = require('./index').getPromoterConfig
+
+  var query = new AV.Query('PromoterShopTenantFee')
+  query.equalTo('province', province)
+  query.equalTo('city', city)
+
+  return query.first().then((tenant) => {
+    if (!tenant) {
+      return getPromoterConfig().then((syscfg) => {
+        return syscfg.minShopkeeperCharge
+      })
+    } else {
+      return new Promise((resolve) => {
+        resolve(tenant.attributes.fee)
+      })
+    }
+  })
+}
+
+/**
  * 根据城市名获取店铺入驻费
  * @param request
  * @param response
@@ -77,20 +103,9 @@ function fetchShopTenantFee(request, response) {
 function getShopTenantByCity(request, response) {
   var province = request.params.province
   var city = request.params.city
-  var getPromoterConfig = require('./index').getPromoterConfig
 
-  var query = new AV.Query('PromoterShopTenantFee')
-  query.equalTo('province', province)
-  query.equalTo('city', city)
-
-  query.first().then((tenant) => {
-    if (!tenant) {
-      getPromoterConfig().then((syscfg) => {
-        response.success({errcode: 0, tenant: syscfg.minShopkeeperCharge})
-      })
-    } else {
-      response.success({errcode: 0, tenant: tenant.attributes.fee})
-    }
+  shopTenantByCity(province, city).then((tenant) => {
+    response.success({errcode: 0, tenant: tenant})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取店铺入驻费失败'})
