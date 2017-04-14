@@ -281,7 +281,7 @@ function shopCertificate(request, response) {
     // console.log('shop========', shop)
     shop.save().then(function(shopInfo){
       currentUser.save().then(function(){
-        // console.log('shopCertificate==success==')
+        // console.log('shopCertificate==success=shopInfo=', shopInfo)
         PromoterFunc.incrementInviteShopNum(inviterId)
         response.success({
           errcode: 0,
