@@ -289,16 +289,12 @@ function getCityList(request, response) {
 }
 
 /**
- * getAreaListByAreaName
+ * getSubAreaByAreaName
  * 通过省份/城市名称获取下属区域（城市/区／县）
  * @param areaName
  * @param areaType: province|city
  */
-function getAreaListByAreaName(request, response) {
-
-  console.log("getAreaListByAreaName request", request.params)
-  var areaName = request.params.areaName
-  var areaType = request.params.areaType
+function getSubAreaByAreaName(areaName, areaType) {
 
   if(areaType == 'province') {
     baiduGetSubAreaList(1, function (results) {
@@ -308,18 +304,21 @@ function getAreaListByAreaName(request, response) {
           return value.area_name == areaName
         })
         if(index == -1) {
-          response.error("get failed!")
+          console.log("get failed!")
+          return false
         } else {
           baiduGetSubAreaList(provinceList[index].area_code, function (cityResults) {
             if(cityResults && cityResults.sub && cityResults.sub.length) {
-              response.success(cityResults.sub)
+              return cityResults.sub
             }else {
-              response.error("get failed!")
+              console.log("get failed!")
+              return false
             }
           })
         }
       }else {
-        response.error("get province areaInfo failed!")
+        console.log("get province areaInfo failed!")
+        return false
       }
     })
   } else if(areaType == 'city') {
@@ -334,19 +333,22 @@ function getAreaListByAreaName(request, response) {
           if(index != -1) {
             baiduGetSubAreaList(cityList[index].area_code, function (areaResults) {
               if (areaResults && areaResults.sub && areaResults.sub.length) {
-                response.success(areaResults.sub)
+                return areaResults.sub
               } else {
-                response.error("get city sub areaInfo failed!")
+                console.log("get city sub areaInfo failed!")
+                return false
               }
             })
           }
         })
       }else {
-        response.error("get city info failed!")
+        console.log("get city info failed!")
+        return false
       }
     })
   } else {
-    response.error("unknow areaType!")
+    console.log("unknow areaType!")
+    return false
   }
 }
 
@@ -379,7 +381,7 @@ var baiduFunc = {
   getSubAreaList: getSubAreaList,
   getSubAreaList2: getSubAreaList2,
   getAllCityMap: getAllCityMap,
-  getAreaListByAreaName: getAreaListByAreaName
+  getSubAreaByAreaName: getSubAreaByAreaName
 }
 
 module.exports = baiduFunc

@@ -74,7 +74,11 @@ function constructShopInfo(leanShop) {
   shop.geo = shopAttr.geo
   shop.geoName = shopAttr.geoName
   shop.geoCity = shopAttr.geoCity
+  shop.geoCityCode = shopAttr.geoCityCode
+  shop.geoDistrictCode = shopAttr.geoDistrictCode
   shop.geoDistrict = shopAttr.geoDistrict
+  shop.geoProvince = shopAttr.geoProvince
+  shop.geoProvinceCode = shopAttr.geoProvinceCode
   shop.pv = shopAttr.pv
   shop.score = shopAttr.score
   shop.ourSpecial = shopAttr.ourSpecial
@@ -227,17 +231,34 @@ function shopCertificate(request, response) {
       })
       return
     }
+
     var currentUser = request.currentUser
+    if(!currentUser) {
+      var userId = request.params.userId
+      if(userId) {
+        currentUser = AV.Object.createWithoutData('_User', userId)
+      }else{
+        response.error({
+          errcode: 1,
+          message: '获取用户信息失败',
+        })
+        return
+      }
+    }
+
     var name = request.params.name
     var phone = request.params.phone
     var shopName = request.params.shopName
     var shopAddress = request.params.shopAddress
     var geo = request.params.geo
+    var geoProvince = request.params.geoProvince
+    var geoProvinceCode = request.params.geoProvinceCode
+    var geoCityCode = request.params.geoCityCode
+    var geoDistrictCode = request.params.geoDistrictCode
     var geoCity = request.params.geoCity
     var geoDistrict = request.params.geoDistrict
     var certification = request.params.certification
     var inviterId = reply
-
 
     var Shop = AV.Object.extend('Shop')
     var shop = new Shop()
@@ -251,8 +272,12 @@ function shopCertificate(request, response) {
       var point = new AV.GeoPoint(geo)
       shop.set('geo', point)
     }
+    shop.set('geoProvince', geoProvince + '')
+    shop.set('geoProvinceCode', geoProvinceCode + '')
     shop.set('geoCity', geoCity + '')
+    shop.set('geoCityCode', geoCityCode + '')
     shop.set('geoDistrict', geoDistrict + '')
+    shop.set('geoDistrictCode', geoDistrictCode + '')
     shop.set('owner', currentUser)
     shop.set('certification', certification + '')
     shop.set('inviter', inviter)
@@ -260,11 +285,12 @@ function shopCertificate(request, response) {
     // console.log('shop========', shop)
     shop.save().then(function(shopInfo){
       currentUser.save().then(function(){
-        // console.log('shopCertificate==success==')
+        // console.log('shopCertificate==success=shopInfo=', shopInfo)
         PromoterFunc.incrementInviteShopNum(inviterId)
         response.success({
           errcode: 0,
-          message: '店铺注册认证成功'
+          message: '店铺注册认证成功',
+          shopInfo: shopInfo
         })
       }, function(error){
         var shopObj = AV.Object.createWithoutData('Shop', shopInfo.id)
@@ -529,6 +555,89 @@ function fetchShopFollowers(request, response) {
   })
 }
 
+function updateShopLocationInfo(request, response) {
+  // console.log('updateShopLocationInfo.request.params=====', request.params)
+
+  var shopId = request.params.shopId;
+
+  var province = request.params.province;
+  var provinceCode = request.params.provinceCode;
+
+  var city = request.params.city;
+  var cityCode = request.params.cityCode;
+
+  var district = request.params.district;
+  var districtCode = request.params.districtCode;
+
+  var latitude = request.params.latitude;
+  var longitude = request.params.longitude;
+  var geoPoint = null
+  if(latitude && longitude) {
+    geoPoint = new AV.GeoPoint([parseFloat(latitude), parseFloat(longitude)])
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  if(province) {
+    shop.set('geoProvince', province + "")
+    shop.set('geoProvinceCode', provinceCode + "")
+  }
+  if(city) {
+    shop.set('geoCity', city + "")
+    shop.set('geoCityCode', cityCode + "")
+  }
+  if(district) {
+    shop.set('geoDistrict', district + "")
+    shop.set('geoDistrictCode', districtCode + "")
+  }
+
+  if(geoPoint) {
+    shop.set('geo', geoPoint)
+  }
+
+  return shop.save().then(function(result){
+    response.success(result)
+  }, function(error){
+    console.log('updateShopLocationInfo.error====', error)
+    response.error('update fail', error)
+  })
+}
+
+function updateShopInfoAfterPaySuccess(request, response) {
+  var shopId = request.params.shopId;
+  var tenant = request.params.tenant;
+
+  if(!shopId || !tenant) {
+    response.error({
+      errcode: -1,
+      message: 'shopId or tenant is null',
+      shopId: shopId,
+      tenant: tenant
+    })
+    return
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  shop.set('tenant', tenant)
+  shop.set('payment', 1)
+
+  return shop.save().then(function(result){
+    response.success({
+      errcode: 0,
+      message: 'success',
+      shopId: shopId,
+      tenant: tenant
+    })
+  }, function(error){
+    console.log('updateShopInfoAfterPaySuccess.error====', error)
+    response.error({
+      errcode: error.code || -1,
+      message: error.message || 'fail',
+      shopId: shopId,
+      tenant: tenant
+    })
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -540,6 +649,8 @@ var shopFunc = {
   unregistShop: unregistShop,
   getShopById: getShopById,
   fetchShopFollowers: fetchShopFollowers,
+  updateShopLocationInfo: updateShopLocationInfo,
+  updateShopInfoAfterPaySuccess: updateShopInfoAfterPaySuccess,
 }
 
 module.exports = shopFunc

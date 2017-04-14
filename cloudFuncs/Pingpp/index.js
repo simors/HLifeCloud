@@ -5,9 +5,46 @@ var crypto = require('crypto')
 var GLOBAL_CONFIG = require('../../config')
 var pingpp = require('pingpp')(GLOBAL_CONFIG.PINGPP_API_KEY)
 var utilFunc = require('../util')
+var mysqlUtil = require('../util/mysqlUtil')
+var Promise = require('bluebird');
 
+
+
+/**
+ * 在mysql中插入支付记录
+ * @param promoterId
+ * @returns {Promise.<T>}
+ */
+function insertChargeInMysql(charge) {
+  console.log("insertChargeInMysql charge:", charge)
+  var created =new Date(charge.created * 1000).toISOString().slice(0, 19).replace('T', ' ')
+  console.log("charge.created:", created)
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCharge` WHERE `order_no` = ? LIMIT 1"
+    return mysqlUtil.query(conn, sql, [charge.order_no])
+  }).then((queryRes) => {
+    if (queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentCharge` (`order_no`, `channel`, `created`, `amount`, `currency`, `transaction_no`, `subject`, `user`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [charge.order_no, charge.channel, created, charge.amount, charge.currency, charge.transaction_no, charge.subject, charge.metadata.user])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
 
 function createPayment(request,response) {
+  var user = request.params.user
   var subject = request.params.subject
   var order_no = request.params.order_no
   var amount = request.params.amount
@@ -16,9 +53,29 @@ function createPayment(request,response) {
 
   console.log("createPayment local IPV4: ", IPV4)
 
-
-  // var channel = 'alipay'
   var extra = {};
+  var metadata = {};
+  // var channel = 'alipay'
+  switch (channel) {
+    case 'alipay':
+      extra = {
+
+      }
+      metadata = {
+        user: user,
+      }
+      break;
+    case 'wx':
+      extra = {
+
+      }
+      metadata = {
+        user: user,
+      }
+      break
+    default:
+      break;
+  }
   // var order_no = crypto.createHash('md5').update(new Date().getTime().toString()).digest('hex').substr(0, 16)
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
@@ -32,7 +89,8 @@ function createPayment(request,response) {
     subject:   subject,
     body:      "商品的描述信息",
     extra:     extra,
-    description: "店铺入驻费用"
+    description: "店铺入驻费用",
+    metadata: metadata,
   }, function(err, charge) {
     if (err != null) {
       console.log("pingpp.charges.create fail:", err)
@@ -51,11 +109,23 @@ function createPayment(request,response) {
 }
 
 function paymentEvent(request,response) {
-  console.log("paymentEvent request.params:", request.params)
+  console.log("paymentEvent request.params", request.params)
 
-  response.success({
-    errcode: 0,
-    message: 'paymentEvent response success!',
+  var charge = request.params.data.object
+
+
+  return insertChargeInMysql(charge).then(() => {
+    console.log("paymentEvent charge into mysql success!")
+    response.success({
+      errcode: 0,
+      message: 'paymentEvent charge into mysql success!',
+    })
+  }).catch((error) => {
+    console.log("paymentEvent charge into mysql fail!", error)
+    response.error({
+      errcode: 1,
+      message: 'paymentEvent charge into mysql fail!',
+    })
   })
 }
 

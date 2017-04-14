@@ -43,7 +43,7 @@ AV.Cloud.define('hLifeGetShopInviter',shopFunc.getShopInviter)
 AV.Cloud.define('hLifeGetShopPromotionMaxNum',shopFunc.getShopPromotionMaxNum)
 AV.Cloud.define('hLifeUnregistShop', shopFunc.unregistShop)
 AV.Cloud.define('hLifeFetchShopFollowers', shopFunc.fetchShopFollowers)
-
+AV.Cloud.define('hLifeUpdateShopLocationInfo', shopFunc.updateShopLocationInfo)
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
@@ -102,7 +102,6 @@ AV.Cloud.define('hLifeGetProviceList', baiduFunc.getProviceList)
 AV.Cloud.define('hLifeGetCityList', baiduFunc.getCityList)
 AV.Cloud.define('hLifeGetDistrictList', baiduFunc.getDistrictList)
 AV.Cloud.define('hLifeGetAllCityMap', baiduFunc.getAllCityMap)
-AV.Cloud.define('hLifeGetAreaListByAreaName', baiduFunc.getAreaListByAreaName)
 
 // 用户积分
 AV.Cloud.define('pointsGetUserPoint', PointsMallFunc.getUserPoint)
