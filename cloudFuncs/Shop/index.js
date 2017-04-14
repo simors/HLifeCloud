@@ -227,7 +227,20 @@ function shopCertificate(request, response) {
       })
       return
     }
+
     var currentUser = request.currentUser
+    if(!currentUser) {
+      var userId = request.params.userId
+      if(userId) {
+        currentUser = AV.Object.createWithoutData('_User', userId)
+      }else{
+        response.error({
+          errcode: 1,
+          message: '获取用户信息失败',
+        })
+        return
+      }
+    }
     var name = request.params.name
     var phone = request.params.phone
     var shopName = request.params.shopName
