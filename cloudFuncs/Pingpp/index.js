@@ -16,6 +16,7 @@ var Promise = require('bluebird');
  * @returns {Promise.<T>}
  */
 function insertChargeInMysql(charge) {
+  console.log("insertChargeInMysql charge:", charge)
   var created =new Date(charge.created * 1000).toISOString().slice(0, 19).replace('T', ' ')
   console.log("charge.created:", created)
   var sql = ""
@@ -26,8 +27,8 @@ function insertChargeInMysql(charge) {
     return mysqlUtil.query(conn, sql, [charge.order_no])
   }).then((queryRes) => {
     if (queryRes.results[0].cnt == 0) {
-      sql = "INSERT INTO `PaymentCharge` (`order_no`, `channel`, `created`, `amount`, `currency`, `transaction_no`, `subject`) VALUES (?, ?, ?, ?, ?, ?, ?)"
-      return mysqlUtil.query(queryRes.conn, sql, [charge.order_no, charge.channel, created, charge.amount, charge.currency, charge.transaction_no, charge.subject])
+      sql = "INSERT INTO `PaymentCharge` (`order_no`, `channel`, `created`, `amount`, `currency`, `transaction_no`, `subject`, `user`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [charge.order_no, charge.channel, created, charge.amount, charge.currency, charge.transaction_no, charge.subject, charge.metadata.user])
     } else {
       return new Promise((resolve) => {
         resolve()
@@ -43,6 +44,7 @@ function insertChargeInMysql(charge) {
 }
 
 function createPayment(request,response) {
+  var user = request.params.user
   var subject = request.params.subject
   var order_no = request.params.order_no
   var amount = request.params.amount
@@ -51,9 +53,29 @@ function createPayment(request,response) {
 
   console.log("createPayment local IPV4: ", IPV4)
 
-
-  // var channel = 'alipay'
   var extra = {};
+  var metadata = {};
+  // var channel = 'alipay'
+  switch (channel) {
+    case 'alipay':
+      extra = {
+
+      }
+      metadata = {
+        user: user,
+      }
+      break;
+    case 'wx':
+      extra = {
+
+      }
+      metadata = {
+        user: user,
+      }
+      break
+    default:
+      break;
+  }
   // var order_no = crypto.createHash('md5').update(new Date().getTime().toString()).digest('hex').substr(0, 16)
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
@@ -67,7 +89,8 @@ function createPayment(request,response) {
     subject:   subject,
     body:      "商品的描述信息",
     extra:     extra,
-    description: "店铺入驻费用"
+    description: "店铺入驻费用",
+    metadata: metadata,
   }, function(err, charge) {
     if (err != null) {
       console.log("pingpp.charges.create fail:", err)
