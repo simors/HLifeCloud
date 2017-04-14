@@ -241,6 +241,7 @@ function shopCertificate(request, response) {
         return
       }
     }
+
     var name = request.params.name
     var phone = request.params.phone
     var shopName = request.params.shopName
