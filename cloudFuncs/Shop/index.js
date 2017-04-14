@@ -285,7 +285,8 @@ function shopCertificate(request, response) {
         PromoterFunc.incrementInviteShopNum(inviterId)
         response.success({
           errcode: 0,
-          message: '店铺注册认证成功'
+          message: '店铺注册认证成功',
+          shopInfo: shopInfo
         })
       }, function(error){
         var shopObj = AV.Object.createWithoutData('Shop', shopInfo.id)
