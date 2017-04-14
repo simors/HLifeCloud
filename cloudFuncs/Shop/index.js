@@ -74,7 +74,11 @@ function constructShopInfo(leanShop) {
   shop.geo = shopAttr.geo
   shop.geoName = shopAttr.geoName
   shop.geoCity = shopAttr.geoCity
+  shop.geoCityCode = shopAttr.geoCityCode
+  shop.geoDistrictCode = shopAttr.geoDistrictCode
   shop.geoDistrict = shopAttr.geoDistrict
+  shop.geoProvince = shopAttr.geoProvince
+  shop.geoProvinceCode = shopAttr.geoProvinceCode
   shop.pv = shopAttr.pv
   shop.score = shopAttr.score
   shop.ourSpecial = shopAttr.ourSpecial
@@ -598,6 +602,42 @@ function updateShopLocationInfo(request, response) {
   })
 }
 
+function updateShopInfoAfterPaySuccess(request, response) {
+  var shopId = request.params.shopId;
+  var tenant = request.params.tenant;
+
+  if(!shopId || !tenant) {
+    response.error({
+      errcode: -1,
+      message: 'shopId or tenant is null',
+      shopId: shopId,
+      tenant: tenant
+    })
+    return
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  shop.set('tenant', tenant)
+  shop.set('payment', 1)
+
+  return shop.save().then(function(result){
+    response.success({
+      errcode: 0,
+      message: 'success',
+      shopId: shopId,
+      tenant: tenant
+    })
+  }, function(error){
+    console.log('updateShopInfoAfterPaySuccess.error====', error)
+    response.error({
+      errcode: error.code || -1,
+      message: error.message || 'fail',
+      shopId: shopId,
+      tenant: tenant
+    })
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -610,6 +650,7 @@ var shopFunc = {
   getShopById: getShopById,
   fetchShopFollowers: fetchShopFollowers,
   updateShopLocationInfo: updateShopLocationInfo,
+  updateShopInfoAfterPaySuccess: updateShopInfoAfterPaySuccess,
 }
 
 module.exports = shopFunc
