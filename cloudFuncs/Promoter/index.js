@@ -1565,8 +1565,30 @@ function getTotalPerformanceStat(request, response) {
  * @param request
  * @param response
  */
-function getAreaAgentMannagers(request, response) {
-  
+function getAreaAgentManagers(request, response) {
+  var identity = request.params.identity
+  var province = request.params.province
+  var city = request.params.city
+  var shopTenantByCity = require('./TenantFee').shopTenantByCity
+
+  var subAreas = []
+
+  var query = new AV.Query('Promoter')
+  if (identity == APPCONST.AGENT_PROVINCE) {
+    query.equalTo('province', province)
+    query.containedIn('city', ['长沙', '湘潭'])
+  } else if (identity == APPCONST.AGENT_CITY) {
+    query.equalTo('province', province)
+    query.equalTo('city', city)
+    query.containedIn('district', subAreas)
+  }
+  query.include('user')
+  query.find().then((promoters) => {
+    response.success({errcode: 0, promoters})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取区域代理信息失败'})
+  })
 }
 
 var PromoterFunc = {
@@ -1596,6 +1618,7 @@ var PromoterFunc = {
   fetchPromoterShopById: fetchPromoterShopById,
   getPromoterTenant: getPromoterTenant,
   getTotalPerformanceStat: getTotalPerformanceStat,
+  getAreaAgentManagers: getAreaAgentManagers,
 }
 
 module.exports = PromoterFunc

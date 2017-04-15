@@ -135,6 +135,7 @@ AV.Cloud.define('promoterGetPromoterShops', PromoterFunc.fetchPromoterShop)
 AV.Cloud.define('promoterGetPromoterShopsById', PromoterFunc.fetchPromoterShopById)
 AV.Cloud.define('promoterGetPromoterTenant', PromoterFunc.getPromoterTenant)
 AV.Cloud.define('promoterGetTotalPerformance', PromoterFunc.getTotalPerformanceStat)
+AV.Cloud.define('promoterGetAreaAgentManager', PromoterFunc.getAreaAgentManagers)
 
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)

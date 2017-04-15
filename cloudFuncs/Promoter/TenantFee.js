@@ -155,6 +155,7 @@ function setShopTenantFee(request, response) {
 }
 
 var tenantFee = {
+  shopTenantByCity: shopTenantByCity,
   fetchShopTenantFee: fetchShopTenantFee,
   getShopTenantByCity: getShopTenantByCity,
   setShopTenantFee: setShopTenantFee,
