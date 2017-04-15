@@ -6,7 +6,8 @@ var GLOBAL_CONFIG = require('../../config')
 var pingpp = require('pingpp')(GLOBAL_CONFIG.PINGPP_API_KEY)
 var utilFunc = require('../util')
 var mysqlUtil = require('../util/mysqlUtil')
-var Promise = require('bluebird');
+var Promise = require('bluebird')
+var shopFunc = require('../../cloudFuncs/Shop')
 
 
 
@@ -112,10 +113,14 @@ function paymentEvent(request,response) {
   console.log("paymentEvent request.params", request.params)
 
   var charge = request.params.data.object
+  var shopId = charge.metadata.shopId
+  var amount = charge.amount
 
 
   return insertChargeInMysql(charge).then(() => {
     console.log("paymentEvent charge into mysql success!")
+    if(shopId && amount)
+      shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
     response.success({
       errcode: 0,
       message: 'paymentEvent charge into mysql success!',
