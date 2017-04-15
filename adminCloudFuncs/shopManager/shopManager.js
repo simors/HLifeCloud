@@ -309,6 +309,7 @@ function getShopList(request, response) {
         targetShopCategory:targetShopCategory,
         containedTag:tags,
         score:result.attributes.score,
+        certification:result.attributes.certification,
         pv:result.attributes.pv,
         phone:result.attributes.phone,
         geoCity:result.attributes.geoCity,
