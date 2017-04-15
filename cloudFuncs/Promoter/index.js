@@ -1570,21 +1570,75 @@ function getAreaAgentManagers(request, response) {
   var province = request.params.province
   var city = request.params.city
   var shopTenantByCity = require('./TenantFee').shopTenantByCity
+  var getSubAreaByAreaName = require('../baidu').getSubAreaByAreaName
+  var constructUserInfo = require('../Auth').constructUserInfo
 
   var subAreas = []
+  var subTenant = undefined
+  var areaType = undefined
+  var areaName = undefined
 
   var query = new AV.Query('Promoter')
+
   if (identity == APPCONST.AGENT_PROVINCE) {
-    query.equalTo('province', province)
-    query.containedIn('city', ['长沙', '湘潭'])
+    areaType = 'province'
+    areaName = province
   } else if (identity == APPCONST.AGENT_CITY) {
-    query.equalTo('province', province)
-    query.equalTo('city', city)
-    query.containedIn('district', subAreas)
+    areaType = 'city'
+    areaName = city
   }
-  query.include('user')
-  query.find().then((promoters) => {
-    response.success({errcode: 0, promoters})
+
+  getSubAreaByAreaName(areaName, areaType).then((subCities) => {
+    subCities.forEach((subCity) => {
+      subAreas.push(subCity.area_name)
+    })
+  }).then(() => {
+    if (identity == APPCONST.AGENT_PROVINCE) {
+      var getTanant = []
+      subAreas.forEach((area) => {
+        getTanant.push(shopTenantByCity(province, area))
+      })
+      return Promise.all(getTanant)
+    } else if (identity == APPCONST.AGENT_CITY) {
+      return shopTenantByCity(province, city)
+    }
+  }).then((result) => {
+    subTenant = result
+    if (Array.isArray(result)) {
+      query.equalTo('province', province)
+      query.containedIn('city', subAreas)
+    } else {
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      query.containedIn('district', subAreas)
+    }
+    query.include('user')
+    return query.find()
+  }).then((promoters) => {
+    var retResult = []
+    subAreas.forEach((area, index) => {
+      var res = {
+        area: area,
+        tenant: Array.isArray(subTenant) ? subTenant[index] : subTenant,
+      }
+      var promoter = promoters.find((subPro) => {
+        if (identity == APPCONST.AGENT_PROVINCE) {
+          if (subPro.attributes.city == area) {
+            return true
+          }
+          return false
+        } else if (identity == APPCONST.AGENT_CITY) {
+          if (subPro.attributes.district == area) {
+            return true
+          }
+          return false
+        }
+      })
+      res.promoter = promoter
+      res.user = promoter ? constructUserInfo(promoter.attributes.user) : undefined
+      retResult.push(res)
+    })
+    response.success({errcode: 0, areaAgent: retResult})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取区域代理信息失败'})
