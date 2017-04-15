@@ -602,18 +602,9 @@ function updateShopLocationInfo(request, response) {
   })
 }
 
-function updateShopInfoAfterPaySuccess(request, response) {
-  var shopId = request.params.shopId;
-  var tenant = request.params.tenant;
-
+function updateShopInfoAfterPaySuccess(shopId, tenant) {
   if(!shopId || !tenant) {
-    response.error({
-      errcode: -1,
-      message: 'shopId or tenant is null',
-      shopId: shopId,
-      tenant: tenant
-    })
-    return
+    return false
   }
 
   var shop = AV.Object.createWithoutData('Shop', shopId)
@@ -621,20 +612,10 @@ function updateShopInfoAfterPaySuccess(request, response) {
   shop.set('payment', 1)
 
   return shop.save().then(function(result){
-    response.success({
-      errcode: 0,
-      message: 'success',
-      shopId: shopId,
-      tenant: tenant
-    })
+    return true
   }, function(error){
     console.log('updateShopInfoAfterPaySuccess.error====', error)
-    response.error({
-      errcode: error.code || -1,
-      message: error.message || 'fail',
-      shopId: shopId,
-      tenant: tenant
-    })
+    return false
   })
 }
 

@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/3/22.
  */
+var Promise = require('bluebird')
 var request = require('request');
 var pinyin = require("pinyin");
 
@@ -167,32 +168,34 @@ function getAleph(area_name) {
   }
 }
 
-function baiduGetSubAreaList(areaCode, cbk) {
+function baiduGetSubAreaList(areaCode) {
   var url = config.serviceUrl + "/shangquan/forward/?qt=sub_area_list&ext=1&level=1&areacode=" + areaCode + "&business_flag=0"
-  request(url, function(error, response, body){
-    var result = null
-    var json = JSON.parse(body)
-    if (json && json['result'] && json['result']['error'] == "0") {
-      result = json['content']
-    }
-    if (cbk) {
-      cbk(areaAbbr(1, result));
-    }
-  });
+
+  return new Promise((resolve, reject) => {
+    request(url, function(error, response, body){
+      var result = null
+      var json = JSON.parse(body)
+      if (json && json['result'] && json['result']['error'] == "0") {
+        result = json['content']
+      }
+      resolve(areaAbbr(1, result))
+    })
+  })
 }
 
-function baiduGetSubAreaList2(areaCode, level, cbk) {
+function baiduGetSubAreaList2(areaCode, level) {
   var url = config.serviceUrl + "/shangquan/forward/?qt=sub_area_list&ext=1&level=" + level + "&areacode=" + areaCode + "&business_flag=0"
-  request(url, function(error, response, body){
-    var result = null
-    var json = JSON.parse(body)
-    if (json && json['result'] && json['result']['error'] == "0") {
-      result = json['content']
-    }
-    if (cbk) {
-      cbk(areaAbbr(level, result));
-    }
-  });
+
+  return new Promise((resolve, reject) => {
+    request(url, function(error, response, body){
+      var result = null
+      var json = JSON.parse(body)
+      if (json && json['result'] && json['result']['error'] == "0") {
+        result = json['content']
+      }
+      resolve(areaAbbr(level, result))
+    })
+  })
 }
 
 function baiduGetAllCityMap(areaCode, cbk) {
@@ -245,46 +248,58 @@ function baiduGetAllCityMap(areaCode, cbk) {
 
 function getSubAreaList(request, response) {
   var areaCode = request.params.areaCode
-  baiduGetSubAreaList(areaCode, function (results) {
+
+  baiduGetSubAreaList(areaCode).then((results) => {
     if(results && results.sub && results.sub.length) {
       response.success(results.sub)
     }else {
       response.error("get failed!")
     }
+  }).catch((error) => {
+    response.error("get failed!")
   })
 }
 
 function getSubAreaList2(request, response) {
   var level = request.params.level || '1'
   var areaCode = request.params.areaCode || '1'
-  baiduGetSubAreaList2(areaCode, level, function (results) {
+
+  baiduGetSubAreaList2(areaCode, level).then((results) => {
     if(results && results.sub && results.sub.length) {
       response.success(results.sub)
     }else {
       response.error("get failed!")
     }
+  }).catch((error) => {
+    response.error("get failed!")
   })
 }
 
 function getProviceList(request, response) {
   var areaCode = 1
-  baiduGetSubAreaList(areaCode, function (results) {
+
+  baiduGetSubAreaList(areaCode).then((results) => {
     if(results && results.sub && results.sub.length) {
       response.success(results.sub)
     }else {
       response.error("get failed!")
     }
+  }).catch((error) => {
+    response.error("get failed!")
   })
 }
 
 function getCityList(request, response) {
   var provinceCode = request.params.provinceCode
-  baiduGetSubAreaList(provinceCode, function (results) {
+
+  baiduGetSubAreaList(provinceCode).then((results) => {
     if(results && results.sub && results.sub.length) {
       response.success(results.sub)
     }else {
       response.error("get failed!")
     }
+  }).catch((error) => {
+    response.error("get failed!")
   })
 }
 
@@ -293,11 +308,12 @@ function getCityList(request, response) {
  * 通过省份/城市名称获取下属区域（城市/区／县）
  * @param areaName
  * @param areaType: province|city
+ * @returns {Promise.<T>}
  */
 function getSubAreaByAreaName(areaName, areaType) {
 
   if(areaType == 'province') {
-    baiduGetSubAreaList(1, function (results) {
+    return baiduGetSubAreaList(1).then((results) => {
       if(results && results.sub && results.sub.length) {
         var provinceList = results.sub
         var index = provinceList.findIndex(function (value) {
@@ -305,61 +321,87 @@ function getSubAreaByAreaName(areaName, areaType) {
         })
         if(index == -1) {
           console.log("get failed!")
-          return false
+          throw {message: "get failed!"}
         } else {
-          baiduGetSubAreaList(provinceList[index].area_code, function (cityResults) {
-            if(cityResults && cityResults.sub && cityResults.sub.length) {
-              return cityResults.sub
-            }else {
-              console.log("get failed!")
-              return false
-            }
-          })
+          return provinceList[index].area_code
         }
       }else {
         console.log("get province areaInfo failed!")
-        return false
+        throw {message: "get province areaInfo failed!"}
       }
+    }).then((area_code) => {
+      return baiduGetSubAreaList(area_code).then((cityResults) => {
+        if(cityResults && cityResults.sub && cityResults.sub.length) {
+          console.log("get cityResults:", cityResults.sub)
+          return new Promise((resolve, reject) => {
+            resolve(cityResults.sub)
+          })
+        }else {
+          console.log("get failed!")
+          throw {message: "get failed!"}
+        }
+      })
+    }).catch((error) => {
+      return new Promise((resolve, reject) => {
+        reject(error)
+      })
     })
   } else if(areaType == 'city') {
-    baiduGetSubAreaList2(1, 2, function (results) {
+    return baiduGetSubAreaList2(1, 2).then((results) => {
       if(results && results.sub && results.sub.length) {
         var provinceList = results.sub
-        provinceList.forEach((value) => {
+        var area_code = undefined
+         provinceList.forEach((value) => {
           cityList = value.sub
           var index = cityList.findIndex(function (value) {
             return value.area_name == areaName
           })
           if(index != -1) {
-            baiduGetSubAreaList(cityList[index].area_code, function (areaResults) {
-              if (areaResults && areaResults.sub && areaResults.sub.length) {
-                return areaResults.sub
-              } else {
-                console.log("get city sub areaInfo failed!")
-                return false
-              }
-            })
+            console.log("return area_code:", cityList[index].area_code)
+            area_code =  cityList[index].area_code
+            return
           }
         })
+        return area_code
       }else {
         console.log("get city info failed!")
-        return false
+        throw {message: "get city info failed!"}
       }
+    }).then((area_code) => {
+      console.log("get area_code:", area_code)
+      return baiduGetSubAreaList(area_code).then((areaResults) => {
+        if (areaResults && areaResults.sub && areaResults.sub.length) {
+          return new Promise((resolve, reject) => {
+            resolve(areaResults.sub)
+          })
+        } else {
+          throw {message: 'get city sub areaInfo failed!'}
+        }
+      })
+    }).catch((error) => {
+      return new Promise((resolve, reject) => {
+        reject(error)
+      })
     })
   } else {
     console.log("unknow areaType!")
-    return false
+    return new Promise((resolve, reject) => {
+      reject({message: "unknow areaType!"})
+    })
   }
 }
 
 function getDistrictList(request, response) {
   var cityCode = request.params.cityCode
-  baiduGetSubAreaList(cityCode, function (results) {
+
+  baiduGetSubAreaList(cityCode).then(() => {
     if(results && results.sub && results.sub.length) {
       response.success(results.sub)
     }else {
       response.error("get failed!")
     }
+  }).catch((error) => {
+    response.error("get failed!")
   })
 }
 
@@ -381,7 +423,7 @@ var baiduFunc = {
   getSubAreaList: getSubAreaList,
   getSubAreaList2: getSubAreaList2,
   getAllCityMap: getAllCityMap,
-  getSubAreaByAreaName: getSubAreaByAreaName
+  getSubAreaByAreaName: getSubAreaByAreaName,
 }
 
 module.exports = baiduFunc
