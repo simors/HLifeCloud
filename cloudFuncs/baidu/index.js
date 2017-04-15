@@ -330,17 +330,14 @@ function getSubAreaByAreaName(areaName, areaType) {
         throw {message: "get province areaInfo failed!"}
       }
     }).then((area_code) => {
-      return baiduGetSubAreaList(area_code).then((cityResults) => {
-        if(cityResults && cityResults.sub && cityResults.sub.length) {
-          console.log("get cityResults:", cityResults.sub)
-          return new Promise((resolve, reject) => {
-            resolve(cityResults.sub)
-          })
-        }else {
-          console.log("get failed!")
-          throw {message: "get failed!"}
-        }
-      })
+      return baiduGetSubAreaList(area_code)
+    }).then((cityResults) => {
+      if(cityResults && cityResults.sub && cityResults.sub.length) {
+        return cityResults.sub
+      }else {
+        console.log("get failed!")
+        throw {message: "get failed!"}
+      }
     }).catch((error) => {
       return new Promise((resolve, reject) => {
         reject(error)
@@ -357,7 +354,6 @@ function getSubAreaByAreaName(areaName, areaType) {
             return value.area_name == areaName
           })
           if(index != -1) {
-            console.log("return area_code:", cityList[index].area_code)
             area_code =  cityList[index].area_code
             return
           }
@@ -368,16 +364,13 @@ function getSubAreaByAreaName(areaName, areaType) {
         throw {message: "get city info failed!"}
       }
     }).then((area_code) => {
-      console.log("get area_code:", area_code)
-      return baiduGetSubAreaList(area_code).then((areaResults) => {
-        if (areaResults && areaResults.sub && areaResults.sub.length) {
-          return new Promise((resolve, reject) => {
-            resolve(areaResults.sub)
-          })
-        } else {
-          throw {message: 'get city sub areaInfo failed!'}
-        }
-      })
+      return baiduGetSubAreaList(area_code)
+    }).then((areaResults) => {
+      if (areaResults && areaResults.sub && areaResults.sub.length) {
+        return areaResults.sub
+      } else {
+        throw {message: 'get city sub areaInfo failed!'}
+      }
     }).catch((error) => {
       return new Promise((resolve, reject) => {
         reject(error)
