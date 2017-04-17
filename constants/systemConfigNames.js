@@ -1,0 +1,3 @@
+module.exports = {
+	SHOP_PROMOTION_MAX_NUM: 'SHOP_PROMOTION_MAX_NUM'
+}
