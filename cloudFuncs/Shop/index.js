@@ -2,6 +2,7 @@
  * Created by zachary on 2017/01/04.
  */
 
+var redis = require('redis');
 var Promise = require('bluebird')
 var AV = require('leanengine');
 var shopUtil = require('../../utils/shopUtil');
@@ -9,6 +10,8 @@ var authUtils = require('../../utils/authUtils');
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_SHOPKEEPER = require('../../constants/appConst').IDENTITY_SHOPKEEPER
 var PromoterFunc = require('../Promoter')
+var systemConfigNames = require('../../constants/systemConfigNames')
+var redisUtils = require('../../utils/redisUtils')
 
 function constructShopInfo(leanShop) {
   var shop = {}
@@ -387,10 +390,40 @@ function getShopInviter(request, response) {
 }
 
 function getShopPromotionMaxNum(request, response) {
-  response.success({
-    errcode: 0,
-    message: 3
+
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNum)=>{
+    // console.log('redisUtils.getAsync.shopPromotionMaxNum===', shopPromotionMaxNum)
+
+    if(!shopPromotionMaxNum || shopPromotionMaxNum < 0) {
+      var query = new AV.Query('SystemConfig')
+      query.equalTo('cfgName', systemConfigNames.SHOP_PROMOTION_MAX_NUM)
+      query.first().then((result)=>{
+        shopPromotionMaxNum = parseInt(result.attributes.cfgValue)
+        // console.log('redisUtils.query.shopPromotionMaxNum===', shopPromotionMaxNum)
+        redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
+        response.success({
+          errcode: '0',
+          message: shopPromotionMaxNum
+        })
+      }, (error)=>{
+        response.error({
+          errcode: '-1',
+          message: error.message || '网络异常'
+        })
+      })
+    }else{
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNum
+      })
+    }
+  }, (error)=>{
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
   })
+  
 }
 
 /**

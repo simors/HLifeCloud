@@ -1518,25 +1518,23 @@ function getPromoterTenant(request, response) {
 }
 
 /**
- * 根据代理级别获取对应的统计数据
+ * 根据地区获取对应的统计数据
  * @param request
  * @param response
  */
 function getTotalPerformanceStat(request, response) {
-  var identity = request.params.identity
   var province = request.params.province
   var city = request.params.city
   var district = request.params.district
 
   var query = new AV.Query('Promoter')
-  if (identity == APPCONST.AGENT_PROVINCE) {
+  if (province) {
     query.equalTo('liveProvince', province)
-  } else if (identity == APPCONST.AGENT_CITY) {
-    query.equalTo('liveProvince', province)
+  }
+  if (city) {
     query.equalTo('liveCity', city)
-  } else if (identity == APPCONST.AGENT_DISTRICT) {
-    query.equalTo('liveProvince', province)
-    query.equalTo('liveCity', city)
+  }
+  if (district) {
     query.equalTo('liveDistrict', district)
   }
   query.find().then((promoters) => {

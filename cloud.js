@@ -3,6 +3,7 @@ var AV = require('leanengine');
 var utilFunc = require('./cloudFuncs/util')
 var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
+var configFunc = require('./cloudFuncs/Config');
 var articleFunc = require('./cloudFuncs/Article');
 var PrivilegeFunc = require('./cloudFuncs/Privilege');
 var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
@@ -17,6 +18,7 @@ var PromoterFunc = require('./cloudFuncs/Promoter')
 var TenantFeeFunc = require('./cloudFuncs/Promoter/TenantFee')
 var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
+
 /**
  * 云函数
  */
@@ -36,6 +38,8 @@ AV.Cloud.define('hLifeGetUsers', authFunc.getUsers)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('hLifeSetPaymentPassword', authFunc.setPaymentPassword)
+
+AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
