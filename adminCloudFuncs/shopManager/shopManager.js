@@ -188,7 +188,7 @@ function getShopList(request, response) {
   var query = new AV.Query('Shop')
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
   var liveArea = request.params.liveArea
-
+  var shopName = request.params.shopName
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
@@ -243,7 +243,9 @@ function getShopList(request, response) {
     //执行内嵌查询
     query.matchesQuery('owner', innerQuery)
   }
-
+  if(shopName){
+    query.contains('shopName',shopName)
+  }
 
   //query.limit(5) // 最多返回 5 条结果
 
