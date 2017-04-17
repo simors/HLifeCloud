@@ -12,6 +12,41 @@ var shopFunc = require('../../cloudFuncs/Shop')
 
 
 /**
+ * 更新mysql中PaymentCards表的余额
+ * @param userId
+ * @param earning
+ * @returns {Promise.<T>}
+ */
+function updatePaymentBalance(userId, earning) {
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCards` WHERE `userId` = ? "
+    return mysqlUtil.query(conn, sql, [userId])
+  }).then((queryRes) => {
+    if(queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentCards` (`userId`, `balance`,) VALUES (?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [userId, earning])
+    } else if(queryRes.results[0].cnt == 1){
+      sql = "UPDATE `PaymentCards` SET `balance` = `balance` + ? WHERE `userId` = ?"
+      return mysqlUtil.query(queryRes.conn, sql, [earning, userId])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+
+/**
  * 在mysql中插入支付记录
  * @param charge
  * @returns {Promise.<T>}
@@ -352,13 +387,33 @@ function idNameCardNumberIdentify(request, response) {
 
 }
 
+function PingppFuncTest(request, response) {
+
+  return updatePaymentBalance('587d81fd61ff4b0065092427', 100).then(() => {
+    response.success({
+      errcode: 0,
+      message: '[PingPP] identification identify success!',
+    })
+  }).catch((error) => {
+    console.log(error)
+    response.error({
+      errcode: 1,
+      message: 'updatePaymentBalance fail!',
+    })
+  })
+
+
+}
+
 
 var PingppFunc = {
   createPayment: createPayment,
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
   transfersEvent: transfersEvent,
-  idNameCardNumberIdentify: idNameCardNumberIdentify
+  idNameCardNumberIdentify: idNameCardNumberIdentify,
+  updatePaymentBalance: updatePaymentBalance,
+  PingppFuncTest: PingppFuncTest,
 }
 
 module.exports = PingppFunc

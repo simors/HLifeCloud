@@ -155,6 +155,7 @@ AV.Cloud.define('hLifeCreateTransfers', PingppFunc.createTransfers)
 AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
 AV.Cloud.define('hLifeTransfersEvent', PingppFunc.transfersEvent)
 AV.Cloud.define('hLifeIdNameCardNumberIdentify', PingppFunc.idNameCardNumberIdentify)
+AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 
 
 module.exports = AV.Cloud;
