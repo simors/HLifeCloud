@@ -18,7 +18,7 @@ var PromoterFunc = require('./cloudFuncs/Promoter')
 var TenantFeeFunc = require('./cloudFuncs/Promoter/TenantFee')
 var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
-
+var topicFunc = require('./cloudFuncs/Topic')
 /**
  * 云函数
  */
@@ -40,7 +40,7 @@ AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('hLifeSetPaymentPassword', authFunc.setPaymentPassword)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
-
+AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
