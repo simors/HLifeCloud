@@ -828,7 +828,7 @@ function fetchNonAgentPromoter(request, response) {
   var lastTime = request.params.lastTime
 
   var normalQuery = new AV.Query('Promoter')
-  // normalQuery.equalTo('identity', 0)
+  normalQuery.equalTo('identity', 0)
   normalQuery.equalTo('payment', 1)
   if (liveProvince) {
     normalQuery.equalTo('liveProvince', liveProvince)
