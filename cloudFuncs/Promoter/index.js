@@ -642,6 +642,7 @@ function cancelPromoterAgent(request, response) {
  */
 function fetchPromoter(request, response) {
   var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
+  var skipNum = request.params.skipNum || 0
   var identity = request.params.identity
   var province = request.params.province
   var city = request.params.city
@@ -758,6 +759,7 @@ function fetchPromoter(request, response) {
     endTeamMemNumQuery
   )
   query.limit(limit)
+  query.skip(skipNum)
   query.include('user')
   if (!orderRule) {
     if (descend) {
@@ -796,6 +798,72 @@ function fetchPromoter(request, response) {
       }
     }
   }
+
+  var constructUserInfo = require('../Auth').constructUserInfo
+
+  query.find().then((promoters) => {
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取推广员信息失败'})
+  })
+}
+
+/**
+ * 根据地区获取非代理推广员列表
+ * @param request
+ * @param response
+ */
+function fetchNonAgentPromoter(request, response) {
+  var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
+  var liveProvince = request.params.liveProvince
+  var liveCity = request.params.liveCity
+  var liveDistrict = request.params.liveDistrict
+  var maxShopEarnings = request.params.maxShopEarnings
+  var maxRoyaltyEarnings = request.params.maxRoyaltyEarnings
+  var lastTime = request.params.lastTime
+
+  var normalQuery = new AV.Query('Promoter')
+  // normalQuery.equalTo('identity', 0)
+  normalQuery.equalTo('payment', 1)
+  if (liveProvince) {
+    normalQuery.equalTo('liveProvince', liveProvince)
+  }
+  if (liveCity) {
+    normalQuery.equalTo('liveCity', liveCity)
+  }
+  if (liveDistrict) {
+    normalQuery.equalTo('liveDistrict', liveDistrict)
+  }
+
+  var endShopEarningsQuery = new AV.Query('Promoter')
+  if (maxShopEarnings) {
+    endShopEarningsQuery.lessThanOrEqualTo('shopEarnings', maxShopEarnings)
+  }
+  var endRoyaltyEarningsQuery = new AV.Query('Promoter')
+  if (maxRoyaltyEarnings) {
+    endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
+  }
+  var timeQuery = new AV.Query('Promoter')
+  if (lastTime) {
+    timeQuery.lessThan('createdAt', new Date(lastTime))
+  }
+
+  var query = AV.Query.and(
+    normalQuery,
+    endShopEarningsQuery,
+    endRoyaltyEarningsQuery,
+    timeQuery
+  )
+  query.limit(limit)
+  query.include('user')
+  query.addDescending('royaltyEarnings')
+  query.addDescending('shopEarnings')
+  query.addDescending('createdAt')
 
   var constructUserInfo = require('../Auth').constructUserInfo
 
@@ -1673,6 +1741,7 @@ var PromoterFunc = {
   fetchPromoterAgent: fetchPromoterAgent,
   cancelPromoterAgent: cancelPromoterAgent,
   fetchPromoter: fetchPromoter,
+  fetchNonAgentPromoter: fetchNonAgentPromoter,
   fetchPromoterDetail: fetchPromoterDetail,
   directSetPromoter: directSetPromoter,
   calPromoterShopEarnings: calPromoterShopEarnings,
