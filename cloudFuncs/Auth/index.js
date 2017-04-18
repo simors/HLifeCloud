@@ -1,7 +1,6 @@
 /**
  * Created by wuxingyu on 2016/12/10.
  */
-var Crypto = require('crypto');
 var AV = require('leanengine');
 var Promise = require('bluebird');
 var authUtils = require('../../utils/authUtils');
