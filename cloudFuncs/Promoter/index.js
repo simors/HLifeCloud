@@ -658,7 +658,7 @@ function fetchPromoter(request, response) {
   var maxShopEarnings = request.params.maxShopEarnings
   var minInviteShopNum = request.params.minInviteShopNum
   var maxInviteShopNum = request.params.maxInviteShopNum
-  var minRoyaltyEarnings = request.params.mingRoyaltyEarnings
+  var minRoyaltyEarnings = request.params.minRoyaltyEarnings
   var maxRoyaltyEarnings = request.params.maxRoyaltyEarnings
   var minTeamMemNum = request.params.minTeamMemNum
   var maxTeamMemNum = request.params.maxTeamMemNum
@@ -715,26 +715,34 @@ function fetchPromoter(request, response) {
 
   var startShopEarningsQuery = new AV.Query('Promoter')
   var endShopEarningsQuery = new AV.Query('Promoter')
-  if (minShopEarnings && maxShopEarnings) {
+  if (minShopEarnings) {
     startShopEarningsQuery.greaterThanOrEqualTo('shopEarnings', minShopEarnings)
+  }
+  if (maxShopEarnings) {
     endShopEarningsQuery.lessThanOrEqualTo('shopEarnings', maxShopEarnings)
   }
   var startInviteShopQuery = new AV.Query('Promoter')
   var endInviteShopQuery = new AV.Query('Promoter')
-  if (minInviteShopNum && maxInviteShopNum) {
+  if (minInviteShopNum) {
     startInviteShopQuery.greaterThanOrEqualTo('inviteShopNum', minInviteShopNum)
+  }
+  if (maxInviteShopNum) {
     endInviteShopQuery.lessThanOrEqualTo('inviteShopNum', maxInviteShopNum)
   }
   var startRoyaltyEarningsQuery = new AV.Query('Promoter')
   var endRoyaltyEarningsQuery = new AV.Query('Promoter')
-  if (minRoyaltyEarnings && maxRoyaltyEarnings) {
+  if (minRoyaltyEarnings) {
     startRoyaltyEarningsQuery.greaterThanOrEqualTo('royaltyEarnings', minRoyaltyEarnings)
+  }
+  if (maxRoyaltyEarnings) {
     endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
   }
   var startTeamMemNumQuery = new AV.Query('Promoter')
   var endTeamMemNumQuery = new AV.Query('Promoter')
-  if (minTeamMemNum && maxTeamMemNum) {
+  if (minTeamMemNum) {
     startTeamMemNumQuery.greaterThanOrEqualTo('teamMemNum', minTeamMemNum)
+  }
+  if (maxTeamMemNum) {
     endTeamMemNumQuery.lessThanOrEqualTo('teamMemNum', maxTeamMemNum)
   }
 
