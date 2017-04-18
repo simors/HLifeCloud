@@ -848,22 +848,20 @@ function fetchNonAgentPromoter(request, response) {
   if (maxRoyaltyEarnings) {
     endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
   }
-  var timeQuery = new AV.Query('Promoter')
-  if (lastTime) {
-    timeQuery.lessThan('createdAt', new Date(lastTime))
-  }
 
   var query = AV.Query.and(
     normalQuery,
     endShopEarningsQuery,
-    endRoyaltyEarningsQuery,
-    timeQuery
+    endRoyaltyEarningsQuery
   )
   query.limit(limit)
   query.include('user')
+  query.addDescending('createdAt')
   query.addDescending('royaltyEarnings')
   query.addDescending('shopEarnings')
-  query.addDescending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
 
   var constructUserInfo = require('../Auth').constructUserInfo
 
