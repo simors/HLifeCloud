@@ -758,6 +758,7 @@ function fetchPromoter(request, response) {
     endTeamMemNumQuery
   )
   query.limit(limit)
+  query.include('user')
   if (!orderRule) {
     if (descend) {
       query.addDescending('royaltyEarnings')
@@ -796,8 +797,14 @@ function fetchPromoter(request, response) {
     }
   }
 
+  var constructUserInfo = require('../Auth').constructUserInfo
+
   query.find().then((promoters) => {
-    response.success({errcode: 0, promoters: promoters})
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取推广员信息失败'})
