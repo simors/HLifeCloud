@@ -307,84 +307,80 @@ function idNameCardNumberIdentify(request, response) {
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
-  // pingpp.identification.identify({
-  //   type: 'bank_card',
-  //   app: GLOBAL_CONFIG.PINGPP_APP_ID,
-  //   data: {
-  //     id_name: userName,
-  //     id_number: idNumber,
-  //     card_number: cardNumber,
-  //     phone_number: phoneNumber
-  //   }
-  // }, function (err, result) {
-  //   err && console.log(err.message);
-  //   result && console.log(result);
-  //   if (err != null) {
-  //     console.log("pingpp.identification.identify fail:", err)
-  //     response.error({
-  //       errcode: 1,
-  //       message: '[PingPP] identification identify failed!',
-  //     })
-  //     return
-  //   }
-  // var cardInfo = {
-  //   id_name: result.data.id_name,
-  //   id_number: result.data.id_number,
-  //   card_number: result.data.card_number,
-  //   phone_number: result.data.phone_number,
-  //   userId: userId,
-  //   bankCode:bankCode,
-
-  // }
-  //   return insertCardInMysql(cardInfo).then(() => {
-  //     response.success({
-  //       errcode: 0,
-  //       message: '[PingPP] identification identify success!',
-  //       result: result,
-  //     })
-  //   }).catch((error) => {
-  //     console.log("insertCardInMysql fail!", error)
-  //     response.error({
-  //       errcode: 1,
-  //       message: 'insertCardInMysql fail!',
-  //     })
-  //   })
-  // })
-
-  var result = {
+  pingpp.identification.identify({
     type: 'bank_card',
-    app: 'app_Pq5G0SOeXLC01mX9',
-    result_code: 0,
-    message: 'SUCCESS',
-    paid: true,
-    data:
-    { id_name: userName,
+    app: GLOBAL_CONFIG.PINGPP_APP_ID,
+    data: {
+      id_name: userName,
       id_number: idNumber,
       card_number: cardNumber,
-      phone_number: phoneNumber }
-  }
-  var cardInfo = {
-    id_name: result.data.id_name,
-    id_number: result.data.id_number,
-    card_number: result.data.card_number,
-    phone_number: result.data.phone_number,
-    userId: userId,
-    bankCode:bankCode,
-  }
-  return insertCardInMysql(cardInfo).then(() => {
-    response.success({
-      errcode: 0,
-      message: '[PingPP] identification identify success!',
-      result: result,
-    })
-  }).catch((error) => {
-    console.log("insertCardInMysql fail!", error)
-    response.error({
-      errcode: 1,
-      message: 'insertCardInMysql fail!',
+      phone_number: phoneNumber
+    }
+  }, function (err, result) {
+    err && console.log(err.message);
+    result && console.log(result);
+    if (err != null) {
+      console.log("pingpp.identification.identify fail:", err)
+      response.error({
+        errcode: 1,
+        message: '[PingPP] identification identify failed!',
+      })
+      return
+    }
+    var cardInfo = {
+      id_name: result.data.id_name,
+      id_number: result.data.id_number,
+      card_number: result.data.card_number,
+      phone_number: result.data.phone_number,
+      userId: userId,
+      bankCode:bankCode,
+
+    }
+    return insertCardInMysql(cardInfo).then(() => {
+      response.success({
+        errcode: 0,
+        message: '[PingPP] identification identify success!',
+        result: result,
+      })
+    }).catch((error) => {
+      console.log("insertCardInMysql fail!", error)
+      response.error({
+        errcode: 1,
+        message: 'insertCardInMysql fail!',
+      })
     })
   })
+}
 
+function getBalanceByUserId(request, response) {
+  var userId = request.params.userId
+  
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT `balance` FROM `PaymentCards` WHERE `userId` = ? "
+    return mysqlUtil.query(conn, sql, [userId])
+  }).then((queryRes) => {
+    if(queryRes.results.length > 0) {
+      var balance = queryRes.results[0].balance || 0
+      response.success({
+        userId: userId,
+        balance: balance
+      })
+    }
+    response.success({
+      userId: userId,
+      balance: 0
+    })
+
+  }).catch((err) => {
+    response.error(err)
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
 }
 
 function PingppFuncTest(request, response) {
@@ -413,6 +409,7 @@ var PingppFunc = {
   transfersEvent: transfersEvent,
   idNameCardNumberIdentify: idNameCardNumberIdentify,
   updatePaymentBalance: updatePaymentBalance,
+  getBalanceByUserId: getBalanceByUserId,
   PingppFuncTest: PingppFuncTest,
 }
 
