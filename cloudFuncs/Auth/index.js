@@ -1,7 +1,7 @@
 /**
  * Created by wuxingyu on 2016/12/10.
  */
-
+var Crypto = require('crypto');
 var AV = require('leanengine');
 var Promise = require('bluebird');
 var authUtils = require('../../utils/authUtils');
@@ -611,22 +611,6 @@ function setUserNickname(request, response) {
   })
 }
 
-function setPaymentPassword(request, response) {
-  var userId = request.params.userId
-  var password = request.params.password
-  var user = AV.Object.createWithoutData('_User', userId)
-  user.set('paymentPassword', password)
-  user.save().then(() => {
-    response.success({
-      errcode: 0,
-    })
-  }, (err) => {
-    response.error({
-      errcode: -1,
-    })
-  })
-}
-
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
@@ -640,7 +624,6 @@ var authFunc = {
   getArticleLikers: getArticleLikers,
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo,
-  setPaymentPassword: setPaymentPassword,
 }
 
 module.exports = authFunc

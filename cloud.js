@@ -37,7 +37,6 @@ AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
 AV.Cloud.define('hLifeGetUsers', authFunc.getUsers)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
-AV.Cloud.define('hLifeSetPaymentPassword', authFunc.setPaymentPassword)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
@@ -156,6 +155,8 @@ AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
 AV.Cloud.define('hLifeTransfersEvent', PingppFunc.transfersEvent)
 AV.Cloud.define('hLifeIdNameCardNumberIdentify', PingppFunc.idNameCardNumberIdentify)
 AV.Cloud.define('hLifeGetBalanceByUserId', PingppFunc.getBalanceByUserId)
+AV.Cloud.define('hLifeSetPaymentPassword', PingppFunc.setPaymentPassword)
+AV.Cloud.define('hLifePaymentPasswordAuth', PingppFunc.paymentPasswordAuth)
 AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 
 

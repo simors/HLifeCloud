@@ -1,7 +1,6 @@
 /**
  * Created by wanpeng on 2017/3/27.
  */
-var crypto = require('crypto')
 var GLOBAL_CONFIG = require('../../config')
 var pingpp = require('pingpp')(GLOBAL_CONFIG.PINGPP_API_KEY)
 var utilFunc = require('../util')
@@ -34,6 +33,69 @@ function updatePaymentBalance(userId, earning) {
     } else {
       return new Promise((resolve) => {
         resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+/**
+ * 在mysql中设置支付密码
+ * @param userId
+ * @param password
+ * @returns {Promise.<T>}
+ */
+function setPaymentPasswordInMysql(userId, password) {
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCards` WHERE `userId` = ? "
+    return mysqlUtil.query(conn, sql, [userId])
+  }).then((queryRes) => {
+    if(queryRes.results[0].cnt == 1) {
+      sql = "UPDATE `PaymentCards` SET `password` = ? WHERE `userId` = ?"
+      return mysqlUtil.query(queryRes.conn, sql, [password, userId])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+/**
+ * 在mysql中支付密码校验
+ * @param userId
+ * @param password
+ * @returns {Promise.<T>}
+ */
+function authPaymentPasswordInMysql(userId, password) {
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCards` WHERE `userId` = ? AND `password` = ?"
+    return mysqlUtil.query(conn, sql, [userId, password])
+  }).then((queryRes) => {
+    if(queryRes.results[0].cnt == 1) {
+      return new Promise((resolve, reject) => {
+        resolve()
+      })
+    } else {
+      return new Promise((resolve, reject) => {
+        reject()
       })
     }
   }).catch((err) => {
@@ -177,7 +239,6 @@ function createPayment(request,response) {
     default:
       break;
   }
-  // var order_no = crypto.createHash('md5').update(new Date().getTime().toString()).digest('hex').substr(0, 16)
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
   pingpp.charges.create({
@@ -240,6 +301,12 @@ function createTransfers(request, response) {
   var amount = request.params.amount
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
+  var userId = request.params.userId
+
+  var metadata = {
+    userId: userId,
+  }
+
 
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
@@ -256,7 +323,8 @@ function createTransfers(request, response) {
       user_name: userName,
       open_bank_code: "0102"
     },
-    description: "Your Description"
+    description: "Your Description",
+    metadata: metadata,
   }, function (err, transfer) {
     if (err != null) {
       console.log("pingpp.transfers.create fail:", err)
@@ -354,7 +422,7 @@ function idNameCardNumberIdentify(request, response) {
 
 function getBalanceByUserId(request, response) {
   var userId = request.params.userId
-  
+
   var sql = ""
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
@@ -380,6 +448,49 @@ function getBalanceByUserId(request, response) {
     if (mysqlConn) {
       mysqlUtil.release(mysqlConn)
     }
+  })
+}
+
+function setPaymentPassword(request, response) {
+  var userId = request.params.userId
+  var password = request.params.password
+
+  var cipher = Crypto.createCipher('aes-256-cbc','Ljyd')
+
+  var pwd = cipher.update(password,'utf8','hex')
+  pwd += cipher.final('hex')
+
+  return setPaymentPasswordInMysql(userId, pwd).then(() => {
+    response.success({
+      errcode: 0,
+      message: 'setPaymentPassword success!',
+    })
+  }).catch((error) => {
+    response.error({
+      errcode: 1,
+      message: 'setPaymentPassword fail!',
+    })
+  })
+}
+
+function paymentPasswordAuth(request, response) {
+  var userId = request.params.userId
+  var password = request.params.password
+  var cipher = Crypto.createCipher('aes-256-cbc','Ljyd')
+
+  var pwd = cipher.update(password,'utf8','hex')
+  pwd += cipher.final('hex')
+
+  return authPaymentPasswordInMysql(userId, pwd).then(() => {
+    response.success({
+      errcode: 0,
+      message: 'paymentPasswordAuth success!',
+    })
+  }).catch((error) => {
+    response.error({
+      errcode: 1,
+      message: 'paymentPasswordAuth fail!',
+    })
   })
 }
 
@@ -410,7 +521,10 @@ var PingppFunc = {
   idNameCardNumberIdentify: idNameCardNumberIdentify,
   updatePaymentBalance: updatePaymentBalance,
   getBalanceByUserId: getBalanceByUserId,
+  setPaymentPassword: setPaymentPassword,
+  paymentPasswordAuth: paymentPasswordAuth,
   PingppFuncTest: PingppFuncTest,
+
 }
 
 module.exports = PingppFunc
