@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/3/27.
  */
+var Crypto = require('crypto');
 var GLOBAL_CONFIG = require('../../config')
 var pingpp = require('pingpp')(GLOBAL_CONFIG.PINGPP_API_KEY)
 var utilFunc = require('../util')
