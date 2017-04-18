@@ -3,6 +3,7 @@ var AV = require('leanengine');
 var utilFunc = require('./cloudFuncs/util')
 var authFunc = require('./cloudFuncs/Auth');
 var shopFunc = require('./cloudFuncs/Shop');
+var configFunc = require('./cloudFuncs/Config');
 var articleFunc = require('./cloudFuncs/Article');
 var PrivilegeFunc = require('./cloudFuncs/Privilege');
 var userManagerFunc = require('./adminCloudFuncs/BKManager/userManager')
@@ -17,6 +18,7 @@ var PromoterFunc = require('./cloudFuncs/Promoter')
 var TenantFeeFunc = require('./cloudFuncs/Promoter/TenantFee')
 var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
+var topicFunc = require('./cloudFuncs/Topic')
 /**
  * 云函数
  */
@@ -37,6 +39,8 @@ AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('hLifeSetPaymentPassword', authFunc.setPaymentPassword)
 
+AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
+AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
@@ -151,6 +155,7 @@ AV.Cloud.define('hLifeCreateTransfers', PingppFunc.createTransfers)
 AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
 AV.Cloud.define('hLifeTransfersEvent', PingppFunc.transfersEvent)
 AV.Cloud.define('hLifeIdNameCardNumberIdentify', PingppFunc.idNameCardNumberIdentify)
+AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 
 
 module.exports = AV.Cloud;

@@ -12,8 +12,43 @@ var shopFunc = require('../../cloudFuncs/Shop')
 
 
 /**
+ * 更新mysql中PaymentCards表的余额
+ * @param userId
+ * @param earning
+ * @returns {Promise.<T>}
+ */
+function updatePaymentBalance(userId, earning) {
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCards` WHERE `userId` = ? "
+    return mysqlUtil.query(conn, sql, [userId])
+  }).then((queryRes) => {
+    if(queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentCards` (`userId`, `balance`,) VALUES (?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [userId, earning])
+    } else if(queryRes.results[0].cnt == 1){
+      sql = "UPDATE `PaymentCards` SET `balance` = `balance` + ? WHERE `userId` = ?"
+      return mysqlUtil.query(queryRes.conn, sql, [earning, userId])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+
+/**
  * 在mysql中插入支付记录
- * @param promoterId
+ * @param charge
  * @returns {Promise.<T>}
  */
 function insertChargeInMysql(charge) {
@@ -42,6 +77,71 @@ function insertChargeInMysql(charge) {
       mysqlUtil.release(mysqlConn)
     }
   })
+}
+
+/**
+ * 在mysql中插入提现记录
+ * @param transfer
+ * @returns {Promise.<T>}
+ */
+function insertTransferInMysql(transfer) {
+  console.log("insertTransferInMysql transfer:", transfer)
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentTransfer` WHERE `order_no` = ? LIMIT 1"
+    return mysqlUtil.query(conn, sql, [transfer.order_no])
+  }).then((queryRes) => {
+    if (queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentTransfer` (`order_no`, `channel`, `created`, `amount`, `currency`, `transaction_no`, `subject`, `user`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [transfer.order_no, transfer.channel, created, charge.amount, charge.currency, charge.transaction_no, charge.subject, charge.metadata.user])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
+
+/**
+ * 在mysql中插入支付绑定银行卡信息
+ * @param card
+ * @returns {Promise.<T>}
+ */
+function insertCardInMysql(cardInfo) {
+  console.log("insertCardInMysql cardInfo:", cardInfo)
+
+  var sql = ""
+  var mysqlConn = undefined
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    sql = "SELECT count(1) as cnt FROM `PaymentCards` WHERE `userId` = ? LIMIT 1"
+    return mysqlUtil.query(conn, sql, [cardInfo.userId])
+  }).then((queryRes) => {
+    if(queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentCards` (`id_name`, `id_number`, `card_number`, `phone_number`, `userId`) VALUES (?, ?, ?, ?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [cardInfo.id_name, cardInfo.id_number, cardInfo.card_number, cardInfo.phone_number, cardInfo.userId])
+    } else {
+      return new Promise((resolve) => {
+        resolve()
+      })
+    }
+  }).catch((err) => {
+    throw err
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+
 }
 
 function createPayment(request,response) {
@@ -114,7 +214,7 @@ function paymentEvent(request,response) {
 
   var charge = request.params.data.object
   var shopId = charge.metadata.shopId
-  var amount = charge.amount
+  var amount = charge.amount * 0.01 //单位为 元
 
 
   return insertChargeInMysql(charge).then(() => {
@@ -164,6 +264,7 @@ function createTransfers(request, response) {
         errcode: 1,
         message: '[PingPP] create transfers failed!',
       })
+      return
     }
     response.success({
       errcode: 0,
@@ -176,6 +277,18 @@ function createTransfers(request, response) {
 
 function transfersEvent(request, response) {
   console.log("transfersEvent request.params:", request.params)
+  var transfer = request.params.data.object
+
+
+  return insertTransferInMysql(transfer).then(() => {
+
+  }).catch((error) => {
+    console.log("transfersEvent transfer into mysql fail!", error)
+    response.error({
+      errcode: 1,
+      message: 'transfersEvent transfer into mysql fail!',
+    })
+  })
 
   response.success({
     errcode: 0,
@@ -188,36 +301,108 @@ function idNameCardNumberIdentify(request, response) {
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
   var idNumber = request.params.idNumber
-  var phoneNumber = request.params.phoneNumber
+  var phoneNumber = request.params.phone
+  var userId = request.params.userId
+  var bankCode = request.params.bankCode
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
-  pingpp.identification.identify({
+  // pingpp.identification.identify({
+  //   type: 'bank_card',
+  //   app: GLOBAL_CONFIG.PINGPP_APP_ID,
+  //   data: {
+  //     id_name: userName,
+  //     id_number: idNumber,
+  //     card_number: cardNumber,
+  //     phone_number: phoneNumber
+  //   }
+  // }, function (err, result) {
+  //   err && console.log(err.message);
+  //   result && console.log(result);
+  //   if (err != null) {
+  //     console.log("pingpp.identification.identify fail:", err)
+  //     response.error({
+  //       errcode: 1,
+  //       message: '[PingPP] identification identify failed!',
+  //     })
+  //     return
+  //   }
+  // var cardInfo = {
+  //   id_name: result.data.id_name,
+  //   id_number: result.data.id_number,
+  //   card_number: result.data.card_number,
+  //   phone_number: result.data.phone_number,
+  //   userId: userId,
+  //   bankCode:bankCode,
+
+  // }
+  //   return insertCardInMysql(cardInfo).then(() => {
+  //     response.success({
+  //       errcode: 0,
+  //       message: '[PingPP] identification identify success!',
+  //       result: result,
+  //     })
+  //   }).catch((error) => {
+  //     console.log("insertCardInMysql fail!", error)
+  //     response.error({
+  //       errcode: 1,
+  //       message: 'insertCardInMysql fail!',
+  //     })
+  //   })
+  // })
+
+  var result = {
     type: 'bank_card',
-    app: GLOBAL_CONFIG.PINGPP_APP_ID,
-    data: {
-      id_name: userName,
+    app: 'app_Pq5G0SOeXLC01mX9',
+    result_code: 0,
+    message: 'SUCCESS',
+    paid: true,
+    data:
+    { id_name: userName,
       id_number: idNumber,
       card_number: cardNumber,
-      phone_number: phoneNumber
-    }
-  }, function (err, result) {
-    err && console.log(err.message);
-    result && console.log(result);
-    // YOUR CODE
-    if (err != null) {
-      console.log("pingpp.identification.identify fail:", err)
-      response.error({
-        errcode: 1,
-        message: '[PingPP] identification identify failed!',
-      })
-    }
+      phone_number: phoneNumber }
+  }
+  var cardInfo = {
+    id_name: result.data.id_name,
+    id_number: result.data.id_number,
+    card_number: result.data.card_number,
+    phone_number: result.data.phone_number,
+    userId: userId,
+    bankCode:bankCode,
+  }
+  return insertCardInMysql(cardInfo).then(() => {
     response.success({
       errcode: 0,
       message: '[PingPP] identification identify success!',
       result: result,
     })
+  }).catch((error) => {
+    console.log("insertCardInMysql fail!", error)
+    response.error({
+      errcode: 1,
+      message: 'insertCardInMysql fail!',
+    })
   })
+
+}
+
+function PingppFuncTest(request, response) {
+
+  return updatePaymentBalance('587d81fd61ff4b0065092427', 100).then(() => {
+    response.success({
+      errcode: 0,
+      message: '[PingPP] identification identify success!',
+    })
+  }).catch((error) => {
+    console.log(error)
+    response.error({
+      errcode: 1,
+      message: 'updatePaymentBalance fail!',
+    })
+  })
+
+
 }
 
 
@@ -226,7 +411,9 @@ var PingppFunc = {
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
   transfersEvent: transfersEvent,
-  idNameCardNumberIdentify: idNameCardNumberIdentify
+  idNameCardNumberIdentify: idNameCardNumberIdentify,
+  updatePaymentBalance: updatePaymentBalance,
+  PingppFuncTest: PingppFuncTest,
 }
 
 module.exports = PingppFunc

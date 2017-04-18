@@ -249,7 +249,7 @@ function shopCertificate(request, response) {
       }
     }
 
-    var name = request.params.name
+    // var name = request.params.name
     var phone = request.params.phone
     var shopName = request.params.shopName
     var shopAddress = request.params.shopAddress
@@ -260,14 +260,14 @@ function shopCertificate(request, response) {
     var geoDistrictCode = request.params.geoDistrictCode
     var geoCity = request.params.geoCity
     var geoDistrict = request.params.geoDistrict
-    var certification = request.params.certification
+    // var certification = request.params.certification
     var inviterId = reply
 
     var Shop = AV.Object.extend('Shop')
     var shop = new Shop()
     var inviter = AV.Object.createWithoutData('_User', inviterId)
 
-    shop.set('name', name + '')
+    // shop.set('name', name + '')
     shop.set('phone', phone + '')
     shop.set('shopName', shopName + '')
     shop.set('shopAddress', shopAddress + '')
@@ -282,7 +282,7 @@ function shopCertificate(request, response) {
     shop.set('geoDistrict', geoDistrict + '')
     shop.set('geoDistrictCode', geoDistrictCode + '')
     shop.set('owner', currentUser)
-    shop.set('certification', certification + '')
+    // shop.set('certification', certification + '')
     shop.set('inviter', inviter)
     currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
     // console.log('shop========', shop)

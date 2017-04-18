@@ -4,7 +4,20 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 function getAdviseList(request,response){
+    var status = request.params.status
+    var username = request.params.username
     var query = new AV.Query('UserFeedBack')
+    if(status == 0){
+      query.equalTo('status',0)
+    }
+  if (username) {
+    //构建内嵌查询
+    var innerQuery = new AV.Query('_User')
+
+    innerQuery.contains('username', username)
+    //执行内嵌查询
+    query.matchesQuery('user', innerQuery)
+  }
     query.descending('createdAt')
     query.include('user')
     query.find().then((results)=>{
