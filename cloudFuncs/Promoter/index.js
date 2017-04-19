@@ -1691,6 +1691,7 @@ function getAreaAgentManagers(request, response) {
       query.equalTo('city', city)
       query.containedIn('district', subAreas)
     }
+    query.equalTo('identity', identity+1)
     query.include('user')
     return query.find()
   }).then((promoters) => {
