@@ -62,6 +62,9 @@ function setPaymentPasswordInMysql(userId, password) {
     if(queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `password` = ? WHERE `userId` = ?"
       return mysqlUtil.query(queryRes.conn, sql, [password, userId])
+    } else if(queryRes.results[0].cnt == 0) {
+      sql = "INSERT INTO `PaymentInfo` (`password`, `userId`) VALUES (?, ?)"
+      return mysqlUtil.query(queryRes.conn, sql, [password, userId])
     } else {
       return new Promise((resolve) => {
         resolve()
