@@ -299,7 +299,7 @@ function paymentEvent(request,response) {
 function createTransfers(request, response) {
   console.log("createTransfers request.params:", request.params)
   var order_no = request.params.order_no
-  var amount = request.params.amount
+  var amount = parseInt(request.params.amount)
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
   var userId = request.params.userId
@@ -315,14 +315,14 @@ function createTransfers(request, response) {
   pingpp.transfers.create({
     order_no:  order_no,
     app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
-    channel:     "unionpay",// 企业付款（银行卡）
+    channel:     "wx_pub",// 微信公众号支付
     amount:    amount,
     currency:    "cny",
     type:        "b2c",
+    recipient: ,
     extra:       {
-      card_number: cardNumber,
       user_name: userName,
-      open_bank_code: "0102"
+      force_check: ,
     },
     description: "Your Description",
     metadata: metadata,
@@ -421,26 +421,37 @@ function idNameCardNumberIdentify(request, response) {
   })
 }
 
-function getBalanceByUserId(request, response) {
+function getPaymentInfoByUserId(request, response) {
   var userId = request.params.userId
 
   var sql = ""
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
-    sql = "SELECT `balance` FROM `PaymentCards` WHERE `userId` = ? "
+    sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password` FROM `PaymentCards` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
     if(queryRes.results.length > 0) {
       var balance = queryRes.results[0].balance || 0
+      var id_name = queryRes.results[0].id_name || undefined
+      var id_number = queryRes.results[0].id_number || undefined
+      var card_number = queryRes.results[0].card_number || undefined
+      var phone_number = queryRes.results[0].phone_number || undefined
+      var password = queryRes.results[0].phone_number? true : false
+
       response.success({
         userId: userId,
-        balance: balance
+        balance: balance,
+        id_name: id_name,
+        id_number: id_number,
+        card_number: card_number,
+        phone_number: phone_number,
+        password: password,
       })
     }
-    response.success({
-      userId: userId,
-      balance: 0
+    response.error({
+      errcode: 1,
+      message: '未找到支付信息',
     })
 
   }).catch((err) => {
@@ -521,7 +532,7 @@ var PingppFunc = {
   transfersEvent: transfersEvent,
   idNameCardNumberIdentify: idNameCardNumberIdentify,
   updatePaymentBalance: updatePaymentBalance,
-  getBalanceByUserId: getBalanceByUserId,
+  getPaymentInfoByUserId: getPaymentInfoByUserId,
   setPaymentPassword: setPaymentPassword,
   paymentPasswordAuth: paymentPasswordAuth,
   PingppFuncTest: PingppFuncTest,
