@@ -1725,6 +1725,54 @@ function getAreaAgentManagers(request, response) {
   })
 }
 
+/**
+ * 根据推广员的昵称或者手机号查询推广员信息
+ * @param request
+ * @param response
+ */
+function fetchPromoterByNameOrId(request, response) {
+  var keyword = request.params.keyword
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var promoters = []
+  var users = []
+
+  var nameQuery = new AV.Query('_User')
+  nameQuery.equalTo('nickname', keyword)
+
+  var phoneQuery = new AV.Query('_User')
+  phoneQuery.equalTo('mobilePhoneNumber', keyword)
+
+  var query = AV.Query.or(nameQuery, phoneQuery)
+  query.find().then((userInfos) => {
+    var ops = []
+    userInfos.forEach((user) => {
+      var userInfo = constructUserInfo(user)
+      users.push(userInfo)
+      ops.push(getPromoterByUserId(userInfo.id))
+    })
+    return Promise.all(ops)
+  }).then((promoterInfos) => {
+    var retUsers = []
+    promoterInfos.forEach((promoter, index) => {
+      if (promoter) {
+        promoters.push(promoter)
+        retUsers.push(users[index])
+      }
+    })
+    response.success({
+      errcode: 0,
+      promoters: promoters,
+      users: retUsers,
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: 1,
+      message: '查询推广员信息失败',
+    })
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -1754,6 +1802,7 @@ var PromoterFunc = {
   getPromoterTenant: getPromoterTenant,
   getTotalPerformanceStat: getTotalPerformanceStat,
   getAreaAgentManagers: getAreaAgentManagers,
+  fetchPromoterByNameOrId: fetchPromoterByNameOrId,
 }
 
 module.exports = PromoterFunc
