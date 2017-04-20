@@ -300,9 +300,11 @@ function paymentEvent(request, response) {
   var amount = charge.amount * 0.01 //单位为 元
   var promoterPaid = require('../Promoter').promoterPaid
 
+  console.log('paymentEvent: ', promoterId)
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
+      console.log('invoke promoter paid:', promoterId)
       return promoterPaid(promoterId)
     } else if (shopId && amount) {
       return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
