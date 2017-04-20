@@ -620,7 +620,7 @@ function PingppFuncTest(request, response) {
     }
     response.error({
       errcode: 1,
-      message: 'updatePaymentBalance fail!',
+      message: '[PingPP] updatePaymentBalance fail!',
     })
   }).finally(() => {
     if (mysqlConn) {
@@ -628,7 +628,7 @@ function PingppFuncTest(request, response) {
     }
     response.success({
       errcode: 0,
-      message: '[PingPP] identification identify success!',
+      message: '[PingPP] updatePaymentBalance success!',
     })
   })
 }
