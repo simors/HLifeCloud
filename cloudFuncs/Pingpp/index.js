@@ -13,22 +13,20 @@ var shopFunc = require('../../cloudFuncs/Shop')
 
 /**
  * 更新mysql中PaymentInfo表的余额
+ * @param conn
  * @param userId
  * @param earning
  * @returns {Promise.<T>}
  */
-function updatePaymentBalance(userId, earning) {
+function updatePaymentBalance(conn, userId, earning) {
   var sql = ""
-  var mysqlConn = undefined
-  return mysqlUtil.getConnection().then((conn) => {
-    mysqlConn = conn
-    sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? "
-    return mysqlUtil.query(conn, sql, [userId])
-  }).then((queryRes) => {
+
+  sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? "
+  return mysqlUtil.query(conn, sql, [userId]).then((queryRes) => {
     if(queryRes.results[0].cnt == 0) {
       sql = "INSERT INTO `PaymentInfo` (`userId`, `balance`,) VALUES (?, ?)"
       return mysqlUtil.query(queryRes.conn, sql, [userId, earning])
-    } else if(queryRes.results[0].cnt == 1){
+    } else if(queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `balance` = `balance` + ? WHERE `userId` = ?"
       return mysqlUtil.query(queryRes.conn, sql, [earning, userId])
     } else {
@@ -38,10 +36,6 @@ function updatePaymentBalance(userId, earning) {
     }
   }).catch((err) => {
     throw err
-  }).finally(() => {
-    if (mysqlConn) {
-      mysqlUtil.release(mysqlConn)
-    }
   })
 }
 
@@ -609,21 +603,34 @@ function paymentPasswordAuth(request, response) {
 }
 
 function PingppFuncTest(request, response) {
+  var mysqlConn = undefined
 
-  return updatePaymentBalance('587d81fd61ff4b0065092427', 100).then(() => {
-    response.success({
-      errcode: 0,
-      message: '[PingPP] identification identify success!',
-    })
-  }).catch((error) => {
-    console.log(error)
+
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    return mysqlUtil.beginTransaction(conn)
+  }).then((conn) => {
+    return updatePaymentBalance(conn, '587d81fd61ff4b0065092427', 55)
+  }).then(() => {
+    return mysqlUtil.commit(mysqlConn)
+  }).catch((err) => {
+    if (mysqlConn) {
+      console.log('transaction rollback')
+      mysqlUtil.rollback(mysqlConn)
+    }
     response.error({
       errcode: 1,
       message: 'updatePaymentBalance fail!',
     })
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+    response.success({
+      errcode: 0,
+      message: '[PingPP] identification identify success!',
+    })
   })
-
-
 }
 
 
