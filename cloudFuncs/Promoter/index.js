@@ -642,6 +642,7 @@ function cancelPromoterAgent(request, response) {
  */
 function fetchPromoter(request, response) {
   var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
+  var skipNum = request.params.skipNum || 0
   var identity = request.params.identity
   var province = request.params.province
   var city = request.params.city
@@ -658,7 +659,7 @@ function fetchPromoter(request, response) {
   var maxShopEarnings = request.params.maxShopEarnings
   var minInviteShopNum = request.params.minInviteShopNum
   var maxInviteShopNum = request.params.maxInviteShopNum
-  var minRoyaltyEarnings = request.params.mingRoyaltyEarnings
+  var minRoyaltyEarnings = request.params.minRoyaltyEarnings
   var maxRoyaltyEarnings = request.params.maxRoyaltyEarnings
   var minTeamMemNum = request.params.minTeamMemNum
   var maxTeamMemNum = request.params.maxTeamMemNum
@@ -715,26 +716,34 @@ function fetchPromoter(request, response) {
 
   var startShopEarningsQuery = new AV.Query('Promoter')
   var endShopEarningsQuery = new AV.Query('Promoter')
-  if (minShopEarnings && maxShopEarnings) {
+  if (minShopEarnings) {
     startShopEarningsQuery.greaterThanOrEqualTo('shopEarnings', minShopEarnings)
+  }
+  if (maxShopEarnings) {
     endShopEarningsQuery.lessThanOrEqualTo('shopEarnings', maxShopEarnings)
   }
   var startInviteShopQuery = new AV.Query('Promoter')
   var endInviteShopQuery = new AV.Query('Promoter')
-  if (minInviteShopNum && maxInviteShopNum) {
+  if (minInviteShopNum) {
     startInviteShopQuery.greaterThanOrEqualTo('inviteShopNum', minInviteShopNum)
+  }
+  if (maxInviteShopNum) {
     endInviteShopQuery.lessThanOrEqualTo('inviteShopNum', maxInviteShopNum)
   }
   var startRoyaltyEarningsQuery = new AV.Query('Promoter')
   var endRoyaltyEarningsQuery = new AV.Query('Promoter')
-  if (minRoyaltyEarnings && maxRoyaltyEarnings) {
+  if (minRoyaltyEarnings) {
     startRoyaltyEarningsQuery.greaterThanOrEqualTo('royaltyEarnings', minRoyaltyEarnings)
+  }
+  if (maxRoyaltyEarnings) {
     endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
   }
   var startTeamMemNumQuery = new AV.Query('Promoter')
   var endTeamMemNumQuery = new AV.Query('Promoter')
-  if (minTeamMemNum && maxTeamMemNum) {
+  if (minTeamMemNum) {
     startTeamMemNumQuery.greaterThanOrEqualTo('teamMemNum', minTeamMemNum)
+  }
+  if (maxTeamMemNum) {
     endTeamMemNumQuery.lessThanOrEqualTo('teamMemNum', maxTeamMemNum)
   }
 
@@ -750,6 +759,8 @@ function fetchPromoter(request, response) {
     endTeamMemNumQuery
   )
   query.limit(limit)
+  query.skip(skipNum)
+  query.include('user')
   if (!orderRule) {
     if (descend) {
       query.addDescending('royaltyEarnings')
@@ -788,8 +799,78 @@ function fetchPromoter(request, response) {
     }
   }
 
+  var constructUserInfo = require('../Auth').constructUserInfo
+
   query.find().then((promoters) => {
-    response.success({errcode: 0, promoters: promoters})
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取推广员信息失败'})
+  })
+}
+
+/**
+ * 根据地区获取非代理推广员列表
+ * @param request
+ * @param response
+ */
+function fetchNonAgentPromoter(request, response) {
+  var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
+  var liveProvince = request.params.liveProvince
+  var liveCity = request.params.liveCity
+  var liveDistrict = request.params.liveDistrict
+  var maxShopEarnings = request.params.maxShopEarnings
+  var maxRoyaltyEarnings = request.params.maxRoyaltyEarnings
+  var lastTime = request.params.lastTime
+
+  var normalQuery = new AV.Query('Promoter')
+  normalQuery.equalTo('identity', 0)
+  normalQuery.equalTo('payment', 1)
+  if (liveProvince) {
+    normalQuery.equalTo('liveProvince', liveProvince)
+  }
+  if (liveCity) {
+    normalQuery.equalTo('liveCity', liveCity)
+  }
+  if (liveDistrict) {
+    normalQuery.equalTo('liveDistrict', liveDistrict)
+  }
+
+  var endShopEarningsQuery = new AV.Query('Promoter')
+  if (maxShopEarnings) {
+    endShopEarningsQuery.lessThanOrEqualTo('shopEarnings', maxShopEarnings)
+  }
+  var endRoyaltyEarningsQuery = new AV.Query('Promoter')
+  if (maxRoyaltyEarnings) {
+    endRoyaltyEarningsQuery.lessThanOrEqualTo('royaltyEarnings', maxRoyaltyEarnings)
+  }
+
+  var query = AV.Query.and(
+    normalQuery,
+    endShopEarningsQuery,
+    endRoyaltyEarningsQuery
+  )
+  query.limit(limit)
+  query.include('user')
+  query.addDescending('createdAt')
+  query.addDescending('royaltyEarnings')
+  query.addDescending('shopEarnings')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+
+  var constructUserInfo = require('../Auth').constructUserInfo
+
+  query.find().then((promoters) => {
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取推广员信息失败'})
@@ -1044,6 +1125,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
   var selfEarn = 0
   var onePromoterEarn = 0
   var twoPromoterEarn = 0
+  var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var royalty = getPromoterRoyalty(level)
   if (royalty.length == 0) {
@@ -1068,6 +1150,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(provinceAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1087,6 +1171,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(cityAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1106,6 +1192,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(districtAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1120,7 +1208,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
-    return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+    return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
+      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+    })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Update promoter earning error')
@@ -1134,6 +1224,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
         onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
+          return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
+        }).then(() => {
           return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
         })
       } else {
@@ -1156,6 +1248,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
           twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
+            return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
+          }).then(() => {
             return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
           })
         } else {
@@ -1214,6 +1308,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
 function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty
   var royaltyEarnings = royalty * income
+  var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var mysqlConn = undefined
 
@@ -1225,7 +1320,9 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
-    return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+    return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
+      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+    })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
@@ -1610,6 +1707,7 @@ function getAreaAgentManagers(request, response) {
       query.equalTo('city', city)
       query.containedIn('district', subAreas)
     }
+    query.equalTo('identity', identity+1)
     query.include('user')
     return query.find()
   }).then((promoters) => {
@@ -1643,11 +1741,61 @@ function getAreaAgentManagers(request, response) {
   })
 }
 
+/**
+ * 根据推广员的昵称或者手机号查询推广员信息
+ * @param request
+ * @param response
+ */
+function fetchPromoterByNameOrId(request, response) {
+  var keyword = request.params.keyword
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var promoters = []
+  var users = []
+
+  var nameQuery = new AV.Query('_User')
+  nameQuery.equalTo('nickname', keyword)
+
+  var phoneQuery = new AV.Query('_User')
+  phoneQuery.equalTo('mobilePhoneNumber', keyword)
+
+  var query = AV.Query.or(nameQuery, phoneQuery)
+  query.find().then((userInfos) => {
+    var ops = []
+    userInfos.forEach((user) => {
+      var userInfo = constructUserInfo(user)
+      users.push(userInfo)
+      ops.push(getPromoterByUserId(userInfo.id))
+    })
+    return Promise.all(ops)
+  }).then((promoterInfos) => {
+    var retUsers = []
+    promoterInfos.forEach((promoter, index) => {
+      if (promoter) {
+        promoters.push(promoter)
+        retUsers.push(users[index])
+      }
+    })
+    response.success({
+      errcode: 0,
+      promoters: promoters,
+      users: retUsers,
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: 1,
+      message: '查询推广员信息失败',
+    })
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
+  getPromoterById: getPromoterById,
+  getUpPromoter: getUpPromoter,
   getUpPromoterByUserId: getUpPromoterByUserId,
   promoterPaid: promoterPaid,
   finishPromoterPayment: finishPromoterPayment,
@@ -1658,6 +1806,7 @@ var PromoterFunc = {
   fetchPromoterAgent: fetchPromoterAgent,
   cancelPromoterAgent: cancelPromoterAgent,
   fetchPromoter: fetchPromoter,
+  fetchNonAgentPromoter: fetchNonAgentPromoter,
   fetchPromoterDetail: fetchPromoterDetail,
   directSetPromoter: directSetPromoter,
   calPromoterShopEarnings: calPromoterShopEarnings,
@@ -1671,6 +1820,7 @@ var PromoterFunc = {
   getPromoterTenant: getPromoterTenant,
   getTotalPerformanceStat: getTotalPerformanceStat,
   getAreaAgentManagers: getAreaAgentManagers,
+  fetchPromoterByNameOrId: fetchPromoterByNameOrId,
 }
 
 module.exports = PromoterFunc

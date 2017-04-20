@@ -37,7 +37,6 @@ AV.Cloud.define('hLifeGetUserinfoById', authFunc.getUserinfoById)
 AV.Cloud.define('hLifeGetUsers', authFunc.getUsers)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
-AV.Cloud.define('hLifeSetPaymentPassword', authFunc.setPaymentPassword)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
@@ -132,6 +131,7 @@ AV.Cloud.define('promoterSetAgent', PromoterFunc.setPromoterAgent)
 AV.Cloud.define('promoterGetAgent', PromoterFunc.fetchPromoterAgent)
 AV.Cloud.define('promoterCancelAgent', PromoterFunc.cancelPromoterAgent)
 AV.Cloud.define('promoterFetchPromoter', PromoterFunc.fetchPromoter)
+AV.Cloud.define('promoterFetchNonAgentPromoter', PromoterFunc.fetchNonAgentPromoter)
 AV.Cloud.define('promoterGetPromoterDetail', PromoterFunc.fetchPromoterDetail)
 AV.Cloud.define('promoterDirectSetPromoter', PromoterFunc.directSetPromoter)
 AV.Cloud.define('promoterDistributeInviteShopEarnings', PromoterFunc.distributeInviteShopEarnings)
@@ -143,6 +143,7 @@ AV.Cloud.define('promoterGetPromoterShopsById', PromoterFunc.fetchPromoterShopBy
 AV.Cloud.define('promoterGetPromoterTenant', PromoterFunc.getPromoterTenant)
 AV.Cloud.define('promoterGetTotalPerformance', PromoterFunc.getTotalPerformanceStat)
 AV.Cloud.define('promoterGetAreaAgentManager', PromoterFunc.getAreaAgentManagers)
+AV.Cloud.define('promoterGetPromoterByNameOrId', PromoterFunc.fetchPromoterByNameOrId)
 
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)
@@ -155,6 +156,9 @@ AV.Cloud.define('hLifeCreateTransfers', PingppFunc.createTransfers)
 AV.Cloud.define('hLifePaymentEvent', PingppFunc.paymentEvent)
 AV.Cloud.define('hLifeTransfersEvent', PingppFunc.transfersEvent)
 AV.Cloud.define('hLifeIdNameCardNumberIdentify', PingppFunc.idNameCardNumberIdentify)
+AV.Cloud.define('hLifeGetPaymentInfoByUserId', PingppFunc.getPaymentInfoByUserId)
+AV.Cloud.define('hLifeSetPaymentPassword', PingppFunc.setPaymentPassword)
+AV.Cloud.define('hLifePaymentPasswordAuth', PingppFunc.paymentPasswordAuth)
 AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 
 
