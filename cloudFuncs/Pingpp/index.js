@@ -10,7 +10,6 @@ var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 
 
-
 /**
  * 更新mysql中PaymentInfo表的余额
  * @param conn
@@ -23,10 +22,10 @@ function updatePaymentBalance(conn, userId, earning) {
 
   sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? "
   return mysqlUtil.query(conn, sql, [userId]).then((queryRes) => {
-    if(queryRes.results[0].cnt == 0) {
+    if (queryRes.results[0].cnt == 0) {
       sql = "INSERT INTO `PaymentInfo` (`userId`, `balance`,) VALUES (?, ?)"
       return mysqlUtil.query(queryRes.conn, sql, [userId, earning])
-    } else if(queryRes.results[0].cnt == 1) {
+    } else if (queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `balance` = `balance` + ? WHERE `userId` = ?"
       return mysqlUtil.query(queryRes.conn, sql, [earning, userId])
     } else {
@@ -53,10 +52,10 @@ function setPaymentPasswordInMysql(userId, password) {
     sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
-    if(queryRes.results[0].cnt == 1) {
+    if (queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `password` = ? WHERE `userId` = ?"
       return mysqlUtil.query(queryRes.conn, sql, [password, userId])
-    } else if(queryRes.results[0].cnt == 0) {
+    } else if (queryRes.results[0].cnt == 0) {
       sql = "INSERT INTO `PaymentInfo` (`password`, `userId`) VALUES (?, ?)"
       return mysqlUtil.query(queryRes.conn, sql, [password, userId])
     } else {
@@ -87,7 +86,7 @@ function authPaymentPasswordInMysql(userId, password) {
     sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? AND `password` = ?"
     return mysqlUtil.query(conn, sql, [userId, password])
   }).then((queryRes) => {
-    if(queryRes.results[0].cnt == 1) {
+    if (queryRes.results[0].cnt == 1) {
       return new Promise((resolve, reject) => {
         resolve()
       })
@@ -113,7 +112,7 @@ function authPaymentPasswordInMysql(userId, password) {
  */
 function insertChargeInMysql(charge) {
   console.log("insertChargeInMysql charge:", charge)
-  var created =new Date(charge.created * 1000).toISOString().slice(0, 19).replace('T', ' ')
+  var created = new Date(charge.created * 1000).toISOString().slice(0, 19).replace('T', ' ')
   console.log("charge.created:", created)
   var sql = ""
   var mysqlConn = undefined
@@ -186,7 +185,7 @@ function insertCardInMysql(cardInfo) {
     sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? LIMIT 1"
     return mysqlUtil.query(conn, sql, [cardInfo.userId])
   }).then((queryRes) => {
-    if(queryRes.results[0].cnt == 0) {
+    if (queryRes.results[0].cnt == 0) {
       sql = "INSERT INTO `PaymentInfo` (`id_name`, `id_number`, `card_number`, `phone_number`, `userId`) VALUES (?, ?, ?, ?, ?)"
       return mysqlUtil.query(queryRes.conn, sql, [cardInfo.id_name, cardInfo.id_number, cardInfo.card_number, cardInfo.phone_number, cardInfo.userId])
     } else {
@@ -218,7 +217,7 @@ function updatePaymentInfoInMysql(paymentInfo) {
     sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? LIMIT 1"
     return mysqlUtil.query(conn, sql, [paymentInfo.userId])
   }).then((queryRes) => {
-    if(queryRes.results[0].cnt == 1) {
+    if (queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `alipay_account` = ?, `id_name` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
       return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.alipay_account, paymentInfo.id_name, paymentInfo.amount, paymentInfo.userId])
     } else {
@@ -237,7 +236,7 @@ function updatePaymentInfoInMysql(paymentInfo) {
 }
 
 
-function createPayment(request,response) {
+function createPayment(request, response) {
   var user = request.params.user
   var subject = request.params.subject
   var order_no = request.params.order_no
@@ -249,17 +248,13 @@ function createPayment(request,response) {
   // var channel = 'alipay'
   switch (channel) {
     case 'alipay':
-      extra = {
-
-      }
+      extra = {}
       metadata = {
         user: user,
       }
       break;
     case 'wx':
-      extra = {
-
-      }
+      extra = {}
       metadata = {
         user: user,
       }
@@ -270,18 +265,18 @@ function createPayment(request,response) {
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
   pingpp.charges.create({
-    order_no:  order_no,// 推荐使用 8-20 位，要求数字或字母，不允许其他字符
-    app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
-    channel:   channel,// 支付使用的第三方支付渠道取值，请参考：https://www.pingxx.com/api#api-c-new
-    amount:    amount,//订单总金额, 人民币单位：分（如订单总金额为 1 元，此处请填 100）
+    order_no: order_no,// 推荐使用 8-20 位，要求数字或字母，不允许其他字符
+    app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+    channel: channel,// 支付使用的第三方支付渠道取值，请参考：https://www.pingxx.com/api#api-c-new
+    amount: amount,//订单总金额, 人民币单位：分（如订单总金额为 1 元，此处请填 100）
     client_ip: "127.0.0.1",// 发起支付请求客户端的 IP 地址，格式为 IPV4，如: 127.0.0.1
-    currency:  "cny",
-    subject:   subject,
-    body:      "商品的描述信息",
-    extra:     extra,
+    currency: "cny",
+    subject: subject,
+    body: "商品的描述信息",
+    extra: extra,
     description: "店铺入驻费用",
     metadata: metadata,
-  }, function(err, charge) {
+  }, function (err, charge) {
     if (err != null) {
       console.log("pingpp.charges.create fail:", err)
       response.error({
@@ -298,18 +293,21 @@ function createPayment(request,response) {
   })
 }
 
-function paymentEvent(request,response) {
-  console.log("paymentEvent request.params", request.params)
-
+function paymentEvent(request, response) {
   var charge = request.params.data.object
+  var promoterId = charge.metadata.promoterId
   var shopId = charge.metadata.shopId
   var amount = charge.amount * 0.01 //单位为 元
+  var promoterPaid = require('../Promoter').promoterPaid
 
 
   return insertChargeInMysql(charge).then(() => {
-    console.log("paymentEvent charge into mysql success!")
-    if(shopId && amount)
-      shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+    if (promoterId) {
+      return promoterPaid(promoterId)
+    } else if (shopId && amount) {
+      return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+    }
+  }).then(() => {
     response.success({
       errcode: 0,
       message: 'paymentEvent charge into mysql success!',
@@ -339,17 +337,16 @@ function createTransfers(request, response) {
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
   switch (channel) {
-    case 'wx_pub':
-    {
+    case 'wx_pub': {
       pingpp.transfers.create({
-        order_no:  order_no,
-        app:       { id: GLOBAL_CONFIG.PINGPP_APP_ID },
-        channel:     "wx_pub",// 微信公众号支付
-        amount:    amount,
-        currency:    "cny",
-        type:        "b2c",
+        order_no: order_no,
+        app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+        channel: "wx_pub",// 微信公众号支付
+        amount: amount,
+        currency: "cny",
+        type: "b2c",
         recipient: account, //微信openId
-        extra:       {
+        extra: {
           user_name: userName,
           force_check: true,
         },
@@ -372,8 +369,7 @@ function createTransfers(request, response) {
       })
     }
       break
-    case 'alipay':
-    {
+    case 'alipay': {
       pingpp.batchTransfers.create({
         "app": GLOBAL_CONFIG.PINGPP_APP_ID,
         "batch_no": order_no, // 批量付款批次号
@@ -400,7 +396,7 @@ function createTransfers(request, response) {
           return
         }
 
-        if(transfer.metadata.userId && (transfer.recipients.length == 1)) {
+        if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
           var paymentInfo = {
             alipay_account: transfer.recipients[0].account,
             userId: transfer.metadata.userId,
@@ -493,7 +489,7 @@ function idNameCardNumberIdentify(request, response) {
       card_number: result.data.card_number,
       phone_number: result.data.phone_number,
       userId: userId,
-      bankCode:bankCode,
+      bankCode: bankCode,
 
     }
     return insertCardInMysql(cardInfo).then(() => {
@@ -522,13 +518,13 @@ function getPaymentInfoByUserId(request, response) {
     sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id` FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
-    if(queryRes.results.length > 0) {
+    if (queryRes.results.length > 0) {
       var balance = queryRes.results[0].balance || 0
       var id_name = queryRes.results[0].id_name || undefined
       var id_number = queryRes.results[0].id_number || undefined
       var card_number = queryRes.results[0].card_number || undefined
       var phone_number = queryRes.results[0].phone_number || undefined
-      var password = queryRes.results[0].phone_number? true : false
+      var password = queryRes.results[0].phone_number ? true : false
       var alipay_account = queryRes.results[0].alipay_account || undefined
       var open_id = queryRes.results[0].open_id || undefined
 
@@ -563,9 +559,9 @@ function setPaymentPassword(request, response) {
   var userId = request.params.userId
   var password = request.params.password
 
-  var cipher = Crypto.createCipher('aes-256-cbc','Ljyd')
+  var cipher = Crypto.createCipher('aes-256-cbc', 'Ljyd')
 
-  var pwd = cipher.update(password,'utf8','hex')
+  var pwd = cipher.update(password, 'utf8', 'hex')
   pwd += cipher.final('hex')
 
   return setPaymentPasswordInMysql(userId, pwd).then(() => {
@@ -584,9 +580,9 @@ function setPaymentPassword(request, response) {
 function paymentPasswordAuth(request, response) {
   var userId = request.params.userId
   var password = request.params.password
-  var cipher = Crypto.createCipher('aes-256-cbc','Ljyd')
+  var cipher = Crypto.createCipher('aes-256-cbc', 'Ljyd')
 
-  var pwd = cipher.update(password,'utf8','hex')
+  var pwd = cipher.update(password, 'utf8', 'hex')
   pwd += cipher.final('hex')
 
   return authPaymentPasswordInMysql(userId, pwd).then(() => {
