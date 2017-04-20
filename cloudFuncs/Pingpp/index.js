@@ -298,16 +298,33 @@ function paymentEvent(request, response) {
   var promoterId = charge.metadata.promoterId
   var shopId = charge.metadata.shopId
   var amount = charge.amount * 0.01 //单位为 元
-  var promoterPaid = require('../Promoter').promoterPaid
+  var promoterFunc = require('../Promoter')
 
   console.log('paymentEvent: ', promoterId)
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
       console.log('invoke promoter paid:', promoterId)
-      return promoterPaid(promoterId)
+      var promoter = undefined
+      return promoterFunc.getPromoterById(promoterId).then((promoterInfo) => {
+        promoter = promoterInfo
+        return promoterFunc.getUpPromoter(promoter)
+      }).then((upPromoter) => {
+        return promoterFunc.calPromoterInviterEarnings(promoter, upPromoter, amount)
+      }).then(() => {
+        return promoterFunc.promoterPaid(promoterId)
+      })
     } else if (shopId && amount) {
-      return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      var shop = undefined
+      return shopFunc.getShopById(shopId).then((shopInfo) => {
+        shop = shopInfo
+        var inviter = shop.attributes.inviter
+        return promoterFunc.getPromoterById(inviter)
+      }).then((promoter) => {
+        return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
+      }).then(() => {
+        return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      })
     }
   }).then(() => {
     response.success({

@@ -1794,6 +1794,8 @@ var PromoterFunc = {
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
   promoterCertificate: promoterCertificate,
+  getPromoterById: getPromoterById,
+  getUpPromoter: getUpPromoter,
   getUpPromoterByUserId: getUpPromoterByUserId,
   promoterPaid: promoterPaid,
   finishPromoterPayment: finishPromoterPayment,
