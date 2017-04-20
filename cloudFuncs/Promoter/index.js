@@ -1125,6 +1125,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
   var selfEarn = 0
   var onePromoterEarn = 0
   var twoPromoterEarn = 0
+  var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var royalty = getPromoterRoyalty(level)
   if (royalty.length == 0) {
@@ -1149,6 +1150,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(provinceAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1168,6 +1171,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(cityAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1187,6 +1192,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
       var agentEarn = getAgentEarning(identity, income)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(districtAgent.id).then(() => {
+        return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
+      }).then(() => {
         return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1201,7 +1208,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
-    return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+    return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
+      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+    })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Update promoter earning error')
@@ -1215,6 +1224,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
         onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
+          return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
+        }).then(() => {
           return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
         })
       } else {
@@ -1237,6 +1248,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
           twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
+            return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
+          }).then(() => {
             return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
           })
         } else {
@@ -1295,6 +1308,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
 function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty
   var royaltyEarnings = royalty * income
+  var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var mysqlConn = undefined
 
@@ -1306,7 +1320,9 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
-    return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+    return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
+      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+    })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
