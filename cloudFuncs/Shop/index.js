@@ -272,7 +272,7 @@ function shopCertificate(request, response) {
     shop.set('shopName', shopName + '')
     shop.set('shopAddress', shopAddress + '')
     if(geo) {
-      let geoArr = geo.split(',')
+      var geoArr = geo.split(',')
       var point = new AV.GeoPoint(geo)
       shop.set('geo', point)
     }
