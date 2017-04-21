@@ -19,6 +19,7 @@ var TenantFeeFunc = require('./cloudFuncs/Promoter/TenantFee')
 var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
 var topicFunc = require('./cloudFuncs/Topic')
+var statFunc = require('./cloudFuncs/Statistics/PerformanceStat')
 /**
  * 云函数
  */
@@ -161,6 +162,9 @@ AV.Cloud.define('hLifeGetPaymentInfoByUserId', PingppFunc.getPaymentInfoByUserId
 AV.Cloud.define('hLifeSetPaymentPassword', PingppFunc.setPaymentPassword)
 AV.Cloud.define('hLifePaymentPasswordAuth', PingppFunc.paymentPasswordAuth)
 AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
+
+// 统计方法
+AV.Cloud.define('statPromoterPerformance', statFunc.statPromoterPerformance)
 
 
 module.exports = AV.Cloud;
