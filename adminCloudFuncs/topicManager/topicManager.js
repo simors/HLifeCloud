@@ -195,10 +195,8 @@ function updateTopicCategoryPicked(request, response) {
 
 function getTopicCategoryList(request, response) {
   var topicCategoryList = []
-  var filterValue = ''
-  if(request.params.filterValue){
-    filterValue = request.params.filterValue
-  }
+  var filterValue = request.params.filterValue
+
 
   var query = new AV.Query('TopicCategory');
   if (request.params.picked!=undefined) {
@@ -219,7 +217,9 @@ function getTopicCategoryList(request, response) {
       query.equalTo('enabled', true);
     }
   }
-  query.contains('title', filterValue);
+  if(filterValue){
+    query.contains('title', filterValue);
+  }
   query.find().then((results)=> {
 
     results.forEach((result)=> {
