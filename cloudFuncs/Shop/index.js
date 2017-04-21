@@ -653,6 +653,21 @@ function updateShopInfoAfterPaySuccess(shopId, tenant) {
   })
 }
 
+/**
+ * 根据用户id获取其店铺信息
+ * @param userId
+ * @returns {*}
+ */
+function getShopByUserId(userId) {
+  var userQuery = new AV.Query('_User')
+  var query = new AV.Query('Shop')
+
+  return userQuery.get(userId).then((user) => {
+    query.equalTo('owner', user)
+    return query.first()
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -666,6 +681,7 @@ var shopFunc = {
   fetchShopFollowers: fetchShopFollowers,
   updateShopLocationInfo: updateShopLocationInfo,
   updateShopInfoAfterPaySuccess: updateShopInfoAfterPaySuccess,
+  getShopByUserId: getShopByUserId,
 }
 
 module.exports = shopFunc

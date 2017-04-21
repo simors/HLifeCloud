@@ -1152,7 +1152,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       return insertPromoterInMysql(provinceAgent.id).then(() => {
         return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
       }).then(() => {
-        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
       return new Promise((resolve) => {
@@ -1173,7 +1173,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       return insertPromoterInMysql(cityAgent.id).then(() => {
         return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
       }).then(() => {
-        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
       return new Promise((resolve) => {
@@ -1194,7 +1194,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       return insertPromoterInMysql(districtAgent.id).then(() => {
         return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
       }).then(() => {
-        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
       return new Promise((resolve) => {
@@ -1209,7 +1209,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
-      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
@@ -1226,7 +1226,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         return insertPromoterInMysql(upPromoter.id).then(() => {
           return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
         }).then(() => {
-          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, promoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
         })
       } else {
         return new Promise((resolve) => {
@@ -1250,7 +1250,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
           return insertPromoterInMysql(upupPromoter.id).then(() => {
             return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
           }).then(() => {
-            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
           })
         } else {
           return new Promise((resolve) => {
@@ -1321,7 +1321,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
     return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
-      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
@@ -1368,14 +1368,15 @@ function updateLeanPromoterEarning(promoterId, earn, earn_type) {
 /**
  * 更新推广员的收益记录
  * @param conn
- * @param fromPromoterId
- * @param toPromoterId
+ * @param fromId          出钱方的id，可能是推广员的id或者店主id
+ * @param toPromoterId    收益方的推广员id
+ * @param promoterId      记录此交易的推广员id
  * @param earn
  * @param deal_type 交易类型，直接或者间接的提成收益或者直接邀请店铺获得的收益（INVITE_SHOP ／ INVITE_PROMOTER）
  * @param earn_type 收益类型，邀请店铺或者邀请推广员(EARN_ROYALTY / EARN_SHOP_INVITE)
  * @returns {*|Promise.<TResult>}
  */
-function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_type, earn_type) {
+function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, deal_type, earn_type) {
   var earnSql = ''
   if (earn_type == EARN_ROYALTY) {
     earnSql = 'UPDATE `PromoterEarnings` SET `royalty_earnings` = `royalty_earnings` + ? WHERE `promoterId` = ?'
@@ -1386,8 +1387,8 @@ function updatePromoterEarning(conn, fromPromoterId, toPromoterId, earn, deal_ty
     if (0 == updateRes.results.changedRows) {
       throw new Error('Update PromoterEarnings error')
     }
-    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `deal_type`) VALUES (?, ?, ?, ?)'
-    return mysqlUtil.query(conn, recordSql, [fromPromoterId, toPromoterId, earn, deal_type])
+    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?)'
+    return mysqlUtil.query(conn, recordSql, [fromId, toPromoterId, promoterId, earn, deal_type])
   })
 }
 
@@ -1789,6 +1790,82 @@ function fetchPromoterByNameOrId(request, response) {
   })
 }
 
+/**
+ * 获取推广员收益记录
+ * @param request
+ * @param response
+ */
+function fetchEarningRecords(request, response) {
+  var promoterId = request.params.promoterId
+  var limit = request.params.limit || 10
+  var lastTime = request.params.lastTime
+  var sql = ''
+  var mysqlConn = undefined
+  var getShopByUserId = require('../Shop').getShopByUserId
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var originalRecords = []
+
+  mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    if (lastTime) {
+      sql = 'SELECT * FROM `PromoterDeal` WHERE `to`=? AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
+      return mysqlUtil.query(conn, sql, [promoterId, lastTime, limit])
+    } else {
+      sql = 'SELECT * FROM `PromoterDeal` WHERE `to`=? ORDER BY `deal_time` DESC LIMIT ?'
+      return mysqlUtil.query(conn, sql, [promoterId, limit])
+    }
+  }).then((queryRes) => {
+    var ops = []
+    queryRes.results.forEach((deal) => {
+      var record = {
+        from: deal.from,
+        to: deal.to,
+        promoterId: deal.promoterId,
+        cost: deal.cost,
+        dealTime: deal.deal_time,
+        dealType: deal.deal_type,
+      }
+      if (INVITE_SHOP == deal.deal_type) {
+        ops.push(getShopByUserId(deal.from))
+      } else if (INVITE_PROMOTER == deal.deal_type) {
+        ops.push(getPromoterById(deal.from, true))
+      }
+      originalRecords.push(record)
+    })
+    // 提前释放mysql连接
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+    mysqlConn = undefined
+    return Promise.all(ops)
+  }).then((results) => {
+    var dealRecords = []
+    results.forEach((retValue, index) => {
+      var elem = {}
+      if (originalRecords[index].dealType == INVITE_SHOP) {
+        elem.shop = retValue
+      } else if (originalRecords[index].dealType == INVITE_PROMOTER) {
+        elem.promoter = retValue
+        elem.user = constructUserInfo(retValue.attributes.user)
+      }
+      elem.cost = originalRecords[index].cost
+      elem.promoterId = originalRecords[index].promoterId
+      elem.dealType = originalRecords[index].dealType
+      elem.dealTime = originalRecords[index].dealTime
+
+      dealRecords.push(elem)
+    })
+    response.success({errcode: 0, dealRecords: dealRecords})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取收益记录失败'})
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -1821,6 +1898,7 @@ var PromoterFunc = {
   getTotalPerformanceStat: getTotalPerformanceStat,
   getAreaAgentManagers: getAreaAgentManagers,
   fetchPromoterByNameOrId: fetchPromoterByNameOrId,
+  fetchEarningRecords: fetchEarningRecords,
 }
 
 module.exports = PromoterFunc
