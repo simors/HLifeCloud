@@ -17,15 +17,20 @@ const LEVEL_DISTRICT = 1
 const LEVEL_CITY = 2
 const LEVEL_PROVINCE = 3
 
-var job = schedule.scheduleJob('0 0 12 * * *', function() {
-  var date = (new Date()).toLocaleDateString()
-  runDistrictPromoterStat(date).then((districtStat) => {
+var dailyJob = schedule.scheduleJob('0 0 12 * * *', function() {
+  var date = new Date()
+  date.setTime(date.getTime() - 24*60*60*1000)    // 统计昨天的业绩
+  runDistrictPromoterStat(date.toLocaleDateString()).then((districtStat) => {
     return runCityPromoterStat(districtStat)
   }).then((cityStat) => {
     return runProvincePromoterStat(cityStat)
   }).catch((err) => {
     console.log(err)
   })
+})
+
+var monthJob = schedule.scheduleJob('0 0 7 1 * *', function() {
+  console.log('exec statistic monthly')
 })
 
 /**
