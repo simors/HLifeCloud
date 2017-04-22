@@ -6,6 +6,7 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var AV = require('leanengine')
 var redis = require('redis')
+var dateFormat = require('dateformat')
 var promoterFuncs = require('../Promoter')
 
 // 收益来源分类
@@ -17,9 +18,11 @@ const LEVEL_DISTRICT = 1
 const LEVEL_CITY = 2
 const LEVEL_PROVINCE = 3
 
+const ONE_DAY = 24*60*60*1000
+
 var dailyJob = schedule.scheduleJob('0 0 12 * * *', function() {
   var date = new Date()
-  date.setTime(date.getTime() - 24*60*60*1000)    // 统计昨天的业绩
+  date.setTime(date.getTime() - ONE_DAY)    // 统计昨天的业绩
   runDistrictPromoterStat(date.toLocaleDateString()).then((districtStat) => {
     return runCityPromoterStat(districtStat)
   }).then((cityStat) => {
@@ -304,8 +307,53 @@ function statPromoterPerformance(request, response) {
   })
 }
 
+/**
+ * 获取某日的业绩统计数据
+ * @param request
+ * @param response
+ */
+function fetchDaliyPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var date = new Date(dateFormat(request.params.date, 'isoDate'))
+
+  var beginQuery = new AV.Query('PromoterPerformanceStat')
+  beginQuery.greaterThanOrEqualTo('createdAt', date)
+
+  var endQuery = new AV.Query('PromoterPerformanceStat')
+  endQuery.lessThan('createdAt', new Date(date.getTime() + ONE_DAY))
+
+  var query = AV.Query.and(beginQuery, endQuery)
+  query.equalTo('level', level)
+
+  switch (level) {
+    case 1:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      query.equalTo('district', district)
+      break
+    case 2:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      break
+    case 3:
+      query.equalTo('province', province)
+      break
+  }
+
+  query.first().then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
+  fetchDaliyPerformance: fetchDaliyPerformance,
 }
 
 module.exports = StatFuncs

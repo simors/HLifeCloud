@@ -165,6 +165,6 @@ AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 
 // 统计方法
 AV.Cloud.define('statPromoterPerformance', statFunc.statPromoterPerformance)
-
+AV.Cloud.define('statFetchDailyPerformance', statFunc.fetchDaliyPerformance)
 
 module.exports = AV.Cloud;
