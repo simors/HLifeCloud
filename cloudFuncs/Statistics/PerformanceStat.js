@@ -351,9 +351,56 @@ function fetchDaliyPerformance(request, response) {
   })
 }
 
+/**
+ *
+ * @param request
+ * @param response
+ */
+function fetchLastDaysPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var lastDate = new Date(dateFormat(request.params.lastDate, 'isoDate'))
+  var days = request.params.days
+
+  var beginQuery = new AV.Query('PromoterPerformanceStat')
+  beginQuery.greaterThanOrEqualTo('createdAt', new Date(lastDate.getTime() - days * ONE_DAY))
+
+  var endQuery = new AV.Query('PromoterPerformanceStat')
+  endQuery.lessThan('createdAt', lastDate)
+
+  var query = AV.Query.and(beginQuery, endQuery)
+  query.equalTo('level', level)
+
+  switch (level) {
+    case 1:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      query.equalTo('district', district)
+      break
+    case 2:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      break
+    case 3:
+      query.equalTo('province', province)
+      break
+  }
+  query.ascending('createdAt')
+
+  query.find().then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
   fetchDaliyPerformance: fetchDaliyPerformance,
+  fetchLastDaysPerformance: fetchLastDaysPerformance,
 }
 
 module.exports = StatFuncs
