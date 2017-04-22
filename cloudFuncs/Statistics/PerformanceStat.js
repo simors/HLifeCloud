@@ -65,6 +65,7 @@ function execStatSave(data) {
       performanceStat.set('promoterNum', data.promoterNum)
       performanceStat.set('earning', data.earn)
       performanceStat.set('level', data.level)
+      performanceStat.set('statDate', new Date(data.statDate))
       return performanceStat.save()
     }
   })
@@ -80,7 +81,6 @@ function runDistrictPromoterStat(date) {
   var originalRecords = []
   var shopNum = 0
   var promoterNum = 0
-  var earning = 0
 
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
@@ -163,6 +163,7 @@ function runDistrictPromoterStat(date) {
         promoterNum: stat.promoterNum,
         earn: stat.earn,
         level: LEVEL_DISTRICT,
+        statDate: date,
       }
       saveOps.push(execStatSave(statData))
     })
@@ -208,6 +209,7 @@ function runCityPromoterStat(districtStat) {
       areaStat.shopNum = stat.attributes.shopNum
       areaStat.promoterNum = stat.attributes.promoterNum
       areaStat.earn = stat.attributes.earning
+      areaStat.statDate = stat.attributes.statDate
     } else {
       areaStat.shopNum += stat.attributes.shopNum
       areaStat.promoterNum += stat.attributes.promoterNum
@@ -225,6 +227,7 @@ function runCityPromoterStat(districtStat) {
       promoterNum: stat.promoterNum,
       earn: stat.earn,
       level: LEVEL_CITY,
+      statDate: stat.statDate,
     }
     saveOps.push(execStatSave(statData))
   })
@@ -263,6 +266,7 @@ function runProvincePromoterStat(cityStat) {
       areaStat.shopNum = stat.attributes.shopNum
       areaStat.promoterNum = stat.attributes.promoterNum
       areaStat.earn = stat.attributes.earning
+      areaStat.statDate = stat.attributes.statDate
     } else {
       areaStat.shopNum += stat.attributes.shopNum
       areaStat.promoterNum += stat.attributes.promoterNum
@@ -279,6 +283,7 @@ function runProvincePromoterStat(cityStat) {
       promoterNum: stat.promoterNum,
       earn: stat.earn,
       level: LEVEL_PROVINCE,
+      statDate: stat.statDate,
     }
     saveOps.push(execStatSave(statData))
   })
@@ -317,16 +322,11 @@ function fetchDaliyPerformance(request, response) {
   var province = request.params.province
   var city = request.params.city
   var district = request.params.district
-  var date = new Date(dateFormat(request.params.date, 'isoDate'))
+  var date = new Date(dateFormat(request.params.date, 'isoDateTime'))
 
-  var beginQuery = new AV.Query('PromoterPerformanceStat')
-  beginQuery.greaterThanOrEqualTo('createdAt', date)
-
-  var endQuery = new AV.Query('PromoterPerformanceStat')
-  endQuery.lessThan('createdAt', new Date(date.getTime() + ONE_DAY))
-
-  var query = AV.Query.and(beginQuery, endQuery)
+  var query = new AV.Query('PromoterPerformanceStat')
   query.equalTo('level', level)
+  query.equalTo('statDate', new Date(date))
 
   switch (level) {
     case 1:
@@ -365,13 +365,14 @@ function fetchLastDaysPerformance(request, response) {
   var days = request.params.days
 
   var beginQuery = new AV.Query('PromoterPerformanceStat')
-  beginQuery.greaterThanOrEqualTo('createdAt', new Date(lastDate.getTime() - days * ONE_DAY))
+  beginQuery.greaterThanOrEqualTo('statDate', new Date(lastDate.getTime() - days * ONE_DAY))
 
   var endQuery = new AV.Query('PromoterPerformanceStat')
-  endQuery.lessThan('createdAt', lastDate)
+  endQuery.lessThan('statDate', lastDate)
 
   var query = AV.Query.and(beginQuery, endQuery)
   query.equalTo('level', level)
+  query.ascending('statDate')
 
   switch (level) {
     case 1:
@@ -387,7 +388,6 @@ function fetchLastDaysPerformance(request, response) {
       query.equalTo('province', province)
       break
   }
-  query.ascending('createdAt')
 
   query.find().then((stat) => {
     response.success({errcode: 0, statistics: stat})
@@ -395,6 +395,10 @@ function fetchLastDaysPerformance(request, response) {
     console.log(err)
     response.error({errcode: 1, message: '获取统计数据失败'})
   })
+}
+
+function runDistrictMonthStat() {
+  
 }
 
 var StatFuncs = {
