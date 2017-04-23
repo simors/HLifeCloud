@@ -33,7 +33,20 @@ var dailyJob = schedule.scheduleJob('0 0 12 * * *', function() {
 })
 
 var monthJob = schedule.scheduleJob('0 0 7 1 * *', function() {
-  console.log('exec statistic monthly')
+  var date = new Date()
+  var year = date.getFullYear()
+  var month = date.getMonth()
+  if (month == 0) {
+    month = 12
+    year = year - 1
+  }
+  runDistrictMonthStat(year, month).then((districtStat) => {
+    return runCityMonthStat(districtStat)
+  }).then((cityStat) => {
+    return runProvinceMonthStat(cityStat)
+  }).catch((err) => {
+    console.log(err)
+  })
 })
 
 /**
