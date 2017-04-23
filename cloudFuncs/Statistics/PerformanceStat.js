@@ -676,11 +676,53 @@ function statMonthPerformance(request, response) {
   })
 }
 
+/**
+ *
+ * @param request
+ * @param response
+ */
+function fetchMonthPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var year = request.params.year
+  var month = request.params.month
+
+  var query = new AV.Query('PromoterMonthStat')
+  query.equalTo('level', level)
+  query.equalTo('year', year)
+  query.equalTo('month', month)
+
+  switch (level) {
+    case 1:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      query.equalTo('district', district)
+      break
+    case 2:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      break
+    case 3:
+      query.equalTo('province', province)
+      break
+  }
+
+  query.first().then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
   fetchDaliyPerformance: fetchDaliyPerformance,
   fetchLastDaysPerformance: fetchLastDaysPerformance,
   statMonthPerformance: statMonthPerformance,
+  fetchMonthPerformance: fetchMonthPerformance,
 }
 
 module.exports = StatFuncs
