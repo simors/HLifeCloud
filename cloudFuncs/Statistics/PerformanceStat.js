@@ -717,12 +717,79 @@ function fetchMonthPerformance(request, response) {
   })
 }
 
+/**
+ * 获取过去几个月的月统计数据，不大于12个月
+ * @param request
+ * @param response
+ */
+function fetchLastMonthsPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var lastYear = request.params.lastYear
+  var lastMonth = request.params.lastMonth
+  var months = request.params.months
+
+  if (months > 12) {
+    response.error({errcode: 1, message: '最多过去12个月的月度统计数据'})
+  }
+
+  var beginYear = lastYear
+  var beginMonth = lastMonth
+  if (lastMonth - months < 0) {
+    beginYear = beginYear - 1
+    beginMonth = 12 - (months - lastMonth) + 1
+  } else {
+    beginMonth = lastMonth - months
+  }
+  console.log('begin', beginYear, beginMonth)
+  console.log('end', lastYear, lastMonth)
+
+  var beginQuery = new AV.Query('PromoterMonthStat')
+  beginQuery.equalTo('year', beginYear)   // 只获取这一年的数据
+  beginQuery.greaterThanOrEqualTo('month', beginMonth)
+
+  var endQuery = new AV.Query('PromoterMonthStat')
+  endQuery.equalTo('year', lastYear)    // 只获取这一年的数据
+  endQuery.lessThanOrEqualTo('month', lastMonth)
+
+  // 由于每次只获取那一年的数据，为了将所有数据拼起来，所以用or
+  var query = AV.Query.or(beginQuery, endQuery)
+  query.equalTo('level', level)
+  query.addAscending('year')
+  query.addAscending('month')
+
+  switch (level) {
+    case 1:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      query.equalTo('district', district)
+      break
+    case 2:
+      query.equalTo('province', province)
+      query.equalTo('city', city)
+      break
+    case 3:
+      query.equalTo('province', province)
+      break
+  }
+
+  query.find().then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
   fetchDaliyPerformance: fetchDaliyPerformance,
   fetchLastDaysPerformance: fetchLastDaysPerformance,
   statMonthPerformance: statMonthPerformance,
   fetchMonthPerformance: fetchMonthPerformance,
+  fetchLastMonthsPerformance: fetchLastMonthsPerformance,
 }
 
 module.exports = StatFuncs

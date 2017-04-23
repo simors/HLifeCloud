@@ -169,5 +169,6 @@ AV.Cloud.define('statFetchDailyPerformance', statFunc.fetchDaliyPerformance)
 AV.Cloud.define('statFetchLastDaysPerformance', statFunc.fetchLastDaysPerformance)
 AV.Cloud.define('statPromoterMonthPerformance', statFunc.statMonthPerformance)
 AV.Cloud.define('statFetchMonthPerformance', statFunc.fetchMonthPerformance)
+AV.Cloud.define('statFetchLastMonthsPerformance', statFunc.fetchLastMonthsPerformance)
 
 module.exports = AV.Cloud;
