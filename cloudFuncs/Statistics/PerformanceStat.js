@@ -43,19 +43,25 @@ var monthJob = schedule.scheduleJob('0 0 7 1 * *', function() {
 function execDailyStatSave(data) {
   var query = new AV.Query('PromoterPerformanceStat')
   query.equalTo('province', data.province)
-  query.equalTo('city', data.city)
-  query.equalTo('district', data.district)
+  if (data.city) {
+    query.equalTo('city', data.city)
+  }
+  if (data.district) {
+    query.equalTo('district', data.district)
+  }
   query.equalTo('level', data.level)
-  query.equalTo('statDate', data.statDate)
+  query.equalTo('statDate', new Date(data.statDate))
 
   return query.first().then((stat) => {
     // 已经存在相关统计数据
     if (stat) {
       var newStat = AV.Object.createWithoutData('PromoterPerformanceStat', stat.id)
-      newStat.set('shopNum', stat.shopNum)
-      newStat.set('promoterNum', stat.promoterNum)
-      newStat.set('earning', stat.earn)
-      return newStat.save()
+      newStat.set('shopNum', data.shopNum)
+      newStat.set('promoterNum', data.promoterNum)
+      newStat.set('earning', data.earn)
+      return newStat.save().then((stat) => {
+        return stat.fetch()
+      })
     } else {
       var PerformanceStat = AV.Object.extend('PromoterPerformanceStat')
       var performanceStat = new PerformanceStat()
@@ -80,8 +86,12 @@ function execDailyStatSave(data) {
 function execMonthlyStatSave(data) {
   var query = new AV.Query('PromoterMonthStat')
   query.equalTo('province', data.province)
-  query.equalTo('city', data.city)
-  query.equalTo('district', data.district)
+  if (data.city) {
+    query.equalTo('city', data.city)
+  }
+  if (data.district) {
+    query.equalTo('district', data.district)
+  }
   query.equalTo('level', data.level)
   query.equalTo('year', data.year)
   query.equalTo('month', data.month)
@@ -90,10 +100,12 @@ function execMonthlyStatSave(data) {
     // 已经存在相关统计数据
     if (stat) {
       var newStat = AV.Object.createWithoutData('PromoterMonthStat', stat.id)
-      newStat.set('shopNum', stat.shopNum)
-      newStat.set('promoterNum', stat.promoterNum)
-      newStat.set('earning', stat.earn)
-      return newStat.save()
+      newStat.set('shopNum', data.shopNum)
+      newStat.set('promoterNum', data.promoterNum)
+      newStat.set('earning', data.earn)
+      return newStat.save().then((stat) => {
+        return stat.fetch()
+      })
     } else {
       var PerformanceStat = AV.Object.extend('PromoterMonthStat')
       var performanceStat = new PerformanceStat()
@@ -513,6 +525,124 @@ function runDistrictMonthStat(year, month) {
 }
 
 /**
+ * 执行城市月度统计
+ * @param districtStat
+ * @returns {Promise.<*>}
+ */
+function runCityMonthStat(districtStat) {
+  var statMap = new Map()
+  var keyArray = []
+  districtStat.forEach((stat) => {
+    var areaKey = {
+      province: stat.attributes.province,
+      city: stat.attributes.city,
+    }
+    var key = keyArray.find((value) => {
+      return (value.province == areaKey.province && value.city == areaKey.city) ? true : false
+    })
+    var areaStat = undefined
+    if (key) {
+      areaStat = statMap.get(key)
+    } else {
+      areaStat = undefined
+      key = areaKey
+      keyArray.push(key)
+    }
+    if (!areaStat) {
+      areaStat = {
+        shopNum: 0,
+        promoterNum: 0,
+        earn: 0,
+      }
+      areaStat.shopNum = stat.attributes.shopNum
+      areaStat.promoterNum = stat.attributes.promoterNum
+      areaStat.earn = stat.attributes.earning
+      areaStat.year = stat.attributes.year
+      areaStat.month = stat.attributes.month
+    } else {
+      areaStat.shopNum += stat.attributes.shopNum
+      areaStat.promoterNum += stat.attributes.promoterNum
+      areaStat.earn += stat.attributes.earning
+    }
+    statMap.set(key, areaStat)
+  })
+
+  var saveOps = []
+  statMap.forEach((stat, key) => {
+    var statData = {
+      province: key.province,
+      city: key.city,
+      shopNum: stat.shopNum,
+      promoterNum: stat.promoterNum,
+      earn: stat.earn,
+      level: LEVEL_CITY,
+      year: stat.year,
+      month: stat.month,
+    }
+    saveOps.push(execMonthlyStatSave(statData))
+  })
+  return Promise.all(saveOps)
+}
+
+/**
+ * 执行身份月度统计
+ * @param districtStat
+ * @returns {Promise.<*>}
+ */
+function runProvinceMonthStat(cityStat) {
+  var statMap = new Map()
+  var keyArray = []
+  cityStat.forEach((stat) => {
+    var areaKey = {
+      province: stat.attributes.province,
+    }
+    var key = keyArray.find((value) => {
+      return (value.province == areaKey.province) ? true : false
+    })
+    var areaStat = undefined
+    if (key) {
+      areaStat = statMap.get(key)
+    } else {
+      areaStat = undefined
+      key = areaKey
+      keyArray.push(key)
+    }
+    if (!areaStat) {
+      areaStat = {
+        shopNum: 0,
+        promoterNum: 0,
+        earn: 0,
+      }
+      areaStat.shopNum = stat.attributes.shopNum
+      areaStat.promoterNum = stat.attributes.promoterNum
+      areaStat.earn = stat.attributes.earning
+      areaStat.year = stat.attributes.year
+      areaStat.month = stat.attributes.month
+    } else {
+      areaStat.shopNum += stat.attributes.shopNum
+      areaStat.promoterNum += stat.attributes.promoterNum
+      areaStat.earn += stat.attributes.earning
+    }
+    statMap.set(key, areaStat)
+  })
+
+  var saveOps = []
+  statMap.forEach((stat, key) => {
+    var statData = {
+      province: key.province,
+      shopNum: stat.shopNum,
+      promoterNum: stat.promoterNum,
+      earn: stat.earn,
+      level: LEVEL_PROVINCE,
+      year: stat.year,
+      month: stat.month,
+    }
+    saveOps.push(execMonthlyStatSave(statData))
+  })
+  return Promise.all(saveOps)
+}
+
+/**
  * 统计
  * @param request
  * @param response
@@ -521,7 +651,11 @@ function statMonthPerformance(request, response) {
   var year = request.params.year
   var month = request.params.month
 
-  runDistrictMonthStat(year, month).then(() => {
+  runDistrictMonthStat(year, month).then((districtStat) => {
+    return runCityMonthStat(districtStat)
+  }).then((cityStat) => {
+    return runProvinceMonthStat(cityStat)
+  }).then(() => {
     response.success({errcode: 0, message: '执行推广员月统计功能成功'})
   }).catch((err) => {
     console.log(err)
