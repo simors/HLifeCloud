@@ -167,5 +167,6 @@ AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 AV.Cloud.define('statPromoterPerformance', statFunc.statPromoterPerformance)
 AV.Cloud.define('statFetchDailyPerformance', statFunc.fetchDaliyPerformance)
 AV.Cloud.define('statFetchLastDaysPerformance', statFunc.fetchLastDaysPerformance)
+AV.Cloud.define('statPromoterMonthPerformance', statFunc.statMonthPerformance)
 
 module.exports = AV.Cloud;
