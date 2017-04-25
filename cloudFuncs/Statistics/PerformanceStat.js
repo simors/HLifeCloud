@@ -8,6 +8,7 @@ var AV = require('leanengine')
 var redis = require('redis')
 var dateFormat = require('dateformat')
 var promoterFuncs = require('../Promoter')
+var getSubAreaByAreaName = require('../baidu').getSubAreaByAreaName
 
 // 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
@@ -677,39 +678,98 @@ function statMonthPerformance(request, response) {
 }
 
 /**
+ * 获取某地区月度业绩
+ * @param payload
+ * @returns {*}
+ */
+function getAreaMonthPerformance(payload) {
+  var query = new AV.Query('PromoterMonthStat')
+  query.equalTo('level', payload.level)
+  query.equalTo('year', payload.year)
+  query.equalTo('month', payload.month)
+
+  switch (payload.level) {
+    case LEVEL_DISTRICT:
+      query.equalTo('province', payload.province)
+      query.equalTo('city', payload.city)
+      query.equalTo('district', payload.district)
+      break
+    case LEVEL_CITY:
+      query.equalTo('province', payload.province)
+      query.equalTo('city', payload.city)
+      break
+    case LEVEL_PROVINCE:
+      query.equalTo('province', payload.province)
+      break
+  }
+
+  return query.first()
+}
+
+/**
  *
  * @param request
  * @param response
  */
 function fetchMonthPerformance(request, response) {
+  var payload = {
+    level: request.params.level,
+    province: request.params.province,
+    city: request.params.city,
+    district: request.params.district,
+    year: request.params.year,
+    month: request.params.month,
+  }
+
+  getAreaMonthPerformance(payload).then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
+/**
+ * 获取某地下辖地区的月度业绩统计数据，由于区县是地区分级的最下级，
+ * 所以此接口不支持查询区县级下辖地区的月度业绩
+ * @param request
+ * @param response
+ */
+function fetchAreaMonthPerformance(request, response) {
   var level = request.params.level
   var province = request.params.province
   var city = request.params.city
-  var district = request.params.district
   var year = request.params.year
   var month = request.params.month
+  var area = ''
+  var areaType = ''
 
-  var query = new AV.Query('PromoterMonthStat')
-  query.equalTo('level', level)
-  query.equalTo('year', year)
-  query.equalTo('month', month)
-
-  switch (level) {
-    case 1:
-      query.equalTo('province', province)
-      query.equalTo('city', city)
-      query.equalTo('district', district)
-      break
-    case 2:
-      query.equalTo('province', province)
-      query.equalTo('city', city)
-      break
-    case 3:
-      query.equalTo('province', province)
-      break
+  if (LEVEL_PROVINCE == level) {
+    area = province
+    areaType = 'province'
+  } else if (LEVEL_CITY == level) {
+    area = city
+    areaType = 'city'
+  } else {
+    response.error({errcode: 1, message: '不支持的地区级别'})
   }
 
-  query.first().then((stat) => {
+  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+    var newLevel = level - 1
+    var ops = []
+    subAreas.forEach((subArea) => {
+      var payload = {
+        level: newLevel,
+        province: province,
+        city: LEVEL_CITY == newLevel ? subArea.area_name : city,
+        district: LEVEL_CITY == newLevel ? undefined : subArea.area_name,
+        year: year,
+        month: month,
+      }
+      ops.push(getAreaMonthPerformance(payload))
+    })
+    return Promise.all(ops)
+  }).then((stat) => {
     response.success({errcode: 0, statistics: stat})
   }).catch((err) => {
     console.log(err)
@@ -790,6 +850,7 @@ var StatFuncs = {
   statMonthPerformance: statMonthPerformance,
   fetchMonthPerformance: fetchMonthPerformance,
   fetchLastMonthsPerformance: fetchLastMonthsPerformance,
+  fetchAreaMonthPerformance: fetchAreaMonthPerformance,
 }
 
 module.exports = StatFuncs
