@@ -778,22 +778,18 @@ function fetchAreaMonthPerformance(request, response) {
 }
 
 /**
- * 获取过去几个月的月统计数据，不大于12个月
- * @param request
- * @param response
+ *
+ * @param payload
+ * @returns {Promise.<Conversation[]>|*|T|Promise<Array<Conversation>>}
  */
-function fetchLastMonthsPerformance(request, response) {
-  var level = request.params.level
-  var province = request.params.province
-  var city = request.params.city
-  var district = request.params.district
-  var lastYear = request.params.lastYear
-  var lastMonth = request.params.lastMonth
-  var months = request.params.months
-
-  if (months > 12) {
-    response.error({errcode: 1, message: '最多过去12个月的月度统计数据'})
-  }
+function getAreaLastMonthPerformance(payload) {
+  var level = payload.level
+  var province = payload.province
+  var city = payload.city
+  var district = payload.district
+  var lastYear = payload.lastYear
+  var lastMonth = payload.lastMonth
+  var months = payload.months
 
   var beginYear = lastYear
   var beginMonth = lastMonth
@@ -803,8 +799,6 @@ function fetchLastMonthsPerformance(request, response) {
   } else {
     beginMonth = lastMonth - months
   }
-  console.log('begin', beginYear, beginMonth)
-  console.log('end', lastYear, lastMonth)
 
   var beginQuery = new AV.Query('PromoterMonthStat')
   beginQuery.equalTo('year', beginYear)   // 只获取这一年的数据
@@ -835,7 +829,30 @@ function fetchLastMonthsPerformance(request, response) {
       break
   }
 
-  query.find().then((stat) => {
+  return query.find()
+}
+
+/**
+ * 获取过去几个月的月统计数据，不大于12个月
+ * @param request
+ * @param response
+ */
+function fetchLastMonthsPerformance(request, response) {
+  var payload = {
+    level: request.params.level,
+    province: request.params.province,
+    city: request.params.city,
+    district: request.params.district,
+    lastYear: request.params.lastYear,
+    lastMonth: request.params.lastMonth,
+    months: request.params.months,
+  }
+
+  if (payload.months > 12) {
+    response.error({errcode: 1, message: '最多过去12个月的月度统计数据'})
+  }
+
+  getAreaLastMonthPerformance(payload).then((stat) => {
     response.success({errcode: 0, statistics: stat})
   }).catch((err) => {
     console.log(err)
