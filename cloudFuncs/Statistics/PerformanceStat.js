@@ -860,6 +860,55 @@ function fetchLastMonthsPerformance(request, response) {
   })
 }
 
+/**
+ * 获取过去几个月某地区下辖地区的业绩统计数据
+ * @param request
+ * @param response
+ */
+function fetchArealastMonthsPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var lastYear = request.params.lastYear
+  var lastMonth = request.params.lastMonth
+  var months = request.params.months
+  var area = ''
+  var areaType = ''
+
+  if (LEVEL_PROVINCE == level) {
+    area = province
+    areaType = 'province'
+  } else if (LEVEL_CITY == level) {
+    area = city
+    areaType = 'city'
+  } else {
+    response.error({errcode: 1, message: '不支持的地区级别'})
+  }
+
+  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+    var newLevel = level - 1
+    var ops = []
+    subAreas.forEach((subArea) => {
+      var payload = {
+        level: newLevel,
+        province: province,
+        city: LEVEL_CITY == newLevel ? subArea.area_name : city,
+        district: LEVEL_CITY == newLevel ? undefined : subArea.area_name,
+        lastYear: lastYear,
+        lastMonth: lastMonth,
+        months: months,
+      }
+      ops.push(getAreaLastMonthPerformance(payload))
+    })
+    return Promise.all(ops)
+  }).then((stat) => {
+    response.success({errcode: 0, statistics: stat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
   fetchDaliyPerformance: fetchDaliyPerformance,
@@ -868,6 +917,7 @@ var StatFuncs = {
   fetchMonthPerformance: fetchMonthPerformance,
   fetchLastMonthsPerformance: fetchLastMonthsPerformance,
   fetchAreaMonthPerformance: fetchAreaMonthPerformance,
+  fetchArealastMonthsPerformance: fetchArealastMonthsPerformance,
 }
 
 module.exports = StatFuncs
