@@ -457,7 +457,7 @@ function fetchLastDaysPerformance(request, response) {
 
   query.find().then((stat) => {
     var retStat = []
-    for (var i = days; i >= 0; i--) {
+    for (var i = days-1; i >= 0; i--) {
       var curDate = new Date(lastDate.getTime() - i * ONE_DAY)
       var curStat = stat.find((statValue) => {
         return curDate.toDateString() == (new Date(statValue.attributes.statDate)).toDateString() ? true : false
@@ -471,7 +471,7 @@ function fetchLastDaysPerformance(request, response) {
           earning: curStat.attributes.earning,
           shopNum: curStat.attributes.shopNum,
           promoterNum: curStat.attributes.promoterNum,
-          statDate: curStat.attributes.statDate,
+          statDate: (new Date(curStat.attributes.statDate)).toLocaleDateString(),
         }
         retStat.push(obj)
       } else {
