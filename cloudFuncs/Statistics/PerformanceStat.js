@@ -977,7 +977,7 @@ function fetchAreaMonthsPerformance(request, response) {
     beginYear = beginYear - 1
     beginMonth = 12 - (months - lastMonth) + 1
   } else {
-    beginMonth = lastMonth - months
+    beginMonth = lastMonth - months + 1
   }
 
   var ops = []
