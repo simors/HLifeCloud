@@ -460,7 +460,6 @@ function fetchLastDaysPerformance(request, response) {
     for (var i = days; i >= 0; i--) {
       var curDate = new Date(lastDate.getTime() - i * ONE_DAY)
       var curStat = stat.find((statValue) => {
-        console.log(statValue)
         return curDate.toDateString() == (new Date(statValue.attributes.statDate)).toDateString() ? true : false
       })
       if (curStat) {
