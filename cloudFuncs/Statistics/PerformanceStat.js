@@ -456,7 +456,40 @@ function fetchLastDaysPerformance(request, response) {
   }
 
   query.find().then((stat) => {
-    response.success({errcode: 0, statistics: stat})
+    var retStat = []
+    for (var i = days; i >= 0; i--) {
+      var curDate = new Date(lastDate.getTime() - i * ONE_DAY)
+      var curStat = stat.find((statValue) => {
+        console.log(statValue)
+        return curDate.toDateString() == (new Date(statValue.attributes.statDate)).toDateString() ? true : false
+      })
+      if (curStat) {
+        var obj = {
+          level: curStat.attributes.level,
+          province: curStat.attributes.province,
+          city: curStat.attributes.city,
+          district: curStat.attributes.district,
+          earning: curStat.attributes.earning,
+          shopNum: curStat.attributes.shopNum,
+          promoterNum: curStat.attributes.promoterNum,
+          statDate: curStat.attributes.statDate,
+        }
+        retStat.push(obj)
+      } else {
+        var obj = {
+          level: level,
+          province: province,
+          city: city,
+          district: district,
+          earning: 0,
+          shopNum: 0,
+          promoterNum: 0,
+          statDate: curDate.toLocaleDateString(),
+        }
+        retStat.push(obj)
+      }
+    }
+    response.success({errcode: 0, statistics: retStat})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取统计数据失败'})
