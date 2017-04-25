@@ -762,17 +762,16 @@ function fetchMonthPerformance(request, response) {
 }
 
 /**
- * 获取某地下辖地区的月度业绩统计数据，由于区县是地区分级的最下级，
- * 所以此接口不支持查询区县级下辖地区的月度业绩
- * @param request
- * @param response
+ * 获取下辖地区月度统计数据
+ * @param payload
+ * @returns {Promise.<TResult>}
  */
-function fetchAreaMonthPerformance(request, response) {
-  var level = request.params.level
-  var province = request.params.province
-  var city = request.params.city
-  var year = request.params.year
-  var month = request.params.month
+function getSubAreaMonthPerformance(payload) {
+  var level = payload.level
+  var province = payload.province
+  var city = payload.city
+  var year = payload.year
+  var month = payload.month
   var area = ''
   var areaType = ''
 
@@ -783,14 +782,14 @@ function fetchAreaMonthPerformance(request, response) {
     area = city
     areaType = 'city'
   } else {
-    response.error({errcode: 1, message: '不支持的地区级别'})
+    throw new Error('不支持的地区级别')
   }
 
-  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+  return getSubAreaByAreaName(area, areaType).then((subAreas) => {
     var newLevel = level - 1
     var ops = []
     subAreas.forEach((subArea) => {
-      var payload = {
+      var subpayload = {
         level: newLevel,
         province: province,
         city: LEVEL_CITY == newLevel ? subArea.area_name : city,
@@ -798,10 +797,28 @@ function fetchAreaMonthPerformance(request, response) {
         year: year,
         month: month,
       }
-      ops.push(getAreaMonthPerformance(payload))
+      ops.push(getAreaMonthPerformance(subpayload))
     })
     return Promise.all(ops)
-  }).then((stat) => {
+  })
+}
+
+/**
+ * 获取某地下辖地区的月度业绩统计数据，由于区县是地区分级的最下级，
+ * 所以此接口不支持查询区县级下辖地区的月度业绩
+ * @param request
+ * @param response
+ */
+function fetchAreaMonthPerformance(request, response) {
+  var payload = {
+    level: request.params.level,
+    province: request.params.province,
+    city: request.params.city,
+    year: request.params.year,
+    month: request.params.month
+  }
+
+  getSubAreaMonthPerformance(payload).then((stat) => {
     response.success({errcode: 0, statistics: stat})
   }).catch((err) => {
     console.log(err)
