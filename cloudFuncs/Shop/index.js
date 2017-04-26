@@ -12,6 +12,8 @@ var IDENTITY_SHOPKEEPER = require('../../constants/appConst').IDENTITY_SHOPKEEPE
 var PromoterFunc = require('../Promoter')
 var systemConfigNames = require('../../constants/systemConfigNames')
 var redisUtils = require('../../utils/redisUtils')
+var ejs = require('ejs')
+var fs  = require('fs')
 
 function constructShopInfo(leanShop) {
   var shop = {}
@@ -668,6 +670,41 @@ function getShopByUserId(userId) {
   })
 }
 
+function getShopPromotionById(shopPromotionId) {
+  var query = new AV.Query('ShopPromotion')
+
+  query.get(shopPromotionId).then((result) => {
+    var shop = result.attributes
+  }).catch((error) => {
+
+  })
+}
+
+/**
+ * 通过shopPromotionId创建分享链接
+ * @param shopPromotionId
+ */
+function shareShopPromotionById(request, response) {
+  var id = request.params.shopPromotionId
+
+  var shopPromotion = getShopPromotionById(id)
+
+  var str = fs.readFileSync(__dirname + '/shopPromotion.ejs', 'utf8')
+  var template = ejs.compile(str)
+
+  var html = template(shopPromotion)
+
+  var buffer = new Buffer(html).toString('base64')
+
+  var data = { base64: buffer }
+  var file = new AV.File("testShare005", data, 'text/html')
+  file.save().then(function (savedFile) {
+    console.log("save success:", savedFile)
+  }, function (err) {
+    console.log("save error:", err)
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -682,6 +719,7 @@ var shopFunc = {
   updateShopLocationInfo: updateShopLocationInfo,
   updateShopInfoAfterPaySuccess: updateShopInfoAfterPaySuccess,
   getShopByUserId: getShopByUserId,
+  shareShopPromotionById: shareShopPromotionById,
 }
 
 module.exports = shopFunc

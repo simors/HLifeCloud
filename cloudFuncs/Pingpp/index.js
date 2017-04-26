@@ -242,9 +242,9 @@ function createPayment(request, response) {
   var order_no = request.params.order_no
   var amount = request.params.amount
   var channel = request.params.channel
+  var metadata = request.params.metadata;
 
   var extra = {};
-  var metadata = {};
   // var channel = 'alipay'
   switch (channel) {
     case 'alipay':
