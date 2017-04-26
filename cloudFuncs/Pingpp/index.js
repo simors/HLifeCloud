@@ -311,7 +311,7 @@ function paymentEvent(request, response) {
         promoter = promoterInfo
         return promoterFunc.getUpPromoter(promoter)
       }).then((upPromoter) => {
-        return promoterFunc.calPromoterInviterEarnings(promoter, upPromoter, amount)
+        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
       }).then(() => {
         return promoterFunc.promoterPaid(promoterId)
       })
