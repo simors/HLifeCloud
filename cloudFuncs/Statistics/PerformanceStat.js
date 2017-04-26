@@ -785,21 +785,33 @@ function getSubAreaMonthPerformance(payload) {
     throw new Error('不支持的地区级别')
   }
 
+  var areaList = []
   return getSubAreaByAreaName(area, areaType).then((subAreas) => {
     var newLevel = level - 1
-    var ops = []
     subAreas.forEach((subArea) => {
-      var subpayload = {
-        level: newLevel,
-        province: province,
-        city: LEVEL_CITY == newLevel ? subArea.area_name : city,
-        district: LEVEL_CITY == newLevel ? undefined : subArea.area_name,
-        year: year,
-        month: month,
-      }
-      ops.push(getAreaMonthPerformance(subpayload))
+      areaList.push(subArea.area_name)
     })
-    return Promise.all(ops)
+    var query = new AV.Query('PromoterMonthStat')
+    query.equalTo('level', newLevel)
+    query.equalTo('year', year)
+    query.equalTo('month', month)
+
+    switch (newLevel) {
+      case LEVEL_DISTRICT:
+        query.equalTo('province', province)
+        query.equalTo('city', city)
+        query.containedIn('district', areaList)
+        break
+      case LEVEL_CITY:
+        query.equalTo('province', province)
+        query.containedIn('city', areaList)
+        break
+      case LEVEL_PROVINCE:
+        query.containedIn('province', areaList)
+        break
+    }
+
+    return query.find()
   })
 }
 
@@ -980,26 +992,71 @@ function fetchAreaMonthsPerformance(request, response) {
     beginMonth = lastMonth - months + 1
   }
 
-  var ops = []
-  for (var i = 0; i < months; i++) {
-    var currYear = beginYear
-    var currMonth = beginMonth + i
-    if (currMonth > 12) {
-      currMonth = currMonth - 12
-      currYear = currYear + 1
-    }
-    var payload = {
-      level: level,
-      province: province,
-      city: city,
-      year: currYear,
-      month: currMonth,
-    }
-    ops.push(getSubAreaMonthPerformance(payload))
+  var area = ''
+  var areaType = ''
+
+  if (LEVEL_PROVINCE == level) {
+    area = province
+    areaType = 'province'
+  } else if (LEVEL_CITY == level) {
+    area = city
+    areaType = 'city'
+  } else {
+    response.error({errcode: 1, message: '不支持的地区级别'})
   }
 
-  Promise.all(ops).then((stat) => {
-    response.success({errcode: 0, statistics: stat})
+  var areaList = []
+  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+    var newLevel = level - 1
+    subAreas.forEach((subArea) => {
+      areaList.push(subArea.area_name)
+    })
+
+    var query = undefined
+    var beginQuery = new AV.Query('PromoterMonthStat')
+    beginQuery.equalTo('year', beginYear)
+    beginQuery.greaterThanOrEqualTo('month', beginMonth)
+
+    var endQuery = new AV.Query('PromoterMonthStat')
+    endQuery.equalTo('year', lastYear)
+    endQuery.lessThanOrEqualTo('month', lastMonth)
+
+    if (beginYear == lastYear) {
+      query = AV.Query.and(beginQuery, endQuery)
+    } else {
+      query = AV.Query.or(beginQuery, endQuery)
+    }
+
+    query.equalTo('level', newLevel)
+    query.addAscending('year')
+    query.addAscending('month')
+    switch (newLevel) {
+      case LEVEL_DISTRICT:
+        query.equalTo('province', province)
+        query.equalTo('city', city)
+        query.containedIn('district', areaList)
+        break
+      case LEVEL_CITY:
+        query.equalTo('province', province)
+        query.containedIn('city', areaList)
+        break
+      case LEVEL_PROVINCE:
+        query.containedIn('province', areaList)
+        break
+    }
+
+    return query.find()
+  }).then((stat) => {
+    var retStat = []
+    for(var i = 0; i < months; i++) {
+      retStat[i] = []    // 初始化
+    }
+    stat.forEach((subStat) => {
+      var pos = ((subStat.attributes.year - beginYear) * 12 + subStat.attributes.month - beginMonth) % 12
+      console.log(pos)
+      retStat[pos].push(subStat)
+    })
+    response.success({errcode: 0, statistics: retStat})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取统计数据失败'})
