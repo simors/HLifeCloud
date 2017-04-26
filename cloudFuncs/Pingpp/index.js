@@ -237,31 +237,32 @@ function updatePaymentInfoInMysql(paymentInfo) {
 
 
 function createPayment(request, response) {
+  console.log("createPayment params:", request.params)
   var user = request.params.user
   var subject = request.params.subject
   var order_no = request.params.order_no
   var amount = request.params.amount
   var channel = request.params.channel
-  var metadata = request.params.metadata;
+  var metadata = request.params.metadata
 
   var extra = {};
   // var channel = 'alipay'
-  switch (channel) {
-    case 'alipay':
-      extra = {}
-      metadata = {
-        user: user,
-      }
-      break;
-    case 'wx':
-      extra = {}
-      metadata = {
-        user: user,
-      }
-      break
-    default:
-      break;
-  }
+  // switch (channel) {
+  //   case 'alipay':
+  //     extra = {}
+  //     metadata = {
+  //       user: user,
+  //     }
+  //     break;
+  //   case 'wx':
+  //     extra = {}
+  //     metadata = {
+  //       user: user,
+  //     }
+  //     break
+  //   default:
+  //     break;
+  // }
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
   pingpp.charges.create({
