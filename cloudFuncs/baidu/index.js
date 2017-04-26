@@ -162,11 +162,18 @@ function areaAbbrForce(area) {
   if (!Array.isArray(areaJson.sub)) {
     return areaJson
   }
+
   for (i = 0; i < areaJson.sub.length; i++) {
     var areaSub = areaJson.sub[i]
+
     if (areaSub.area_type != 1 && areaSub.area_type != 2) {
       continue
     }
+
+    if(areaSub.area_type == 1 && areaSub.sub) {
+      areaAbbrForce(areaSub)
+    }
+
     if (areaSub.area_name.endsWith('省')) {
       areaJson.sub[i].area_name = areaSub.area_name.substring(0, areaSub.area_name.lastIndexOf('省'))
     } else if (areaSub.area_name.endsWith('市')) {
@@ -315,6 +322,7 @@ function baiduGetSubAreaList2(areaCode, level) {
       if (json && json['result'] && json['result']['error'] == "0") {
         result = json['content']
       }
+
       resolve(areaAbbrForce(result))
     })
   })

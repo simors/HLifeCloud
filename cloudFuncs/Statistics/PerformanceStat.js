@@ -456,7 +456,39 @@ function fetchLastDaysPerformance(request, response) {
   }
 
   query.find().then((stat) => {
-    response.success({errcode: 0, statistics: stat})
+    var retStat = []
+    for (var i = days-1; i >= 0; i--) {
+      var curDate = new Date(lastDate.getTime() - i * ONE_DAY)
+      var curStat = stat.find((statValue) => {
+        return curDate.toDateString() == (new Date(statValue.attributes.statDate)).toDateString() ? true : false
+      })
+      if (curStat) {
+        var obj = {
+          level: curStat.attributes.level,
+          province: curStat.attributes.province,
+          city: curStat.attributes.city,
+          district: curStat.attributes.district,
+          earning: curStat.attributes.earning,
+          shopNum: curStat.attributes.shopNum,
+          promoterNum: curStat.attributes.promoterNum,
+          statDate: (new Date(curStat.attributes.statDate)).toLocaleDateString(),
+        }
+        retStat.push(obj)
+      } else {
+        var obj = {
+          level: level,
+          province: province,
+          city: city,
+          district: district,
+          earning: 0,
+          shopNum: 0,
+          promoterNum: 0,
+          statDate: curDate.toLocaleDateString(),
+        }
+        retStat.push(obj)
+      }
+    }
+    response.success({errcode: 0, statistics: retStat})
   }).catch((err) => {
     console.log(err)
     response.error({errcode: 1, message: '获取统计数据失败'})
@@ -730,17 +762,16 @@ function fetchMonthPerformance(request, response) {
 }
 
 /**
- * 获取某地下辖地区的月度业绩统计数据，由于区县是地区分级的最下级，
- * 所以此接口不支持查询区县级下辖地区的月度业绩
- * @param request
- * @param response
+ * 获取下辖地区月度统计数据
+ * @param payload
+ * @returns {Promise.<TResult>}
  */
-function fetchAreaMonthPerformance(request, response) {
-  var level = request.params.level
-  var province = request.params.province
-  var city = request.params.city
-  var year = request.params.year
-  var month = request.params.month
+function getSubAreaMonthPerformance(payload) {
+  var level = payload.level
+  var province = payload.province
+  var city = payload.city
+  var year = payload.year
+  var month = payload.month
   var area = ''
   var areaType = ''
 
@@ -751,25 +782,55 @@ function fetchAreaMonthPerformance(request, response) {
     area = city
     areaType = 'city'
   } else {
-    response.error({errcode: 1, message: '不支持的地区级别'})
+    throw new Error('不支持的地区级别')
   }
 
-  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+  var areaList = []
+  return getSubAreaByAreaName(area, areaType).then((subAreas) => {
     var newLevel = level - 1
-    var ops = []
     subAreas.forEach((subArea) => {
-      var payload = {
-        level: newLevel,
-        province: province,
-        city: LEVEL_CITY == newLevel ? subArea.area_name : city,
-        district: LEVEL_CITY == newLevel ? undefined : subArea.area_name,
-        year: year,
-        month: month,
-      }
-      ops.push(getAreaMonthPerformance(payload))
+      areaList.push(subArea.area_name)
     })
-    return Promise.all(ops)
-  }).then((stat) => {
+    var query = new AV.Query('PromoterMonthStat')
+    query.equalTo('level', newLevel)
+    query.equalTo('year', year)
+    query.equalTo('month', month)
+
+    switch (newLevel) {
+      case LEVEL_DISTRICT:
+        query.equalTo('province', province)
+        query.equalTo('city', city)
+        query.containedIn('district', areaList)
+        break
+      case LEVEL_CITY:
+        query.equalTo('province', province)
+        query.containedIn('city', areaList)
+        break
+      case LEVEL_PROVINCE:
+        query.containedIn('province', areaList)
+        break
+    }
+
+    return query.find()
+  })
+}
+
+/**
+ * 获取某地下辖地区的月度业绩统计数据，由于区县是地区分级的最下级，
+ * 所以此接口不支持查询区县级下辖地区的月度业绩
+ * @param request
+ * @param response
+ */
+function fetchAreaMonthPerformance(request, response) {
+  var payload = {
+    level: request.params.level,
+    province: request.params.province,
+    city: request.params.city,
+    year: request.params.year,
+    month: request.params.month
+  }
+
+  getSubAreaMonthPerformance(payload).then((stat) => {
     response.success({errcode: 0, statistics: stat})
   }).catch((err) => {
     console.log(err)
@@ -861,7 +922,7 @@ function fetchLastMonthsPerformance(request, response) {
 }
 
 /**
- * 获取过去几个月某地区下辖地区的业绩统计数据
+ * 获取过去几个月某地区下辖地区的业绩统计数据，返回值以区域名作为区分的主键
  * @param request
  * @param response
  */
@@ -909,6 +970,99 @@ function fetchArealastMonthsPerformance(request, response) {
   })
 }
 
+/**
+ * 获取过去几个月某地区下辖地区的业绩统计数据，返回值以月份作为区分的主键
+ * @param request
+ * @param response
+ */
+function fetchAreaMonthsPerformance(request, response) {
+  var level = request.params.level
+  var province = request.params.province
+  var city = request.params.city
+  var lastYear = request.params.lastYear
+  var lastMonth = request.params.lastMonth
+  var months = request.params.months
+
+  var beginYear = lastYear
+  var beginMonth = lastMonth
+  if (lastMonth - months < 0) {
+    beginYear = beginYear - 1
+    beginMonth = 12 - (months - lastMonth) + 1
+  } else {
+    beginMonth = lastMonth - months + 1
+  }
+
+  var area = ''
+  var areaType = ''
+
+  if (LEVEL_PROVINCE == level) {
+    area = province
+    areaType = 'province'
+  } else if (LEVEL_CITY == level) {
+    area = city
+    areaType = 'city'
+  } else {
+    response.error({errcode: 1, message: '不支持的地区级别'})
+  }
+
+  var areaList = []
+  getSubAreaByAreaName(area, areaType).then((subAreas) => {
+    var newLevel = level - 1
+    subAreas.forEach((subArea) => {
+      areaList.push(subArea.area_name)
+    })
+
+    var query = undefined
+    var beginQuery = new AV.Query('PromoterMonthStat')
+    beginQuery.equalTo('year', beginYear)
+    beginQuery.greaterThanOrEqualTo('month', beginMonth)
+
+    var endQuery = new AV.Query('PromoterMonthStat')
+    endQuery.equalTo('year', lastYear)
+    endQuery.lessThanOrEqualTo('month', lastMonth)
+
+    if (beginYear == lastYear) {
+      query = AV.Query.and(beginQuery, endQuery)
+    } else {
+      query = AV.Query.or(beginQuery, endQuery)
+    }
+
+    query.equalTo('level', newLevel)
+    query.addAscending('year')
+    query.addAscending('month')
+    switch (newLevel) {
+      case LEVEL_DISTRICT:
+        query.equalTo('province', province)
+        query.equalTo('city', city)
+        query.containedIn('district', areaList)
+        break
+      case LEVEL_CITY:
+        query.equalTo('province', province)
+        query.containedIn('city', areaList)
+        break
+      case LEVEL_PROVINCE:
+        query.containedIn('province', areaList)
+        break
+    }
+
+    return query.find()
+  }).then((stat) => {
+    var retStat = []
+    for(var i = 0; i < months; i++) {
+      retStat[i] = []    // 初始化
+    }
+    stat.forEach((subStat) => {
+      var pos = ((subStat.attributes.year - beginYear) * 12 + subStat.attributes.month - beginMonth) % 12
+      console.log(pos)
+      retStat[pos].push(subStat)
+    })
+    response.success({errcode: 0, statistics: retStat})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取统计数据失败'})
+  })
+}
+
 var StatFuncs = {
   statPromoterPerformance: statPromoterPerformance,
   fetchDaliyPerformance: fetchDaliyPerformance,
@@ -918,6 +1072,7 @@ var StatFuncs = {
   fetchLastMonthsPerformance: fetchLastMonthsPerformance,
   fetchAreaMonthPerformance: fetchAreaMonthPerformance,
   fetchArealastMonthsPerformance: fetchArealastMonthsPerformance,
+  fetchAreaMonthsPerformance: fetchAreaMonthsPerformance,
 }
 
 module.exports = StatFuncs
