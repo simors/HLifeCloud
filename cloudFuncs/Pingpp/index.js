@@ -313,6 +313,7 @@ function paymentEvent(request, response) {
       }).then((upPromoter) => {
         return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
       }).then(() => {
+        // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return promoterFunc.promoterPaid(promoterId)
       })
     } else if (shopId && amount) {
@@ -324,6 +325,7 @@ function paymentEvent(request, response) {
       }).then((promoter) => {
         return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
       }).then(() => {
+        // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
       })
     }
