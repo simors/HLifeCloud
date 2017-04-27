@@ -639,8 +639,8 @@ function updateShopLocationInfo(request, response) {
 }
 
 function updateShopInfoAfterPaySuccessCloud(request, response) {
-  let shopId = request.params.shopId;
-  let tenant = request.params.tenant;
+  var shopId = request.params.shopId;
+  var tenant = request.params.tenant;
   if(!shopId || !tenant) {
     response.error({
       code: -1,
