@@ -1,11 +1,487 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Todo</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
-    <meta charset="UTF-8">
+    <meta charset="utf-8"/>
+    <title><%=title%></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <link rel="shortcut icon" type="image/x-icon" src="http://ac-k5rltwmf.clouddn.com/f437c4cb1d368193dfd3.png"/>
+
+
+    <style>
+        html {
+            font-family: sans-serif;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch
+        }
+
+        body {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #444;
+            background-color: #fff
+        }
+
+        article, aside, details, figcaption, figure, footer, header, main, nav, section, summary {
+            display: block
+        }
+
+        audio, canvas, progress, video {
+            display: inline-block;
+            vertical-align: baseline
+        }
+
+        audio:not([controls]) {
+            display: none;
+            height: 0
+        }
+
+        [hidden], template {
+            display: none
+        }
+
+        a {
+            background: transparent;
+            text-decoration: none;
+            color: #444
+        }
+
+        a:active, a:hover {
+            outline: 0
+        }
+
+        a:hover {
+            color: #2b2b2b
+        }
+
+        abbr[title] {
+            border-bottom: 1px dotted
+        }
+
+        b, strong {
+            font-weight: 700
+        }
+
+        dfn {
+            font-style: italic
+        }
+
+        mark {
+            background: #ff0;
+            color: #000
+        }
+
+        small {
+            font-size: 80%
+        }
+
+        sub, sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        img {
+            border: 0;
+            vertical-align: middle
+        }
+
+        svg:not(:root) {
+            overflow: hidden
+        }
+
+        hr {
+            -moz-box-sizing: content-box;
+            box-sizing: content-box;
+            height: 0
+        }
+
+        pre {
+            overflow: auto;
+            white-space: pre;
+            white-space: pre-wrap;
+            word-wrap: break-word
+        }
+
+        code, kbd, pre, samp {
+            font-family: monospace, monospace;
+            font-size: 1em
+        }
+
+        button, input, optgroup, select, textarea {
+            color: inherit;
+            font: inherit;
+            margin: 0
+        }
+
+        button {
+            overflow: visible
+        }
+
+        button, select {
+            text-transform: none
+        }
+
+        button, html input[type=button], input[type=reset], input[type=submit] {
+            -webkit-appearance: button;
+            cursor: pointer
+        }
+
+        button[disabled], html input[disabled] {
+            cursor: default
+        }
+
+        button::-moz-focus-inner, input::-moz-focus-inner {
+            border: 0;
+            padding: 0
+        }
+
+        input {
+            line-height: normal
+        }
+
+        input[type=checkbox], input[type=radio] {
+            box-sizing: border-box;
+            padding: 0
+        }
+
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+            height: auto
+        }
+
+        input[type=search] {
+            -webkit-appearance: textfield;
+            -moz-box-sizing: content-box;
+            -webkit-box-sizing: content-box;
+            box-sizing: content-box
+        }
+
+        input[type=search]::-webkit-search-cancel-button, input[type=search]::-webkit-search-decoration {
+            -webkit-appearance: none
+        }
+
+        fieldset {
+            border: 1px solid silver;
+            margin: 0 2px;
+            padding: .35em .625em .75em
+        }
+
+        legend {
+            border: 0;
+            padding: 0
+        }
+
+        textarea {
+            overflow: auto;
+            resize: vertical
+        }
+
+        optgroup {
+            font-weight: 700
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0
+        }
+
+        td, th {
+            padding: 0
+        }
+
+        html, button, input, select, textarea {
+            font-family: "Helvetica Neue", Helvetica, sans-serif
+        }
+
+        h1, h2, h3, h4, h5, h6, p, figure, form, blockquote {
+            margin: 0
+        }
+
+        ul, ol, li, dl, dd {
+            margin: 0;
+            padding: 0
+        }
+
+        ul, ol {
+            list-style: none outside none
+        }
+
+        h1, h2, h3 {
+            line-height: 2;
+            font-weight: 400
+        }
+
+        h1 {
+            font-size: 21px
+        }
+
+        h2 {
+            font-size: 18.2px
+        }
+
+        h3 {
+            font-size: 16.38px
+        }
+
+        h4 {
+            font-size: 14px
+        }
+
+        h5, h6 {
+            font-size: 11.9px;
+            text-transform: uppercase
+        }
+
+        input:-moz-placeholder, textarea:-moz-placeholder {
+            color: #ccc
+        }
+
+        input::-moz-placeholder, textarea::-moz-placeholder {
+            color: #ccc
+        }
+
+        input:-ms-input-placeholder, textarea:-ms-input-placeholder {
+            color: #ccc
+        }
+
+        input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+            color: #ccc
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent
+        }
+
+        .artical-content {
+            padding: 10px;
+            font-size: 18px;
+            border-top: 1px solid #eeebeb;
+            word-wrap: break-word;
+            text-align: justify
+        }
+
+        .artical-content p {
+            padding: 10px 0
+        }
+
+        .artical-content img {
+            display: block;
+            width: 100%;
+            max-width: 100% !important;
+            margin: 0 auto
+        }
+
+        .artical-content video, .artical-content iframe {
+            width: 100% !important
+        }
+
+        .artical-content a, .artical-content a:hover {
+            color: #025fad
+        }
+
+        .artical-content a {
+            -webkit-tap-highlight-color: rgba(30, 136, 226, .2)
+        }
+
+        .top-down-app {
+            border-bottom: 1px solid #eeebeb
+        }
+
+        .top-down-app a {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: -moz-flex;
+            display: flex;
+            padding: 5px 10px
+        }
+
+        .top-down-app .ljyd-logo {
+            width: 50px;
+            margin-right: 10px
+        }
+
+        .top-down-app .ljyd-logo img {
+            width: 100%
+        }
+
+        .top-down-app .app-info {
+            -webkit-box-flex: 1;
+            -ms-flex: 1;
+            -webkit-flex: 1;
+            -moz-flex: 1;
+            flex: 1
+        }
+
+        .top-down-app .name {
+            font-size: 16px
+        }
+
+        .top-down-app .text {
+            font-size: 12px;
+            color: gray
+        }
+
+        .top-down-app .score img {
+            width: 50px;
+            vertical-align: top
+        }
+
+        .top-down-app .button-down {
+            height: 30px;
+            line-height: 30px;
+            padding: 0 10px;
+            margin-top: 10px;
+            background: #ff7819;
+            color: #fff;
+            -webkit-border-radius: 5px;
+            border-radius: 5px
+        }
+
+        .down-app {
+            padding: 10px;
+            border-top: 1px solid #eeebeb
+        }
+
+        .down-app .button-down-app {
+            display: block;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            font-size: 16px;
+            background: #ff7819;
+            color: #fff;
+            -webkit-border-radius: 5px;
+            border-radius: 5px
+        }
+
+        header {
+            padding-left: 10px;
+        }
+
+        .artical-title .headline {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            font-size: 20px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #434141
+        }
+
+        .artical-title .artical-info {
+            color: #a9a9b2
+        }
+
+        .artical-title .new-source {
+            color: #025fad;
+            -webkit-tap-highlight-color: rgba(30, 136, 226, .2)
+        }
+
+        article {
+            padding-left: 10px;
+        }
+
+        article p {
+            padding-bottom: 5px;
+            text-indent: 2em;
+        }
+
+        .artical-image {
+            align-items: center;
+            display: block;
+        }
+
+        .artical-image img {
+            display: block;
+            width: 100px;
+            height: 100px;
+            max-width: 100% !important;
+            margin: 0 auto
+        }
+
+        .cover {
+            align-items: center;
+            display: block;
+        }
+
+        .cover img {
+            display: block;
+            width: 100px;
+            height: 100px;
+            max-width: 100% !important;
+            margin: 0 auto
+        }
+    </style>
+
 </head>
-<body>
-<h1><%= title %></h1>
+<body class="">
+<section class="">
+    <div class="top-down-app">
+        <a href="https://www.pgyer.com/F5Df">
+            <div class="ljyd-logo">
+                <img src="http://ac-k5rltwmf.clouddn.com/05a4d0505a42fd236d8f.png" alt=""/>
+            </div>
+            <div class="app-info">
+                <h4 class="name">
+                    邻家优店</h4>
+                <div class="text">
+                    周边优惠，实惠不断！
+                </div>
+            </div>
+            <div class="button-down">
+                免费下载
+            </div>
+        </a>
+    </div>
+    <header class="artical-title">
+        <h1 class="headline"><%=title%></h1>
+        <div class="artical-info">
+            <span class="times">22分钟前</span>
+            <a class="new-source"
+               href="https://www.baidu.com"
+            >FourFourTwo</a>
+            <span class="news-source">10评论</span>
+        </div>
+    </header>
+
+    <article>
+        <div class="cover">
+            <img src="<%=coverUrl%>" style="width: 180px; height: 180px">
+        </div>
+
+        <% if(content && content.length > 0) { %>
+            <% content.forEach(( value ) => { %>
+                <% if( value.type === 'COMP_TEXT') { %>
+                    <p> <%=value.text%> </p>
+                <% } else if( value.type === 'COMP_IMG' ) { %>
+                    <div class="artical-image">
+                        <img src="<%=value.url%>" style="width: <%=value.width/2%>px; height: <%=value.height/2%>px">
+                    </div>
+                <% }%>
+            <% }) %>
+        <% } %>
+    </article>
+
+
+    <div class="down-app">
+        <a href="https://www.pgyer.com/F5Df" class="button-down-app">下载邻家优店，查看周边优惠信息</a>
+    </div>
+</section>
+
 </body>
+
 </html>

@@ -702,10 +702,20 @@ function getShopByUserId(userId) {
 function getShopPromotionById(shopPromotionId) {
   var query = new AV.Query('ShopPromotion')
 
-  query.get(shopPromotionId).then((result) => {
+  return query.get(shopPromotionId).then((result) => {
     var shop = result.attributes
+    return {
+      title: shop.title,
+      coverUrl: shop.coverUrl,
+      abstract: shop.abstract,
+      type: shop.type,
+      originalPrice: shop.originalPrice,
+      promotingPrice: shop.promotingPrice,
+      promotionDetailInfo: shop.promotionDetailInfo
+    }
   }).catch((error) => {
-
+    console.log(error)
+    return undefined
   })
 }
 
@@ -716,22 +726,29 @@ function getShopPromotionById(shopPromotionId) {
 function shareShopPromotionById(request, response) {
   var id = request.params.shopPromotionId
 
-  var shopPromotion = getShopPromotionById(id)
+  getShopPromotionById(id).then((result) => {
+    console.log("result:", result)
+    var shopPromotion = {
+      title: result.title,
+      coverUrl: result.coverUrl,
+      content: JSON.parse(result.promotionDetailInfo),
+    }
+    var str = fs.readFileSync(__dirname + '/shopPromotion.ejs', 'utf8')
+    var template = ejs.compile(str)
+    var shareHtml = template(shopPromotion)
+    var buffer = new Buffer(shareHtml).toString('base64')
+    var data = { base64: buffer }
 
-  var str = fs.readFileSync(__dirname + '/shopPromotion.ejs', 'utf8')
-  var template = ejs.compile(str)
-
-  var html = template(shopPromotion)
-
-  var buffer = new Buffer(html).toString('base64')
-
-  var data = { base64: buffer }
-  var file = new AV.File("testShare005", data, 'text/html')
-  file.save().then(function (savedFile) {
-    console.log("save success:", savedFile)
-  }, function (err) {
-    console.log("save error:", err)
+    var file = new AV.File("shopPromotion_shareId" + id, data, 'text/html')
+    return file.save()
+  }).then((savedFile) => {
+    console.log("savedFile:", savedFile)
+    response.success(savedFile)
+  }).catch((error) => {
+    console.log(error)
+    response.error(error)
   })
+
 }
 
 var shopFunc = {
