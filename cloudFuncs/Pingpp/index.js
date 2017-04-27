@@ -23,7 +23,7 @@ function updatePaymentBalance(conn, userId, earning) {
   sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? "
   return mysqlUtil.query(conn, sql, [userId]).then((queryRes) => {
     if (queryRes.results[0].cnt == 0) {
-      sql = "INSERT INTO `PaymentInfo` (`userId`, `balance`,) VALUES (?, ?)"
+      sql = "INSERT INTO `PaymentInfo` (`userId`, `balance`) VALUES (?, ?)"
       return mysqlUtil.query(queryRes.conn, sql, [userId, earning])
     } else if (queryRes.results[0].cnt == 1) {
       sql = "UPDATE `PaymentInfo` SET `balance` = `balance` + ? WHERE `userId` = ?"
@@ -311,7 +311,7 @@ function paymentEvent(request, response) {
         promoter = promoterInfo
         return promoterFunc.getUpPromoter(promoter)
       }).then((upPromoter) => {
-        return promoterFunc.calPromoterInviterEarnings(promoter, upPromoter, amount)
+        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
       }).then(() => {
         return promoterFunc.promoterPaid(promoterId)
       })

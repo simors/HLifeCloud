@@ -1387,8 +1387,8 @@ function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, dea
     if (0 == updateRes.results.changedRows) {
       throw new Error('Update PromoterEarnings error')
     }
-    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?)'
-    return mysqlUtil.query(conn, recordSql, [fromId, toPromoterId, promoterId, earn, deal_type])
+    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?, ?)'
+    return mysqlUtil.query(conn, recordSql, [fromId, toPromoterId, earn, promoterId, deal_type])
   })
 }
 
