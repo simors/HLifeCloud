@@ -743,7 +743,16 @@ function shareShopPromotionById(request, response) {
     return file.save()
   }).then((savedFile) => {
     console.log("savedFile:", savedFile)
-    response.success(savedFile)
+    if(savedFile.attributes.url) {
+      response.success({
+        url: savedFile.attributes.url
+      })
+      return
+    }
+    response.error({
+      errorCode: 1,
+      message: "share html file save failed!"
+    })
   }).catch((error) => {
     console.log(error)
     response.error(error)
