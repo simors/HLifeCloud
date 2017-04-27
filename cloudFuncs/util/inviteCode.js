@@ -8,6 +8,7 @@ var uuid = require('node-uuid');
 var GLOBAL_CONFIG = require('../../config')
 
 const CODE_EXPIRE = 3600
+const PREFIX = 'inviteCode:'
 
 function getInvitationCodeOnceSuccessCB(payload) {
   payload.response.success({
@@ -30,32 +31,54 @@ function getInvitationCodeOnceErrorCB(userId, err, response) {
 }
 
 function getInvitationCodeOnce(userId, response) {
-  Promise.promisifyAll(redis.RedisClient.prototype);
-  var id = uuid.v4().substring(0, 8);
-  // var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
-  var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
-  client.auth(GLOBAL_CONFIG.REDIS_AUTH)
-  client.select(GLOBAL_CONFIG.REDIS_DB)
-  // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
-  // 主从切换等原因造成短暂不可用导致应用进程退出。
-  client.on('error', function (err) {
-    getInvitationCodeOnceErrorCB(userId, err, response);
-  });
-  client.getAsync(id).then((reply) => {
-    if (reply == null) {
-      client.setAsync(id, userId).then((reply) => {
-        client.expire(id, CODE_EXPIRE)
-        getInvitationCodeOnceSuccessCB({
-          status: 0,
-          result: id,
-          response: response,
-        })
+  var getPromoterByUserId = require('../Promoter').getPromoterByUserId
+  var getPromoterInviteCode = require('../Promoter').getPromoterInviteCode
+  var savePromoterInviteCode = require('../Promoter').savePromoterInviteCode
+  var promoterId = undefined
+
+  getPromoterByUserId(userId).then((promoterInfo) => {
+    promoterId = promoterInfo.id
+    return getPromoterInviteCode(promoterId)
+  }).then((inviteCode) => {
+    if (inviteCode && inviteCode.length > 0) {
+      getInvitationCodeOnceSuccessCB({
+        status: 0,
+        result: inviteCode,
+        response: response,
+      })
+    } else {
+      Promise.promisifyAll(redis.RedisClient.prototype);
+      var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+      client.auth(GLOBAL_CONFIG.REDIS_AUTH)
+      client.select(GLOBAL_CONFIG.REDIS_DB)
+      // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
+      // 主从切换等原因造成短暂不可用导致应用进程退出。
+      client.on('error', function (err) {
+        getInvitationCodeOnceErrorCB(userId, err, response);
+      });
+
+      var id = uuid.v4().substring(0, 8);
+      var key = PREFIX + id
+      client.getAsync(key).then((reply) => {
+        if (reply == null) {
+          client.setAsync(key, userId).then(() => {
+            savePromoterInviteCode(promoterId, id)
+          }).then((reply) => {
+            // client.expire(id, CODE_EXPIRE)
+            getInvitationCodeOnceSuccessCB({
+              status: 0,
+              result: id,
+              response: response,
+            })
+          })
+        } else {
+          getInvitationCodeOnceErrorCB(userId, 1, response)
+        }
       })
     }
-    else {
-      getInvitationCodeOnceErrorCB(userId, 1, response)
-    }
-  });
+  }).catch((err) => {
+    getInvitationCodeOnceErrorCB(userId, 1, response)
+  })
 }
 
 function getInvitationCode(request, response) {
@@ -70,6 +93,8 @@ function getInvitationCode(request, response) {
 }
 
 function verifyCode(code) {
+  var getPromoterByInviteCode = require('../Promoter').getPromoterByInviteCode
+
   Promise.promisifyAll(redis.RedisClient.prototype);
   // var client = redis.createClient(process.env['REDIS_URL_HLifeCache']);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
@@ -80,12 +105,20 @@ function verifyCode(code) {
   client.on('error', function (err) {
     console.log("error:", err)
   });
-  return client.getAsync(code).then((reply) => {
+  var key = PREFIX + code
+  return client.getAsync(key).then((reply) => {
     if (reply != null) {
-      client.del(code)
+      // client.del(code)
       return reply
     } else {
-      return undefined
+      return getPromoterByInviteCode(code).then((promoterInfo) => {
+        if (promoterInfo) {
+          client.setAsync(key, promoterInfo.attributes.user.id)
+          return promoterInfo.attributes.user.id
+        } else {
+          return undefined
+        }
+      })
     }
   })
 }
