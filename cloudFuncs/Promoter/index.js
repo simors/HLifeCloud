@@ -132,6 +132,40 @@ function fetchPromoterSysConfig(request, response) {
 }
 
 /**
+ * 获取推广员的邀请码
+ * @param promoterId
+ * @returns {Promise.<TResult>|*}
+ */
+function getPromoterInviteCode(promoterId) {
+  return getPromoterById(promoterId).then((promoterInfo) => {
+    return promoterInfo.attributes.inviteCode
+  })
+}
+
+/**
+ * 根据邀请码获取推广员信息
+ * @param code
+ * @returns {*}
+ */
+function getPromoterByInviteCode(code) {
+  var query = new AV.Query('Promoter')
+  query.equalTo('inviteCode', code)
+  return query.first()
+}
+
+/**
+ * 保存推广员的邀请码
+ * @param promoterId
+ * @param inviteCode
+ * @returns {Promise.<Conversation>|Promise<Conversation>|*}
+ */
+function savePromoterInviteCode(promoterId, inviteCode) {
+  var promoter = AV.Object.createWithoutData('Promoter', promoterId)
+  promoter.set('inviteCode', inviteCode)
+  return promoter.save()
+}
+
+/**
  * 用户认证为推广员
  * @param request
  * @param response
@@ -1868,6 +1902,9 @@ var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
   setPromoterSysConfig: setPromoterSysConfig,
+  getPromoterInviteCode: getPromoterInviteCode,
+  savePromoterInviteCode: savePromoterInviteCode,
+  getPromoterByInviteCode: getPromoterByInviteCode,
   promoterCertificate: promoterCertificate,
   getPromoterById: getPromoterById,
   getUpPromoter: getUpPromoter,
