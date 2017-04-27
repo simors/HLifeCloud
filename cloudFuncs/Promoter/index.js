@@ -147,7 +147,6 @@ function promoterCertificate(request, response) {
       return
     }
     var currentUser = request.currentUser
-    var name = request.params.name
     var phone = request.params.phone
     var liveProvince = request.params.liveProvince
     var liveCity = request.params.liveCity
@@ -159,7 +158,6 @@ function promoterCertificate(request, response) {
     var upUser = AV.Object.createWithoutData('_User', upUserId)
 
     upUser.fetch().then((upUserInfo) => {
-      promoter.set('name', name)
       promoter.set('phone', phone)
       promoter.set('user', currentUser)
       promoter.set('liveProvince', liveProvince)
