@@ -638,6 +638,35 @@ function updateShopLocationInfo(request, response) {
   })
 }
 
+function updateShopInfoAfterPaySuccessCloud(request, response) {
+  let shopId = request.params.shopId;
+  let tenant = request.params.tenant;
+  if(!shopId || !tenant) {
+    response.error({
+      code: -1,
+      message: 'shopId or tenant is null'
+    })
+    return
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  shop.set('tenant', tenant)
+  shop.set('payment', 1)
+
+  return shop.save().then(function(result){
+    response.success({
+      code: 0,
+      message: 'success'
+    })
+  }, function(error){
+    response.error({
+      code: -1,
+      message: 'update fail'
+    })
+    console.log('updateShopInfoAfterPaySuccessCloud.error====', error)
+  })
+}
+
 function updateShopInfoAfterPaySuccess(shopId, tenant) {
   if(!shopId || !tenant) {
     return false
@@ -718,6 +747,7 @@ var shopFunc = {
   fetchShopFollowers: fetchShopFollowers,
   updateShopLocationInfo: updateShopLocationInfo,
   updateShopInfoAfterPaySuccess: updateShopInfoAfterPaySuccess,
+  updateShopInfoAfterPaySuccessCloud: updateShopInfoAfterPaySuccessCloud,
   getShopByUserId: getShopByUserId,
   shareShopPromotionById: shareShopPromotionById,
 }

@@ -51,6 +51,7 @@ AV.Cloud.define('hLifeUnregistShop', shopFunc.unregistShop)
 AV.Cloud.define('hLifeFetchShopFollowers', shopFunc.fetchShopFollowers)
 AV.Cloud.define('hLifeUpdateShopLocationInfo', shopFunc.updateShopLocationInfo)
 AV.Cloud.define('hLifeShareShopPromotionById', shopFunc.shareShopPromotionById)
+AV.Cloud.define('hLifeUpdateShopInfoAfterPaySuccess', shopFunc.updateShopInfoAfterPaySuccessCloud)
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
