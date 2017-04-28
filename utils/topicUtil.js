@@ -33,7 +33,7 @@ function upFromLeancloudObject(lcObj) {
     			id: user.id,
     			nickname: nickname
     		}
-    	}else if(['upType', 'targetId', 'status'].includes(key)) {
+    	}else if(['upType', 'targetId', 'status'].indexOf(key) != -1) {
     		upInfo[key] = attrs[key]
     	}
     }
@@ -82,7 +82,7 @@ function topicCommentFromLeancloudObject(lcObj) {
     		}
     		topicComment.nickname = nickname
     		topicComment.avatar = userAttrs.avatar
-    	}else if(['content', 'lickCount', 'geoPoint', 'position'].includes(key)) {
+    	}else if(['content', 'likeCount', 'geoPoint', 'position'].indexOf(key) != -1) {
     		topicComment[key] = attrs[key]	
     	}
     }
