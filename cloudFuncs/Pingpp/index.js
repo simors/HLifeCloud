@@ -322,7 +322,8 @@ function paymentEvent(request, response) {
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
         var inviter = shop.attributes.inviter.id
-        return promoterFunc.getPromoterById(inviter)
+        console.log('shop inviter:', inviter)
+        return promoterFunc.getPromoterByUserId(inviter)
       }).then((promoter) => {
         return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
       }).then(() => {
