@@ -1166,6 +1166,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
     })
   }
 
+  console.log('current promoter', promoter.id, ', promoter royalty:', royalty)
   // 第一步先在mysql中插入数据是为了检查mysql中的推广员数据是否存在，如果存在不做任何操作，不存在也插入一条新的记录。这么做为了防止
   // 推广员在注册阶段mysql数据记录没有插入成功导致后面出问题
   return insertPromoterInMysql(promoter.id).then(() => {
@@ -1180,10 +1181,13 @@ function calPromoterShopEarnings(promoter, shop, income) {
       localAgents.push(provinceAgent)
       var identity = provinceAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
+      console.log('province agent:', provinceAgent.id, ', earn:', agentEarn)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(provinceAgent.id).then(() => {
+        console.log('update province balance:', provinceAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
       }).then(() => {
+        console.log('update province agent earn:', agentEarn)
         return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1201,10 +1205,13 @@ function calPromoterShopEarnings(promoter, shop, income) {
       localAgents.push(cityAgent)
       var identity = cityAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
+      console.log('city agent:', cityAgent.id, ', earn:', agentEarn)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(cityAgent.id).then(() => {
+        console.log('update city balance:', cityAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
       }).then(() => {
+        console.log('update city agent earn:', agentEarn)
         return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1222,10 +1229,13 @@ function calPromoterShopEarnings(promoter, shop, income) {
       localAgents.push(districtAgent)
       var identity = districtAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
+      console.log('district agent:', districtAgent.id, ', earn:', agentEarn)
       platformEarn = platformEarn - agentEarn
       return insertPromoterInMysql(districtAgent.id).then(() => {
+        console.log('update district balance:', districtAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
       }).then(() => {
+        console.log('update district agent earn:', agentEarn)
         return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
       })
     } else {
@@ -1240,7 +1250,9 @@ function calPromoterShopEarnings(promoter, shop, income) {
     // 更新推广员自己的收益
     selfEarn = income * royalty[0]
     platformEarn = platformEarn - selfEarn
+    console.log('update promoter balance:', promoter.attributes.user.id, ', earn: ', selfEarn)
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
+      console.log('update promoter earn:', selfEarn)
       return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
     })
   }).then((insertRes) => {
@@ -1252,12 +1264,15 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return getUpPromoter(promoter, false).then((upPromoter) => {
       newUpPromoter = upPromoter
       upPro = upPromoter
+      console.log('first up promoter:', upPromoter.id)
       if (upPromoter) {
         onePromoterEarn = income * royalty[1]
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
+          console.log('update first up promoter balance:', upPromoter.attributes.user.id, ', earn:', onePromoterEarn)
           return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
         }).then(() => {
+          console.log('update first up promoter earn:', onePromoterEarn)
           return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, promoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
         })
       } else {
@@ -1276,12 +1291,15 @@ function calPromoterShopEarnings(promoter, shop, income) {
     if (upPromoter) {
       return getUpPromoter(upPromoter, false).then((upupPromoter) => {
         upUpPro = upupPromoter
+        console.log('second up promoter:', upupPromoter.id)
         if (upupPromoter) {
           twoPromoterEarn = income * royalty[2]
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
+            console.log('update second up promoter balance:', upupPromoter.attributes.user.id, ', earn:', twoPromoterEarn)
             return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
           }).then(() => {
+            console.log('update second up promoter earn:', twoPromoterEarn)
             return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
           })
         } else {
@@ -1295,12 +1313,14 @@ function calPromoterShopEarnings(promoter, shop, income) {
     if (insertRes && !insertRes.results.insertId) {
       throw new Error('Update promoter earning of level two friend error')
     }
+    console.log('update platform earn:', platformEarn, ', promoter:', promoter.id)
     // 更新平台分成收益
     return updatePlatformEarning(mysqlConn, shopOwner, promoter.id, platformEarn, INVITE_SHOP)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Update platform earnings error')
     }
+    console.log('update leancloud data')
 
     // 更新leancloud上的数据
     var leanAction = []
