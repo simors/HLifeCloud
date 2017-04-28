@@ -65,6 +65,7 @@ AV.Cloud.define('addUserFromAdmin',userManagerFunc.addUserFromAdmin)
 AV.Cloud.define('deleteUserFromAdmin',userManagerFunc.deleteUserFromAdmin)
 AV.Cloud.define('getAdminTopicList',TopicManagerFunc.getTopicList)
 AV.Cloud.define('updateTopicStatus',TopicManagerFunc.updateTopicStatus)
+AV.Cloud.define('shareTopicById',TopicManagerFunc.shareTopicById)
 
 AV.Cloud.define('getAdviseList',UserFeedback.getAdviseList)
 AV.Cloud.define('readAdvise',UserFeedback.readAdvise)
