@@ -19,11 +19,11 @@ function upFromLeancloudObject(lcObj) {
     for(var key in attrs) {
     	if(key == 'user') {
     		var user = attrs.user
-    		console.log('user====', user)
+    		// console.log('user====', user)
     		var userAttrs = user.attributes
 
     		var nickname = userAttrs.nickname
-    		console.log('userAttrs====', userAttrs)
+    		// console.log('userAttrs====', userAttrs)
     		if(!nickname) {
     			var mobilePhoneNumber = userAttrs.mobilePhoneNumber
     			nickname = util.hidePhoneNumberDetail(mobilePhoneNumber)
