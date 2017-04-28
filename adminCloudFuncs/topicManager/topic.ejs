@@ -399,6 +399,9 @@
         article p {
             padding-bottom: 5px;
             text-indent: 2em;
+            font-size: 18px;
+            word-wrap: break-word;
+            text-align: justify;
         }
 
         .artical-image {
@@ -458,20 +461,16 @@
     </header>
 
     <article>
-        <div class="cover">
-            <img src="<%=coverUrl%>">
-        </div>
-
         <% if(content && content.length > 0) { %>
-            <% content.forEach(( value ) => { %>
-                <% if( value.type === 'COMP_TEXT') { %>
-                    <p> <%=value.text%> </p>
-                <% } else if( value.type === 'COMP_IMG' ) { %>
-                    <div class="artical-image">
-                        <img src="<%=value.url%>">
-                    </div>
-                <% }%>
-            <% }) %>
+        <% content.forEach(( value ) => { %>
+        <% if( value.type === 'COMP_TEXT') { %>
+        <p> <%=value.text%> </p>
+        <% } else if( value.type === 'COMP_IMG' ) { %>
+        <div class="artical-image">
+            <img src="<%=value.url%>">
+        </div>
+        <% }%>
+        <% }) %>
         <% } %>
     </article>
 

@@ -3,6 +3,8 @@
  */
 var AV = require('leanengine');
 var Promise = require('bluebird');
+var ejs = require('ejs')
+var fs  = require('fs')
 //去掉空格
 function Trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, "");
@@ -269,6 +271,55 @@ function createNewTopicCategory(request, response) {
   }
 }
 
+function getTopicById(topicId) {
+  var query = new AV.Query('Topics')
+
+  return query.get(topicId).then((result) => {
+    var topic = result.attributes
+    console.log("topic:", topic)
+    return {
+      title: topic.title,
+      content: JSON.parse(topic.content),
+      abstract: topic.abstract
+    }
+  }).catch((error) => {
+    console.log(error)
+    return undefined
+  })
+}
+
+function shareTopicById(request, response) {
+  var id = request.params.topicId
+
+  getTopicById(id).then((topic) => {
+
+    var str = fs.readFileSync(__dirname + '/topic.ejs', 'utf8')
+    var template = ejs.compile(str)
+    var shareHtml = template(topic)
+    var buffer = new Buffer(shareHtml).toString('base64')
+    var data = { base64: buffer }
+
+    var file = new AV.File("topic_topicId" + id, data, 'text/html')
+    return file.save()
+
+  }).then((savedFile) => {
+    console.log("savedFile:", savedFile)
+    if(savedFile.attributes.url) {
+      response.success({
+        url: savedFile.attributes.url
+      })
+      return
+    }
+    response.error({
+      errorCode: 1,
+      message: "share html file save failed!"
+    })
+  }).catch((error) => {
+    console.log(error)
+    response.error(error)
+  })
+}
+
 var TopicManagerFunc = {
   updateTopicPicked: updateTopicPicked,
   getTopicList: getTopicList,
@@ -277,7 +328,8 @@ var TopicManagerFunc = {
   createNewTopicCategory:createNewTopicCategory,
   getPickedTopicList:getPickedTopicList,
   fetchAllTopicStatus:fetchAllTopicStatus,
-  updateTopicStatus:updateTopicStatus
+  updateTopicStatus:updateTopicStatus,
+  shareTopicById: shareTopicById,
 }
 
 module.exports = TopicManagerFunc
