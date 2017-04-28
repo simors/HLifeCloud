@@ -407,8 +407,7 @@
 
         .artical-image img {
             display: block;
-            width: 100px;
-            height: 100px;
+            width: 100%;
             max-width: 100% !important;
             margin: 0 auto
         }
@@ -420,8 +419,7 @@
 
         .cover img {
             display: block;
-            width: 100px;
-            height: 100px;
+            width: 100%;
             max-width: 100% !important;
             margin: 0 auto
         }
@@ -460,7 +458,7 @@
 
     <article>
         <div class="cover">
-            <img src="<%=coverUrl%>" style="width: 180px; height: 180px">
+            <img src="<%=coverUrl%>">
         </div>
 
         <% if(content && content.length > 0) { %>
@@ -469,7 +467,7 @@
                     <p> <%=value.text%> </p>
                 <% } else if( value.type === 'COMP_IMG' ) { %>
                     <div class="artical-image">
-                        <img src="<%=value.url%>" style="width: <%=value.width/2%>px; height: <%=value.height/2%>px">
+                        <img src="<%=value.url%>">
                     </div>
                 <% }%>
             <% }) %>
