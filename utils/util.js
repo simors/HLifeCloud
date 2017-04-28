@@ -92,9 +92,43 @@ function DateAdd(interval, number, date) {
   }
 }
 
+/**
+ * 移除字符中空格
+ *
+ * @param phone
+ */
+function removeSpace(phone) {
+  if (!phone) {
+    return;
+  }
+  return phone.toString().replace(/\s+/g, "");
+}
+
+/**
+ * 隐藏电话号码中间4位
+ *
+ * @param phone
+ * @returns {188****8888}
+ */
+function hidePhoneNumberDetail(phone) {
+  if (!phone) {
+    return;
+  }
+
+  phone = removeSpace(phone)
+
+  if (phone.length <= 7) {
+    return phone
+  }
+  else {
+    return phone.toString().substring(0, 3) + "****" + phone.toString().substring(7)
+  }
+}
+
 var util = {
   parseDate: parseDate,
   DateAdd: DateAdd,
+  hidePhoneNumberDetail: hidePhoneNumberDetail,
 }
 
 module.exports = util
