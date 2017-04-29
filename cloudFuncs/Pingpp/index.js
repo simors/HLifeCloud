@@ -301,7 +301,7 @@ function paymentEvent(request, response) {
   var amount = charge.amount * 0.01 //单位为 元
   var promoterFunc = require('../Promoter')
 
-  console.log('paymentEvent: ', promoterId)
+  console.log('receive paymentEvent')
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
@@ -317,11 +317,13 @@ function paymentEvent(request, response) {
         return promoterFunc.promoterPaid(promoterId)
       })
     } else if (shopId && amount) {
+      console.log('invoke shop paid:', shopId, amount)
       var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
-        var inviter = shop.attributes.inviter
-        return promoterFunc.getPromoterById(inviter)
+        var inviter = shop.attributes.inviter.id
+        console.log('shop inviter:', inviter)
+        return promoterFunc.getPromoterByUserId(inviter)
       }).then((promoter) => {
         return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
       }).then(() => {
