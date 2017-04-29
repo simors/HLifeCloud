@@ -594,7 +594,7 @@ function getPaymentInfoByUserId(request, response) {
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
-    sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id` FROM `PaymentInfo` WHERE `userId` = ? "
+    sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id`, `open_bank_code`, `open_bank` FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
     if (queryRes.results.length > 0) {
@@ -606,6 +606,8 @@ function getPaymentInfoByUserId(request, response) {
       var password = queryRes.results[0].phone_number ? true : false
       var alipay_account = queryRes.results[0].alipay_account || undefined
       var open_id = queryRes.results[0].open_id || undefined
+      var open_bank_code = queryRes.results[0].open_bank_code || undefined
+      var open_bank = queryRes.results[0].open_bank || undefined
 
       response.success({
         userId: userId,
@@ -617,6 +619,8 @@ function getPaymentInfoByUserId(request, response) {
         password: password,
         alipay_account: alipay_account,
         open_id: open_id,
+        open_bank_code: open_bank_code,
+        open_bank: open_bank,
       })
       return
     }
