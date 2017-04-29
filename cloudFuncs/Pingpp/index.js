@@ -347,30 +347,32 @@ function createTransfers(request, response) {
   console.log("createTransfers request.params:", request.params)
   var order_no = request.params.order_no
   var amount = parseInt(request.params.amount)
-  var account = request.params.account
+  var card_number = request.params.card_number
   var userName = request.params.userName
-  var userId = request.params.userId
+  var metadata = request.params.metadata
   var channel = request.params.channel
-
-  var metadata = {
-    userId: userId,
-  }
+  var open_bank_code = request.params.open_bank_code
+  var open_bank = request.params.open_bank
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
 
   switch (channel) {
-    case 'wx_pub': {
+    case 'unionpay': {
       pingpp.transfers.create({
         order_no: order_no,
         app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-        channel: "wx_pub",// 微信公众号支付
+        channel: "unionpay",// 银联支付
         amount: amount,
         currency: "cny",
         type: "b2c",
-        recipient: account, //微信openId
         extra: {
-          user_name: userName,
-          force_check: true,
+          card_number: card_number,  //收款人银行卡号或者存折号
+          user_name: userName,  //收款人姓名 选填
+          open_bank_code: open_bank_code, //开户银行编号 选填
+          open_bank: open_bank,  //开户银行 选填
+          // prov: , //省份 选填
+          // city: , //城市 选填
+          // sub_bank: , //开户支行名称 选填
         },
         description: "Your Description",
         metadata: metadata,
@@ -385,63 +387,95 @@ function createTransfers(request, response) {
         }
         response.success({
           errcode: 0,
-          message: 'wx create transfers success!',
+          message: 'unionpay create transfers success!',
           transfer: transfer,
         })
       })
     }
       break
+    case 'wx_pub': {
+      // pingpp.transfers.create({
+      //   order_no: order_no,
+      //   app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+      //   channel: "wx_pub",// 微信公众号支付
+      //   amount: amount,
+      //   currency: "cny",
+      //   type: "b2c",
+      //   recipient: account, //微信openId
+      //   extra: {
+      //     user_name: userName,
+      //     force_check: true,
+      //   },
+      //   description: "Your Description",
+      //   metadata: metadata,
+      // }, function (err, transfer) {
+      //   if (err != null) {
+      //     console.log(err)
+      //     response.error({
+      //       errcode: 1,
+      //       message: err.message,
+      //     })
+      //     return
+      //   }
+      //   response.success({
+      //     errcode: 0,
+      //     message: 'wx create transfers success!',
+      //     transfer: transfer,
+      //   })
+      // })
+    }
+      break
     case 'alipay': {
-      pingpp.batchTransfers.create({
-        "app": GLOBAL_CONFIG.PINGPP_APP_ID,
-        "batch_no": order_no, // 批量付款批次号
-        "channel": "alipay", // 目前只支持 alipay
-        "amount": amount, // 批量付款总金额
-        "description": "Your Description",
-        "metadata": metadata,
-        "recipients": [
-          {
-            "account": account, // 接收者支付宝账号
-            "amount": amount, // 付款金额
-            "name": userName // 接收者姓名
-          }
-        ],
-        "currency": 'cny',
-        "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
-      }, function (err, transfer) {
-        if (err != null) {
-          console.log(err)
-          response.error({
-            errcode: 1,
-            message: err.message,
-          })
-          return
-        }
-
-        if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
-          var paymentInfo = {
-            alipay_account: transfer.recipients[0].account,
-            userId: transfer.metadata.userId,
-            id_name: transfer.recipients[0].name,
-            amount: transfer.recipients[0].amount,
-          }
-          return updatePaymentInfoInMysql(paymentInfo).then(() => {
-            response.success({
-              errcode: 0,
-              message: 'alipay create transfers success!',
-              transfer: transfer,
-            })
-          }).catch((error) => {
-            response.error(error)
-          })
-        } else {
-          response.error({
-            errcode: 1,
-            message: "alipay create transfers fail!",
-          })
-        }
-
-      })
+      // pingpp.batchTransfers.create({
+      //   "app": GLOBAL_CONFIG.PINGPP_APP_ID,
+      //   "batch_no": order_no, // 批量付款批次号
+      //   "channel": "alipay", // 目前只支持 alipay
+      //   "amount": amount, // 批量付款总金额
+      //   "description": "Your Description",
+      //   "metadata": metadata,
+      //   "recipients": [
+      //     {
+      //       "account": account, // 接收者支付宝账号
+      //       "amount": amount, // 付款金额
+      //       "name": userName // 接收者姓名
+      //     }
+      //   ],
+      //   "currency": 'cny',
+      //   "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
+      // }, function (err, transfer) {
+      //   if (err != null) {
+      //     console.log(err)
+      //     response.error({
+      //       errcode: 1,
+      //       message: err.message,
+      //     })
+      //     return
+      //   }
+      //
+      //   if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
+      //     var paymentInfo = {
+      //       alipay_account: transfer.recipients[0].account,
+      //       userId: transfer.metadata.userId,
+      //       id_name: transfer.recipients[0].name,
+      //       amount: transfer.recipients[0].amount,
+      //     }
+      //     return updatePaymentInfoInMysql(paymentInfo).then(() => {
+      //       response.success({
+      //         errcode: 0,
+      //         message: 'alipay create transfers success!',
+      //         transfer: transfer,
+      //       })
+      //     }).catch((error) => {
+      //       response.error(error)
+      //     })
+      //   } else {
+      //     response.error({
+      //       errcode: 1,
+      //       message: "alipay create transfers fail!",
+      //     })
+      //   }
+      //
+      // })
     }
       break
     default:
