@@ -274,8 +274,13 @@ function shopCertificate(request, response) {
     shop.set('shopName', shopName + '')
     shop.set('shopAddress', shopAddress + '')
     if(geo) {
+      // console.log('shopCertificate==geo==', geo)
       var geoArr = geo.split(',')
-      var point = new AV.GeoPoint(geoArr)
+      var latitude = parseFloat(geoArr[0])
+      var longitude = parseFloat(geoArr[1])
+      var numberGeoArr = [latitude, longitude]
+      // console.log('shopCertificate==numberGeoArr==', numberGeoArr)
+      var point = new AV.GeoPoint(numberGeoArr)
       shop.set('geo', point)
     }
     shop.set('geoProvince', geoProvince + '')
