@@ -51,7 +51,7 @@ function push(request, response) {
 function _push(data, query) {
   var defaultData = {
     alert: '通知',
-    title: '邻家优店',
+    title: '汇邻优店',
     prod: 'dev',
     sceneName: 'MESSAGE_BOX',
     sceneParams: {}
