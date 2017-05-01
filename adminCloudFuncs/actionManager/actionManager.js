@@ -58,6 +58,8 @@ function getActionList(request, response) {
   if (geoCity) {
     query.equalTo('geoCity', geoCity)
   }
+  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  query.limit(limit)
   query.find().then((results)=> {
     var banners = []
 
