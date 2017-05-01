@@ -31,9 +31,9 @@ var PINGPP_APP_ID = ""
 var PINGPP_TEST_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
 var PINGPP_LIVE_API_KEY = "sk_live_P044i19GCS8SyT84eTvbHmbH" //Secret Key
 
-var PINGPP_DEV_APP_ID = "app_aX1mbDu5G08OP0i9" //ping++ 邻家优店-DEV应用 Id
+var PINGPP_DEV_APP_ID = "app_aX1mbDu5G08OP0i9" //ping++ 汇邻优店-DEV应用 Id
 
-var PINGPP_PRE_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 邻家优店-PRE应用 Id
+var PINGPP_PRE_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 汇邻优店-PRE应用 Id
 
 var PINGPP_PRO_APP_ID = ""
 

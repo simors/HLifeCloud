@@ -218,8 +218,8 @@ function updatePaymentInfoInMysql(paymentInfo) {
     return mysqlUtil.query(conn, sql, [paymentInfo.userId])
   }).then((queryRes) => {
     if (queryRes.results[0].cnt == 1) {
-      sql = "UPDATE `PaymentInfo` SET `alipay_account` = ?, `id_name` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
-      return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.alipay_account, paymentInfo.id_name, paymentInfo.amount, paymentInfo.userId])
+      sql = "UPDATE `PaymentInfo` SET `card_number` = ?, `id_name` = ?, `open_bank_code` = ?, `open_bank` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
+      return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount, paymentInfo.userId])
     } else {
       return new Promise((resolve) => {
         resolve()
@@ -387,11 +387,32 @@ function createTransfers(request, response) {
           })
           return
         }
-        response.success({
-          errcode: 0,
-          message: 'unionpay create transfers success!',
-          transfer: transfer,
-        })
+
+        if (transfer.metadata.userId) {
+          var paymentInfo = {
+            userId: transfer.metadata.userId,
+            card_number: transfer.extra.card_number,
+            user_name: transfer.extra.user_name,
+            open_bank_code: transfer.extra.open_bank_code,
+            open_bank: transfer.extra.open_bank,
+            amount: transfer.amount,
+          }
+          return updatePaymentInfoInMysql(paymentInfo).then(() => {
+            response.success({
+              errcode: 0,
+              message: 'alipay create transfers success!',
+              transfer: transfer,
+            })
+          }).catch((error) => {
+            response.error(error)
+          })
+        } else {
+          response.error({
+            errcode: 1,
+            message: "alipay create transfers fail!",
+          })
+        }
+
       })
     }
       break
@@ -428,56 +449,56 @@ function createTransfers(request, response) {
     }
       break
     case 'alipay': {
-      // pingpp.batchTransfers.create({
-      //   "app": GLOBAL_CONFIG.PINGPP_APP_ID,
-      //   "batch_no": order_no, // 批量付款批次号
-      //   "channel": "alipay", // 目前只支持 alipay
-      //   "amount": amount, // 批量付款总金额
-      //   "description": "Your Description",
-      //   "metadata": metadata,
-      //   "recipients": [
-      //     {
-      //       "account": account, // 接收者支付宝账号
-      //       "amount": amount, // 付款金额
-      //       "name": userName // 接收者姓名
-      //     }
-      //   ],
-      //   "currency": 'cny',
-      //   "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
-      // }, function (err, transfer) {
-      //   if (err != null) {
-      //     console.log(err)
-      //     response.error({
-      //       errcode: 1,
-      //       message: err.message,
-      //     })
-      //     return
-      //   }
-      //
-      //   if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
-      //     var paymentInfo = {
-      //       alipay_account: transfer.recipients[0].account,
-      //       userId: transfer.metadata.userId,
-      //       id_name: transfer.recipients[0].name,
-      //       amount: transfer.recipients[0].amount,
-      //     }
-      //     return updatePaymentInfoInMysql(paymentInfo).then(() => {
-      //       response.success({
-      //         errcode: 0,
-      //         message: 'alipay create transfers success!',
-      //         transfer: transfer,
-      //       })
-      //     }).catch((error) => {
-      //       response.error(error)
-      //     })
-      //   } else {
-      //     response.error({
-      //       errcode: 1,
-      //       message: "alipay create transfers fail!",
-      //     })
-      //   }
-      //
-      // })
+      pingpp.batchTransfers.create({
+        "app": GLOBAL_CONFIG.PINGPP_APP_ID,
+        "batch_no": order_no, // 批量付款批次号
+        "channel": "alipay", // 目前只支持 alipay
+        "amount": amount, // 批量付款总金额
+        "description": "Your Description",
+        "metadata": metadata,
+        "recipients": [
+          {
+            "account": account, // 接收者支付宝账号
+            "amount": amount, // 付款金额
+            "name": userName // 接收者姓名
+          }
+        ],
+        "currency": 'cny',
+        "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
+      }, function (err, transfer) {
+        if (err != null) {
+          console.log(err)
+          response.error({
+            errcode: 1,
+            message: err.message,
+          })
+          return
+        }
+
+        if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
+          var paymentInfo = {
+            alipay_account: transfer.recipients[0].account,
+            userId: transfer.metadata.userId,
+            id_name: transfer.recipients[0].name,
+            amount: transfer.recipients[0].amount,
+          }
+          return updatePaymentInfoInMysql(paymentInfo).then(() => {
+            response.success({
+              errcode: 0,
+              message: 'alipay create transfers success!',
+              transfer: transfer,
+            })
+          }).catch((error) => {
+            response.error(error)
+          })
+        } else {
+          response.error({
+            errcode: 1,
+            message: "alipay create transfers fail!",
+          })
+        }
+
+      })
     }
       break
     default:
@@ -573,7 +594,7 @@ function getPaymentInfoByUserId(request, response) {
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
-    sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id` FROM `PaymentInfo` WHERE `userId` = ? "
+    sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id`, `open_bank_code`, `open_bank` FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
     if (queryRes.results.length > 0) {
@@ -585,6 +606,8 @@ function getPaymentInfoByUserId(request, response) {
       var password = queryRes.results[0].phone_number ? true : false
       var alipay_account = queryRes.results[0].alipay_account || undefined
       var open_id = queryRes.results[0].open_id || undefined
+      var open_bank_code = queryRes.results[0].open_bank_code || undefined
+      var open_bank = queryRes.results[0].open_bank || undefined
 
       response.success({
         userId: userId,
@@ -596,6 +619,8 @@ function getPaymentInfoByUserId(request, response) {
         password: password,
         alipay_account: alipay_account,
         open_id: open_id,
+        open_bank_code: open_bank_code,
+        open_bank: open_bank,
       })
       return
     }
