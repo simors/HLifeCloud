@@ -263,7 +263,8 @@ function getShopList(request, response) {
   if(status==1) {
     query.equalTo('status',status)
   }
-
+  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  query.limit(limit)
   // console.log('getShopList.query===', query)
   query.find().then(function (results) {
      // console.log('count', results.length)

@@ -25,7 +25,8 @@ function getUserList(request, response) {
       query.equalTo('adminUser', user)
       query.equalTo('enable', true)
       console.log('hahahahaha')
-
+      var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+      query.limit(limit)
       query.include('role')
 
       promises.push(
@@ -230,12 +231,14 @@ function deleteUserFromAdmin(request, response) {
 
 //获取APP用户列表
 function getAppUserList(request,response) {
+
   var orderMode = request.params.orderMode
   var status = request.params.status
   var username=request.params.username
   var geoCity = request.params.geoCity
   var query = new AV.Query('_User')
   var liveArea = request.params.liveArea
+
   query.include('detail')
   if(status==1){
     query.equalTo('status',status)
@@ -278,6 +281,8 @@ function getAppUserList(request,response) {
   else {
     query.descending('createdAt');
   }
+  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  query.limit(limit)
   query.find().then((results)=>{
     // console.log('results',results)
 

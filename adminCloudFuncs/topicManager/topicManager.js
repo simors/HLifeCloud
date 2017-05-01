@@ -127,7 +127,8 @@ function getPickedTopicList(request, response) {
   if (request.params.limit) {
     topicQuery.limit(request.params.limit)
   }
-
+  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  topicQuery.limit(limit)
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
@@ -222,6 +223,8 @@ function getTopicCategoryList(request, response) {
   if(filterValue){
     query.contains('title', filterValue);
   }
+  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  query.limit(limit)
   query.find().then((results)=> {
 
     results.forEach((result)=> {
