@@ -298,7 +298,9 @@ function getShopList(request, response) {
       if (result.attributes.owner) {
          owner = {
           id: result.attributes.owner.id,
-          username: result.attributes.owner.attributes.username
+          username: result.attributes.owner.attributes.username,
+          avatar:result.attributes.owner.attributes.avatar,
+          nickname:result.attributes.owner.attributes.nickname
         }
       }
 

@@ -1125,16 +1125,16 @@ function getAgentEarning(identity, income) {
 
   switch (identity) {
     case APPCONST.AGENT_PROVINCE:
-      agentEarn = provinceEarning
+      agentEarn = provinceEarning.toFixed(3)
       break
     case APPCONST.AGENT_CITY:
-      agentEarn = cityEarning
+      agentEarn = cityEarning.toFixed(3)
       break
     case APPCONST.AGENT_DISTRICT:
-      agentEarn = districtEarning
+      agentEarn = districtEarning.toFixed(3)
       break
     case APPCONST.AGENT_STREET:
-      agentEarn = streetEarning
+      agentEarn = streetEarning.toFixed(3)
       break
   }
   return agentEarn
