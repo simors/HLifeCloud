@@ -296,7 +296,7 @@ function shareTopicById(request, response) {
 
   getTopicById(id).then((topic) => {
 
-    var str = fs.readFileSync(__dirname + '/topic.ejs', 'utf8')
+    var str = fs.readFileSync(__dirname + '/topicShare.ejs', 'utf8')
     var template = ejs.compile(str)
     var shareHtml = template(topic)
     var buffer = new Buffer(shareHtml).toString('base64')
@@ -332,7 +332,6 @@ var TopicManagerFunc = {
   getPickedTopicList:getPickedTopicList,
   fetchAllTopicStatus:fetchAllTopicStatus,
   updateTopicStatus:updateTopicStatus,
-  shareTopicById: shareTopicById,
 }
 
 module.exports = TopicManagerFunc

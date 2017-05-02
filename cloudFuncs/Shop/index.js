@@ -738,7 +738,7 @@ function shareShopPromotionById(request, response) {
       coverUrl: result.coverUrl,
       content: JSON.parse(result.promotionDetailInfo),
     }
-    var str = fs.readFileSync(__dirname + '/shopPromotion.ejs', 'utf8')
+    var str = fs.readFileSync(__dirname + '/shopPromotionShare.ejs', 'utf8')
     var template = ejs.compile(str)
     var shareHtml = template(shopPromotion)
     var buffer = new Buffer(shareHtml).toString('base64')
