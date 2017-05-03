@@ -32,6 +32,7 @@
     "node-uuid": "^1.4.8",
     "pingpp": "^2.0.10",
     "pinyin": "^2.8.2",
+    "qrcode": "^0.8.1",
     "querystring": "^0.2.0",
     "redis": "^2.7.1",
     "request": "^2.81.0"
