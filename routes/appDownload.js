@@ -12,6 +12,10 @@ router.get('/:device', function(req, res, next) {
   switch (device) {
     case 'ios':
       QRCode.toDataURI('https://itunes.apple.com/lookup?id=1224852246', function (err, url) {
+        if(err) {
+          console.log("Failed to generate QRCode:", err)
+          next(new Error('Failed to generate QRCode ' + err))
+        }
         res.render('appDownload', {
           title: 'ios下载',
           downloadQrCode: url,
