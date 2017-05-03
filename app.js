@@ -9,6 +9,7 @@ var shopPromotionShare = require('./routes/shopPromotionShare')
 var shopShare = require('./routes/shopShare')
 var topicShare = require('./routes/topicShare')
 var appDownload = require('./routes/appDownload')
+var inviteCode = require('./routes/inviteCodeShare')
 var AV = require('leanengine');
 
 var app = express();
@@ -44,6 +45,8 @@ app.use('/shopShare', shopShare)
 app.use('/topicShare', topicShare)
 
 app.use('/appDownload', appDownload)
+
+app.use('/inviteCodeShare', inviteCode)
 
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
