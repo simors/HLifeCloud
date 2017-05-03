@@ -1248,7 +1248,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       throw new Error('Update district promoter earning error')
     }
     // 更新推广员自己的收益
-    selfEarn = income * royalty[0]
+    selfEarn = (income * royalty[0]).toFixed(3)
     platformEarn = platformEarn - selfEarn
     console.log('update promoter balance:', promoter.attributes.user.id, ', earn: ', selfEarn)
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
@@ -1266,7 +1266,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       upPro = upPromoter
       console.log('first up promoter:', upPromoter.id)
       if (upPromoter) {
-        onePromoterEarn = income * royalty[1]
+        onePromoterEarn = (income * royalty[1]).toFixed(3)
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
           console.log('update first up promoter balance:', upPromoter.attributes.user.id, ', earn:', onePromoterEarn)
@@ -1293,7 +1293,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         upUpPro = upupPromoter
         console.log('second up promoter:', upupPromoter.id)
         if (upupPromoter) {
-          twoPromoterEarn = income * royalty[2]
+          twoPromoterEarn = (income * royalty[2]).toFixed(3)
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
             console.log('update second up promoter balance:', upupPromoter.attributes.user.id, ', earn:', twoPromoterEarn)
@@ -1359,7 +1359,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
  */
 function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty
-  var royaltyEarnings = royalty * income
+  var royaltyEarnings = (royalty * income).toFixed(3)
   var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var mysqlConn = undefined
@@ -1408,6 +1408,11 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
  * @returns {Promise.<Conversation>|Promise<Conversation>|*}
  */
 function updateLeanPromoterEarning(promoterId, earn, earn_type) {
+  if (0 == earn) {
+    return new Promise((resolve, reject) => {
+      resolve()
+    })
+  }
   var newPromoter = AV.Object.createWithoutData('Promoter', promoterId)
   if (earn_type == EARN_ROYALTY) {
     newPromoter.increment('royaltyEarnings', earn)
