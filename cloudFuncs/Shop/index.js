@@ -295,54 +295,25 @@ function shopCertificate(request, response) {
     currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
     // console.log('shop========', shop)
     shop.save().then(function(shopInfo){
-      currentUser.save().then(function(){
-        // console.log('shopCertificate==success=shopInfo=', shopInfo)
-        PromoterFunc.getPromoterByUserId(inviterId).then((promoter) => {
-          PromoterFunc.incrementInviteShopNum(promoter.id)
-        }).catch((err) => {
-          throw err
-        })
-
-        response.success({
-          errcode: 0,
-          message: '店铺注册认证成功',
-          shopInfo: shopInfo
-        })
-      }, function(error){
-        var shopObj = AV.Object.createWithoutData('Shop', shopInfo.id)
-        shopObj.destroy()
-        // console.log("shopCertificate.save===", error)
-        console.log(error)
-        response.error({
-          errcode: 1,
-          message: '店铺注册认证失败，请与客服联系',
-        })
+      var savePromoter = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
+        console.log('shop invite promoter id is: ', upPromoter.id)
+        PromoterFunc.incrementInviteShopNum(upPromoter.id)
       })
-    }, function(error){
-      // console.log("shopCertificate.shop.save===", error)
-      console.log(error)
+
+      return Promise.all([currentUser.save(), savePromoter])
+    }).then(() => {
+      response.success({
+        errcode: 0,
+        message: '店铺注册认证成功',
+        shopInfo: shopInfo
+      })
+    }).catch((err) => {
+      console.log(err)
       response.error({
         errcode: 1,
         message: '店铺注册认证失败，请与客服联系',
       })
     })
-
-    // Promise.all([currentUser.save(), shop.save()]).then(() => {
-    //   console.log('shopCertificate==success==')
-    //   PromoterFunc.incrementInviteShopNum(inviterId)
-    //   response.success({
-    //     errcode: 0,
-    //     message: '店铺注册认证成功'
-    //   })
-
-    // }).catch((error) => {
-    //   console.log("shopCertificate", error)
-    //   console.log(error)
-    //   response.error({
-    //     errcode: 1,
-    //     message: '店铺注册认证失败，请与客服联系',
-    //   })
-    // })
   }).catch(function(error){
     console.log("shopCertificate.verifyCode====", error)
     response.error({
