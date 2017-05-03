@@ -22,9 +22,9 @@ var MYSQL_DEV_DB = 'hlife_dev'
 var MYSQL_PRE_USER = 'xiaojee'
 var MYSQL_PRE_PWD = 'Xiaojee2017'
 var MYSQL_PRE_DB = 'hlife_pre'
-var MYSQL_PROD_USER = ''
-var MYSQL_PROD_PWD = ''
-var MYSQL_PROD_DB = 'hlife_prod'
+var MYSQL_PROD_USER = 'xiaojeePro'
+var MYSQL_PROD_PWD = 'XjDayDayUpGo!!'
+var MYSQL_PROD_DB = 'hlife_pro'
 
 //Ping++应用配置
 var PINGPP_APP_ID = ""
