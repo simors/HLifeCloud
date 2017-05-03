@@ -35,7 +35,7 @@ var PINGPP_DEV_APP_ID = "app_aX1mbDu5G08OP0i9" //ping++ 汇邻优店-DEV应用 I
 
 var PINGPP_PRE_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 汇邻优店-PRE应用 Id
 
-var PINGPP_PRO_APP_ID = ""
+var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 Id
 
 //应用下载链接配置
 var APP_DOWNLOAD_LINK = ""
