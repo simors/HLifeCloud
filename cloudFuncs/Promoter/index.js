@@ -1701,7 +1701,7 @@ function getTotalPerformanceStat(request, response) {
     var totalPerformance = 0
     promoters.forEach((promoter) => {
       totalInvitedShops += promoter.attributes.inviteShopNum
-      totalTeamMems += promoter.attributes.teamMemNum
+      totalTeamMems += 1        // 生活在这个区域内的推广员都算作团队成员
       totalPerformance += promoter.attributes.shopEarnings + promoter.attributes.royaltyEarnings
     })
     response.success({
