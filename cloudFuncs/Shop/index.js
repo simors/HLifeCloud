@@ -294,14 +294,15 @@ function shopCertificate(request, response) {
     shop.set('inviter', inviter)
     currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
     // console.log('shop========', shop)
-    shop.save().then(function(shopInfo){
-      var savePromoter = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
-        console.log('shop invite promoter id is: ', upPromoter.id)
-        PromoterFunc.incrementInviteShopNum(upPromoter.id)
-      })
 
-      return Promise.all([currentUser.save(), savePromoter])
-    }).then(() => {
+    var savePromoter = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
+      console.log('shop invite promoter id is: ', upPromoter.id)
+      PromoterFunc.incrementInviteShopNum(upPromoter.id)
+    })
+
+    Promise.all([currentUser.save(), savePromoter]).then(() => {
+      return shop.save()
+    }).then((shopInfo) => {
       response.success({
         errcode: 0,
         message: '店铺注册认证成功',
