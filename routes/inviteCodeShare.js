@@ -6,6 +6,8 @@
 var router = require('express').Router();
 var AV = require('leanengine');
 var QRCode = require('qrcode')
+var GLOBAL_CONFIG = require('../config')
+
 
 router.get('/:code', function(req, res, next) {
   var code = req.params.code
@@ -19,6 +21,7 @@ router.get('/:code', function(req, res, next) {
       title: '邀请码',
       downloadQrCode: url,
       code: code,
+      appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
     })
   })
 
