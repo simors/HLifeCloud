@@ -54,7 +54,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_PRE_DB
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
   APP_DOWNLOAD_LINK = "http://hlyd-pre.leanapp.cn/appDownloadLink"
-} else {
+} else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
   REDIS_DB = PROD_REDIS
   MYSQL_USER = MYSQL_PROD_USER
   MYSQL_PWD = MYSQL_PROD_PWD
