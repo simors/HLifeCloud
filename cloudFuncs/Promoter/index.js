@@ -1436,7 +1436,7 @@ function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, dea
     earnSql = 'UPDATE `PromoterEarnings` SET `shop_earnings` = `shop_earnings` + ? WHERE `promoterId` = ?'
   }
   return mysqlUtil.query(conn, earnSql, [earn, toPromoterId]).then((updateRes) => {
-    if (0 == updateRes.results.changedRows) {
+    if (0 != earn && 0 == updateRes.results.changedRows) {
       throw new Error('Update PromoterEarnings error')
     }
     var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?, ?)'
