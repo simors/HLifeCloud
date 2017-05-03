@@ -297,7 +297,12 @@ function shopCertificate(request, response) {
     shop.save().then(function(shopInfo){
       currentUser.save().then(function(){
         // console.log('shopCertificate==success=shopInfo=', shopInfo)
-        PromoterFunc.incrementInviteShopNum(inviterId)
+        PromoterFunc.getPromoterByUserId(inviterId).then((promoter) => {
+          PromoterFunc.incrementInviteShopNum(promoter.id)
+        }).catch((err) => {
+          throw err
+        })
+
         response.success({
           errcode: 0,
           message: '店铺注册认证成功',

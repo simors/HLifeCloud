@@ -1327,11 +1327,15 @@ function calPromoterShopEarnings(promoter, shop, income) {
     localAgents.forEach((agent) => {
       var identity = agent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
+      console.log('update leancloud agent earnings: promoterId= ', agent.id, ', earn = ', agentEarn)
       var agentAction = updateLeanPromoterEarning(agent.id, agentEarn, EARN_ROYALTY)
       leanAction.push(agentAction)
     })
+    console.log('update leancloud self earnings: promoterId= ', promoter.id, ', earn = ', selfEarn)
     var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
+    console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
     var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+    console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
     var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
     leanAction.push(selfAction, onePromoter, twoPromoter)
     return Promise.all(leanAction)
@@ -1372,18 +1376,22 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
+    console.log('update user balance: userId = ', promoter.attributes.user.id, ', earn = ', royaltyEarnings)
     return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
+      console.log('update promoter earning: invitedPromoter = ', invitedPromoter.id, ', toPromoter = ', promoter.id, ', promoter = ', promoter.id, ', earn = ', royaltyEarnings)
       return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
     }
+    console.log('update platform earning:', income-royaltyEarnings)
     return updatePlatformEarning(insertRes.conn, invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
+    console.log('update leancloud earning: promoter = ', promoter.id , ', earn = ', royaltyEarnings)
     return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
@@ -1408,16 +1416,17 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
  * @returns {Promise.<Conversation>|Promise<Conversation>|*}
  */
 function updateLeanPromoterEarning(promoterId, earn, earn_type) {
-  if (0 == earn) {
+  var numEarn = Number(earn)
+  if (0 == numEarn) {
     return new Promise((resolve, reject) => {
       resolve()
     })
   }
   var newPromoter = AV.Object.createWithoutData('Promoter', promoterId)
   if (earn_type == EARN_ROYALTY) {
-    newPromoter.increment('royaltyEarnings', earn)
+    newPromoter.increment('royaltyEarnings', numEarn)
   } else {
-    newPromoter.increment('shopEarnings', earn)
+    newPromoter.increment('shopEarnings', numEarn)
   }
   return newPromoter.save(null, {fetchWhenSave: true})
 }
