@@ -30,34 +30,24 @@
             </div>
         </a>
     </div>
-    <header class="artical-title">
-        <h1 class="headline"><%=title%></h1>
-        <div class="">
-            <img src="http://ac-k5rltwmf.clouddn.com/e7217ee14b8149438d21.png" alt="" style="width: 13px; height: auto; margin-right: 13px">
-            <span class=""><%=address%></span>
+
+    <article style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+        <div>
+            扫一扫下面的二维码，获取邀请码或者
         </div>
         <div>
-            <img src="http://ac-k5rltwmf.clouddn.com/6f21170225926c075961.png" alt="" style="width: 15px; height: auto; margin-right: 11px">
-            <span class=""><%=phone%></span>
+            直接输入以下邀请码
         </div>
-    </header>
-
-    <article>
         <div class="cover">
-            <img src="<%=coverUrl%>">
+            <img src="<%=downloadQrCode%>">
+        </div>
+        <div>
+            <span>邀请码：</span>
+            <span><%=code%></span>
         </div>
     </article>
 
-    <article>
-        <h4 class="public-headline">店铺公告</h4>
-        <div>
-            <span>营业时间：<%=openTime%></span>
-        </div>
-        <div>
-            <span>本店特色：</span>
-            <span><%=ourSpecial%></span>
-        </div>
-    </article>
+
 
     <div class="down-app">
         <a href="<%=appDownloadLink%>" class="button-down-app">下载汇邻优店，秀出美好生活</a>

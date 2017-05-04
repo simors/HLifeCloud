@@ -281,6 +281,16 @@ function insertPromoterInMysql(promoterId) {
  * @param includeUser  是否关联查询用户及上级推广员用户信息
  */
 function getUpPromoter(promoter, includeUser) {
+  if (!promoter) {
+    return new Promise((resolve, reject) => {
+      reject()
+    })
+  }
+  if (!promoter.attributes.upUser) {
+    return new Promise((resolve, reject) => {
+      resolve(undefined)
+    })
+  }
   var upQuery = new AV.Query('Promoter')
   upQuery.equalTo('user', promoter.attributes.upUser)
   if (!includeUser) {
@@ -309,6 +319,13 @@ function getUpPromoterByUserId(request, response) {
 
   query.first().then((promoter) => {
     getUpPromoter(promoter, true).then((upPromoter) => {
+      if (!upPromoter) {
+        response.success({
+          errcode: 2,
+          message: '不存在此用户的上级推广员'
+        })
+        return
+      }
       var constructUserInfo = require('../Auth').constructUserInfo
       response.success({
         errcode: 0,
@@ -685,7 +702,6 @@ function fetchPromoter(request, response) {
   var liveDistrict = request.params.liveDistrict
   var phone = request.params.phone
   var payment = request.params.payment
-  var name = request.params.name
   var level = request.params.level
   var minShopEarnings = request.params.minShopEarnings
   var maxShopEarnings = request.params.maxShopEarnings
@@ -738,9 +754,6 @@ function fetchPromoter(request, response) {
   }
   if (payment != undefined) {
     normalQuery.equalTo('payment', payment)
-  }
-  if (name) {
-    normalQuery.startsWith('name', name)
   }
   if (level != undefined) {
     normalQuery.equalTo('level', level)
@@ -945,7 +958,6 @@ function directSetPromoter(request, response) {
   var liveProvince = request.params.liveProvince
   var liveCity = request.params.liveCity
   var liveDistrict = request.params.liveDistrict
-  var name = request.params.name
   var phone = request.params.phone
   var identity = request.params.identity
   var province = request.params.province || ''
@@ -966,7 +978,6 @@ function directSetPromoter(request, response) {
   }).catch((err) => {
     user.addUnique('identity', IDENTITY_PROMOTER)
     user.save().then(() => {
-      promoter.set('name', name)
       promoter.set('phone', phone)
       promoter.set('user', user)
       promoter.set('liveProvince', liveProvince)
@@ -1248,7 +1259,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       throw new Error('Update district promoter earning error')
     }
     // 更新推广员自己的收益
-    selfEarn = income * royalty[0]
+    selfEarn = (income * royalty[0]).toFixed(3)
     platformEarn = platformEarn - selfEarn
     console.log('update promoter balance:', promoter.attributes.user.id, ', earn: ', selfEarn)
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
@@ -1266,7 +1277,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
       upPro = upPromoter
       console.log('first up promoter:', upPromoter.id)
       if (upPromoter) {
-        onePromoterEarn = income * royalty[1]
+        onePromoterEarn = (income * royalty[1]).toFixed(3)
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
           console.log('update first up promoter balance:', upPromoter.attributes.user.id, ', earn:', onePromoterEarn)
@@ -1293,7 +1304,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         upUpPro = upupPromoter
         console.log('second up promoter:', upupPromoter.id)
         if (upupPromoter) {
-          twoPromoterEarn = income * royalty[2]
+          twoPromoterEarn = (income * royalty[2]).toFixed(3)
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
             console.log('update second up promoter balance:', upupPromoter.attributes.user.id, ', earn:', twoPromoterEarn)
@@ -1327,11 +1338,15 @@ function calPromoterShopEarnings(promoter, shop, income) {
     localAgents.forEach((agent) => {
       var identity = agent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
+      console.log('update leancloud agent earnings: promoterId= ', agent.id, ', earn = ', agentEarn)
       var agentAction = updateLeanPromoterEarning(agent.id, agentEarn, EARN_ROYALTY)
       leanAction.push(agentAction)
     })
+    console.log('update leancloud self earnings: promoterId= ', promoter.id, ', earn = ', selfEarn)
     var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
+    console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
     var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+    console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
     var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
     leanAction.push(selfAction, onePromoter, twoPromoter)
     return Promise.all(leanAction)
@@ -1359,7 +1374,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
  */
 function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty
-  var royaltyEarnings = royalty * income
+  var royaltyEarnings = (royalty * income).toFixed(3)
   var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
 
   var mysqlConn = undefined
@@ -1372,18 +1387,22 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
+    console.log('update user balance: userId = ', promoter.attributes.user.id, ', earn = ', royaltyEarnings)
     return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
+      console.log('update promoter earning: invitedPromoter = ', invitedPromoter.id, ', toPromoter = ', promoter.id, ', promoter = ', promoter.id, ', earn = ', royaltyEarnings)
       return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PromoterDeal error')
     }
+    console.log('update platform earning:', income-royaltyEarnings)
     return updatePlatformEarning(insertRes.conn, invitedPromoter.id, promoter.id, income-royaltyEarnings, INVITE_PROMOTER)
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
+    console.log('update leancloud earning: promoter = ', promoter.id , ', earn = ', royaltyEarnings)
     return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
@@ -1408,11 +1427,17 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
  * @returns {Promise.<Conversation>|Promise<Conversation>|*}
  */
 function updateLeanPromoterEarning(promoterId, earn, earn_type) {
+  var numEarn = Number(earn)
+  if (0 == numEarn) {
+    return new Promise((resolve, reject) => {
+      resolve()
+    })
+  }
   var newPromoter = AV.Object.createWithoutData('Promoter', promoterId)
   if (earn_type == EARN_ROYALTY) {
-    newPromoter.increment('royaltyEarnings', earn)
+    newPromoter.increment('royaltyEarnings', numEarn)
   } else {
-    newPromoter.increment('shopEarnings', earn)
+    newPromoter.increment('shopEarnings', numEarn)
   }
   return newPromoter.save(null, {fetchWhenSave: true})
 }
@@ -1436,7 +1461,7 @@ function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, dea
     earnSql = 'UPDATE `PromoterEarnings` SET `shop_earnings` = `shop_earnings` + ? WHERE `promoterId` = ?'
   }
   return mysqlUtil.query(conn, earnSql, [earn, toPromoterId]).then((updateRes) => {
-    if (0 == updateRes.results.changedRows) {
+    if (0 != earn && 0 == updateRes.results.changedRows) {
       throw new Error('Update PromoterEarnings error')
     }
     var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?, ?)'
@@ -1693,7 +1718,7 @@ function getTotalPerformanceStat(request, response) {
     var totalPerformance = 0
     promoters.forEach((promoter) => {
       totalInvitedShops += promoter.attributes.inviteShopNum
-      totalTeamMems += promoter.attributes.teamMemNum
+      totalTeamMems += 1        // 生活在这个区域内的推广员都算作团队成员
       totalPerformance += promoter.attributes.shopEarnings + promoter.attributes.royaltyEarnings
     })
     response.success({

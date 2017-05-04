@@ -23,8 +23,7 @@ function pointIncrement(request, response, point) {
   query.first().then((userPoint) => {
     var points = AV.Object.createWithoutData('PointsMall', userPoint.id)
     points.increment('point', point)
-    points.fetchWhenSave(true)
-    points.save().then((newPoints) => {
+    points.save(null, {fetchWhenSave: true}).then((newPoints) => {
       response.success({
         point: newPoints.attributes.point
       })

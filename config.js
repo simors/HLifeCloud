@@ -22,11 +22,11 @@ var MYSQL_DEV_DB = 'hlife_dev'
 var MYSQL_PRE_USER = 'xiaojee'
 var MYSQL_PRE_PWD = 'Xiaojee2017'
 var MYSQL_PRE_DB = 'hlife_pre'
-var MYSQL_PROD_USER = ''
-var MYSQL_PROD_PWD = ''
-var MYSQL_PROD_DB = 'hlife_prod'
+var MYSQL_PROD_USER = 'xiaojeePro'
+var MYSQL_PROD_PWD = 'XjDayDayUpGo!!'
+var MYSQL_PROD_DB = 'hlife_pro'
 
-
+//Ping++应用配置
 var PINGPP_APP_ID = ""
 var PINGPP_TEST_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
 var PINGPP_LIVE_API_KEY = "sk_live_P044i19GCS8SyT84eTvbHmbH" //Secret Key
@@ -35,7 +35,10 @@ var PINGPP_DEV_APP_ID = "app_aX1mbDu5G08OP0i9" //ping++ 汇邻优店-DEV应用 I
 
 var PINGPP_PRE_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 汇邻优店-PRE应用 Id
 
-var PINGPP_PRO_APP_ID = ""
+var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 Id
+
+//应用下载链接配置
+var APP_DOWNLOAD_LINK = ""
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   REDIS_DB = DEBUG_REDIS
@@ -43,19 +46,21 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_PWD = MYSQL_DEV_PWD
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
+  APP_DOWNLOAD_LINK = "http://hlyd-dev.leanapp.cn/appDownloadLink"
 } else if (process.env.LEANCLOUD_APP_ID === 'TUVjJ5HHNmopfJeREa4IcB1T-gzGzoHsz') {
   REDIS_DB = PRE_REDIS
   MYSQL_USER = MYSQL_PRE_USER
   MYSQL_PWD = MYSQL_PRE_PWD
   MYSQL_DB = MYSQL_PRE_DB
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
-} else {
+  APP_DOWNLOAD_LINK = "http://hlyd-pre.leanapp.cn/appDownloadLink"
+} else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
   REDIS_DB = PROD_REDIS
   MYSQL_USER = MYSQL_PROD_USER
   MYSQL_PWD = MYSQL_PROD_PWD
   MYSQL_DB = MYSQL_PROD_DB
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
-
+  APP_DOWNLOAD_LINK = "http://hlyd-pro.leanapp.cn/appDownloadLink"
 }
 
 var GLOBAL_CONFIG = {
@@ -71,6 +76,8 @@ var GLOBAL_CONFIG = {
 
   PINGPP_APP_ID: PINGPP_APP_ID,
   PINGPP_API_KEY: PINGPP_LIVE_API_KEY,
+
+  APP_DOWNLOAD_LINK: APP_DOWNLOAD_LINK,
 }
 
 module.exports = GLOBAL_CONFIG
