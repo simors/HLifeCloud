@@ -61,7 +61,6 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_PROD_DB
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
   APP_DOWNLOAD_LINK = "http://hlyd-pro.leanapp.cn/appDownloadLink"
-
 }
 
 var GLOBAL_CONFIG = {

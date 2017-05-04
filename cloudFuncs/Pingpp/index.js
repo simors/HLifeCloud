@@ -361,157 +361,165 @@ function createTransfers(request, response) {
   var open_bank_code = request.params.open_bank_code
   var open_bank = request.params.open_bank
 
-  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
+  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
-  switch (channel) {
-    case 'unionpay': {
-      pingpp.transfers.create({
-        order_no: order_no,
-        app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-        channel: "unionpay",// 银联支付
-        amount: amount,
-        currency: "cny",
-        type: "b2c",
-        extra: {
-          card_number: card_number,  //收款人银行卡号或者存折号
-          user_name: userName,  //收款人姓名 选填
-          open_bank_code: open_bank_code, //开户银行编号 选填
-          open_bank: open_bank,  //开户银行 选填
-          // prov: , //省份 选填
-          // city: , //城市 选填
-          // sub_bank: , //开户支行名称 选填
-        },
-        description: "Your Description",
-        metadata: metadata,
-      }, function (err, transfer) {
-        if (err != null) {
-          console.log(err)
-          response.error({
-            errcode: 1,
-            message: err.message,
-          })
-          return
-        }
-
-        if (transfer.metadata.userId) {
-          var paymentInfo = {
-            userId: transfer.metadata.userId,
-            card_number: transfer.extra.card_number,
-            user_name: transfer.extra.user_name,
-            open_bank_code: transfer.extra.open_bank_code,
-            open_bank: transfer.extra.open_bank,
-            amount: transfer.amount,
-          }
-          return updatePaymentInfoInMysql(paymentInfo).then(() => {
-            response.success({
-              errcode: 0,
-              message: 'alipay create transfers success!',
-              transfer: transfer,
+  var today = new Date()
+  if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
+    switch (channel) {
+      case 'unionpay': {
+        pingpp.transfers.create({
+          order_no: order_no,
+          app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+          channel: "unionpay",// 银联支付
+          amount: amount,
+          currency: "cny",
+          type: "b2c",
+          extra: {
+            card_number: card_number,  //收款人银行卡号或者存折号
+            user_name: userName,  //收款人姓名 选填
+            open_bank_code: open_bank_code, //开户银行编号 选填
+            open_bank: open_bank,  //开户银行 选填
+            // prov: , //省份 选填
+            // city: , //城市 选填
+            // sub_bank: , //开户支行名称 选填
+          },
+          description: "Your Description",
+          metadata: metadata,
+        }, function (err, transfer) {
+          if (err != null) {
+            console.log(err)
+            response.error({
+              errcode: 1,
+              message: err.message,
             })
-          }).catch((error) => {
-            response.error(error)
-          })
-        } else {
-          response.error({
-            errcode: 1,
-            message: "alipay create transfers fail!",
-          })
-        }
-
-      })
-    }
-      break
-    case 'wx_pub': {
-      // pingpp.transfers.create({
-      //   order_no: order_no,
-      //   app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-      //   channel: "wx_pub",// 微信公众号支付
-      //   amount: amount,
-      //   currency: "cny",
-      //   type: "b2c",
-      //   recipient: account, //微信openId
-      //   extra: {
-      //     user_name: userName,
-      //     force_check: true,
-      //   },
-      //   description: "Your Description",
-      //   metadata: metadata,
-      // }, function (err, transfer) {
-      //   if (err != null) {
-      //     console.log(err)
-      //     response.error({
-      //       errcode: 1,
-      //       message: err.message,
-      //     })
-      //     return
-      //   }
-      //   response.success({
-      //     errcode: 0,
-      //     message: 'wx create transfers success!',
-      //     transfer: transfer,
-      //   })
-      // })
-    }
-      break
-    case 'alipay': {
-      pingpp.batchTransfers.create({
-        "app": GLOBAL_CONFIG.PINGPP_APP_ID,
-        "batch_no": order_no, // 批量付款批次号
-        "channel": "alipay", // 目前只支持 alipay
-        "amount": amount, // 批量付款总金额
-        "description": "Your Description",
-        "metadata": metadata,
-        "recipients": [
-          {
-            "account": account, // 接收者支付宝账号
-            "amount": amount, // 付款金额
-            "name": userName // 接收者姓名
+            return
           }
-        ],
-        "currency": 'cny',
-        "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
-      }, function (err, transfer) {
-        if (err != null) {
-          console.log(err)
-          response.error({
-            errcode: 1,
-            message: err.message,
-          })
-          return
-        }
 
-        if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
-          var paymentInfo = {
-            alipay_account: transfer.recipients[0].account,
-            userId: transfer.metadata.userId,
-            id_name: transfer.recipients[0].name,
-            amount: transfer.recipients[0].amount,
-          }
-          return updatePaymentInfoInMysql(paymentInfo).then(() => {
-            response.success({
-              errcode: 0,
-              message: 'alipay create transfers success!',
-              transfer: transfer,
+          if (transfer.metadata.userId) {
+            var paymentInfo = {
+              userId: transfer.metadata.userId,
+              card_number: transfer.extra.card_number,
+              user_name: transfer.extra.user_name,
+              open_bank_code: transfer.extra.open_bank_code,
+              open_bank: transfer.extra.open_bank,
+              amount: transfer.amount,
+            }
+            return updatePaymentInfoInMysql(paymentInfo).then(() => {
+              response.success({
+                errcode: 0,
+                message: 'alipay create transfers success!',
+                transfer: transfer,
+              })
+            }).catch((error) => {
+              response.error(error)
             })
-          }).catch((error) => {
-            response.error(error)
-          })
-        } else {
-          response.error({
-            errcode: 1,
-            message: "alipay create transfers fail!",
-          })
-        }
+          } else {
+            response.error({
+              errcode: 1,
+              message: "alipay create transfers fail!",
+            })
+          }
 
-      })
+        })
+      }
+        break
+      case 'wx_pub': {
+        // pingpp.transfers.create({
+        //   order_no: order_no,
+        //   app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+        //   channel: "wx_pub",// 微信公众号支付
+        //   amount: amount,
+        //   currency: "cny",
+        //   type: "b2c",
+        //   recipient: account, //微信openId
+        //   extra: {
+        //     user_name: userName,
+        //     force_check: true,
+        //   },
+        //   description: "Your Description",
+        //   metadata: metadata,
+        // }, function (err, transfer) {
+        //   if (err != null) {
+        //     console.log(err)
+        //     response.error({
+        //       errcode: 1,
+        //       message: err.message,
+        //     })
+        //     return
+        //   }
+        //   response.success({
+        //     errcode: 0,
+        //     message: 'wx create transfers success!',
+        //     transfer: transfer,
+        //   })
+        // })
+      }
+        break
+      case 'alipay': {
+        // pingpp.batchTransfers.create({
+        //   "app": GLOBAL_CONFIG.PINGPP_APP_ID,
+        //   "batch_no": order_no, // 批量付款批次号
+        //   "channel": "alipay", // 目前只支持 alipay
+        //   "amount": amount, // 批量付款总金额
+        //   "description": "Your Description",
+        //   "metadata": metadata,
+        //   "recipients": [
+        //     {
+        //       "account": account, // 接收者支付宝账号
+        //       "amount": amount, // 付款金额
+        //       "name": userName // 接收者姓名
+        //     }
+        //   ],
+        //   "currency": 'cny',
+        //   "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
+        // }, function (err, transfer) {
+        //   if (err != null) {
+        //     console.log(err)
+        //     response.error({
+        //       errcode: 1,
+        //       message: err.message,
+        //     })
+        //     return
+        //   }
+        //
+        //   if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
+        //     var paymentInfo = {
+        //       alipay_account: transfer.recipients[0].account,
+        //       userId: transfer.metadata.userId,
+        //       id_name: transfer.recipients[0].name,
+        //       amount: transfer.recipients[0].amount,
+        //     }
+        //     return updatePaymentInfoInMysql(paymentInfo).then(() => {
+        //       response.success({
+        //         errcode: 0,
+        //         message: 'alipay create transfers success!',
+        //         transfer: transfer,
+        //       })
+        //     }).catch((error) => {
+        //       response.error(error)
+        //     })
+        //   } else {
+        //     response.error({
+        //       errcode: 1,
+        //       message: "alipay create transfers fail!",
+        //     })
+        //   }
+        //
+        // })
+      }
+        break
+      default:
+        response.error({
+          code: 702,
+          message: "unknow channel!",
+        })
+        break
     }
-      break
-    default:
-      response.error({
-        errcode: 1,
-        message: "unknow channel!",
-      })
-      break
+  } else {
+    response.error({
+      code: 701,
+      message: "transfer time error",
+    })
   }
 }
 
