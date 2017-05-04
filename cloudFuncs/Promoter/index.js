@@ -281,6 +281,16 @@ function insertPromoterInMysql(promoterId) {
  * @param includeUser  是否关联查询用户及上级推广员用户信息
  */
 function getUpPromoter(promoter, includeUser) {
+  if (!promoter) {
+    return new Promise((resolve, reject) => {
+      reject()
+    })
+  }
+  if (!promoter.attributes.upUser) {
+    return new Promise((resolve, reject) => {
+      resolve(undefined)
+    })
+  }
   var upQuery = new AV.Query('Promoter')
   upQuery.equalTo('user', promoter.attributes.upUser)
   if (!includeUser) {
@@ -309,6 +319,13 @@ function getUpPromoterByUserId(request, response) {
 
   query.first().then((promoter) => {
     getUpPromoter(promoter, true).then((upPromoter) => {
+      if (!upPromoter) {
+        response.success({
+          errcode: 2,
+          message: '不存在此用户的上级推广员'
+        })
+        return
+      }
       var constructUserInfo = require('../Auth').constructUserInfo
       response.success({
         errcode: 0,

@@ -311,6 +311,11 @@ function paymentEvent(request, response) {
         promoter = promoterInfo
         return promoterFunc.getUpPromoter(promoter)
       }).then((upPromoter) => {
+        if (!upPromoter) {
+          return new Promise((resolve) => {
+            resolve()
+          })
+        }
         return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
