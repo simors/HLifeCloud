@@ -759,7 +759,7 @@ function shareShopPromotionById(request, response) {
       message: "share html file save failed!"
     })
   }).catch((error) => {
-    console.log(error)
+    // console.log(error)
     response.error(error)
   })
 
