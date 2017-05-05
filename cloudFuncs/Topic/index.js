@@ -114,10 +114,34 @@ function fetchTopicComments(request, response) {
 	}
 }
 
+function getTopicComments(topicId) {
+
+	var query = new AV.Query('TopicComments')
+	var topic = AV.Object.createWithoutData('Topics', topicId)
+	query.equalTo('topic', topic)
+
+	query.limit(5)
+	query.include(['user']);
+	query.include(['parentComment']);
+	query.include(['parentComment.user']);
+	query.descending('createdAt')
+
+	return query.find().then((results) => {
+		var topicComments = []
+		if(results && results.length > 0) {
+			results.forEach((result) => {
+				topicComments.push(topicUtil.topicCommentFromLeancloudObject(result))
+			})
+		}
+		return topicComments
+	})
+}
+
 
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
+	getTopicComments: getTopicComments,
 
 }
 

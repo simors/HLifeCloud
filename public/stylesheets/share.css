@@ -415,3 +415,22 @@ article p {
 .public-headline {
 
 }
+
+.comment {
+  padding-top: 20px;
+  background-color: #f7f7f7;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.comment-item {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.comment-item img {
+  width: 30px;
+  height: 30px;
+}

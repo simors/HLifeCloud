@@ -5,6 +5,7 @@
 var router = require('express').Router();
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../config')
+var topicFunc = require('../cloudFuncs/Topic/')
 
 
 // `AV.Object.extend` 方法一定要放在全局变量，否则会造成堆栈溢出。
@@ -13,20 +14,30 @@ var Topics = AV.Object.extend('Topics');
 
 // 查询 Topics 详情
 router.get('/:id', function(req, res, next) {
-  console.log("topic id:", req.params.id)
   var topicId = req.params.id;
 
   if(topicId) {
     var query = new AV.Query(Topics)
-
+    query.include('user')
     query.get(topicId).then((result) => {
-      console.log("topic result:", result)
-      var topicInfo = result.attributes
-      res.render('topicShare', {
-        title: topicInfo.title || '优店话题',
-        content: JSON.parse(topicInfo.content) || null,
-        abstract: topicInfo.abstract || '优店话题摘要',
-        appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+      return result
+    }).then((topic) => {
+      topicFunc.getTopicComments(topicId).then((results) => {
+        var comments = []
+        if(results && results.length > 0) {
+          comments = results
+        }
+
+        var topicInfo = topic.attributes
+        var user = topicInfo.user.attributes
+        res.render('topicShare', {
+          title: topicInfo.title || '优店话题',
+          content: JSON.parse(topicInfo.content) || null,
+          abstract: topicInfo.abstract || '优店话题摘要',
+          author: user.nickname || '邻家小二',
+          comments: comments,
+          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+        })
       })
     }).catch(next)
   } else {

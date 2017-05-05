@@ -34,10 +34,7 @@
         <h1 class="headline"><%=title%></h1>
         <div class="artical-info">
             <span class="times">22分钟前</span>
-            <a class="new-source"
-               href="https://www.baidu.com"
-            >FourFourTwo</a>
-            <span class="news-source">10评论</span>
+            <a class="new-source"><%=author%></a>
         </div>
     </header>
 
@@ -54,6 +51,23 @@
         <% }) %>
         <% } %>
     </article>
+
+    <div class="comment">
+        <h3 style="text-align: center">精选留言</h3>
+
+        <% if(comments && comments.length > 0) { %>
+        <% comments.forEach(( value ) => { %>
+            <% var avatar = value.avatar || "https://simors.github.io/ljyd_blog/ic_launcher.png"%>
+            <div class="comment-item">
+                <img src="<%=avatar%>" alt="">
+                <div style=" margin-left: 10px">
+                    <div style="color: #717171"><%=value.nickname%></div>
+                    <p><%=value.content%></p>
+                </div>
+            </div>
+        <% }) %>
+        <% } %>
+    </div>
 
 
     <div class="down-app">
