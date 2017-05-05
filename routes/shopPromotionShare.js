@@ -7,24 +7,25 @@ var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../config')
 
 
-// `AV.Object.extend` 方法一定要放在全局变量，否则会造成堆栈溢出。
-// 详见： https://leancloud.cn/docs/js_guide.html#对象
-var ShopPromotion = AV.Object.extend('ShopPromotion');
-
 // 查询 ShopPromotion 详情
 router.get('/:id', function(req, res, next) {
   console.log("ShopPromotion id:", req.params.id)
   var shopPromotionId = req.params.id;
 
   if(shopPromotionId) {
-    var query = new AV.Query(ShopPromotion)
+    var query = new AV.Query('ShopPromotion')
+    query.equalTo('objectId', shopPromotionId)
+    query.include('targetShop')
 
-    query.get(shopPromotionId).then((result) => {
-      console.log("ShopPromotion result:", result)
+    query.first().then((result) => {
       var shopPromotionInfo = result.attributes
+      var targetShop = shopPromotionInfo.targetShop.attributes
       res.render('shopPromotionShare', {
         title: shopPromotionInfo.title || '优店活动',
         coverUrl: shopPromotionInfo.coverUrl || '',
+        type: shopPromotionInfo.type,
+        abstract: shopPromotionInfo.abstract || '活动简介',
+        shopName: targetShop.shopName || '汇邻优店',
         content: JSON.parse(shopPromotionInfo.promotionDetailInfo) || null,
         appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
       })
