@@ -1158,6 +1158,11 @@ function getAgentEarning(identity, income) {
  * @param income 店铺上交的费用
  */
 function calPromoterShopEarnings(promoter, shop, income) {
+  if (!promoter || !shop) {
+    return new Promise((resolve, reject) => {
+      reject(new Error('Promoter or Shop undefined'))
+    })
+  }
   var level = promoter.attributes.level
   var mysqlConn = undefined
   var platformEarn = income
@@ -1275,8 +1280,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
     return getUpPromoter(promoter, false).then((upPromoter) => {
       newUpPromoter = upPromoter
       upPro = upPromoter
-      console.log('first up promoter:', upPromoter.id)
       if (upPromoter) {
+        console.log('first up promoter:', upPromoter.id)
         onePromoterEarn = (income * royalty[1]).toFixed(3)
         platformEarn = platformEarn - onePromoterEarn
         return insertPromoterInMysql(upPromoter.id).then(() => {
@@ -1302,8 +1307,8 @@ function calPromoterShopEarnings(promoter, shop, income) {
     if (upPromoter) {
       return getUpPromoter(upPromoter, false).then((upupPromoter) => {
         upUpPro = upupPromoter
-        console.log('second up promoter:', upupPromoter.id)
         if (upupPromoter) {
+          console.log('second up promoter:', upupPromoter.id)
           twoPromoterEarn = (income * royalty[2]).toFixed(3)
           platformEarn = platformEarn - twoPromoterEarn
           return insertPromoterInMysql(upupPromoter.id).then(() => {
@@ -1344,11 +1349,17 @@ function calPromoterShopEarnings(promoter, shop, income) {
     })
     console.log('update leancloud self earnings: promoterId= ', promoter.id, ', earn = ', selfEarn)
     var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
-    console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
-    var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
-    console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
-    var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
-    leanAction.push(selfAction, onePromoter, twoPromoter)
+    leanAction.push(selfAction)
+    if (upPro) {
+      console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
+      var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+      leanAction.push(onePromoter)
+    }
+    if (upUpPro) {
+      console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
+      var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
+      leanAction.push(twoPromoter)
+    }
     return Promise.all(leanAction)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
@@ -1428,7 +1439,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
  */
 function updateLeanPromoterEarning(promoterId, earn, earn_type) {
   var numEarn = Number(earn)
-  if (0 == numEarn) {
+  if (0 == numEarn || !promoterId) {
     return new Promise((resolve, reject) => {
       resolve()
     })
