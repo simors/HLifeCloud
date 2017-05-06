@@ -1,26 +1,204 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="mobile-agent" content="format=html5">
-    <title>汇邻优店APP下载</title>
-    <meta name="description" content="邻里互动，同城交易">
-    <meta name="keywords" content="店铺，邻里，优惠">
-    <link rel="stylesheet" href="/stylesheets/style.css">
-</head>
-<body>
-<div id="main">
-    <header>
-        <div class="header-logo">
-            <img src="/images/hlyd_logo.png" alt="">
-            汇邻优店
+<html lang=en>
+<meta charset=UTF-8>
+<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name=viewport>
+<meta content="initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name=viewport
+      media="(device-height: 568px)">
+<title>汇邻优店</title>
+<style>* {
+        box-sizing: border-box
+    }
+
+    a, b, body, canvas, dd, div, dl, dt, em, form, h1, h2, h3, h4, h5, h6, html, img, input, label, li, ol, p, q, span, ul {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        outline: 0
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background-color: #FFF;
+        font-family: PingFangSC-Regular, 'Microsoft YaHei', 'Heiti SC', 'Droid Sans Fallback', arial, helvetica, sans-serif
+    }
+
+    a {
+        text-decoration: none;
+        outline: 0
+    }
+
+    .weixin-tip {
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: rgba(0, 0, 0, .8);
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+        display: none
+    }
+
+    .weixin-tip img {
+        max-width: 100%
+    }
+
+    .weixin-tip p {
+        text-align: center;
+        margin-top: 10%;
+        padding: 0 5%
+    }
+
+    .icon-ml {
+        margin-left: 40px
+    }
+
+    .lined {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: center
+    }
+
+    .lined:after, .lined:before {
+        content: '';
+        position: relative;
+        height: 1px;
+        background-color: #f3f3f3;
+        flex-grow: 2
+    }
+
+    .lined .label {
+        padding: 0 10px
+    }
+
+    [class*="-m"] {
+        display: none
+    }
+
+    .header {
+        height: 62px;
+        background-color: #ff7819;
+        background-repeat: no-repeat;
+        background-image: url(./images/hlyd_logo_white.png);
+        background-position: center;
+        font-size: 14px;
+        text-align: center;
+        padding-top: 20px;
+        color: #fff;
+        text-indent: -9999px
+    }
+
+    .content {
+        text-align: center;
+        margin: 126px auto 0
+    }
+
+    .qrcode-pc .desc {
+        font-size: 16px;
+        color: #999;
+        margin-top: 16px
+    }
+
+    .download .tip-pc {
+        margin-top: 80px;
+        font-size: 18px;
+        color: #696969;
+        margin-bottom: 28px
+    }
+
+    .download-btn .icon-wrapper {
+        display: inline-block;
+        color: #ff7819;
+        font-size: 20px
+    }
+
+    .download-btn [class*="-icon"] {
+        background-color: #ff7819;
+        border-radius: 5px;
+        width: 76px;
+        height: 76px;
+        margin-bottom: 17px;
+        display: inline-block;
+        background-repeat: no-repeat;
+        background-position: center
+    }
+
+    .download-btn .ios-icon {
+        background-image: url(./images/icon-ios-pc.png)
+    }
+
+    .download-btn .android-icon {
+        background-image: url(./images/icon-android-pc.png)
+    }
+
+    @media screen and (max-width: 768px) {
+        .icon-ml {
+            margin-left: 23px
+        }
+
+        [class*="-pc"] {
+            display: none
+        }
+
+        .download .tip-m {
+            display: flex;
+            margin-top: 60px;
+            font-size: 13px;
+            color: #696969;
+            margin-bottom: 28px
+        }
+
+        .header {
+            margin: 74px auto 0;
+            width: 88px;
+            height: 88px;
+            background-image: url(./images/hlyd_logo_white.png);
+            background-size: 88px 88px
+        }
+
+        .content {
+            margin: 60px 41px 0
+        }
+
+        .download-btn .icon-wrapper {
+            font-size: 17px
+        }
+
+        .download-btn [class*="-icon"] {
+            width: 62px;
+            height: 62px;
+            background-size: 25px 29px;
+            margin-bottom: 8px
+        }
+
+        .download-btn .ios-icon {
+            background-image: url(./images/icon-ios-pc.png)
+        }
+
+        .download-btn .android-icon {
+            background-image: url(./images/icon-android-pc.png)
+        }
+    }</style>
+<div class=header>汇邻优店</div>
+<div class=content>
+    <div class=qrcode-pc><img alt=扫描二维码下载优步乘客端
+                              src="/images/hlyd_qrcode.png"
+                              height=176 title=扫描二维码下载汇邻优店乘客端 width=176>
+        <p class=desc>扫描二维码下载汇邻优店</div>
+    <div class=download>
+        <div class="lined tip-m">
+            <div class=label>汇邻优店</div>
         </div>
-    </header>
-    <div class="content">
-
+        <div class=tip-pc>请点击下载与手机系统相匹配的App</div>
+        <div class=download-btn><a class=icon-wrapper
+                                   href="https://itunes.apple.com/us/app/邻家优店/id1224852246?mt=8">
+                <div class="j-dlink ios-icon" data-platform=ios></div>
+                <div class=ios-label>IOS</div>
+            </a><a class="icon-wrapper icon-ml" href="<%=androidAppDownloadUrl%>">
+                <div class="j-dlink android-icon" data-platform=android></div>
+                <div class=android-label>Android</div>
+            </a></div>
     </div>
-
 </div>
-</body>
-</html>
