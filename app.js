@@ -11,6 +11,7 @@ var topicShare = require('./routes/topicShare')
 var appDownload = require('./routes/appDownload')
 var appDownloadLink = require('./routes/appDownloadLink')
 var inviteCode = require('./routes/inviteCodeShare')
+var download = require('./routes/download')
 var AV = require('leanengine');
 
 var app = express();
@@ -50,6 +51,8 @@ app.use('/appDownload', appDownload)
 app.use('/appDownloadLink', appDownloadLink)
 
 app.use('/inviteCodeShare', inviteCode)
+
+app.use('/download', download)
 
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
