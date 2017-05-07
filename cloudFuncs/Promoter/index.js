@@ -1727,16 +1727,19 @@ function getTotalPerformanceStat(request, response) {
     var totalInvitedShops = 0
     var totalTeamMems = 0
     var totalPerformance = 0
+    var totalPromoters = 0
     promoters.forEach((promoter) => {
       totalInvitedShops += promoter.attributes.inviteShopNum
-      totalTeamMems += 1        // 生活在这个区域内的推广员都算作团队成员
+      totalTeamMems += promoter.attributes.teamMemNum
       totalPerformance += promoter.attributes.shopEarnings + promoter.attributes.royaltyEarnings
+      totalPromoters += 1       // 生活在这个区域内的推广员都算作团队成员
     })
     response.success({
       errcode: 0,
       totalInvitedShops,
       totalTeamMems,
       totalPerformance,
+      totalPromoters,
     })
   }).catch((err) => {
     console.log(err)
