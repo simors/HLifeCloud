@@ -450,7 +450,7 @@ function getSubAreaByAreaName(areaName, areaType) {
           return value.area_name == areaName
         })
         if(index == -1) {
-          console.log("get failed!")
+          console.log("find province failed!")
           throw {message: "get failed!"}
         } else {
           return provinceList[index].area_code
@@ -465,7 +465,6 @@ function getSubAreaByAreaName(areaName, areaType) {
       if(cityResults && cityResults.sub && cityResults.sub.length) {
         return cityResults.sub
       }else {
-        console.log("get failed!")
         throw {message: "get failed!"}
       }
     }).catch((error) => {

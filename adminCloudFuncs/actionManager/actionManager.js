@@ -64,7 +64,6 @@ function getActionList(request, response) {
     var banners = []
 
     results.forEach((result)=> {
-      console.log('reuslt', result)
       var banner = {
         id: result.id,
         cityList: result.attributes.cityList,
@@ -157,7 +156,6 @@ function updateBanner(request, response) {
   var image = request.params.image
   // var geoDistrict = request.params.geoDistrict
   var action = request.params.action
-  console.log('request',request.params)
   var cityList=[]
   var provinceList=[]
   var geoCityCodes=[]

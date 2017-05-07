@@ -52,7 +52,6 @@ function fetchUserFollowees(request, response) {
 
   if(!isRefresh) { //分页查询
     if(!lastCreatedAt) {
-      console.log('分页查询分页查询分页查询分页查询')
       response.error({
         code: -3,
         message: 'lastCreatedAt为空'
@@ -131,7 +130,6 @@ function fetchUserFollowees(request, response) {
                 userFollowees: userFollowees,
               })
             }, (err)=>{
-              console.log('followerQueryArr===err=', err)
               response.success({
                 code: 0,
                 message: '成功',
@@ -140,7 +138,6 @@ function fetchUserFollowees(request, response) {
             })
 
           }, (err)=>{
-            console.log('topicOrQueryArr===err=', err)
             response.success({
               code: 0,
               message: '成功',
@@ -149,7 +146,6 @@ function fetchUserFollowees(request, response) {
           })
 
         }, (err)=>{
-          console.log('shopOrQuery===', err)
 
           response.success({
             code: 0,
@@ -202,7 +198,6 @@ function fetchUserFollowers(request, response) {
 
   if(!isRefresh) { //分页查询
     if(!lastCreatedAt) {
-      console.log('分页查询分页查询分页查询分页查询')
       response.error({
         code: -3,
         message: 'lastCreatedAt为空'
@@ -281,7 +276,6 @@ function fetchUserFollowers(request, response) {
                 userFollowers: userFollowers,
               })
             }, (err)=>{
-              console.log('followerQueryArr===err=', err)
               response.success({
                 code: 0,
                 message: '成功',
@@ -290,7 +284,6 @@ function fetchUserFollowers(request, response) {
             })
 
           }, (err)=>{
-            console.log('topicOrQueryArr===err=', err)
             response.success({
               code: 0,
               message: '成功',
@@ -299,7 +292,6 @@ function fetchUserFollowers(request, response) {
           })
 
         }, (err)=>{
-          console.log('shopOrQuery===', err)
 
           response.success({
             code: 0,
@@ -358,7 +350,6 @@ function login(request, response) {
         message: '自动登陆成功'
       })
     }, (err) => {
-      console.log('become....err====', err)
       response.error({
         code: -2,
         message: '自动登陆失败'
@@ -385,7 +376,6 @@ function login(request, response) {
         message: '登陆成功'
       })
     }, (err) => {
-      console.log('logInWithMobilePhone.....err====', err)
       response.error({
         code: -1,
         message: '登陆失败'

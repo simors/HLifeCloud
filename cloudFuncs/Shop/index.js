@@ -94,8 +94,6 @@ function constructShopInfo(leanShop) {
   shop.createdAt = leanShop.createdAt
   shop.updatedAt = leanShop.updatedAt
 
-  console.log(shop)
-
   return shop
 }
 
@@ -108,7 +106,6 @@ function fetchShopCommentList(request, response) {
 
   if(!isRefresh) { //分页查询
     if(!lastCreatedAt) {
-      console.log('分页查询分页查询分页查询分页查询')
       response.success([])
       return
     }
@@ -127,7 +124,6 @@ function fetchShopCommentList(request, response) {
   query.limit(5) // 最多返回 5 条结果
   query.equalTo('status', 1)
   return query.find().then(function(results) {
-    console.log('shopComments==', results)
     try{
       var shopComments = shopUtil.shopCommentFromLeancloudObject(results)
 
@@ -444,7 +440,6 @@ function fetchShopFollowers(request, response) {
 
   if(!isRefresh) { //分页查询
     if(!lastCreatedAt) {
-      console.log('分页查询分页查询分页查询分页查询')
       response.error({
         code: -3,
         message: 'lastCreatedAt为空'
@@ -709,7 +704,6 @@ function shareShopPromotionById(request, response) {
   var id = request.params.shopPromotionId
 
   getShopPromotionById(id).then((result) => {
-    console.log("result:", result)
     var shopPromotion = {
       title: result.title,
       coverUrl: result.coverUrl,
@@ -724,7 +718,6 @@ function shareShopPromotionById(request, response) {
     var file = new AV.File("shopPromotion_shareId" + id, data, 'text/html')
     return file.save()
   }).then((savedFile) => {
-    console.log("savedFile:", savedFile)
     if(savedFile.attributes.url) {
       response.success({
         url: savedFile.attributes.url

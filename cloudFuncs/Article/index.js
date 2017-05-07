@@ -16,7 +16,6 @@ function addArticleCategory(request,response){
   articleCategory.set('imageSource',imageSource)
   articleCategory.set('type',type)
   articleCategory.save().then((result)=>{
-    console.log('result==>',result)
     response.success()
   },(err)=>{
     response.error(err)
@@ -27,10 +26,8 @@ function addArticleCategory(request,response){
 function updateCategoryWithoutType(request,response) {
  // console.log('arr',request.params.arr)
   var arr = request.params.arr
-  console.log('arr',arr)
 
   arr.forEach((result)=>{
-    console.log('result',result)
     var category = new AV.Object.createWithoutData('ArticleCategory',result.id)
     if(result.imageSource)
       category.set('imageSource',result.imageSource)

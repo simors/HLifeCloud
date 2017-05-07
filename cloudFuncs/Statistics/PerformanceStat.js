@@ -1053,7 +1053,6 @@ function fetchAreaMonthsPerformance(request, response) {
     }
     stat.forEach((subStat) => {
       var pos = ((subStat.attributes.year - beginYear) * 12 + subStat.attributes.month - beginMonth) % 12
-      console.log(pos)
       retStat[pos].push(subStat)
     })
     response.success({errcode: 0, statistics: retStat})

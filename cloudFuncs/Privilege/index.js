@@ -14,7 +14,6 @@ function getMenuList(request, response) {
   query.find().then((results)=> {
     var menuList = []
     results.forEach((result)=> {
-      console.log('hahahahahah', result)
 
       menuList.push({
         menu: result.attributes.menu.attributes.name
@@ -31,7 +30,6 @@ function getMenuListByLogin(request, response) {
   AV.User.logInWithMobilePhone(phone, password).then((userInfo)=> {
 
     var userId = userInfo.id
-    console.log('hahahahahah', userId)
 
     var user = new AV.Object.createWithoutData('_User', userId)
     var role = new AV.Object.createWithoutData('_Role', roleId)
@@ -79,7 +77,6 @@ function getPermissionListOnlyByLogin(request, response) {
   query.first().then((userInfo)=> {
 
     var userId = userInfo.id
-    console.log('hahahahahah', userId)
 
     var user = new AV.Object.createWithoutData('AdminUser', userId)
    // var role = new AV.Object.createWithoutData('_Role', roleId)
@@ -106,7 +103,6 @@ function getPermissionListOnlyByLogin(request, response) {
         promises.push(
           query.find().then((results)=> {
           results.forEach((result)=> {
-            console.log('1', result.attributes.permission.attributes.menu)
 
             // console.log('2', result.attributes.permission.attributes.subMenu)
             // console.log('3',result.attributes.permission.attributes.name)

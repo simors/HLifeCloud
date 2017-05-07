@@ -132,7 +132,6 @@ function getPickedTopicList(request, response) {
   topicQuery.find().then((results)=> {
 
     results.forEach((result)=> {
-      console.log(result.attributes.category.attributes)
       topicList.push({
         content: result.attributes.content, //话题内容
         title: result.attributes.title,
@@ -279,7 +278,6 @@ function getTopicById(topicId) {
 
   return query.get(topicId).then((result) => {
     var topic = result.attributes
-    console.log("topic:", topic)
     return {
       title: topic.title,
       content: JSON.parse(topic.content),
@@ -306,7 +304,6 @@ function shareTopicById(request, response) {
     return file.save()
 
   }).then((savedFile) => {
-    console.log("savedFile:", savedFile)
     if(savedFile.attributes.url) {
       response.success({
         url: savedFile.attributes.url

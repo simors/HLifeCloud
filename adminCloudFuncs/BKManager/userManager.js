@@ -17,14 +17,12 @@ function getUserList(request, response) {
   var userQuery = new AV.Query('AdminUser')
   userQuery.find().then((results)=> {
     results.forEach((result)=> {
-      console.log('result=====>', result)
       var query = new AV.Query('UserRole')
 
       var user = new AV.Object.createWithoutData('AdminUser', result.id)
 
       query.equalTo('adminUser', user)
       query.equalTo('enable', true)
-      console.log('hahahahaha')
       var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
       query.limit(limit)
       query.include('role')
@@ -133,26 +131,21 @@ function updateUserFromAdmin(request, response) {
         var willRoles = []
         request.params.roleList.forEach((role)=> {
          // role = Trim(role)
-          console.log('role', role, 'asd')
           var roleQuery = new AV.Query('_Role')
           roleQuery.equalTo('name', role)
           promises.push(
             roleQuery.first().then((roleInfo)=> {
-              console.log('roleInfo', roleInfo)
               var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
               var UserRole = AV.Object.extend('UserRole')
               var userRole = new UserRole()
               userRole.set('adminUser', user)
               userRole.set('role', roleObject)
-              // console.log('jhahahahahaha', userRole)
               userRole.save()
             },
               (err)=> {
                 response.error(err)
               }))
-          // console.log('roleInfo',roleInfo)
         })
-        // console.log('hahahahah', willRoles)
         Promise.all(promises).then(()=> {
           response.success()
         })

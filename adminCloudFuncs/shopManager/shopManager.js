@@ -74,7 +74,6 @@ function getShopTagList(request, response) {
   var tagList = []
   query.find().then((results)=> {
     results.forEach((result)=> {
-      console.log('category',result.attributes.upCategory)
       tagList.push({
         id: result.id,
         name: result.attributes.name,

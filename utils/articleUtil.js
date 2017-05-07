@@ -20,7 +20,6 @@ if (result){
   comment.nickname = author.attributes.nickname
   comment.username = author.attributes.username
   comment.createdAt = result.createdAt.valueOf()
-  console.log('comment.time============>',comment.createdAt)
 
   if(attrs.replyId) {
     var reply = attrs.replyId
