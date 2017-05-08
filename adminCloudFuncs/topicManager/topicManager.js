@@ -95,9 +95,9 @@ function getTopicList(request, response) {
 
     })
     response.success(topicList)
-  }), (err)=> {
+  }, (err)=> {
     response.error(err)
-  }
+  })
 }
 //测试增加所有话题的status
 function fetchAllTopicStatus(request,response) {
@@ -238,9 +238,9 @@ function getTopicCategoryList(request, response) {
       })
     })
     response.success(topicCategoryList)
-  }), (err)=> {
+  }, (err)=> {
     response.error(err)
-  }
+  })
 }
 
 function createNewTopicCategory(request, response) {
