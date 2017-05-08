@@ -151,9 +151,9 @@ function getPickedTopicList(request, response) {
       })
     })
     response.success(topicList)
-  }), (err)=> {
+  }, (err)=> {
     response.error(err)
-  }
+  })
 }
 
 
