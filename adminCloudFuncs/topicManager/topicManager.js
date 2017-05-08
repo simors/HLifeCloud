@@ -95,9 +95,9 @@ function getTopicList(request, response) {
 
     })
     response.success(topicList)
-  }), (err)=> {
+  }, (err)=> {
     response.error(err)
-  }
+  })
 }
 //测试增加所有话题的status
 function fetchAllTopicStatus(request,response) {
@@ -127,7 +127,7 @@ function getPickedTopicList(request, response) {
   if (request.params.limit) {
     topicQuery.limit(request.params.limit)
   }
-  var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
+  var limit = request.params.limit ? request.params.limit : 10    // 默认只返回10条数据
   topicQuery.limit(limit)
   topicQuery.find().then((results)=> {
 
@@ -151,9 +151,9 @@ function getPickedTopicList(request, response) {
       })
     })
     response.success(topicList)
-  }), (err)=> {
+  }).then((err) => {
     response.error(err)
-  }
+  })
 }
 
 
@@ -238,9 +238,9 @@ function getTopicCategoryList(request, response) {
       })
     })
     response.success(topicCategoryList)
-  }), (err)=> {
+  }).then((err)=> {
     response.error(err)
-  }
+  })
 }
 
 function createNewTopicCategory(request, response) {
