@@ -49,7 +49,10 @@
         <% if(content && content.length > 0) { %>
             <% content.forEach(( value ) => { %>
                 <% if( value.type === 'COMP_TEXT') { %>
-                    <p> <%=value.text%> </p>
+                    <%var textArray = value.text.split("\n")%>
+                    <%textArray.forEach((value) =>{ %>
+                        <p><%=value%></p>
+                    <% }) %>
                 <% } else if( value.type === 'COMP_IMG' ) { %>
                     <div class="artical-image">
                         <img src="<%=value.url%>">
