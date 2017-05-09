@@ -19,7 +19,6 @@ router.get('/:id', function(req, res, next) {
     var query = new AV.Query(Shop)
 
     query.get(ShopId).then((result) => {
-      console.log("query result:", result)
       var shopInfo = result.attributes
 
       res.render('shopShare', {

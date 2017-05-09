@@ -16,7 +16,6 @@ router.get('/', function(req, res, next) {
   query.limit(1)
   query.descending('createdAt')
   query.first().then((result) => {
-    console.log("result:", result)
     var fileUrl = result.attributes.fileUrl
     res.render('appDownloadLink', {
       androidAppDownloadUrl: fileUrl || 'https://www.pgyer.com/pn66'
