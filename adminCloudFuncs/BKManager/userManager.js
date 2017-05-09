@@ -202,7 +202,8 @@ function deleteUserFromAdmin(request, response) {
   query.equalTo('password',request.params.password)
   query.first().then((result)=>{
    //console.log('hahaha',result.id)
-    if(result){ var user = AV.Object.createWithoutData('AdminUser',result.id)
+    if(result){
+      var user = AV.Object.createWithoutData('AdminUser',result.id)
       user.set('password',request.params.newPassword)
       user.save().then((userInfo)=>{
         response.success({
@@ -211,8 +212,8 @@ function deleteUserFromAdmin(request, response) {
         })
       },(err)=>{
         response.error(err)
-      })}
-   else{
+      })
+    } else{
      var err ='密码错误'
      response.error(err)
     }
@@ -308,8 +309,6 @@ function getAppUserList(request,response) {
   },(err)=>{
     response.error(err)
   })
-
-
 }
 
 function updateAppUserEnable(request,response){
@@ -334,8 +333,11 @@ function getShopByUserId(request,response) {
   query.include('containedTag')
   query.first().then((result)=>{
 
+    if (!result) {
+      response.error(new Error('cannot find shop by user ' + userid))
+      return
+    }
     var tags = []
-    // console.log('containedTag', result.attributes.containedTag)
     if (result.attributes.containedTag) {
       result.attributes.containedTag.forEach((tag)=> {
         var tagInfo = {
@@ -352,14 +354,10 @@ function getShopByUserId(request,response) {
         id: result.attributes.targetShopCategory.id
       }
     }
-    // console.log('result', result.attributes.owner)
-    // var owner={}
-    // if (result.attributes.owner) {
-     var owner = {
-        id: result.attributes.owner.id,
-        username: result.attributes.owner.attributes.username
-      }
-    // }
+    var owner = {
+      id: result.attributes.owner.id,
+      username: result.attributes.owner.attributes.username
+    }
 
     var shop={
       id:result.id,
@@ -382,9 +380,10 @@ function getShopByUserId(request,response) {
       grade:result.attributes.grade,
       createdAt:result.createdAt
     }
+    console.log('xxxxxx')
     response.success(shop)
-  },(err)=>{
-    repsonse.error(err)
+  }).then((err) => {
+    response.error(err)
   })
 }
 
