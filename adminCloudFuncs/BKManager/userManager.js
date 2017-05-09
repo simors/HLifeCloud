@@ -380,7 +380,6 @@ function getShopByUserId(request,response) {
       grade:result.attributes.grade,
       createdAt:result.createdAt
     }
-    console.log('xxxxxx')
     response.success(shop)
   }).then((err) => {
     response.error(err)

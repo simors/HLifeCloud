@@ -9,7 +9,6 @@ var GLOBAL_CONFIG = require('../config')
 
 // 查询 ShopPromotion 详情
 router.get('/:id', function(req, res, next) {
-  console.log("ShopPromotion id:", req.params.id)
   var shopPromotionId = req.params.id;
 
   if(shopPromotionId) {

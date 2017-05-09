@@ -11,7 +11,6 @@ var GLOBAL_CONFIG = require('../config')
 
 router.get('/:code', function(req, res, next) {
   var code = req.params.code
-  console.log("code:", code)
   QRCode.toDataURI(code, function (err, url) {
     if(err) {
       console.log("Failed to generate QRCode:", err);

@@ -6,7 +6,6 @@ var Promise = require('bluebird');
 var util = require('../../utils/util');
 
 function push(request, response) {
-  console.log('push------>>>>', request.params)
 
   if(!request.params.pushContent) {
     response.error({
@@ -15,10 +14,8 @@ function push(request, response) {
     })
   }else {
     var query = buildPushQuery(request.params)
-    console.log('query******<><><><>', query)
 
     var data = buildPushData(request.params)
-    console.log('data******<><><><>', data)
 
     _push(data, query)
 
@@ -84,7 +81,6 @@ function _push(data, query) {
     sendData.expiration_interval = data.expiration_interval
   }
 
-  console.log('push sendData=====', sendData)
   AV.Push.send(sendData);
 }
 
