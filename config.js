@@ -38,7 +38,7 @@ var PINGPP_PRE_APP_ID = "app_Pq5G0SOeXLC01mX9" //ping++ 汇邻优店-PRE应用 I
 var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 Id
 
 //应用下载链接配置
-var APP_DOWNLOAD_LINK = ""
+var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   REDIS_DB = DEBUG_REDIS
@@ -46,21 +46,18 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_PWD = MYSQL_DEV_PWD
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
-  APP_DOWNLOAD_LINK = "http://hlyd-dev.leanapp.cn/appDownloadLink"
 } else if (process.env.LEANCLOUD_APP_ID === 'TUVjJ5HHNmopfJeREa4IcB1T-gzGzoHsz') {
   REDIS_DB = PRE_REDIS
   MYSQL_USER = MYSQL_PRE_USER
   MYSQL_PWD = MYSQL_PRE_PWD
   MYSQL_DB = MYSQL_PRE_DB
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
-  APP_DOWNLOAD_LINK = "http://hlyd-pre.leanapp.cn/appDownloadLink"
 } else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
   REDIS_DB = PROD_REDIS
   MYSQL_USER = MYSQL_PROD_USER
   MYSQL_PWD = MYSQL_PROD_PWD
   MYSQL_DB = MYSQL_PROD_DB
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
-  APP_DOWNLOAD_LINK = "http://hlyd-pro.leanapp.cn/appDownloadLink"
 }
 
 var GLOBAL_CONFIG = {

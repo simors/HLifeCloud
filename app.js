@@ -9,7 +9,6 @@ var shopPromotionShare = require('./routes/shopPromotionShare')
 var shopShare = require('./routes/shopShare')
 var topicShare = require('./routes/topicShare')
 var appDownload = require('./routes/appDownload')
-var appDownloadLink = require('./routes/appDownloadLink')
 var inviteCode = require('./routes/inviteCodeShare')
 var download = require('./routes/download')
 var AV = require('leanengine');
@@ -47,8 +46,6 @@ app.use('/shopShare', shopShare)
 app.use('/topicShare', topicShare)
 
 app.use('/appDownload', appDownload)
-
-app.use('/appDownloadLink', appDownloadLink)
 
 app.use('/inviteCodeShare', inviteCode)
 
