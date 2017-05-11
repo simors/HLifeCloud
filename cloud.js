@@ -20,6 +20,7 @@ var PingppFunc = require('./cloudFuncs/Pingpp')
 var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
 var topicFunc = require('./cloudFuncs/Topic')
 var statFunc = require('./cloudFuncs/Statistics/PerformanceStat')
+var searchFunc = require('./cloudFuncs/Search')
 /**
  * 云函数
  */
@@ -176,5 +177,11 @@ AV.Cloud.define('statFetchLastMonthsPerformance', statFunc.fetchLastMonthsPerfor
 AV.Cloud.define('statFetchAreaMonthPerformance', statFunc.fetchAreaMonthPerformance)
 AV.Cloud.define('statFetchAreaLastMonthsPerformance', statFunc.fetchArealastMonthsPerformance)
 AV.Cloud.define('statFetchAreaMonthsPerformance', statFunc.fetchAreaMonthsPerformance)
+
+// 搜索
+AV.Cloud.define('searchFetchSearchResult', searchFunc.fetchSearchResult)
+AV.Cloud.define('searchFetchUserResult', searchFunc.fetchUserResult)
+AV.Cloud.define('searchFetchShopResult', searchFunc.fetchShopResult)
+AV.Cloud.define('searchFetchTopicResult', searchFunc.fetchTopicResult)
 
 module.exports = AV.Cloud;
