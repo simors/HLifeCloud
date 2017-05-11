@@ -316,8 +316,12 @@ function paymentEvent(request, response) {
   var charge = request.params.data.object
   var promoterId = charge.metadata.promoterId
   var shopId = charge.metadata.shopId
+  var fromUser = charge.metadata.fromUser
+  var toUser = charge.metadata.toUser
+  var dealType = charge.metadata.dealType
   var amount = charge.amount * 0.01 //单位为 元
   var promoterFunc = require('../Promoter')
+  var mysqlConn = undefined
 
   console.log('receive paymentEvent')
 
@@ -340,7 +344,7 @@ function paymentEvent(request, response) {
         return promoterFunc.promoterPaid(promoterId)
       })
     } else if (shopId && amount) {
-      console.log('invoke shop paid:', shopId, amount)
+      console.log('invoke shop paid:', shopId, ', ', amount)
       var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
@@ -352,6 +356,25 @@ function paymentEvent(request, response) {
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      })
+    } else if (fromUser && toUser) {
+      console.log('invoke common paid: ', fromUser, ', ', toUser)
+      var deal = {
+        from: fromUser,
+        to: toUser,
+        cost: amount,
+        deal_type: dealType,
+        order_no: charge.order_no,
+        channel: charge.channel,
+        transaction_no: charge.transaction_no
+      }
+      return mysqlUtil.getConnection().then((conn) => {
+        mysqlConn = conn
+        return updateUserDealRecords(conn, deal)
+      }).finally(() => {
+        if (mysqlConn) {
+          mysqlUtil.release(mysqlConn)
+        }
       })
     }
   }).then(() => {
