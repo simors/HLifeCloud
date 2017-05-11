@@ -9,6 +9,12 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 
+// 收益来源分类
+const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
+const INVITE_SHOP = 2           // 邀请店铺获得的收益
+const BUY_GOODS = 3             // 购买商品
+const REWARD = 4                // 打赏
+const WITHDRAW = 5              // 取现
 
 /**
  * 更新mysql中PaymentInfo表的余额
@@ -294,6 +300,18 @@ function createPayment(request, response) {
   })
 }
 
+function updateUserDealRecords(conn, deal) {
+  if (!deal.from || !deal.to || !deal.cost || !deal.deal_type) {
+    throw new Error('')
+  }
+  var promoterId = deal.promoterId || ''
+  var order_no = deal.order_no || ''
+  var channel = deal.channel || ''
+  var transaction_no = deal.transaction_no || ''
+  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `order_no`, `channel`, `transaction_no`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, order_no, channel, transaction_no])
+}
+
 function paymentEvent(request, response) {
   var charge = request.params.data.object
   var promoterId = charge.metadata.promoterId
@@ -316,7 +334,7 @@ function paymentEvent(request, response) {
             resolve()
           })
         }
-        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
+        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return promoterFunc.promoterPaid(promoterId)
@@ -330,7 +348,7 @@ function paymentEvent(request, response) {
         console.log('shop inviter:', inviter)
         return promoterFunc.getPromoterByUserId(inviter)
       }).then((promoter) => {
-        return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
+        return promoterFunc.calPromoterShopEarnings(promoter, shop, amount, charge)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
@@ -727,6 +745,11 @@ function PingppFuncTest(request, response) {
 
 
 var PingppFunc = {
+  INVITE_PROMOTER: INVITE_PROMOTER,
+  INVITE_SHOP: INVITE_SHOP,
+  BUY_GOODS: BUY_GOODS,
+  REWARD: REWARD,
+  WITHDRAW: WITHDRAW,
   createPayment: createPayment,
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
@@ -737,6 +760,7 @@ var PingppFunc = {
   setPaymentPassword: setPaymentPassword,
   paymentPasswordAuth: paymentPasswordAuth,
   PingppFuncTest: PingppFuncTest,
+  updateUserDealRecords: updateUserDealRecords,
 
 }
 
