@@ -181,7 +181,7 @@ function fetchTopicResult(request, response) {
     }
     response.success({
       hits: topicQuery.hits(),
-      sid: topicQuery.sid,
+      sid: topicQuery._sid,
       result: topicResult
     })
   }).catch((error) => {
