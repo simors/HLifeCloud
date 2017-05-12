@@ -16,6 +16,35 @@ const BUY_GOODS = 3             // 购买商品
 const REWARD = 4                // 打赏
 const WITHDRAW = 5              // 取现
 
+// 异常状态
+const NOT_FIXED = 1             // 异常未被处理
+const FIXED = 2                 // 异常已被处理
+
+/**
+ * 更新异常交易记录
+ * @param deal
+ * @returns {*}
+ */
+function addExceptionEarnings(deal) {
+  var mysqlConn = undefined
+  if (!deal.from || !deal.to || !deal.amount || !deal.deal_type) {
+    throw new Error('')
+  }
+  var charge_id = deal.charge_id || ''
+  var order_no = deal.order_no || ''
+  var channel = deal.channel || ''
+  var transaction_no = deal.transaction_no || ''
+  var recordSql = 'INSERT INTO `ExceptionEarnings` (`from`, `to`, `amount`, `deal_type`, `charge_id`, `order_no`, `channel`, `transaction_no`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  return mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
+    return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.amount, deal.deal_type, charge_id, order_no, channel, transaction_no, NOT_FIXED])
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
 /**
  * 更新mysql中PaymentInfo表的余额
  * @param conn
@@ -303,6 +332,12 @@ function createPayment(request, response) {
   })
 }
 
+/**
+ * 更新交易记录，包括各种收益和取现记录
+ * @param conn
+ * @param deal
+ * @returns {*}
+ */
 function updateUserDealRecords(conn, deal) {
   if (!deal.from || !deal.to || !deal.cost || !deal.deal_type) {
     throw new Error('')
@@ -324,6 +359,8 @@ function paymentEvent(request, response) {
   var toUser = charge.metadata.toUser
   var dealType = charge.metadata.dealType
   var amount = charge.amount * 0.01 //单位为 元
+  var upPromoterId = undefined
+  var shopInviterId = undefined
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
 
@@ -340,6 +377,7 @@ function paymentEvent(request, response) {
             resolve()
           })
         }
+        upPromoterId = upPromoter.id
         return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
@@ -352,6 +390,7 @@ function paymentEvent(request, response) {
         shop = shopInfo
         var inviter = shop.attributes.inviter.id
         console.log('shop inviter:', inviter)
+        shopInviterId = inviter
         return promoterFunc.getPromoterByUserId(inviter)
       }).then((promoter) => {
         return promoterFunc.calPromoterShopEarnings(promoter, shop, amount, charge)
@@ -386,7 +425,38 @@ function paymentEvent(request, response) {
       message: 'paymentEvent charge into mysql success!',
     })
   }).catch((error) => {
-    console.log("paymentEvent charge into mysql fail!", error)
+    var exp = {
+      amount: amount,
+      charge_id: charge.id,
+      order_no: charge.order_no,
+      channel: charge.channel,
+      transaction_no: charge.transaction_no
+    }
+    if (promoterId) {
+      console.log('distribute promoter earnings error: ', error)
+      exp.deal_type = INVITE_PROMOTER
+      exp.from = promoterId
+      exp.to = upPromoterId
+      addExceptionEarnings(exp).catch((err) => {
+        console.log('save exception earn for promoter error: ', err)
+      })
+    } else if (shopId && amount) {
+      console.log('distribute invite shop earnings error: ', error)
+      exp.deal_type = INVITE_SHOP
+      exp.from = shopId
+      exp.to = shopInviterId
+      addExceptionEarnings(exp).catch((err) => {
+        console.log('save exception earn for shop error: ', err)
+      })
+    } else if (fromUser && toUser) {
+      console.log('distribute common user payment error: ', error)
+      exp.deal_type = dealType
+      exp.from = fromUser
+      exp.to = toUser
+      addExceptionEarnings(exp).catch((err) => {
+        console.log('save exception earn for common payment error: ', err)
+      })
+    }
     response.error({
       errcode: 1,
       message: 'paymentEvent charge into mysql fail!',
