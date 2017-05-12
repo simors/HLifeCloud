@@ -305,11 +305,12 @@ function updateUserDealRecords(conn, deal) {
     throw new Error('')
   }
   var promoterId = deal.promoterId || ''
+  var charge_id = deal.charge_id || ''
   var order_no = deal.order_no || ''
   var channel = deal.channel || ''
   var transaction_no = deal.transaction_no || ''
-  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `order_no`, `channel`, `transaction_no`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, order_no, channel, transaction_no])
+  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `charge_id`, `order_no`, `channel`, `transaction_no`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, charge_id, order_no, channel, transaction_no])
 }
 
 function paymentEvent(request, response) {
@@ -322,8 +323,6 @@ function paymentEvent(request, response) {
   var amount = charge.amount * 0.01 //单位为 元
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
-
-  console.log('receive paymentEvent')
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
@@ -364,6 +363,7 @@ function paymentEvent(request, response) {
         to: toUser,
         cost: amount,
         deal_type: dealType,
+        charge_id: charge.id,
         order_no: charge.order_no,
         channel: charge.channel,
         transaction_no: charge.transaction_no

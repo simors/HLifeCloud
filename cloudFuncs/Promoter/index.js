@@ -1535,6 +1535,7 @@ function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, dea
       promoterId: promoterId,
       cost: earn,
       deal_type: deal_type,
+      charge_id: charge.id,
       order_no: charge.order_no,
       channel: charge.channel,
       transaction_no: charge.transaction_no,
