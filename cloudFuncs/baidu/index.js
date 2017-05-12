@@ -159,7 +159,7 @@ function areaAbbr(level, area) {
 function areaAbbrForce(area) {
   var areaJson = area
   var i = 0
-  if (!Array.isArray(areaJson.sub)) {
+  if (!areaJson.sub || !Array.isArray(areaJson.sub)) {
     return areaJson
   }
 
