@@ -26,7 +26,6 @@ function fetchSearchResult(request, response) {
 
     if(userResults.length > 0) {
       userResults.forEach((value) => {
-        console.log("user value:", value)
         userInfo = value.attributes
         searchResult.user.push({
           id: value.id,
@@ -40,7 +39,6 @@ function fetchSearchResult(request, response) {
     searchResult.shop = []
     if(shopResults.length > 0) {
       shopResults.forEach((value) => {
-        console.log("shop value:", value)
         shopInfo = value.attributes
         searchResult.shop.push({
           id: value.id,
@@ -56,7 +54,6 @@ function fetchSearchResult(request, response) {
 
     if(topicResults.length > 0) {
       topicResults.forEach((value) => {
-        console.log("topic value:", value)
         topicInfo = value.attributes
         searchResult.topic.push({
           id: value.id,
@@ -81,7 +78,6 @@ function fetchUserResult(request, response) {
   var userResult = []
 
   var userQuery = new AV.SearchQuery('_User')
-  console.log("userQuery", userQuery)
   userQuery.queryString(key)
   userQuery.limit(10)
   if(sid)
@@ -103,7 +99,7 @@ function fetchUserResult(request, response) {
     response.success({
       hits: userQuery.hits(),
       sid: userQuery._sid,
-      result: userResult
+      users: userResult
     })
 
   }).catch((error) => {
@@ -129,7 +125,6 @@ function fetchShopResult(request, response) {
   return shopQuery.find().then((results) => {
     if(results.length > 0) {
       results.forEach((value) => {
-        console.log("shop value:", value)
         shopInfo = value.attributes
         shopResult.push({
           id: value.id,
@@ -142,7 +137,7 @@ function fetchShopResult(request, response) {
     response.success({
       hits: shopQuery.hits(),
       sid: shopQuery._sid,
-      result: shopResult,
+      shops: shopResult,
 
     })
   }).catch((error) => {
@@ -166,7 +161,6 @@ function fetchTopicResult(request, response) {
     topicQuery.reset()
 
   return topicQuery.find().then((results) => {
-    console.log("results.length:", results.length)
 
     if(results.length > 0) {
       results.forEach((value) => {
@@ -182,7 +176,7 @@ function fetchTopicResult(request, response) {
     response.success({
       hits: topicQuery.hits(),
       sid: topicQuery._sid,
-      result: topicResult
+      topics: topicResult
     })
   }).catch((error) => {
     console.log("error", error)
