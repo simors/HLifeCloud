@@ -21,7 +21,7 @@ const LEVEL_PROVINCE = 3
 
 const ONE_DAY = 24*60*60*1000
 
-var dailyJob = schedule.scheduleJob('0 0 12 * * *', function() {
+var dailyJob = schedule.scheduleJob('0 0 1 * * *', function() {
   var date = new Date()
   date.setTime(date.getTime() - ONE_DAY)    // 统计昨天的业绩
   runDistrictPromoterStat(date.toLocaleDateString()).then((districtStat) => {
@@ -33,7 +33,7 @@ var dailyJob = schedule.scheduleJob('0 0 12 * * *', function() {
   })
 })
 
-var monthJob = schedule.scheduleJob('0 0 7 1 * *', function() {
+var monthJob = schedule.scheduleJob('0 0 4 1 * *', function() {
   var date = new Date()
   var year = date.getFullYear()
   var month = date.getMonth()
