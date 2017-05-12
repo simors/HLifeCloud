@@ -12,10 +12,6 @@ var mysqlUtil = require('../util/mysqlUtil')
 
 const PREFIX = 'promoter:'
 
-// 收益来源分类
-const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
-const INVITE_SHOP = 2           // 邀请店铺获得的收益
-
 // 收益类型分类
 const EARN_ROYALTY = 'royalty'  // 收入分成获取的收益
 const EARN_SHOP_INVITE = 'shopinvite'   // 直接邀请店铺获得的收益
@@ -1156,8 +1152,9 @@ function getAgentEarning(identity, income) {
  * @param promoter 一级推广员
  * @param shop 被邀请的店铺信息
  * @param income 店铺上交的费用
+ * @param charge 用户支付时返回的charge对象
  */
-function calPromoterShopEarnings(promoter, shop, income) {
+function calPromoterShopEarnings(promoter, shop, income, charge) {
   if (!promoter || !shop) {
     return new Promise((resolve, reject) => {
       reject(new Error('Promoter or Shop undefined'))
@@ -1174,6 +1171,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
   var onePromoterEarn = 0
   var twoPromoterEarn = 0
   var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
+  var INVITE_SHOP = require('../Pingpp').INVITE_SHOP
 
   var royalty = getPromoterRoyalty(level)
   if (royalty.length == 0) {
@@ -1204,7 +1202,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
       }).then(() => {
         console.log('update province agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
       })
     } else {
       return new Promise((resolve) => {
@@ -1228,7 +1226,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
       }).then(() => {
         console.log('update city agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
       })
     } else {
       return new Promise((resolve) => {
@@ -1252,7 +1250,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
         return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
       }).then(() => {
         console.log('update district agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY)
+        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
       })
     } else {
       return new Promise((resolve) => {
@@ -1269,7 +1267,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
     console.log('update promoter balance:', promoter.attributes.user.id, ', earn: ', selfEarn)
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
       console.log('update promoter earn:', selfEarn)
-      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE)
+      return updatePromoterEarning(mysqlConn, shopOwner, promoter.id, promoter.id, selfEarn, INVITE_SHOP, EARN_SHOP_INVITE, charge)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
@@ -1289,7 +1287,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
           return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
         }).then(() => {
           console.log('update first up promoter earn:', onePromoterEarn)
-          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, promoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+          return updatePromoterEarning(mysqlConn, shopOwner, upPromoter.id, promoter.id, onePromoterEarn, INVITE_SHOP, EARN_ROYALTY, charge)
         })
       } else {
         return new Promise((resolve) => {
@@ -1316,7 +1314,7 @@ function calPromoterShopEarnings(promoter, shop, income) {
             return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
           }).then(() => {
             console.log('update second up promoter earn:', twoPromoterEarn)
-            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY)
+            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY, charge)
           })
         } else {
           return new Promise((resolve) => {
@@ -1382,11 +1380,13 @@ function calPromoterShopEarnings(promoter, shop, income) {
  * @param promoter 一级推广员
  * @param invitedPromoter 被邀请的推广员
  * @param income 新推广员上交的费用
+ * @param charge 用户
  */
-function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
+function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty[0]
   var royaltyEarnings = (royalty * income).toFixed(3)
   var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
+  var INVITE_PROMOTER = require('../Pingpp').INVITE_PROMOTER
   var upPro = undefined
   var upUpPro = undefined
   var onePromoterEarn = (globalPromoterCfg.invitePromoterRoyalty[1] * income).toFixed(3)
@@ -1407,11 +1407,11 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
     console.log('update user balance: userId = ', promoter.attributes.user.id, ', earn = ', royaltyEarnings)
     return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
       console.log('update promoter earning: invitedPromoter = ', invitedPromoter.id, ', toPromoter = ', promoter.id, ', promoter = ', promoter.id, ', earn = ', royaltyEarnings)
-      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY)
+      return updatePromoterEarning(conn, invitedPromoter.id, promoter.id, promoter.id, royaltyEarnings, INVITE_PROMOTER, EARN_ROYALTY, charge)
     })
   }).then((insertRes) => {
     if (!insertRes.results.insertId) {
-      throw new Error('Insert new record for PromoterDeal error')
+      throw new Error('Insert new record for DealRecords error')
     }
     // 更新一级好友（上级推广员）的分成收益
     var newUpPromoter = undefined
@@ -1423,7 +1423,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
         console.log('update user balance: userId = ', upPromoter.attributes.user.id, ', earn = ', onePromoterEarn)
         return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn).then(() => {
           console.log('update first up promoter earning: ', onePromoterEarn)
-          return updatePromoterEarning(mysqlConn, invitedPromoter.id, upPromoter.id, promoter.id, onePromoterEarn, INVITE_PROMOTER, EARN_ROYALTY)
+          return updatePromoterEarning(mysqlConn, invitedPromoter.id, upPromoter.id, promoter.id, onePromoterEarn, INVITE_PROMOTER, EARN_ROYALTY, charge)
         })
       } else {
         return new Promise((resolve) => {
@@ -1446,7 +1446,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income) {
           console.log('update user balance: userId = ', upupPromoter.attributes.user.id, ', earn = ', twoPromoterEarn)
           return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn).then(() => {
             console.log('update second up promoter earning: ', twoPromoterEarn)
-            return updatePromoterEarning(mysqlConn, invitedPromoter.id, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_PROMOTER, EARN_ROYALTY)
+            return updatePromoterEarning(mysqlConn, invitedPromoter.id, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_PROMOTER, EARN_ROYALTY, charge)
           })
         } else {
           return new Promise((resolve) => {
@@ -1514,9 +1514,11 @@ function updateLeanPromoterEarning(promoterId, earn, earn_type) {
  * @param earn
  * @param deal_type 交易类型，直接或者间接的提成收益或者直接邀请店铺获得的收益（INVITE_SHOP ／ INVITE_PROMOTER）
  * @param earn_type 收益类型，邀请店铺或者邀请推广员(EARN_ROYALTY / EARN_SHOP_INVITE)
+ * @param charge    用户支付时ping++返回的对象
  * @returns {*|Promise.<TResult>}
  */
-function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, deal_type, earn_type) {
+function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, deal_type, earn_type, charge) {
+  var updateUserDealRecords = require('../Pingpp').updateUserDealRecords
   var earnSql = ''
   if (earn_type == EARN_ROYALTY) {
     earnSql = 'UPDATE `PromoterEarnings` SET `royalty_earnings` = `royalty_earnings` + ? WHERE `promoterId` = ?'
@@ -1527,8 +1529,18 @@ function updatePromoterEarning(conn, fromId, toPromoterId, promoterId, earn, dea
     if (0 != earn && 0 == updateRes.results.changedRows) {
       throw new Error('Update PromoterEarnings error')
     }
-    var recordSql = 'INSERT INTO `PromoterDeal` (`from`, `to`, `cost`, `promoterId`, `deal_type`) VALUES (?, ?, ?, ?, ?)'
-    return mysqlUtil.query(conn, recordSql, [fromId, toPromoterId, earn, promoterId, deal_type])
+    var deal = {
+      from: fromId,
+      to: toPromoterId,
+      promoterId: promoterId,
+      cost: earn,
+      deal_type: deal_type,
+      charge_id: charge.id,
+      order_no: charge.order_no,
+      channel: charge.channel,
+      transaction_no: charge.transaction_no,
+    }
+    return updateUserDealRecords(conn, deal)
   })
 }
 
@@ -1558,7 +1570,7 @@ function distributeInviteShopEarnings(request, response) {
 
   getPromoterById(promoterId).then((promoter) => {
     getShopById(shopId, false).then((shop) => {
-      calPromoterShopEarnings(promoter, shop, income).then(() => {
+      calPromoterShopEarnings(promoter, shop, income, {}).then(() => {
         response.success({errcode: 0, message: '邀请店铺收益分配成功'})
       }).catch((err) => {
         response.error({errcode: 1, message: '邀请店铺收益分配失败'})
@@ -1585,7 +1597,7 @@ function distributeInvitePromoterEarnings(request, response) {
 
   getPromoterById(promoterId).then((promoter) => {
     getPromoterById(invitedPromoterId).then((invitedPromoter) => {
-      calPromoterInviterEarnings(promoter, invitedPromoter, income).then(() => {
+      calPromoterInviterEarnings(promoter, invitedPromoter, income, {}).then(() => {
         response.success({errcode: 0, message: '邀请推广员收益分配成功'})
       }).catch((err) => {
         console.log(err)
@@ -1946,16 +1958,18 @@ function fetchEarningRecords(request, response) {
   var mysqlConn = undefined
   var getShopByUserId = require('../Shop').getShopByUserId
   var constructUserInfo = require('../Auth').constructUserInfo
+  var INVITE_PROMOTER = require('../Pingpp').INVITE_PROMOTER
+  var INVITE_SHOP = require('../Pingpp').INVITE_SHOP
   var originalRecords = []
 
   mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
     if (lastTime) {
-      sql = 'SELECT * FROM `PromoterDeal` WHERE `to`=? AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
-      return mysqlUtil.query(conn, sql, [promoterId, lastTime, limit])
+      sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_time`<? AND `deal_type` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
+      return mysqlUtil.query(conn, sql, [promoterId, lastTime, INVITE_PROMOTER, INVITE_SHOP, limit])
     } else {
-      sql = 'SELECT * FROM `PromoterDeal` WHERE `to`=? ORDER BY `deal_time` DESC LIMIT ?'
-      return mysqlUtil.query(conn, sql, [promoterId, limit])
+      sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_type` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
+      return mysqlUtil.query(conn, sql, [promoterId, INVITE_PROMOTER, INVITE_SHOP, limit])
     }
   }).then((queryRes) => {
     var ops = []

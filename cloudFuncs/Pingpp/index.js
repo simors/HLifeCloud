@@ -9,6 +9,12 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 
+// 收益来源分类
+const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
+const INVITE_SHOP = 2           // 邀请店铺获得的收益
+const BUY_GOODS = 3             // 购买商品
+const REWARD = 4                // 打赏
+const WITHDRAW = 5              // 取现
 
 /**
  * 更新mysql中PaymentInfo表的余额
@@ -111,9 +117,7 @@ function authPaymentPasswordInMysql(userId, password) {
  * @returns {Promise.<T>}
  */
 function insertChargeInMysql(charge) {
-  console.log("insertChargeInMysql charge:", charge)
   var created = new Date(charge.created * 1000).toISOString().slice(0, 19).replace('T', ' ')
-  console.log("charge.created:", created)
   var sql = ""
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
@@ -144,17 +148,25 @@ function insertChargeInMysql(charge) {
  * @returns {Promise.<T>}
  */
 function insertTransferInMysql(transfer) {
-  console.log("insertTransferInMysql transfer:", transfer)
   var sql = ""
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
-    sql = "SELECT count(1) as cnt FROM `PaymentTransfer` WHERE `order_no` = ? LIMIT 1"
+    sql = "SELECT count(1) as cnt FROM `DealRecords` WHERE `order_no` = ? LIMIT 1"
     return mysqlUtil.query(conn, sql, [transfer.order_no])
   }).then((queryRes) => {
     if (queryRes.results[0].cnt == 0) {
-      sql = "INSERT INTO `PaymentTransfer` (`order_no`, `channel`, `created`, `amount`, `currency`, `transaction_no`, `subject`, `user`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-      return mysqlUtil.query(queryRes.conn, sql, [transfer.order_no, transfer.channel, created, charge.amount, charge.currency, charge.transaction_no, charge.subject, charge.metadata.user])
+      var deal = {
+        from: 'platform',
+        to: transfer.metadata.userId,
+        cost: transfer.amount,
+        deal_type: WITHDRAW,
+        charge_id: transfer.id,
+        order_no: transfer.order_no,
+        channel: transfer.channel,
+        transaction_no: transfer.transaction_no
+      }
+      return updateUserDealRecords(mysqlConn, deal)
     } else {
       return new Promise((resolve) => {
         resolve()
@@ -176,8 +188,6 @@ function insertTransferInMysql(transfer) {
  * @returns {Promise.<T>}
  */
 function insertCardInMysql(cardInfo) {
-  console.log("insertCardInMysql cardInfo:", cardInfo)
-
   var sql = ""
   var mysqlConn = undefined
   return mysqlUtil.getConnection().then((conn) => {
@@ -237,7 +247,6 @@ function updatePaymentInfoInMysql(paymentInfo) {
 
 
 function createPayment(request, response) {
-  console.log("createPayment params:", request.params)
   var user = request.params.user
   var subject = request.params.subject
   var order_no = request.params.order_no
@@ -294,14 +303,29 @@ function createPayment(request, response) {
   })
 }
 
+function updateUserDealRecords(conn, deal) {
+  if (!deal.from || !deal.to || !deal.cost || !deal.deal_type) {
+    throw new Error('')
+  }
+  var promoterId = deal.promoterId || ''
+  var charge_id = deal.charge_id || ''
+  var order_no = deal.order_no || ''
+  var channel = deal.channel || ''
+  var transaction_no = deal.transaction_no || ''
+  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `charge_id`, `order_no`, `channel`, `transaction_no`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, charge_id, order_no, channel, transaction_no])
+}
+
 function paymentEvent(request, response) {
   var charge = request.params.data.object
   var promoterId = charge.metadata.promoterId
   var shopId = charge.metadata.shopId
+  var fromUser = charge.metadata.fromUser
+  var toUser = charge.metadata.toUser
+  var dealType = charge.metadata.dealType
   var amount = charge.amount * 0.01 //单位为 元
   var promoterFunc = require('../Promoter')
-
-  console.log('receive paymentEvent')
+  var mysqlConn = undefined
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
@@ -316,13 +340,13 @@ function paymentEvent(request, response) {
             resolve()
           })
         }
-        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount)
+        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return promoterFunc.promoterPaid(promoterId)
       })
     } else if (shopId && amount) {
-      console.log('invoke shop paid:', shopId, amount)
+      console.log('invoke shop paid:', shopId, ', ', amount)
       var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
@@ -330,10 +354,30 @@ function paymentEvent(request, response) {
         console.log('shop inviter:', inviter)
         return promoterFunc.getPromoterByUserId(inviter)
       }).then((promoter) => {
-        return promoterFunc.calPromoterShopEarnings(promoter, shop, amount)
+        return promoterFunc.calPromoterShopEarnings(promoter, shop, amount, charge)
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      })
+    } else if (fromUser && toUser) {
+      console.log('invoke common paid: ', fromUser, ', ', toUser)
+      var deal = {
+        from: fromUser,
+        to: toUser,
+        cost: amount,
+        deal_type: dealType,
+        charge_id: charge.id,
+        order_no: charge.order_no,
+        channel: charge.channel,
+        transaction_no: charge.transaction_no
+      }
+      return mysqlUtil.getConnection().then((conn) => {
+        mysqlConn = conn
+        return updateUserDealRecords(conn, deal)
+      }).finally(() => {
+        if (mysqlConn) {
+          mysqlUtil.release(mysqlConn)
+        }
       })
     }
   }).then(() => {
@@ -351,7 +395,6 @@ function paymentEvent(request, response) {
 }
 
 function createTransfers(request, response) {
-  console.log("createTransfers request.params:", request.params)
   var order_no = request.params.order_no
   var amount = parseInt(request.params.amount)
   var card_number = request.params.card_number
@@ -364,7 +407,8 @@ function createTransfers(request, response) {
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
   var today = new Date()
-  if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
+  // if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
+  if (1) {
     switch (channel) {
       case 'unionpay': {
         pingpp.transfers.create({
@@ -524,12 +568,14 @@ function createTransfers(request, response) {
 }
 
 function transfersEvent(request, response) {
-  console.log("transfersEvent request.params:", request.params)
   var transfer = request.params.data.object
 
 
   return insertTransferInMysql(transfer).then(() => {
-
+    response.success({
+      errcode: 0,
+      message: 'transfersEvent response success!',
+    })
   }).catch((error) => {
     console.log("transfersEvent transfer into mysql fail!", error)
     response.error({
@@ -537,15 +583,9 @@ function transfersEvent(request, response) {
       message: 'transfersEvent transfer into mysql fail!',
     })
   })
-
-  response.success({
-    errcode: 0,
-    message: 'transfersEvent response success!',
-  })
 }
 
 function idNameCardNumberIdentify(request, response) {
-  console.log("idNameCardNumberIdentify request.params)", request.params)
   var cardNumber = request.params.cardNumber
   var userName = request.params.userName
   var idNumber = request.params.idNumber
@@ -565,9 +605,7 @@ function idNameCardNumberIdentify(request, response) {
       phone_number: phoneNumber
     }
   }, function (err, result) {
-    err && console.log(err.message);
-    result && console.log(result);
-    if (err != null) {
+    if (!err) {
       console.log("pingpp.identification.identify fail:", err)
       response.error({
         errcode: 1,
@@ -727,6 +765,11 @@ function PingppFuncTest(request, response) {
 
 
 var PingppFunc = {
+  INVITE_PROMOTER: INVITE_PROMOTER,
+  INVITE_SHOP: INVITE_SHOP,
+  BUY_GOODS: BUY_GOODS,
+  REWARD: REWARD,
+  WITHDRAW: WITHDRAW,
   createPayment: createPayment,
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
@@ -737,6 +780,7 @@ var PingppFunc = {
   setPaymentPassword: setPaymentPassword,
   paymentPasswordAuth: paymentPasswordAuth,
   PingppFuncTest: PingppFuncTest,
+  updateUserDealRecords: updateUserDealRecords,
 
 }
 
