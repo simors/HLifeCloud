@@ -45,6 +45,12 @@ function getUserPoint(request, response) {
   var query = new AV.Query('PointsMall')
   query.equalTo('user', user)
   query.first().then((userPoint) => {
+    if (!userPoint) {
+      response.error({
+        point: 0
+      })
+      return
+    }
     response.success({
       point: userPoint.attributes.point
     })
