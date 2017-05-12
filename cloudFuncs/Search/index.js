@@ -13,9 +13,9 @@ function fetchSearchResult(request, response) {
     var searchResult = {}
 
     var key = request.params.key
-    let userQuery = new AV.SearchQuery('_User')
-  let shopQuery = new AV.SearchQuery('Shop')
-  let topicsQuery = new AV.SearchQuery('Topics')
+    var userQuery = new AV.SearchQuery('_User')
+  var shopQuery = new AV.SearchQuery('Shop')
+  var topicsQuery = new AV.SearchQuery('Topics')
 
   userQuery.queryString(key)
   shopQuery.queryString(key)
@@ -80,7 +80,7 @@ function fetchUserResult(request, response) {
   var sid = request.params.sid
   var userResult = []
 
-  let userQuery = new AV.SearchQuery('_User')
+  var userQuery = new AV.SearchQuery('_User')
   console.log("userQuery", userQuery)
   userQuery.queryString(key)
   userQuery.limit(10)
@@ -118,7 +118,7 @@ function fetchShopResult(request, response) {
 
   var shopResult = []
 
-  let shopQuery = new AV.SearchQuery('Shop')
+  var shopQuery = new AV.SearchQuery('Shop')
   shopQuery.queryString(key)
   shopQuery.limit(10)
   if(sid)
@@ -157,7 +157,7 @@ function fetchTopicResult(request, response) {
 
   var topicResult = []
 
-  let topicQuery = new AV.SearchQuery('Topics')
+  var topicQuery = new AV.SearchQuery('Topics')
   topicQuery.queryString(key)
   topicQuery.limit(10)
   if(sid)
@@ -181,7 +181,7 @@ function fetchTopicResult(request, response) {
     }
     response.success({
       hits: topicQuery.hits(),
-      sid: topicQuery.sid,
+      sid: topicQuery._sid,
       result: topicResult
     })
   }).catch((error) => {
