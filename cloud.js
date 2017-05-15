@@ -41,6 +41,8 @@ AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
+AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)
+AV.Cloud.define('configSetShareDomain', configFunc.setShareDomain)
 AV.Cloud.define('hLifeFetchTopicComments', topicFunc.fetchTopicComments)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
