@@ -222,7 +222,6 @@ function fetchShopCommentUpedUserList(request, response) {
  * @param response
  */
 function shopCertificate(request, response) {
-  // console.log('shopCertificate====', request.params)
   var inviteCode = request.params.inviteCode
   inviteCodeFunc.verifyCode(inviteCode).then(function(reply){
     if (!reply) {
@@ -292,8 +291,11 @@ function shopCertificate(request, response) {
     // console.log('shop========', shop)
 
     var savePromoter = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
-      console.log('shop invite promoter id is: ', upPromoter.id)
+      console.log('getPromoterByUserId shop invite promoter id is: ', upPromoter.id)
       PromoterFunc.incrementInviteShopNum(upPromoter.id)
+    }, (reason) => {
+      console.log('getPromoterByUserId.reason====', reason)
+      return reason
     })
 
     Promise.all([currentUser.save(), savePromoter]).then(() => {
@@ -304,15 +306,27 @@ function shopCertificate(request, response) {
         message: '店铺注册认证成功',
         shopInfo: shopInfo
       })
+    }, function(reason) {
+      console.log('shopCertificate.Promise.all.reason====', reason)
+      response.error({
+        errcode: 1,
+        message: '店铺注册认证失败，请与客服联系',
+      })
     }).catch((err) => {
-      console.log(err)
+      console.log('shopCertificate.Promise.all.catch.err====', err)
       response.error({
         errcode: 1,
         message: '店铺注册认证失败，请与客服联系',
       })
     })
+  }, function(reason) {
+    console.log("shopCertificate.verifyCode.reason====", reason)
+    response.error({
+      errcode: 1,
+      message: '邀请码校验失败，请重新获取'
+    })
   }).catch(function(error){
-    console.log("shopCertificate.verifyCode====", error)
+    console.log("shopCertificate.verifyCode.catch.error====", error)
     response.error({
       errcode: 1,
       message: '邀请码校验失败，请重新获取',

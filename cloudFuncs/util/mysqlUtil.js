@@ -14,11 +14,11 @@ var mysqlPool  = mysql.createPool({
 })
 
 mysqlPool.on('connection', function (connection) {
-  console.log('A new connection %d created.', connection.threadId)
+  // console.log('A new connection %d created.', connection.threadId)
 })
 
 mysqlPool.on('release', function (connection) {
-  console.log('Connection %d released.', connection.threadId)
+  // console.log('Connection %d released.', connection.threadId)
 })
 
 function getConnection() {
