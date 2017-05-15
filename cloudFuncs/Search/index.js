@@ -75,11 +75,17 @@ function fetchSearchResult(request, response) {
 function fetchUserResult(request, response) {
   var key = request.params.key
   var sid = request.params.sid
+  var limit = request.params.limit
+
   var userResult = []
 
   var userQuery = new AV.SearchQuery('_User')
   userQuery.queryString(key)
-  userQuery.limit(10)
+  if(limit)
+    userQuery.limit(limit)
+  else
+    userQuery.limit(10)
+
   if(sid)
     userQuery.sid(sid)
   else
@@ -111,12 +117,17 @@ function fetchUserResult(request, response) {
 function fetchShopResult(request, response) {
   var key = request.params.key
   var sid = request.params.sid
+  var limit = request.params.limit
 
   var shopResult = []
 
   var shopQuery = new AV.SearchQuery('Shop')
   shopQuery.queryString(key)
-  shopQuery.limit(10)
+  if(limit)
+    shopQuery.limit(limit)
+  else
+    shopQuery.limit(10)
+
   if(sid)
     shopQuery.sid(sid)
   else
@@ -149,12 +160,17 @@ function fetchShopResult(request, response) {
 function fetchTopicResult(request, response) {
   var key = request.params.key
   var sid = request.params.sid
+  var limit = request.params.limit
 
   var topicResult = []
 
   var topicQuery = new AV.SearchQuery('Topics')
   topicQuery.queryString(key)
-  topicQuery.limit(10)
+  if(limit)
+    topicQuery.limit(limit)
+  else
+    topicQuery.limit(10)
+
   if(sid)
     topicQuery.sid(sid)
   else
