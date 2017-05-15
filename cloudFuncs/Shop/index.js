@@ -340,7 +340,13 @@ function shopCertificate(request, response) {
     console.log('query exist shop error: ', err)
     response.error({
       errcode: 1,
-      message: '配置'
+      message: '注册店铺失败，请与客服联系'
+    })
+  }).catch((err) => {
+    console.log('shop regist error: ', err)
+    response.error({
+      errcode: 1,
+      message: '注册店铺失败，请与客服联系'
     })
   })
 }

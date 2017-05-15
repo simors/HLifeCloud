@@ -168,75 +168,99 @@ function savePromoterInviteCode(promoterId, inviteCode) {
  */
 function promoterCertificate(request, response) {
   var inviteCode = request.params.inviteCode
-  inviteCodeFunc.verifyCode(inviteCode).then((reply) => {
-    if (!reply) {
+  var currentUser = request.currentUser
+  var phone = request.params.phone
+  var liveProvince = request.params.liveProvince
+  var liveCity = request.params.liveCity
+  var liveDistrict = request.params.liveDistrict
+
+  var existQuery = new AV.Query('Promoter')
+  existQuery.equalTo('user', currentUser)
+  existQuery.first().then((promoter) => {
+    if (promoter) {
       response.error({
         errcode: 1,
-        message: '邀请码无效，请向推广员重新获取邀请码',
+        message: '此用户已经是推广员，不能重复注册',
       })
-      return
+    } else {
+      inviteCodeFunc.verifyCode(inviteCode).then((reply) => {
+        if (!reply) {
+          response.error({
+            errcode: 1,
+            message: '邀请码无效，请向推广员重新获取邀请码',
+          })
+          return
+        }
+
+        var upUserId = reply
+
+        var Promoter = AV.Object.extend('Promoter')
+        var promoter = new Promoter()
+        var upUser = AV.Object.createWithoutData('_User', upUserId)
+
+        upUser.fetch().then((upUserInfo) => {
+          promoter.set('phone', phone)
+          promoter.set('user', currentUser)
+          promoter.set('liveProvince', liveProvince)
+          promoter.set('liveCity', liveCity)
+          promoter.set('liveDistrict', liveDistrict)
+          promoter.set('upUser', upUserInfo)
+          promoter.set('payment', 0)      // 表示未完成支付
+          promoter.set('shopEarnings', 0)
+          promoter.set('royaltyEarnings', 0)
+          promoter.set('inviteShopNum', 0)
+          promoter.set('teamMemNum', 0)
+          promoter.set('level', 1)
+          promoter.set('identity', APPCONST.AGENT_NONE)
+          promoter.set('province', "")
+          promoter.set('city', "")
+          promoter.set('district', "")
+          promoter.set('street', "")
+
+          currentUser.addUnique('identity', IDENTITY_PROMOTER)
+
+          var incTeamMem = getPromoterByUserId(upUserId).then((upPromoter) => {
+            incrementTeamMem(upPromoter.id)
+          }).catch((err) => {
+            console.log(err)
+            response.error({
+              errcode: 1,
+              message: '注册推广员失败，找不到上级好友的推广信息',
+            })
+          })
+          var newPromoter = undefined
+
+          Promise.all([currentUser.save(), incTeamMem]).then(() => {
+            return promoter.save()
+          }).then((promoterInfo) => {
+            newPromoter = promoterInfo
+            return insertPromoterInMysql(promoterInfo.id)
+          }).then(() => {
+            response.success({
+              errcode: 0,
+              message: '注册推广员成功',
+              promoter: newPromoter,
+            })
+          }).catch((err) => {
+            console.log("promoterCertificate", err)
+            response.error({
+              errcode: 1,
+              message: '注册推广员失败，请与客服联系',
+            })
+          })
+        })
+      })
     }
-    var currentUser = request.currentUser
-    var phone = request.params.phone
-    var liveProvince = request.params.liveProvince
-    var liveCity = request.params.liveCity
-    var liveDistrict = request.params.liveDistrict
-    var upUserId = reply
-
-    var Promoter = AV.Object.extend('Promoter')
-    var promoter = new Promoter()
-    var upUser = AV.Object.createWithoutData('_User', upUserId)
-
-    upUser.fetch().then((upUserInfo) => {
-      promoter.set('phone', phone)
-      promoter.set('user', currentUser)
-      promoter.set('liveProvince', liveProvince)
-      promoter.set('liveCity', liveCity)
-      promoter.set('liveDistrict', liveDistrict)
-      promoter.set('upUser', upUserInfo)
-      promoter.set('payment', 0)      // 表示未完成支付
-      promoter.set('shopEarnings', 0)
-      promoter.set('royaltyEarnings', 0)
-      promoter.set('inviteShopNum', 0)
-      promoter.set('teamMemNum', 0)
-      promoter.set('level', 1)
-      promoter.set('identity', APPCONST.AGENT_NONE)
-      promoter.set('province', "")
-      promoter.set('city', "")
-      promoter.set('district', "")
-      promoter.set('street', "")
-
-      currentUser.addUnique('identity', IDENTITY_PROMOTER)
-
-      var incTeamMem = getPromoterByUserId(upUserId).then((upPromoter) => {
-        incrementTeamMem(upPromoter.id)
-      }).catch((err) => {
-        console.log(err)
-        response.error({
-          errcode: 1,
-          message: '注册推广员失败，找不到上级好友的推广信息',
-        })
-      })
-      var newPromoter = undefined
-
-      Promise.all([currentUser.save(), incTeamMem]).then(() => {
-        return promoter.save()
-      }).then((promoterInfo) => {
-        newPromoter = promoterInfo
-        return insertPromoterInMysql(promoterInfo.id)
-      }).then(() => {
-        response.success({
-          errcode: 0,
-          message: '注册推广员成功',
-          promoter: newPromoter,
-        })
-      }).catch((err) => {
-        console.log("promoterCertificate", err)
-        response.error({
-          errcode: 1,
-          message: '注册推广员失败，请与客服联系',
-        })
-      })
+  }, (err) => {
+    console.log('find promoter exist error:', err)
+    response.error({
+      errcode: 1,
+      message: '查询推广员失败，请重试',
+    })
+  }).catch((err) => {
+    response.error({
+      errcode: 1,
+      message: '注册推广员失败，请与客服联系',
     })
   })
 }
