@@ -19,15 +19,25 @@ router.get('/:id', function(req, res, next) {
     query.first().then((result) => {
       var shopPromotionInfo = result.attributes
       var targetShop = shopPromotionInfo.targetShop.attributes
-      res.render('shopPromotionShare', {
-        title: shopPromotionInfo.title || '优店活动',
-        coverUrl: shopPromotionInfo.coverUrl || '',
-        type: shopPromotionInfo.type,
-        abstract: shopPromotionInfo.abstract || '活动简介',
-        shopName: targetShop.shopName || '汇邻优店',
-        content: JSON.parse(shopPromotionInfo.promotionDetailInfo) || null,
-        appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-      })
+      var status = shopPromotionInfo.status
+      if(status) {
+        res.render('shopPromotionShare', {
+          title: shopPromotionInfo.title || '优店活动',
+          coverUrl: shopPromotionInfo.coverUrl || '',
+          type: shopPromotionInfo.type,
+          abstract: shopPromotionInfo.abstract || '活动简介',
+          shopName: targetShop.shopName || '汇邻优店',
+          content: JSON.parse(shopPromotionInfo.promotionDetailInfo) || null,
+          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+        })
+      } else {
+        res.render('shareError', {
+          title: shopPromotionInfo.title || '优店活动',
+          message: "店铺活动已经失效！",
+          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+        });
+      }
+
     }).catch(next)
   } else {
     next(new Error('Failed to load ShopPromotion ' + req.params.id));

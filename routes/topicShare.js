@@ -30,14 +30,23 @@ router.get('/:id', function(req, res, next) {
 
         var topicInfo = topic.attributes
         var user = topicInfo.user.attributes
-        res.render('topicShare', {
-          title: topicInfo.title || '优店话题',
-          content: JSON.parse(topicInfo.content) || null,
-          abstract: topicInfo.abstract || '优店话题摘要',
-          author: user.nickname || '邻家小二',
-          comments: comments,
-          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-        })
+        var status = topicInfo.status
+        if(status) {
+          res.render('topicShare', {
+            title: topicInfo.title || '优店话题',
+            content: JSON.parse(topicInfo.content) || null,
+            abstract: topicInfo.abstract || '优店话题摘要',
+            author: user.nickname || '邻家小二',
+            comments: comments,
+            appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+          })
+        } else {
+          res.render('shareError', {
+            title: topicInfo.title || '优店话题',
+            message: "话题文章已经被删除！",
+            appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+          });
+        }
       })
     }).catch(next)
   } else {

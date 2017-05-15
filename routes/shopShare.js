@@ -20,16 +20,25 @@ router.get('/:id', function(req, res, next) {
 
     query.get(ShopId).then((result) => {
       var shopInfo = result.attributes
+      var status = shopInfo.status
+      if(status === 1) {
+        res.render('shopShare', {
+          title: shopInfo.title || '汇邻优店',
+          coverUrl: shopInfo.coverUrl || '',
+          address: shopInfo.shopAddress || '未知地址',
+          phone: shopInfo.contactNumber || '未知电话',
+          openTime: shopInfo.openTime || '8:30-22:00',
+          ourSpecial: shopInfo.ourSpecial || '没有特色就是最大的特色',
+          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+        })
+      } else {
+        res.render('shareError', {
+          title: shopInfo.title || '汇邻优店',
+          message: "店铺已经被删除！",
+          appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
+        });
+      }
 
-      res.render('shopShare', {
-        title: shopInfo.title || '汇邻优店',
-        coverUrl: shopInfo.coverUrl || '',
-        address: shopInfo.shopAddress || '未知地址',
-        phone: shopInfo.contactNumber || '未知电话',
-        openTime: shopInfo.openTime || '8:30-22:00',
-        ourSpecial: shopInfo.ourSpecial || '没有特色就是最大的特色',
-        appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-      })
     }).catch(next)
   } else {
     console.log("Failed to load Shop", req.params.id)
