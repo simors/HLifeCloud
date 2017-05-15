@@ -50,7 +50,7 @@ router.get('/:id', function(req, res, next) {
       })
     }).catch(next)
   } else {
-    next(new Error('Failed to load ShopPromotion ' + req.params.id));
+    next(new Error('Failed to load Topics ' + req.params.id));
   }
 });
 
