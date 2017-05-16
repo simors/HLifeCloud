@@ -72,6 +72,9 @@ function getShareDomain(request, response) {
     response.success({
       shareDomain: domain
     })
+  }, (err) => {
+    console.log(err)
+    response.error(err)
   }).catch((error) => {
     console.log(error)
     response.error(error)
