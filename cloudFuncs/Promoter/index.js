@@ -1489,8 +1489,21 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
     if (!insertRes.results.insertId) {
       throw new Error('Insert new record for PlatformEarnings error')
     }
-    console.log('update leancloud earning: promoter = ', promoter.id , ', earn = ', royaltyEarnings)
-    return updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
+    var leanAction = []
+    console.log('update leancloud self earnings: promoterId= ', promoter.id, ', earn = ', royaltyEarnings)
+    var selfAction = updateLeanPromoterEarning(promoter.id, royaltyEarnings, EARN_ROYALTY)
+    leanAction.push(selfAction)
+    if (upPro) {
+      console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
+      var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
+      leanAction.push(onePromoter)
+    }
+    if (upUpPro) {
+      console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
+      var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
+      leanAction.push(twoPromoter)
+    }
+    return Promise.all(leanAction)
   }).then(() => {
     return mysqlUtil.commit(mysqlConn)
   }).catch((err) => {
