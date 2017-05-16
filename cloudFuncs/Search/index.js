@@ -118,7 +118,6 @@ function fetchShopResult(request, response) {
   var key = request.params.key
   var sid = request.params.sid
   var limit = request.params.limit
-
   var shopResult = []
 
   var shopQuery = new AV.SearchQuery('Shop')
@@ -140,8 +139,9 @@ function fetchShopResult(request, response) {
         shopResult.push({
           id: value.id,
           shopName: shopInfo.shopName,
-          album: shopInfo.album || '',
-          shopAddress: shopInfo.shopAddress || '地址不详'
+          coverUrl: shopInfo.coverUrl || '',
+          shopAddress: shopInfo.shopAddress || '地址不详',
+          score: shopInfo.score || 2
         })
       })
     }
