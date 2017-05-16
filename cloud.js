@@ -84,6 +84,8 @@ AV.Cloud.define('getShopCategoryList',ShopManagerFunc.getShopCategoryList)
 AV.Cloud.define('getShopTagList',ShopManagerFunc.getShopTagList)
 AV.Cloud.define('createShopCategory',ShopManagerFunc.createShopCategory)
 AV.Cloud.define('updateShopCategory',ShopManagerFunc.updateShopCategory)
+AV.Cloud.define('updateShopCategoryId',ShopManagerFunc.updateShopCategoryId)
+
 AV.Cloud.define('createShopTag',ShopManagerFunc.createShopTag)
 AV.Cloud.define('updateShopTag',ShopManagerFunc.updateShopTag)
 AV.Cloud.define('getShopList',ShopManagerFunc.getShopList)
