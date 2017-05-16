@@ -412,7 +412,20 @@ function paymentEvent(request, response) {
       }
       return mysqlUtil.getConnection().then((conn) => {
         mysqlConn = conn
-        return updateUserDealRecords(conn, deal)
+        return mysqlUtil.beginTransaction(conn)
+      }).then(() => {
+        return updateUserDealRecords(mysqlConn, deal)
+      }).then(() => {
+        return updatePaymentBalance(mysqlConn, toUser, deal.cost)
+      }).then(() => {
+        return mysqlUtil.commit(mysqlConn)
+      }).catch((err) => {
+        console.log(err)
+        if (mysqlConn) {
+          console.log('transaction rollback')
+          mysqlUtil.rollback(mysqlConn)
+        }
+        throw err
       }).finally(() => {
         if (mysqlConn) {
           mysqlUtil.release(mysqlConn)
