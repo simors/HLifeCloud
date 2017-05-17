@@ -26,7 +26,7 @@ function fetchSearchResult(request, response) {
 
     if(userResults.length > 0) {
       userResults.forEach((value) => {
-        userInfo = value.attributes
+        var userInfo = value.attributes
         searchResult.user.push({
           id: value.id,
           nickname: userInfo.nickname,
@@ -39,7 +39,7 @@ function fetchSearchResult(request, response) {
     searchResult.shop = []
     if(shopResults.length > 0) {
       shopResults.forEach((value) => {
-        shopInfo = value.attributes
+        var shopInfo = value.attributes
         searchResult.shop.push({
           id: value.id,
           shopName: shopInfo.shopName,
@@ -54,7 +54,7 @@ function fetchSearchResult(request, response) {
 
     if(topicResults.length > 0) {
       topicResults.forEach((value) => {
-        topicInfo = value.attributes
+        var topicInfo = value.attributes
         searchResult.topic.push({
           id: value.id,
           title: topicInfo.title,
@@ -94,7 +94,7 @@ function fetchUserResult(request, response) {
   return userQuery.find().then((results) => {
     if(results.length > 0) {
       results.forEach((value) => {
-        userInfo = value.attributes
+        var userInfo = value.attributes
         userResult.push({
           id: value.id,
           nickname: userInfo.nickname,
@@ -135,7 +135,7 @@ function fetchShopResult(request, response) {
   return shopQuery.find().then((results) => {
     if(results.length > 0) {
       results.forEach((value) => {
-        shopInfo = value.attributes
+        var shopInfo = value.attributes
         shopResult.push({
           id: value.id,
           shopName: shopInfo.shopName,
@@ -180,7 +180,7 @@ function fetchTopicResult(request, response) {
 
     if(results.length > 0) {
       results.forEach((value) => {
-        topicInfo = value.attributes
+        var topicInfo = value.attributes
         topicResult.push({
           id: value.id,
           title: topicInfo.title,
