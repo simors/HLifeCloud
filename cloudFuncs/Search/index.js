@@ -166,6 +166,7 @@ function fetchTopicResult(request, response) {
 
   var topicQuery = new AV.SearchQuery('Topics')
   topicQuery.queryString(key)
+  topicQuery.include('user')
   if(limit)
     topicQuery.limit(limit)
   else
@@ -181,11 +182,15 @@ function fetchTopicResult(request, response) {
     if(results.length > 0) {
       results.forEach((value) => {
         var topicInfo = value.attributes
+        var userInfo = topicInfo.user.attributes
         topicResult.push({
           id: value.id,
           title: topicInfo.title,
           imgGroup: topicInfo.imgGroup,
-          abstract: topicInfo.abstract
+          abstract: topicInfo.abstract,
+          userId: topicInfo.user.id,
+          nickname: userInfo.nickname,
+          avatar: userInfo.avatar,
         })
       })
     }
