@@ -167,6 +167,7 @@ function fetchTopicResult(request, response) {
   var topicQuery = new AV.SearchQuery('Topics')
   topicQuery.queryString(key)
   topicQuery.include('user')
+  topicQuery.include('category')
   if(limit)
     topicQuery.limit(limit)
   else
@@ -184,13 +185,21 @@ function fetchTopicResult(request, response) {
         var topicInfo = value.attributes
         var userInfo = topicInfo.user.attributes
         topicResult.push({
-          id: value.id,
           title: topicInfo.title,
           imgGroup: topicInfo.imgGroup,
           abstract: topicInfo.abstract,
-          userId: topicInfo.user.id,
+          content: topicInfo.content, //话题内容
+          objectId: value.id,  //话题id
+          categoryId: topicInfo.category.id,  //属于的分类
+          categoryName: topicInfo.category.attributes.title, // 话题分类名
           nickname: userInfo.nickname,
+          userId: topicInfo.user.id,
+          createdAt: value.createdAt,  //创建时间
           avatar: userInfo.avatar,
+          commentNum: topicInfo.commentNum, //评论数
+          likeCount: topicInfo.likeCount, //点赞数
+          geoPoint: topicInfo.geoPoint,
+          position: topicInfo.position,
         })
       })
     }
