@@ -4,6 +4,7 @@
 var AV = require('leanengine');
 var redis = require('redis');
 var Promise = require('bluebird');
+var dateFormat = require('dateformat')
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
@@ -2003,7 +2004,7 @@ function fetchEarningRecords(request, response) {
     mysqlConn = conn
     if (lastTime) {
       sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_time`<? AND `deal_type` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
-      return mysqlUtil.query(conn, sql, [promoterId, lastTime, INVITE_PROMOTER, INVITE_SHOP, limit])
+      return mysqlUtil.query(conn, sql, [promoterId, dateFormat(lastTime, 'isoDateTime'), INVITE_PROMOTER, INVITE_SHOP, limit])
     } else {
       sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_type` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
       return mysqlUtil.query(conn, sql, [promoterId, INVITE_PROMOTER, INVITE_SHOP, limit])

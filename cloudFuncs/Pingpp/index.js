@@ -8,6 +8,7 @@ var utilFunc = require('../util')
 var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
+var dateFormat = require('dateformat')
 
 // 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
@@ -870,7 +871,7 @@ function fetchDealRecords(request, response) {
     if (promoterId) {
       if (lastTime) {
         sql = 'SELECT * FROM `DealRecords` WHERE `to` in (?, ?) AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
-        return mysqlUtil.query(conn, sql, [userId, promoterId, lastTime, limit])
+        return mysqlUtil.query(conn, sql, [userId, promoterId, dateFormat(lastTime, 'isoDateTime'), limit])
       } else {
         sql = 'SELECT * FROM `DealRecords` WHERE `to` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
         return mysqlUtil.query(conn, sql, [userId, promoterId, limit])
@@ -878,7 +879,7 @@ function fetchDealRecords(request, response) {
     } else {
       if (lastTime) {
         sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
-        return mysqlUtil.query(conn, sql, [userId, lastTime, limit])
+        return mysqlUtil.query(conn, sql, [userId, dateFormat(lastTime, 'isoDateTime'), limit])
       } else {
         sql = 'SELECT * FROM `DealRecords` WHERE `to`=? ORDER BY `deal_time` DESC LIMIT ?'
         return mysqlUtil.query(conn, sql, [userId, limit])
