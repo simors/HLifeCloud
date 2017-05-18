@@ -600,6 +600,11 @@ function setUserNickname(request, response) {
   })
 }
 
+function getUserById(userId) {
+  var query = new AV.Query('_User')
+  return query.get(userId)
+}
+
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
@@ -613,6 +618,7 @@ var authFunc = {
   getArticleLikers: getArticleLikers,
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo,
+  getUserById: getUserById,
 }
 
 module.exports = authFunc

@@ -846,6 +846,102 @@ function PingppFuncTest(request, response) {
   })
 }
 
+function fetchDealRecords(request, response) {
+  var userId = request.params.userId
+  var limit = request.params.limit || 10
+  var lastTime = request.params.lastTime
+  var sql = ''
+  var mysqlConn = undefined
+  var promoterFunc = require('../Promoter')
+  var promoterId = undefined
+  var originalRecords = []
+  var getShopByUserId = require('../Shop').getShopByUserId
+  var getUserById = require('../Auth').getUserById
+  var constructUserInfo = require('../Auth').constructUserInfo
+
+  promoterFunc.getPromoterByUserId(userId).then((promoter) => {
+    if (promoter) {
+      promoterId = promoter.id
+    }
+  }).then(() => {
+    return mysqlUtil.getConnection()
+  }).then((conn) => {
+    mysqlConn = conn
+    if (promoterId) {
+      if (lastTime) {
+        sql = 'SELECT * FROM `DealRecords` WHERE `to` in (?, ?) AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
+        return mysqlUtil.query(conn, sql, [userId, promoterId, lastTime, limit])
+      } else {
+        sql = 'SELECT * FROM `DealRecords` WHERE `to` in (?, ?) ORDER BY `deal_time` DESC LIMIT ?'
+        return mysqlUtil.query(conn, sql, [userId, promoterId, limit])
+      }
+    } else {
+      if (lastTime) {
+        sql = 'SELECT * FROM `DealRecords` WHERE `to`=? AND `deal_time`<? ORDER BY `deal_time` DESC LIMIT ?'
+        return mysqlUtil.query(conn, sql, [userId, lastTime, limit])
+      } else {
+        sql = 'SELECT * FROM `DealRecords` WHERE `to`=? ORDER BY `deal_time` DESC LIMIT ?'
+        return mysqlUtil.query(conn, sql, [userId, limit])
+      }
+    }
+  }).then((queryRes) => {
+    var ops = []
+    queryRes.results.forEach((deal) => {
+      var record = {
+        from: deal.from,
+        to: deal.to,
+        cost: deal.cost,
+        dealTime: deal.deal_time,
+        dealType: deal.deal_type,
+      }
+      if (INVITE_SHOP == deal.deal_type) {
+        ops.push(getShopByUserId(deal.from))
+      } else if (INVITE_PROMOTER == deal.deal_type) {
+        ops.push(promoterFunc.getPromoterById(deal.from, true))
+      } else if (WITHDRAW == deal.deal_type) {
+        ops.push(getUserById(deal.to))
+      } else {
+        ops.push(getUserById(deal.from))
+      }
+      originalRecords.push(record)
+    })
+    // 提前释放mysql连接
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+    mysqlConn = undefined
+    return Promise.all(ops)
+  }).then((results) => {
+    var dealRecords = []
+    results.forEach((retValue, index) => {
+      var elem = {}
+      if (originalRecords[index].dealType == INVITE_SHOP) {
+        elem.shop = retValue
+      } else if (originalRecords[index].dealType == INVITE_PROMOTER) {
+        elem.promoter = retValue
+        elem.user = constructUserInfo(retValue.attributes.user)
+      } else if (originalRecords[index].dealType == WITHDRAW) {
+        elem.user = constructUserInfo(retValue)
+      } else {
+        elem.user = constructUserInfo(retValue)
+      }
+      elem.cost = originalRecords[index].cost
+      elem.dealType = originalRecords[index].dealType
+      elem.dealTime = originalRecords[index].dealTime
+
+      dealRecords.push(elem)
+    })
+    response.success({errcode: 0, dealRecords: dealRecords})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取收益记录失败'})
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
+  })
+}
+
 
 var PingppFunc = {
   INVITE_PROMOTER: INVITE_PROMOTER,
@@ -864,7 +960,7 @@ var PingppFunc = {
   paymentPasswordAuth: paymentPasswordAuth,
   PingppFuncTest: PingppFuncTest,
   updateUserDealRecords: updateUserDealRecords,
-
+  fetchDealRecords: fetchDealRecords,
 }
 
 module.exports = PingppFunc

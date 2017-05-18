@@ -21,12 +21,15 @@ function fetchSearchResult(request, response) {
   shopQuery.queryString(key)
   topicsQuery.queryString(key)
 
+  topicsQuery.include('user')
+  topicsQuery.include('category')
+
   return userQuery.find().then((userResults) => {
     searchResult.user = []
 
     if(userResults.length > 0) {
       userResults.forEach((value) => {
-        userInfo = value.attributes
+        var userInfo = value.attributes
         searchResult.user.push({
           id: value.id,
           nickname: userInfo.nickname,
@@ -39,12 +42,13 @@ function fetchSearchResult(request, response) {
     searchResult.shop = []
     if(shopResults.length > 0) {
       shopResults.forEach((value) => {
-        shopInfo = value.attributes
+        var shopInfo = value.attributes
         searchResult.shop.push({
           id: value.id,
           shopName: shopInfo.shopName,
-          album: shopInfo.album || '',
-          shopAddress: shopInfo.shopAddress || '地址不详'
+          coverUrl: shopInfo.coverUrl || '',
+          shopAddress: shopInfo.shopAddress || '地址不详',
+          score: shopInfo.score || 2
         })
       })
     }
@@ -54,12 +58,24 @@ function fetchSearchResult(request, response) {
 
     if(topicResults.length > 0) {
       topicResults.forEach((value) => {
-        topicInfo = value.attributes
+        var topicInfo = value.attributes
+        var userInfo = topicInfo.user.attributes
         searchResult.topic.push({
-          id: value.id,
           title: topicInfo.title,
           imgGroup: topicInfo.imgGroup,
-          abstract: topicInfo.abstract
+          abstract: topicInfo.abstract,
+          content: topicInfo.content, //话题内容
+          objectId: value.id,  //话题id
+          categoryId: topicInfo.category.id,  //属于的分类
+          categoryName: topicInfo.category.attributes.title, // 话题分类名
+          nickname: userInfo.nickname,
+          userId: topicInfo.user.id,
+          createdAt: value.createdAt,  //创建时间
+          avatar: userInfo.avatar,
+          commentNum: topicInfo.commentNum, //评论数
+          likeCount: topicInfo.likeCount, //点赞数
+          geoPoint: topicInfo.geoPoint,
+          position: topicInfo.position,
         })
 
       })
@@ -94,7 +110,7 @@ function fetchUserResult(request, response) {
   return userQuery.find().then((results) => {
     if(results.length > 0) {
       results.forEach((value) => {
-        userInfo = value.attributes
+        var userInfo = value.attributes
         userResult.push({
           id: value.id,
           nickname: userInfo.nickname,
@@ -135,7 +151,7 @@ function fetchShopResult(request, response) {
   return shopQuery.find().then((results) => {
     if(results.length > 0) {
       results.forEach((value) => {
-        shopInfo = value.attributes
+        var shopInfo = value.attributes
         shopResult.push({
           id: value.id,
           shopName: shopInfo.shopName,
@@ -166,6 +182,8 @@ function fetchTopicResult(request, response) {
 
   var topicQuery = new AV.SearchQuery('Topics')
   topicQuery.queryString(key)
+  topicQuery.include('user')
+  topicQuery.include('category')
   if(limit)
     topicQuery.limit(limit)
   else
@@ -180,12 +198,24 @@ function fetchTopicResult(request, response) {
 
     if(results.length > 0) {
       results.forEach((value) => {
-        topicInfo = value.attributes
+        var topicInfo = value.attributes
+        var userInfo = topicInfo.user.attributes
         topicResult.push({
-          id: value.id,
           title: topicInfo.title,
           imgGroup: topicInfo.imgGroup,
-          abstract: topicInfo.abstract
+          abstract: topicInfo.abstract,
+          content: topicInfo.content, //话题内容
+          objectId: value.id,  //话题id
+          categoryId: topicInfo.category.id,  //属于的分类
+          categoryName: topicInfo.category.attributes.title, // 话题分类名
+          nickname: userInfo.nickname,
+          userId: topicInfo.user.id,
+          createdAt: value.createdAt,  //创建时间
+          avatar: userInfo.avatar,
+          commentNum: topicInfo.commentNum, //评论数
+          likeCount: topicInfo.likeCount, //点赞数
+          geoPoint: topicInfo.geoPoint,
+          position: topicInfo.position,
         })
       })
     }
