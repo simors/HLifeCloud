@@ -21,6 +21,9 @@ function fetchSearchResult(request, response) {
   shopQuery.queryString(key)
   topicsQuery.queryString(key)
 
+  topicsQuery.include('user')
+  topicsQuery.include('category')
+
   return userQuery.find().then((userResults) => {
     searchResult.user = []
 
@@ -43,8 +46,9 @@ function fetchSearchResult(request, response) {
         searchResult.shop.push({
           id: value.id,
           shopName: shopInfo.shopName,
-          album: shopInfo.album || '',
-          shopAddress: shopInfo.shopAddress || '地址不详'
+          coverUrl: shopInfo.coverUrl || '',
+          shopAddress: shopInfo.shopAddress || '地址不详',
+          score: shopInfo.score || 2
         })
       })
     }
@@ -55,11 +59,23 @@ function fetchSearchResult(request, response) {
     if(topicResults.length > 0) {
       topicResults.forEach((value) => {
         var topicInfo = value.attributes
+        var userInfo = topicInfo.user.attributes
         searchResult.topic.push({
-          id: value.id,
           title: topicInfo.title,
           imgGroup: topicInfo.imgGroup,
-          abstract: topicInfo.abstract
+          abstract: topicInfo.abstract,
+          content: topicInfo.content, //话题内容
+          objectId: value.id,  //话题id
+          categoryId: topicInfo.category.id,  //属于的分类
+          categoryName: topicInfo.category.attributes.title, // 话题分类名
+          nickname: userInfo.nickname,
+          userId: topicInfo.user.id,
+          createdAt: value.createdAt,  //创建时间
+          avatar: userInfo.avatar,
+          commentNum: topicInfo.commentNum, //评论数
+          likeCount: topicInfo.likeCount, //点赞数
+          geoPoint: topicInfo.geoPoint,
+          position: topicInfo.position,
         })
 
       })
