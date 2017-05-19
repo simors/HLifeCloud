@@ -193,7 +193,7 @@ function getShopList(request, response) {
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
-
+  query.include('inviter')
   if(liveArea){
     if(liveArea.length==2){
       query.contains('geoProvince',liveArea[1])
@@ -304,9 +304,19 @@ function getShopList(request, response) {
           nickname:result.attributes.owner.attributes.nickname
         }
       }
+      var inviter = {}
+      if (result.attributes.inviter) {
+        inviter = {
+          id: result.attributes.inviter.id,
+          username: result.attributes.inviter.attributes.username,
+          avatar:result.attributes.inviter.attributes.avatar,
+          nickname:result.attributes.inviter.attributes.nickname
+        }
+      }
 
       var shop={
         id:result.id,
+        payment:result.attributes.payment,
         shopName:result.attributes.shopName,
         shopAddress:result.attributes.shopAddress,
         status:result.attributes.status,
@@ -325,7 +335,8 @@ function getShopList(request, response) {
         album:result.attributes.album,
         owner:owner,
         grade:result.attributes.grade,
-        createdAt:result.createdAt
+        createdAt:result.createdAt,
+        inviter:inviter
       }
        // console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
