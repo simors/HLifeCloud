@@ -479,7 +479,7 @@ function paymentEvent(request, response) {
 
 function createTransfers(request, response) {
   var order_no = request.params.order_no
-  var amount = parseInt(request.params.amount)
+  var amount = parseInt(request.params.amount).toFixed(0) * 100 //人民币分
   var card_number = request.params.card_number
   var userName = request.params.userName
   var metadata = request.params.metadata
