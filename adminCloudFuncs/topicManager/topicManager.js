@@ -261,16 +261,48 @@ function createNewTopicCategory(request, response) {
       response.error(err)
     })
   }else{
-    var TopicCategory = AV.Object.extend('TopicCategory')
-    var topicCategory = new TopicCategory()
-    topicCategory.set('title', name)
-    topicCategory.set('introduction', introduction)
-    topicCategory.save().then((result)=> {
-      response.success(result)
-    }, (err)=> {
-      response.error(err)
+    var query = AV.Query('TopicCategory')
+    query.count().then((count)=>{
+      var TopicCategory = AV.Object.extend('TopicCategory')
+      var topicCategory = new TopicCategory()
+      topicCategory.set('title', name)
+      topicCategory.set('introduction', introduction)
+      topicCategory.set('TopicCategoryId',count+1)
+      topicCategory.save().then((result)=> {
+        response.success(result)
+      }, (err)=> {
+        response.error(err)
+      })
     })
   }
+}
+
+function updateTopicCategoryId(request,response){
+  var query = new AV.Query('TopicCategory')
+  query.notEqualTo('TopicCategoryId',null)
+  query.find().then((results)=>{
+    var categoryCancelList = []
+    results.forEach((result)=>{
+      var category = AV.Object.createWithoutData('TopicCategory', result.id)
+      category.set('TopicCategoryId', null)
+      categoryCancelList.push(category)
+    })
+    AV.Object.saveAll(categoryCancelList).then(()=>{
+      var categorys = []
+      var count = 1
+      request.params.categoryList.forEach((result)=> {
+        var category = AV.Object.createWithoutData('TopicCategory', result.id)
+        category.set('TopicCategoryId', count)
+        categorys.push(category)
+        count++
+      })
+      AV.Object.saveAll(categorys)
+    }).then(()=>{
+      response.success()
+    },(err)=>{
+      response.error(err)
+    })
+  })
 }
 
 function getTopicById(topicId) {
@@ -329,6 +361,7 @@ var TopicManagerFunc = {
   getPickedTopicList:getPickedTopicList,
   fetchAllTopicStatus:fetchAllTopicStatus,
   updateTopicStatus:updateTopicStatus,
+  updateTopicCategoryId:updateTopicCategoryId,
 }
 
 module.exports = TopicManagerFunc
