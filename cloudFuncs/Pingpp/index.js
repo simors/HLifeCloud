@@ -479,7 +479,7 @@ function paymentEvent(request, response) {
 
 function createTransfers(request, response) {
   var order_no = request.params.order_no
-  var amount = parseInt(request.params.amount)
+  var amount = parseInt(request.params.amount).toFixed(0) * 100 //人民币分
   var card_number = request.params.card_number
   var userName = request.params.userName
   var metadata = request.params.metadata
@@ -490,14 +490,14 @@ function createTransfers(request, response) {
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
   var today = new Date()
-  // if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
-  if (1) {
+  if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
+  // if (1) {
     switch (channel) {
-      case 'unionpay': {
+      case 'allinpay': {
         pingpp.transfers.create({
           order_no: order_no,
           app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-          channel: "unionpay",// 银联支付
+          channel: "allinpay",// 通联支付
           amount: amount,
           currency: "cny",
           type: "b2c",
@@ -505,7 +505,7 @@ function createTransfers(request, response) {
             card_number: card_number,  //收款人银行卡号或者存折号
             user_name: userName,  //收款人姓名 选填
             open_bank_code: open_bank_code, //开户银行编号 选填
-            open_bank: open_bank,  //开户银行 选填
+            // open_bank: open_bank,  //开户银行 选填
             // prov: , //省份 选填
             // city: , //城市 选填
             // sub_bank: , //开户支行名称 选填
@@ -514,9 +514,9 @@ function createTransfers(request, response) {
           metadata: metadata,
         }, function (err, transfer) {
           if (err != null) {
-            console.log(err)
+            console.log("pingpp.transfers.create", err)
             response.error({
-              errcode: 1,
+              errcode: err.code,
               message: err.message,
             })
             return
@@ -529,12 +529,12 @@ function createTransfers(request, response) {
               user_name: transfer.extra.user_name,
               open_bank_code: transfer.extra.open_bank_code,
               open_bank: transfer.extra.open_bank,
-              amount: transfer.amount,
+              amount: (transfer.amount).toFixed(0) / 100,
             }
             return updatePaymentInfoInMysql(paymentInfo).then(() => {
               response.success({
                 errcode: 0,
-                message: 'alipay create transfers success!',
+                message: 'allinpay create transfers success!',
                 transfer: transfer,
               })
             }).catch((error) => {
@@ -543,7 +543,7 @@ function createTransfers(request, response) {
           } else {
             response.error({
               errcode: 1,
-              message: "alipay create transfers fail!",
+              message: "allinpay create transfers fail!",
             })
           }
 
