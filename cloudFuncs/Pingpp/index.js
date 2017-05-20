@@ -188,7 +188,7 @@ function insertTransferInMysql(transfer) {
       var deal = {
         from: 'platform',
         to: transfer.metadata.userId,
-        cost: transfer.amount,
+        cost: (transfer.amount * 0.01).toFixed(2),
         deal_type: WITHDRAW,
         charge_id: transfer.id,
         order_no: transfer.order_no,
@@ -529,7 +529,7 @@ function createTransfers(request, response) {
               user_name: transfer.extra.user_name,
               open_bank_code: transfer.extra.open_bank_code,
               open_bank: transfer.extra.open_bank,
-              amount: (transfer.amount).toFixed(0) / 100,
+              amount: (transfer.amount).toFixed(0) * 0.01,
             }
             return updatePaymentInfoInMysql(paymentInfo).then(() => {
               response.success({
