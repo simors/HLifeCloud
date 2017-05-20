@@ -493,7 +493,7 @@ function createTransfers(request, response) {
   // if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
   if (1) {
     switch (channel) {
-      case 'unionpay': {
+      case 'allinpay': {
         pingpp.transfers.create({
           order_no: order_no,
           app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
@@ -534,7 +534,7 @@ function createTransfers(request, response) {
             return updatePaymentInfoInMysql(paymentInfo).then(() => {
               response.success({
                 errcode: 0,
-                message: 'alipay create transfers success!',
+                message: 'allinpay create transfers success!',
                 transfer: transfer,
               })
             }).catch((error) => {
@@ -543,7 +543,7 @@ function createTransfers(request, response) {
           } else {
             response.error({
               errcode: 1,
-              message: "alipay create transfers fail!",
+              message: "allinpay create transfers fail!",
             })
           }
 
