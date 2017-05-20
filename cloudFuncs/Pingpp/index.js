@@ -497,7 +497,7 @@ function createTransfers(request, response) {
         pingpp.transfers.create({
           order_no: order_no,
           app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-          channel: "unionpay",// 银联支付
+          channel: "allinpay",// 通联支付
           amount: amount,
           currency: "cny",
           type: "b2c",
@@ -505,7 +505,7 @@ function createTransfers(request, response) {
             card_number: card_number,  //收款人银行卡号或者存折号
             user_name: userName,  //收款人姓名 选填
             open_bank_code: open_bank_code, //开户银行编号 选填
-            open_bank: open_bank,  //开户银行 选填
+            // open_bank: open_bank,  //开户银行 选填
             // prov: , //省份 选填
             // city: , //城市 选填
             // sub_bank: , //开户支行名称 选填
