@@ -111,6 +111,8 @@ function createShopCategory(request, response) {
   })
 }
 
+
+
 function updateShopCategory(request, response) {
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
 if(request.params.tagList){
@@ -191,7 +193,7 @@ function getShopList(request, response) {
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
-
+  query.include('inviter')
   if(liveArea){
     if(liveArea.length==2){
       query.contains('geoProvince',liveArea[1])
@@ -302,9 +304,19 @@ function getShopList(request, response) {
           nickname:result.attributes.owner.attributes.nickname
         }
       }
+      var inviter = {}
+      if (result.attributes.inviter) {
+        inviter = {
+          id: result.attributes.inviter.id,
+          username: result.attributes.inviter.attributes.username,
+          avatar:result.attributes.inviter.attributes.avatar,
+          nickname:result.attributes.inviter.attributes.nickname
+        }
+      }
 
       var shop={
         id:result.id,
+        payment:result.attributes.payment,
         shopName:result.attributes.shopName,
         shopAddress:result.attributes.shopAddress,
         status:result.attributes.status,
@@ -323,7 +335,8 @@ function getShopList(request, response) {
         album:result.attributes.album,
         owner:owner,
         grade:result.attributes.grade,
-        createdAt:result.createdAt
+        createdAt:result.createdAt,
+        inviter:inviter
       }
        // console.log('hahahah',shop)
       // result.nextSkipNum = parseInt(skipNum) + results.length
@@ -361,9 +374,35 @@ function updateChoosenCategory(request, response) {
       response.error(err)
     })
   })
-
 }
 
+function updateShopCategoryId(request,response){
+  var query = new AV.Query('ShopCategory')
+  query.notEqualTo('shopCategoryId',null)
+  query.find().then((results)=>{
+    var categoryCancelList = []
+    results.forEach((result)=>{
+      var category = AV.Object.createWithoutData('ShopCategory', result.id)
+      category.set('shopCategoryId', null)
+      categoryCancelList.push(category)
+    })
+    AV.Object.saveAll(categoryCancelList).then(()=>{
+      var categorys = []
+      var count = 1
+      request.params.categoryList.forEach((result)=> {
+        var category = AV.Object.createWithoutData('ShopCategory', result.id)
+        category.set('shopCategoryId', count)
+        categorys.push(category)
+        count++
+      })
+      AV.Object.saveAll(categorys)
+  }).then(()=>{
+    response.success()
+  },(err)=>{
+    response.error(err)
+  })
+  })
+}
 // function closeShop(request,response){
 //   var shop = AV.Object.createWithoutData('Shop',request.params.id)
 //   shop.set('isOpen',false)
@@ -593,6 +632,7 @@ var ShopManagerFunc = {
   updateCommentStatus:updateCommentStatus,
   deleteShopCoverImg:deleteShopCoverImg,
   updateCategoryStatus:updateCategoryStatus,
+  updateShopCategoryId:updateShopCategoryId,
 
 }
 module.exports = ShopManagerFunc
