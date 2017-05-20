@@ -514,9 +514,9 @@ function createTransfers(request, response) {
           metadata: metadata,
         }, function (err, transfer) {
           if (err != null) {
-            console.log(err)
+            console.log("pingpp.transfers.create", err)
             response.error({
-              errcode: 1,
+              errcode: err.code,
               message: err.message,
             })
             return
@@ -529,7 +529,7 @@ function createTransfers(request, response) {
               user_name: transfer.extra.user_name,
               open_bank_code: transfer.extra.open_bank_code,
               open_bank: transfer.extra.open_bank,
-              amount: transfer.amount,
+              amount: (transfer.amount).toFixed(0) / 100,
             }
             return updatePaymentInfoInMysql(paymentInfo).then(() => {
               response.success({
