@@ -96,6 +96,8 @@ function setPromoterSysConfig(request, response) {
       errcode: 0,
       message: '设置推广参数成功！',
     })
+  }).finally(() => {
+    client.quit()
   })
 }
 
@@ -110,6 +112,8 @@ function getPromoterConfig() {
 
   return client.getAsync(PREFIX + "syscfg").then((syscfg) => {
     return JSON.parse(syscfg)
+  }).finally(() => {
+    client.quit()
   })
 }
 

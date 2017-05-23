@@ -74,6 +74,8 @@ function getInvitationCodeOnce(userId, response) {
         } else {
           getInvitationCodeOnceErrorCB(userId, 1, response)
         }
+      }).finally(() => {
+        client.quit()
       })
     }
   }).catch((err) => {
@@ -120,6 +122,8 @@ function verifyCode(code) {
         }
       })
     }
+  }).finally(() => {
+    client.quit()
   })
 }
 

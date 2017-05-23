@@ -54,8 +54,9 @@ function setShareDomain(request, response) {
   }).catch((error) => {
     console.log(error)
     response.error(error)
+  }).finally(() => {
+    client.quit()
   })
-
 }
 
 function getShareDomain(request, response) {
@@ -78,8 +79,9 @@ function getShareDomain(request, response) {
   }).catch((error) => {
     console.log(error)
     response.error(error)
+  }).finally(() => {
+    client.quit()
   })
-
 }
 
 var configFunc = {
