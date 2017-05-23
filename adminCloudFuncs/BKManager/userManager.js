@@ -386,6 +386,40 @@ function getShopByUserId(request,response) {
   })
 }
 
+function getUserDetailById(request,response){
+  var userId = request.params.userId
+  var query = new AV.Query('_User')
+  query.include('detail')
+  // query.equalTo('objectId',userId)
+  query.get(userId).then((result)=>{
+    var userInfo= {
+      id : result.id,
+      identity:result.attributes.identity,
+      status:result.attributes.status,
+      geoCity:result.attributes.geoCity,
+      nickname:result.attributes.nickname,
+      username:result.attributes.username,
+      birthday:result.attributes.birthday,
+      type:result.attributes.type,
+      emailVerified:result.attributes.emailVerified,
+      mobilePhoneNumber:result.attributes.mobilePhoneNumber,
+      avatar:result.attributes.avatar,
+      geoDistrict:result.attributes.geoDistrict,
+      gender:result.attributes.gender,
+      authData:result.attributes.authData,
+      MobilePhoneVerified:result.attributes.mobilePhoneVerified,
+      // detailId:result.attributes.detail.id,
+      geoProvince:result.attributes.geoProvince,
+      createdAt:result.createdAt
+    }
+    response.success(userInfo)
+  },(err)=>{
+    response.error(err)
+  })
+
+
+}
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
@@ -395,6 +429,7 @@ var UserManagerFunc = {
   updateMyPassword:updateMyPassword,
   getAppUserList:getAppUserList,
   updateAppUserEnable:updateAppUserEnable,
-  getShopByUserId:getShopByUserId
+  getShopByUserId:getShopByUserId,
+  getUserDetailById:getUserDetailById
 }
 module.exports = UserManagerFunc
