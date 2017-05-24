@@ -23,7 +23,7 @@ router.get('/:id', function(req, res, next) {
       var status = shopInfo.status
       if(status === 1) {
         res.render('shopShare', {
-          title: shopInfo.title || '汇邻优店',
+          title: shopInfo.shopName || '汇邻优店',
           coverUrl: shopInfo.coverUrl || '',
           address: shopInfo.shopAddress || '未知地址',
           phone: shopInfo.contactNumber || '未知电话',
