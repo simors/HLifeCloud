@@ -516,7 +516,7 @@ function createTransfers(request, response) {
           if (err != null) {
             console.log("pingpp.transfers.create", err)
             response.error({
-              errcode: err.code,
+              errcode: 703,
               message: err.message,
             })
             return
