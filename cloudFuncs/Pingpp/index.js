@@ -491,8 +491,8 @@ function createTransfers(request, response) {
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
   var today = new Date()
-  if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
-  // if (1) {
+  // if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
+  if (1) {
     switch (channel) {
       case 'allinpay': {
         pingpp.transfers.create({
@@ -517,7 +517,7 @@ function createTransfers(request, response) {
           if (err != null) {
             console.log("pingpp.transfers.create", err)
             response.error({
-              errcode: err.code,
+              errcode: 703,
               message: err.message,
             })
             return
