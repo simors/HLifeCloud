@@ -6,6 +6,7 @@ var router = require('express').Router();
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../config')
 var topicFunc = require('../cloudFuncs/Topic/')
+var util = require('../utils/util');
 
 
 // `AV.Object.extend` 方法一定要放在全局变量，否则会造成堆栈溢出。
@@ -31,6 +32,7 @@ router.get('/:id', function(req, res, next) {
         var topicInfo = topic.attributes
         var user = topicInfo.user.attributes
         var status = topicInfo.status
+        var createdAt = new Date(topic.createdAt.valueOf())
         if(status) {
           res.render('topicShare', {
             title: topicInfo.title || '优店话题',
@@ -38,6 +40,7 @@ router.get('/:id', function(req, res, next) {
             abstract: topicInfo.abstract || '优店话题摘要',
             author: user.nickname || '邻家小二',
             comments: comments,
+            timestamp: util.getConversationTime(createdAt.getTime()),
             appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
           })
         } else {
