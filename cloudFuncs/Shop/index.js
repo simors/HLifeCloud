@@ -123,6 +123,9 @@ function constructShopPromotion(leanPromotion) {
 
   promotion.targetShop = targetShop
 
+  promotion.createdAt = leanPromotion.createdAt
+  promotion.updatedAt = leanPromotion.updatedAt
+
   return promotion
 }
 
