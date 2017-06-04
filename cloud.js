@@ -56,6 +56,8 @@ AV.Cloud.define('hLifeFetchShopFollowers', shopFunc.fetchShopFollowers)
 AV.Cloud.define('hLifeUpdateShopLocationInfo', shopFunc.updateShopLocationInfo)
 AV.Cloud.define('hLifeShareShopPromotionById', shopFunc.shareShopPromotionById)
 AV.Cloud.define('hLifeUpdateShopInfoAfterPaySuccess', shopFunc.updateShopInfoAfterPaySuccessCloud)
+AV.Cloud.define('shopFetchNearbyPromotion', shopFunc.fetchNearbyShopPromotion)
+AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)

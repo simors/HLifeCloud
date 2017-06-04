@@ -97,6 +97,40 @@ function constructShopInfo(leanShop) {
   return shop
 }
 
+function constructShopPromotion(leanPromotion) {
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var prompAttr = leanPromotion.attributes
+  var promotion = {}
+  promotion.id = leanPromotion.id
+  promotion.coverUrl = prompAttr.coverUrl
+  promotion.typeId = prompAttr.typeId
+  promotion.type = prompAttr.type
+  promotion.typeDesc = prompAttr.typeDesc
+  promotion.title = prompAttr.title
+  promotion.abstract = prompAttr.abstract
+  promotion.promotingPrice = prompAttr.promotingPrice
+  promotion.originalPrice = prompAttr.originalPrice
+  promotion.status = prompAttr.status
+  promotion.promotionDetailInfo = prompAttr.promotionDetailInfo
+
+  var targetShop = {}
+  var targetShopAttr = prompAttr.targetShop.attributes
+  targetShop.id = prompAttr.targetShop.id
+  targetShop.shopName = targetShopAttr.shopName
+  targetShop.geoDistrict = targetShopAttr.geoDistrict
+  targetShop.geo = targetShopAttr.geo
+  targetShop.owner = constructUserInfo(targetShopAttr.owner)
+
+  promotion.targetShop = targetShop
+
+  return promotion
+}
+
+function getShopById(shopId) {
+  var query = new AV.Query('Shop')
+  return query.get(shopId)
+}
+
 function fetchShopCommentList(request, response) {
   var shopId = request.params.id
   var isRefresh = request.params.isRefresh
@@ -766,6 +800,63 @@ function shareShopPromotionById(request, response) {
 
 }
 
+/**
+ * 更新所有店铺推广信息的地理位置，调试用!
+ * @param request
+ * @param response
+ */
+function modifyPromotionGeoPoint(request, response) {
+  var query = new AV.Query('ShopPromotion')
+  query.include('targetShop')
+  query.each((promotion) => {
+    var promotionId = promotion.id
+    var shop = promotion.attributes.targetShop
+    var geo = shop.attributes.geo
+    var shopPromotion = AV.Object.createWithoutData('ShopPromotion', promotionId)
+    shopPromotion.set('geo', geo)
+    shopPromotion.save()
+  })
+  response.success({errcode: 0, message: 'ok'})
+}
+
+/**
+ * 获取周边店铺推广信息
+ * @param request
+ * @param response
+ */
+function fetchNearbyShopPromotion(request, response) {
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
+
+  var query = new AV.Query('ShopPromotion')
+  query.equalTo('status', "1")
+  query.include(['targetShop', 'targetShop.owner'])
+  query.limit(20)
+
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, 5500.0) // 全中国的最大距离
+
+  if (lastDistance) {
+    var notIncludeQuery = new AV.Query('ShopPromotion')
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
+
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(constructShopPromotion(promp))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -782,6 +873,8 @@ var shopFunc = {
   updateShopInfoAfterPaySuccessCloud: updateShopInfoAfterPaySuccessCloud,
   getShopByUserId: getShopByUserId,
   shareShopPromotionById: shareShopPromotionById,
+  fetchNearbyShopPromotion: fetchNearbyShopPromotion,
+  modifyPromotionGeoPoint: modifyPromotionGeoPoint,
 }
 
 module.exports = shopFunc
