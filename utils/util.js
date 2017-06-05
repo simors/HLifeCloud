@@ -93,6 +93,49 @@ function DateAdd(interval, number, date) {
 }
 
 /**
+ * 获取聊天列表界面时间
+ *
+ * @param timestamp
+ */
+function getConversationTime(timestamp) {
+  var timeDiffInMS = 0
+  if (timestamp) {
+    timeDiffInMS = Date.now() - timestamp
+  }
+  var labelText = "刚刚"
+  const timeDiffInSec = Math.floor(timeDiffInMS / 1000.0)
+  if (timeDiffInSec > 0) {
+    //labelText = timeDiffInSec + "秒前"
+    const timeDiffInMin = Math.floor(timeDiffInSec / 60.0)
+    if (timeDiffInMin > 0) {
+      labelText = timeDiffInMin + "分钟前"
+      const timeDiffInHour = Math.floor(timeDiffInMin / 60.0)
+      if (timeDiffInHour > 0) {
+        labelText = timeDiffInHour + "小时前"
+        const timeDiffInDay = Math.floor(timeDiffInHour / 24.0)
+        if (timeDiffInDay > 0) {
+          labelText = timeDiffInDay + "天前"
+          const timeDiffInWeek = Math.floor(timeDiffInDay / 7.0)
+          if (timeDiffInWeek > 0) {
+            labelText = timeDiffInWeek + "周前"
+            const timeDiffInMon = Math.floor(timeDiffInDay / 30.0)
+            if (timeDiffInMon > 0) {
+              labelText = timeDiffInMon + "月前"
+              const timeDiffInYear = Math.floor(timeDiffInDay / 365.0)
+              if (timeDiffInYear > 0) {
+                labelText = timeDiffInYear + "年前"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return labelText
+}
+
+
+/**
  * 移除字符中空格
  *
  * @param phone
@@ -129,6 +172,7 @@ var util = {
   parseDate: parseDate,
   DateAdd: DateAdd,
   hidePhoneNumberDetail: hidePhoneNumberDetail,
+  getConversationTime: getConversationTime,
 }
 
 module.exports = util
