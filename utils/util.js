@@ -98,11 +98,11 @@ function DateAdd(interval, number, date) {
  * @param timestamp
  */
 function getConversationTime(timestamp) {
-  let timeDiffInMS = 0
+  var timeDiffInMS = 0
   if (timestamp) {
     timeDiffInMS = Date.now() - timestamp
   }
-  let labelText = "刚刚"
+  var labelText = "刚刚"
   const timeDiffInSec = Math.floor(timeDiffInMS / 1000.0)
   if (timeDiffInSec > 0) {
     //labelText = timeDiffInSec + "秒前"
