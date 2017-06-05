@@ -112,6 +112,7 @@ function constructShopPromotion(leanPromotion) {
   promotion.originalPrice = prompAttr.originalPrice
   promotion.status = prompAttr.status
   promotion.promotionDetailInfo = prompAttr.promotionDetailInfo
+  promotion.geo = prompAttr.geo
 
   var targetShop = {}
   var targetShopAttr = prompAttr.targetShop.attributes
@@ -830,11 +831,12 @@ function modifyPromotionGeoPoint(request, response) {
 function fetchNearbyShopPromotion(request, response) {
   var geo = request.params.geo
   var lastDistance = request.params.lastDistance
+  var limit = request.params.limit || 20
 
   var query = new AV.Query('ShopPromotion')
   query.equalTo('status', "1")
   query.include(['targetShop', 'targetShop.owner'])
-  query.limit(20)
+  query.limit(limit)
 
   var point = new AV.GeoPoint(geo)
   query.withinKilometers('geo', point, 5500.0) // 全中国的最大距离
