@@ -21,6 +21,7 @@ var UserFeedback = require('./adminCloudFuncs/userFeedback/userFeedback')
 var topicFunc = require('./cloudFuncs/Topic')
 var statFunc = require('./cloudFuncs/Statistics/PerformanceStat')
 var searchFunc = require('./cloudFuncs/Search')
+var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 /**
  * 云函数
  */
@@ -58,6 +59,13 @@ AV.Cloud.define('hLifeShareShopPromotionById', shopFunc.shareShopPromotionById)
 AV.Cloud.define('hLifeUpdateShopInfoAfterPaySuccess', shopFunc.updateShopInfoAfterPaySuccessCloud)
 AV.Cloud.define('shopFetchNearbyPromotion', shopFunc.fetchNearbyShopPromotion)
 AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
+
+// 店铺商品
+AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)
+AV.Cloud.define('goodsShopGoodsOnline', goodsFunc.shopGoodsOnline)
+AV.Cloud.define('goodsShopGoodsOffline', goodsFunc.shopGoodsOffline)
+AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
+AV.Cloud.define('goodsFetchGoodsList', goodsFunc.fetchShopGoods)
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
