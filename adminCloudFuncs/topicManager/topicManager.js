@@ -261,7 +261,8 @@ function createNewTopicCategory(request, response) {
       response.error(err)
     })
   }else{
-    var query = AV.Query('TopicCategory')
+    var query = new AV.Query('TopicCategory')
+    query.equalTo('enabled',true)
     query.count().then((count)=>{
       var TopicCategory = AV.Object.extend('TopicCategory')
       var topicCategory = new TopicCategory()
