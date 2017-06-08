@@ -37,6 +37,33 @@ function addNewShopGoods(request, response) {
   })
 }
 
+function modifyShopGoodsInfo(request, response) {
+  var goodsId = request.params.goodsId
+  var goodsName = request.params.goodsName
+  var price = request.params.price
+  var originalPrice = request.params.originalPrice
+  var coverPhoto = request.params.coverPhoto
+  var album = request.params.album
+  var detail = request.params.detail
+
+  var shopGoods = AV.Object.createWithoutData('ShopGoods', goodsId)
+  shopGoods.set('goodsName', goodsName)
+  shopGoods.set('price', price)
+  shopGoods.set('originalPrice', originalPrice)
+  shopGoods.set('coverPhoto', coverPhoto)
+  shopGoods.set('album', album)
+  shopGoods.set('detail', detail)
+  shopGoods.save(null, {fetchWhenSave: true}).then((goodsInfo) => {
+    response.success({errcode: 0, goodsInfo: goodsInfo})
+  }, (err) => {
+    console.log('err in shopGoodsOffline:', err)
+    response.error({errcode: 1, message: '修改商品信息失败'})
+  }).catch((err) => {
+    console.log('err in shopGoodsOffline:', err)
+    response.error({errcode: 1, message: '修改商品信息失败'})
+  })
+}
+
 function shopGoodsOnline(request, response) {
   var goodsId = request.params.goodsId
   var shopGoods = AV.Object.createWithoutData('ShopGoods', goodsId)
@@ -102,15 +129,16 @@ function fetchShopGoods(request, response) {
     response.success({errcode: 0, goods: goods})
   }, (err) => {
     console.log('err in fetchShopGoods:', err)
-    response.error({errcode: 1, message: '获取商品列表失败'})
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
   }).catch((err) => {
     console.log('err in fetchShopGoods:', err)
-    response.error({errcode: 1, message: '获取商品列表失败'})
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
   })
 }
 
 var GoodsFunc = {
   addNewShopGoods: addNewShopGoods,
+  modifyShopGoodsInfo: modifyShopGoodsInfo,
   shopGoodsOnline: shopGoodsOnline,
   shopGoodsOffline: shopGoodsOffline,
   shopGoodsDelete: shopGoodsDelete,
