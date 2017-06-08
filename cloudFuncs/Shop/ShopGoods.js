@@ -53,7 +53,10 @@ function modifyShopGoodsInfo(request, response) {
   shopGoods.set('coverPhoto', coverPhoto)
   shopGoods.set('album', album)
   shopGoods.set('detail', detail)
-  shopGoods.save(null, {fetchWhenSave: true}).then((goodsInfo) => {
+  shopGoods.save(null, {fetchWhenSave: true}).then((newGoods) => {
+    var query = new AV.Query('ShopGoods')
+    return query.get(newGoods.id)
+  }).then((goodsInfo) => {
     response.success({errcode: 0, goodsInfo: goodsInfo})
   }, (err) => {
     console.log('err in shopGoodsOffline:', err)
