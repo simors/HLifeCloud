@@ -224,6 +224,7 @@ function getTopicCategoryList(request, response) {
   }
   var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
   query.limit(limit)
+  query.ascending('TopicCategoryId')
   query.find().then((results)=> {
 
     results.forEach((result)=> {
@@ -235,6 +236,7 @@ function getTopicCategoryList(request, response) {
         introduction: result.attributes.introduction,
         image: result.attributes.image,
         enabled: result.attributes.enabled,
+        topicCategoryId: result.attributes.TopicCategoryId
       })
     })
     response.success(topicCategoryList)
@@ -261,7 +263,8 @@ function createNewTopicCategory(request, response) {
       response.error(err)
     })
   }else{
-    var query = AV.Query('TopicCategory')
+    var query = new AV.Query('TopicCategory')
+    query.equalTo('enabled',true)
     query.count().then((count)=>{
       var TopicCategory = AV.Object.extend('TopicCategory')
       var topicCategory = new TopicCategory()
