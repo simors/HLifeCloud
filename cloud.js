@@ -65,6 +65,7 @@ AV.Cloud.define('submitCompleteShopInfo',shopFunc.submitCompleteShopInfo)
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)
+AV.Cloud.define('goodsModifyShopGoods', goodsFunc.modifyShopGoodsInfo)
 AV.Cloud.define('goodsShopGoodsOnline', goodsFunc.shopGoodsOnline)
 AV.Cloud.define('goodsShopGoodsOffline', goodsFunc.shopGoodsOffline)
 AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
