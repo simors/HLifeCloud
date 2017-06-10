@@ -965,7 +965,7 @@ function submitEditShopInfo(request, response) {
 
   // console.log('_submitEditShopInfo.payload===', payload)
   // console.log('_submitEditShopInfo.shop===', shop)
-  return shop.save().then((shopInfo)=> {
+   shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
     response.success({success: true, code: 0})
   }, (err)=> {
