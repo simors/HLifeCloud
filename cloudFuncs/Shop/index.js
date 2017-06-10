@@ -881,7 +881,7 @@ function submitCompleteShopInfo(request, response) {
     shop.set('targetShopCategory', targetShopCategory)
   }
 
-  let containedTag = []
+  var containedTag = []
   if (tagIds && tagIds.length) {
     tagIds.forEach((tagId) => {
       containedTag.push(AV.Object.createWithoutData('ShopTag', tagId))
