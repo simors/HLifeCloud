@@ -923,8 +923,10 @@ function submitCompleteShopInfo(request, response) {
 function submitEditShopInfo(request, response) {
 
   var payload = request.params.payload
-  var shopId = request.params.shopId
-  var shop = AV.Object.createWithoutData('Shop', shopId)
+  // var shop = request.params.shop
+  var shop = AV.Object.createWithoutData('Shop', request.params.shop.shopId)
+  var album = request.params.shop.album
+  var coverUrl = request.params.shop.coverUrl
 
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
@@ -948,7 +950,9 @@ function submitEditShopInfo(request, response) {
   var geoProvinceCode = provinceCode
   var geoCityCode = cityCode
   var geoDistrictCode = districtCode
+  if(album&&album.length){
 
+  }
   var containedTag = []
   if (tagIds && tagIds.length) {
     tagIds.forEach((tagId) => {
@@ -962,6 +966,12 @@ function submitEditShopInfo(request, response) {
   shop.set('contactNumber', contactNumber)
   shop.set('contactNumber2', contactNumber2)
   shop.set('ourSpecial', ourSpecial)
+  if(album&&album.length){
+    shop.set('album',album)
+  }
+  if(coverUrl&&coverUrl.length){
+    shop.set('coverUrl',coverUrl)
+  }
   if (geo) {
     var geoArr = geo.split(',')
     var latitude = parseFloat(geoArr[0])
