@@ -864,18 +864,28 @@ function fetchNearbyShopPromotion(request, response) {
 
 function submitCompleteShopInfo(request, response) {
   var payload = request.params.payload
-  var shopId = request.params.shopId
-  var shop = AV.Object.createWithoutData('Shop', shopId)
+  // var shop = request.params.shop
+  var shop = AV.Object.createWithoutData('Shop', request.params.shop.shopId)
+  var album = request.params.shop.album
+  var coverUrl = request.params.shop.coverUrl
+
   var shopCategoryObjectId = payload.shopCategoryObjectId
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
   var contactNumber2 = payload.contactNumber2
   var ourSpecial = payload.ourSpecial
-  var album = payload.album
-  var coverUrl = payload.coverUrl
+   if(payload.album&&payload.album.length)
+   {album = payload.album}
+  if(payload.coverUrl)
+  {coverUrl = payload.coverUrl}
   var tagIds = payload.tagIds
   var targetShopCategory = null
-
+  // if(album&&album.length){
+  //   shop.set('album',album)
+  // }
+  // if(album&&album.length){
+  //   shop.set('album',album)
+  // }
   // console.log('_submitCompleteShopInfo...=shopCategoryObjectId====', shopCategoryObjectId)
   if (shopCategoryObjectId) {
     targetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryObjectId)
