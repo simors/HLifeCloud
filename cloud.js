@@ -62,6 +62,7 @@ AV.Cloud.define('hLifeUpdateShopInfoAfterPaySuccess', shopFunc.updateShopInfoAft
 AV.Cloud.define('shopFetchNearbyPromotion', shopFunc.fetchNearbyShopPromotion)
 AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
 AV.Cloud.define('submitCompleteShopInfo',shopFunc.submitCompleteShopInfo)
+AV.Cloud.define('submitEditShopInfo',shopFunc.submitEditShopInfo)
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)

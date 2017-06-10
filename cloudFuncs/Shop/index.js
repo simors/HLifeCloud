@@ -863,8 +863,8 @@ function fetchNearbyShopPromotion(request, response) {
 }
 
 function submitCompleteShopInfo(request, response) {
-  var payload = request.payload
-  var shop = request.shop
+  var payload = request.params.payload
+  var shop = request.params.shop
   var shopCategoryObjectId = payload.shopCategoryObjectId
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
@@ -908,6 +908,73 @@ function submitCompleteShopInfo(request, response) {
     response.error({success: false, error: err.code})
   })
 }
+
+function submitEditShopInfo(request, response) {
+  var payload = request.params.payload
+  var shop = request.params.shop
+  var openTime = payload.openTime
+  var contactNumber = payload.contactNumber
+  var contactNumber2 = payload.contactNumber2
+  var ourSpecial = payload.ourSpecial
+  var tagIds = payload.tagIds
+  var shopName = payload.shopName
+  var shopAddress = payload.shopAddress
+  var geo = payload.geo
+  var geoCity = payload.geoCity
+  var geoDistrict = payload.geoDistrict
+
+  var provincesAndCities = configSelector.selectProvincesAndCities(store.getState())
+  var provinceInfo = Utils.getProvinceInfoByCityName(provincesAndCities, payload.geoCity)
+  var province = provinceInfo.provinceName
+  var provinceCode = provinceInfo.provinceCode
+  var cityCode = Utils.getCityCode(provincesAndCities, payload.geoCity)
+  var districtCode = Utils.getDistrictCode(provincesAndCities, payload.geoDistrict)
+
+  var geoProvince = province
+  var geoProvinceCode = provinceCode
+  var geoCityCode = cityCode
+  var geoDistrictCode = districtCode
+
+  var containedTag = []
+  if (tagIds && tagIds.length) {
+    tagIds.forEach((tagId) => {
+      containedTag.push(AV.Object.createWithoutData('ShopTag', tagId))
+    })
+  }
+  shop.set('shopName', shopName)
+  shop.set('shopAddress', shopAddress)
+  shop.set('containedTag', containedTag)
+  shop.set('openTime', openTime)
+  shop.set('contactNumber', contactNumber)
+  shop.set('contactNumber2', contactNumber2)
+  shop.set('ourSpecial', ourSpecial)
+  if (geo) {
+    var geoArr = geo.split(',')
+    var latitude = parseFloat(geoArr[0])
+    var longitude = parseFloat(geoArr[1])
+    var numberGeoArr = [latitude, longitude]
+    var point = new AV.GeoPoint(numberGeoArr)
+    shop.set('geo', point)
+  }
+  shop.set('geoProvince', geoProvince)
+  shop.set('geoCity', geoCity)
+  shop.set('geoDistrict', geoDistrict)
+  shop.set('geoProvinceCode', geoProvinceCode.toString())
+  shop.set('geoCityCode', geoCityCode.toString())
+  shop.set('geoDistrictCode', geoDistrictCode.toString())
+
+  // console.log('_submitEditShopInfo.payload===', payload)
+  // console.log('_submitEditShopInfo.shop===', shop)
+  return shop.save().then((shopInfo)=> {
+    // console.log('new ShopInfo:', shopInfo)
+    response.success({success: true, code: 0})
+  }, (err)=> {
+    // console.log(err)
+    response.error({success: false, code: err.code})
+  })
+}
+
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -927,6 +994,7 @@ var shopFunc = {
   fetchNearbyShopPromotion: fetchNearbyShopPromotion,
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
+  submitEditShopInfo: submitEditShopInfo,
 }
 
 module.exports = shopFunc
