@@ -939,20 +939,11 @@ function submitEditShopInfo(request, response) {
   var geoCity = payload.geoCity
   var geoDistrict = payload.geoDistrict
 
-  var provincesAndCities = configSelector.selectProvincesAndCities(store.getState())
-  var provinceInfo = Utils.getProvinceInfoByCityName(provincesAndCities, payload.geoCity)
-  var province = provinceInfo.provinceName
-  var provinceCode = provinceInfo.provinceCode
-  var cityCode = Utils.getCityCode(provincesAndCities, payload.geoCity)
-  var districtCode = Utils.getDistrictCode(provincesAndCities, payload.geoDistrict)
+  var geoProvince = shop.geoProvince
+  var geoProvinceCode = shop.geoProvinceCode
+  var geoCityCode = shop.geoCityCode
+  var geoDistrictCode = shop.geoDistrictCode
 
-  var geoProvince = province
-  var geoProvinceCode = provinceCode
-  var geoCityCode = cityCode
-  var geoDistrictCode = districtCode
-  if(album&&album.length){
-
-  }
   var containedTag = []
   if (tagIds && tagIds.length) {
     tagIds.forEach((tagId) => {
@@ -969,7 +960,7 @@ function submitEditShopInfo(request, response) {
   if(album&&album.length){
     shop.set('album',album)
   }
-  if(coverUrl&&coverUrl.length){
+  if(coverUrl){
     shop.set('coverUrl',coverUrl)
   }
   if (geo) {
@@ -983,9 +974,9 @@ function submitEditShopInfo(request, response) {
   shop.set('geoProvince', geoProvince)
   shop.set('geoCity', geoCity)
   shop.set('geoDistrict', geoDistrict)
-  shop.set('geoProvinceCode', geoProvinceCode.toString())
-  shop.set('geoCityCode', geoCityCode.toString())
-  shop.set('geoDistrictCode', geoDistrictCode.toString())
+  shop.set('geoProvinceCode', geoProvinceCode)
+  shop.set('geoCityCode', geoCityCode)
+  shop.set('geoDistrictCode', geoDistrictCode)
 
   // console.log('_submitEditShopInfo.payload===', payload)
   // console.log('_submitEditShopInfo.shop===', shop)
