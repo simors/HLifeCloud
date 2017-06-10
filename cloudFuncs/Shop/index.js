@@ -864,7 +864,8 @@ function fetchNearbyShopPromotion(request, response) {
 
 function submitCompleteShopInfo(request, response) {
   var payload = request.params.payload
-  var shop = request.params.shop
+  var shopId = request.params.shopId
+  var shop = AV.Object.createWithoutData('Shop', shopId)
   var shopCategoryObjectId = payload.shopCategoryObjectId
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
@@ -901,11 +902,11 @@ function submitCompleteShopInfo(request, response) {
   shop.set('contactNumber2', contactNumber2)
   shop.set('ourSpecial', ourSpecial)
   // console.log('_submitCompleteShopInfo.shop====', shop)
-  shop.save().then(function (result) {
-    response.success({success: true})
-  }, function (err) {
-    // console.log('_submitCompleteShopInfo.err====', err)
-    response.error({success: false, error: err.code})
+  shop.save().then(function (shopInfo) {
+    response.success({errcode: 0, goodsInfo: shopInfo})
+  }, (err)=> {
+    // console.log(err)
+    response.error({errcode: 1, message: '店铺更新失败'})
   })
 }
 
