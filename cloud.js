@@ -46,6 +46,8 @@ AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)
 AV.Cloud.define('configSetShareDomain', configFunc.setShareDomain)
 AV.Cloud.define('hLifeFetchTopicComments', topicFunc.fetchTopicComments)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
+
+//店铺app端
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
@@ -59,6 +61,7 @@ AV.Cloud.define('hLifeShareShopPromotionById', shopFunc.shareShopPromotionById)
 AV.Cloud.define('hLifeUpdateShopInfoAfterPaySuccess', shopFunc.updateShopInfoAfterPaySuccessCloud)
 AV.Cloud.define('shopFetchNearbyPromotion', shopFunc.fetchNearbyShopPromotion)
 AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
+AV.Cloud.define('submitCompleteShopInfo',shopFunc.submitCompleteShopInfo)
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)
@@ -108,6 +111,7 @@ AV.Cloud.define('updateReplyStatus',ShopManagerFunc.updateReplyStatus)
 AV.Cloud.define('updateCommentStatus',ShopManagerFunc.updateCommentStatus)
 AV.Cloud.define('deleteShopCoverImg',ShopManagerFunc.deleteShopCoverImg)
 
+
 AV.Cloud.define('updateCategoryStatus',ShopManagerFunc.updateCategoryStatus)
 AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('getShopByUserId',userManagerFunc.getShopByUserId)
@@ -122,7 +126,7 @@ AV.Cloud.define('hLifePush',PushManagerFunc.push)
 AV.Cloud.define('hLifeFetchSmsUserList',SmsManagerFunc.fetchSmsUserList)
 AV.Cloud.define('hLifeSendSms',SmsManagerFunc.sendSms)
 
-
+//百度地图
 AV.Cloud.define('hLifeGetSubAreaList', baiduFunc.getSubAreaList)
 AV.Cloud.define('hLifeGetSubAreaList2', baiduFunc.getSubAreaList2)
 AV.Cloud.define('hLifeGetProviceList', baiduFunc.getProviceList)
