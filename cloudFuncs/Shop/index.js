@@ -910,8 +910,11 @@ function submitCompleteShopInfo(request, response) {
 }
 
 function submitEditShopInfo(request, response) {
+
   var payload = request.params.payload
-  var shop = request.params.shop
+  var shopId = request.params.shopId
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
   var contactNumber2 = payload.contactNumber2
@@ -967,13 +970,14 @@ function submitEditShopInfo(request, response) {
   // console.log('_submitEditShopInfo.shop===', shop)
    shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
-    response.success({success: true, code: 0})
+     response.success({errcode: 0, goodsInfo: shopInfo})
   }, (err)=> {
     // console.log(err)
-    response.error({success: false, code: err.code})
+     response.error({errcode: 1, message: '店铺更新失败'})
   })
 }
 
+// response.success({errcode: 0, goodsInfo: goodsInfo})
 
 var shopFunc = {
   constructShopInfo: constructShopInfo,
