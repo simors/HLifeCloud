@@ -291,6 +291,7 @@ function getAppUserList(request,response) {
         nickname:result.attributes.nickname,
         username:result.attributes.username,
         birthday:result.attributes.birthday,
+        isVirtual:result.attributes.isVirtual,
         type:result.attributes.type,
         emailVerified:result.attributes.emailVerified,
         mobilePhoneNumber:result.attributes.mobilePhoneNumber,
@@ -423,7 +424,7 @@ function getUserDetailById(request,response){
 function addVirtualUserByAdmin(request,response){
   var username = request.params.username
   var password = '168168'
-  var nickname = request.params.nickname
+  var nickname = request.params.nickname?request.params.nickname:username
   var geo = request.params.geo
   var province = request.params.province
   var city = request.params.city
@@ -464,11 +465,11 @@ function addVirtualUserByAdmin(request,response){
       response.success({errcode: 0,success:true})
     }).catch((err) => {
       console.log(err)
-      response.error({errcode: 1, message: '增加用户失败',success:false})
+      response.error({errcode: 1, message: err.message,success:false})
     })
   }).catch((err) => {
     console.log(err)
-    response.error({errcode: 1, message: '增加用户失败',success:false})
+    response.error({errcode: 1, message: err.message,success:false})
   })
   }
 
