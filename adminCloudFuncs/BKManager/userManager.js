@@ -396,6 +396,7 @@ function getUserDetailById(request,response){
     var userInfo= {
       id : result.id,
       identity:result.attributes.identity,
+      isVirtual:result.attributes.isVirtual,
       status:result.attributes.status,
       geoCity:result.attributes.geoCity,
       nickname:result.attributes.nickname,
