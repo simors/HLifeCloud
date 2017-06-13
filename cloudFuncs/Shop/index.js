@@ -69,10 +69,7 @@ function constructShopInfo(leanShop) {
   var containedPromotions = []
   if (shopAttr.containedPromotions && shopAttr.containedPromotions.length) {
     shopAttr.containedPromotions.forEach((promotion)=> {
-      // TODO: 获取推广信息
-      var promotionRecord = {
-        id: promotion.id,
-      }
+      var promotionRecord = constructShopPromotion(promotion, false)
       containedPromotions.push(promotionRecord)
     })
   }
@@ -99,7 +96,7 @@ function constructShopInfo(leanShop) {
   return shop
 }
 
-function constructShopPromotion(leanPromotion) {
+function constructShopPromotion(leanPromotion, showUser) {
   var constructUserInfo = require('../Auth').constructUserInfo
   var prompAttr = leanPromotion.attributes
   var promotion = {}
@@ -122,7 +119,9 @@ function constructShopPromotion(leanPromotion) {
   targetShop.shopName = targetShopAttr.shopName
   targetShop.geoDistrict = targetShopAttr.geoDistrict
   targetShop.geo = targetShopAttr.geo
-  targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  if (showUser) {
+    targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  }
 
   promotion.targetShop = targetShop
 
@@ -852,7 +851,7 @@ function fetchNearbyShopPromotion(request, response) {
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
-      promotions.push(constructShopPromotion(promp))
+      promotions.push(constructShopPromotion(promp, true))
     })
     response.success({errcode: 0, promotions: promotions})
   }, (err) => {
