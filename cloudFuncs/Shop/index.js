@@ -15,6 +15,8 @@ var redisUtils = require('../../utils/redisUtils')
 var ejs = require('ejs')
 var fs = require('fs')
 
+const CHINA_WIDTH = 5500.0      // 全国最大宽度
+
 function constructShopInfo(leanShop) {
   var shop = {}
   var shopAttr = leanShop.attributes
@@ -67,10 +69,7 @@ function constructShopInfo(leanShop) {
   var containedPromotions = []
   if (shopAttr.containedPromotions && shopAttr.containedPromotions.length) {
     shopAttr.containedPromotions.forEach((promotion)=> {
-      // TODO: 获取推广信息
-      var promotionRecord = {
-        id: promotion.id,
-      }
+      var promotionRecord = constructShopPromotion(promotion, false)
       containedPromotions.push(promotionRecord)
     })
   }
@@ -97,7 +96,7 @@ function constructShopInfo(leanShop) {
   return shop
 }
 
-function constructShopPromotion(leanPromotion) {
+function constructShopPromotion(leanPromotion, showUser) {
   var constructUserInfo = require('../Auth').constructUserInfo
   var prompAttr = leanPromotion.attributes
   var promotion = {}
@@ -120,7 +119,9 @@ function constructShopPromotion(leanPromotion) {
   targetShop.shopName = targetShopAttr.shopName
   targetShop.geoDistrict = targetShopAttr.geoDistrict
   targetShop.geo = targetShopAttr.geo
-  targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  if (showUser) {
+    targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  }
 
   promotion.targetShop = targetShop
 
@@ -839,7 +840,7 @@ function fetchNearbyShopPromotion(request, response) {
   query.limit(limit)
 
   var point = new AV.GeoPoint(geo)
-  query.withinKilometers('geo', point, 5500.0) // 全中国的最大距离
+  query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
 
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('ShopPromotion')
@@ -850,7 +851,7 @@ function fetchNearbyShopPromotion(request, response) {
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
-      promotions.push(constructShopPromotion(promp))
+      promotions.push(constructShopPromotion(promp, true))
     })
     response.success({errcode: 0, promotions: promotions})
   }, (err) => {
@@ -989,7 +990,67 @@ function submitEditShopInfo(request, response) {
   })
 }
 
-// response.success({errcode: 0, goodsInfo: goodsInfo})
+function fetchNearbyShops(request, response) {
+  var shopCategoryId = request.params.shopCategoryId
+  var shopTagId = request.params.shopTagId
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
+  var sortId = request.params.sortId // 0-智能,1-按好评,2-按距离;3-按等级(grade)
+  var distance = request.params.distance
+  var limit = request.params.limit || 30
+
+  var query = new AV.Query('Shop')
+  query.equalTo('status', 1)
+  query.equalTo('payment', 1)
+  query.exists('coverUrl')
+  query.limit(limit)
+
+  if (shopCategoryId) {
+    var targetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryId)
+    query.equalTo('targetShopCategory', targetShopCategory)
+  }
+
+  if(shopTagId) {
+    var shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
+    query.equalTo('containedTag', shopTag)
+  }
+
+  if (!distance) {
+    distance = CHINA_WIDTH      // 全中国的最大距离
+  }
+
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, distance)
+
+  if (lastDistance) {
+    var notIncludeQuery = new AV.Query('Shop')
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
+
+  if (1 == sortId) {
+    query.descending('score')
+  } else if (3 == sortId) {
+    query.descending('grade')
+  }
+
+  //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
+  query.include(['targetShopCategory', 'owner', 'containedTag', 'containedPromotions'])
+
+  query.find().then((results) => {
+    var shops = []
+    results.forEach((shop) => {
+      shops.push(constructShopInfo(shop))
+    })
+    response.success({errcode: 0, shops: shops})
+  }, (err) => {
+    console.log('error in fetchNearbyShops: ', err)
+    response.error({errcode: 1, shops: [], message: '获取店铺信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShops: ', err)
+    response.error({errcode: 1, shops: [], message: '获取店铺信息失败'})
+  })
+}
 
 var shopFunc = {
   constructShopInfo: constructShopInfo,
@@ -1008,6 +1069,7 @@ var shopFunc = {
   getShopByUserId: getShopByUserId,
   shareShopPromotionById: shareShopPromotionById,
   fetchNearbyShopPromotion: fetchNearbyShopPromotion,
+  fetchNearbyShops: fetchNearbyShops,
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
