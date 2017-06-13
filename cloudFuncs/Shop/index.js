@@ -996,8 +996,8 @@ function fetchNearbyShops(request, response) {
   var geo = request.params.geo
   var lastDistance = request.params.lastDistance
   var sortId = request.params.sortId // 0-智能,1-按好评,2-按距离;3-按等级(grade)
-  let distance = request.params.distance
-  let limit = request.params.limit || 30
+  var distance = request.params.distance
+  var limit = request.params.limit || 30
 
   var query = new AV.Query('Shop')
   query.equalTo('status', 1)
@@ -1011,7 +1011,7 @@ function fetchNearbyShops(request, response) {
   }
 
   if(shopTagId) {
-    let shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
+    var shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
     query.equalTo('containedTag', shopTag)
   }
 
