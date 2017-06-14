@@ -119,6 +119,7 @@ AV.Cloud.define('updateCategoryStatus',ShopManagerFunc.updateCategoryStatus)
 AV.Cloud.define('getAppUserList',userManagerFunc.getAppUserList)
 AV.Cloud.define('getShopByUserId',userManagerFunc.getShopByUserId)
 AV.Cloud.define('getUserDetailById',userManagerFunc.getUserDetailById)
+AV.Cloud.define('addVirtualUserByAdmin',userManagerFunc.addVirtualUserByAdmin)
 
 AV.Cloud.define('updateAppUserEnable',userManagerFunc.updateAppUserEnable)
 AV.Cloud.define('getActionList',ActionManagerFunc.getActionList)

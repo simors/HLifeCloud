@@ -905,7 +905,7 @@ function submitCompleteShopInfo(request, response) {
     shop.set('coverUrl', coverUrl)
   }
 
-  if (album) {
+  if (album && album.length) {
     shop.set('album', album)
   }
 

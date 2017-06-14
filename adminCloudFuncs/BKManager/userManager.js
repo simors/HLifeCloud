@@ -291,6 +291,7 @@ function getAppUserList(request,response) {
         nickname:result.attributes.nickname,
         username:result.attributes.username,
         birthday:result.attributes.birthday,
+        isVirtual:result.attributes.isVirtual,
         type:result.attributes.type,
         emailVerified:result.attributes.emailVerified,
         mobilePhoneNumber:result.attributes.mobilePhoneNumber,
@@ -395,6 +396,7 @@ function getUserDetailById(request,response){
     var userInfo= {
       id : result.id,
       identity:result.attributes.identity,
+      isVirtual:result.attributes.isVirtual,
       status:result.attributes.status,
       geoCity:result.attributes.geoCity,
       nickname:result.attributes.nickname,
@@ -420,6 +422,58 @@ function getUserDetailById(request,response){
 
 }
 
+function addVirtualUserByAdmin(request,response){
+  var username = request.params.username
+  var password = '168168'
+  var nickname = request.params.nickname?request.params.nickname:username
+  var geo = request.params.geo
+  var province = request.params.province
+  var city = request.params.city
+  var district = request.params.district
+  var provinceCode = request.params.provinceCode
+  var cityCode = request.params.cityCode
+  var districtCode = request.params.districtCode
+  var type = 'normal'
+  var mobilePhoneNumber = request.params.mobilePhoneNumber
+  var status = 1
+  var gender = 'female'
+  var mobilePhoneVerified = true
+  //console.log('role',roleList)
+
+  var User = AV.Object.extend('_User')
+  var user = new User()
+  user.set('username', username)
+  user.set('password', password)
+  user.set('nickname', nickname)
+  user.set('mobilePhoneVerified', true)
+  user.set('geo', geo)
+  user.set('province', province)
+  user.set('city', city)
+  user.set('district', district)
+  user.set('provinceCode', provinceCode)
+  user.set('cityCode', cityCode)
+  user.set('districtCode', districtCode)
+  user.set('type', type)
+  user.set('mobilePhoneNumber', mobilePhoneNumber)
+  user.set('status', status)
+  user.set('gender', gender)
+  user.set('isVirtual',1)
+  // user.set('username', username)
+  user.save().then((result)=> {
+    var userInfo = AV.Object.createWithoutData('_User',result.id)
+    userInfo.set('mobilePhoneVerified',true)
+    userInfo.save().then(()=>{
+      response.success({errcode: 0,success:true})
+    }).catch((err) => {
+      console.log(err)
+      response.error({errcode: 1, message: err.message,success:false})
+    })
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: err.message,success:false})
+  })
+  }
+
 var UserManagerFunc = {
   getUserList: getUserList,
   getAllRoleList: getAllRoleList,
@@ -430,6 +484,7 @@ var UserManagerFunc = {
   getAppUserList:getAppUserList,
   updateAppUserEnable:updateAppUserEnable,
   getShopByUserId:getShopByUserId,
-  getUserDetailById:getUserDetailById
+  getUserDetailById:getUserDetailById,
+  addVirtualUserByAdmin:addVirtualUserByAdmin,
 }
 module.exports = UserManagerFunc
