@@ -844,6 +844,7 @@ function fetchNearbyShopPromotion(request, response) {
 
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('ShopPromotion')
+    notIncludeQuery.equalTo('status', "1")
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
@@ -1025,13 +1026,20 @@ function fetchNearbyShops(request, response) {
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('Shop')
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
-    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
-  }
+    notIncludeQuery.equalTo('status', 1)
+    notIncludeQuery.equalTo('payment', 1)
+    notIncludeQuery.exists('coverUrl')
+    if (shopCategoryId) {
+      var notTargetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryId)
+      notIncludeQuery.equalTo('targetShopCategory', notTargetShopCategory)
+    }
 
-  if (1 == sortId) {
-    query.descending('score')
-  } else if (3 == sortId) {
-    query.descending('grade')
+    if(shopTagId) {
+      var notShopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
+      notIncludeQuery.equalTo('containedTag', notShopTag)
+    }
+    notIncludeQuery.select(['objectId'])
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
 
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId
