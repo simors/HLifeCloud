@@ -130,18 +130,18 @@ function updateUserFromAdmin(request, response) {
         //console.log(arr)
         var willRoles = []
         request.params.roleList.forEach((role)=> {
-         // role = Trim(role)
+          // role = Trim(role)
           var roleQuery = new AV.Query('_Role')
           roleQuery.equalTo('name', role)
           promises.push(
             roleQuery.first().then((roleInfo)=> {
-              var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
-              var UserRole = AV.Object.extend('UserRole')
-              var userRole = new UserRole()
-              userRole.set('adminUser', user)
-              userRole.set('role', roleObject)
-              userRole.save()
-            },
+                var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
+                var UserRole = AV.Object.extend('UserRole')
+                var userRole = new UserRole()
+                userRole.set('adminUser', user)
+                userRole.set('role', roleObject)
+                userRole.save()
+              },
               (err)=> {
                 response.error(err)
               }))
@@ -175,11 +175,11 @@ function deleteUserFromAdmin(request, response) {
         var adminRole = AV.Object.createWithoutData('UserRole', result.id)
         adminRole.destroy()
       })
-        user.destroy().then((success)=> {
-          response.success(success)
-        }, (err)=> {
-          response.error(err)
-        })
+      user.destroy().then((success)=> {
+        response.success(success)
+      }, (err)=> {
+        response.error(err)
+      })
 
     } else {
       // console.log('hahahahahahaha', user)
@@ -196,47 +196,51 @@ function deleteUserFromAdmin(request, response) {
 
 }
 
- function updateMyPassword(request,response) {
+function updateMyPassword(request, response) {
   var query = new AV.Query('AdminUser')
-  query.equalTo('username',request.params.username)
-  query.equalTo('password',request.params.password)
-  query.first().then((result)=>{
-   //console.log('hahaha',result.id)
-    if(result){
-      var user = AV.Object.createWithoutData('AdminUser',result.id)
-      user.set('password',request.params.newPassword)
-      user.save().then((userInfo)=>{
+  query.equalTo('username', request.params.username)
+  query.equalTo('password', request.params.password)
+  query.first().then((result)=> {
+    //console.log('hahaha',result.id)
+    if (result) {
+      var user = AV.Object.createWithoutData('AdminUser', result.id)
+      user.set('password', request.params.newPassword)
+      user.save().then((userInfo)=> {
         response.success({
-          username:request.params.username,
-          password:userInfo.attributes.password
+          username: request.params.username,
+          password: userInfo.attributes.password
         })
-      },(err)=>{
+      }, (err)=> {
         response.error(err)
       })
-    } else{
-     var err ='密码错误'
-     response.error(err)
+    } else {
+      var err = '密码错误'
+      response.error(err)
     }
 
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 }
 
 //获取APP用户列表
-function getAppUserList(request,response) {
+function getAppUserList(request, response) {
 
   var orderMode = request.params.orderMode
   var status = request.params.status
-  var username=request.params.username
+  var username = request.params.username
   var geoCity = request.params.geoCity
   var query = new AV.Query('_User')
   var liveArea = request.params.liveArea
-
+  var isVirtual = request.params.isVirtual
   query.include('detail')
-  if(status==1){
-    query.equalTo('status',status)
+  if (status == 1) {
+    query.equalTo('status', status)
   }
+  if (isVirtual==1) {
+    query.equalTo('isVirtual', isVirtual)
+  }
+
   if (!request.params.startTime) {
     query.greaterThanOrEqualTo('createdAt', new Date('2016-9-28 00:00:00'));
     query.lessThan('createdAt', new Date());
@@ -245,19 +249,20 @@ function getAppUserList(request,response) {
     query.greaterThanOrEqualTo('createdAt', request.params.startTime);
     query.lessThan('createdAt', request.params.endTime);
   }
-  if(username){
-    query.contains('username',username)
+  if (username) {
+    query.contains('username', username)
   }
-  if(geoCity){
-    query.contains('geoCity',geoCity)
+  if (geoCity) {
+    query.contains('geoCity', geoCity)
   }
-  if(liveArea){
-    if(liveArea.length==2){
-      query.contains('geoProvince',liveArea[1])
-    }else if(liveArea.length==3){
-      query.contains('geoCity',liveArea[2])
-    }else if(liveArea.length==4){
-      query.contains('geoDistrict',liveArea[3])
+
+  if (liveArea) {
+    if (liveArea.length == 2) {
+      query.contains('geoProvince', liveArea[1])
+    } else if (liveArea.length == 3) {
+      query.contains('geoCity', liveArea[2])
+    } else if (liveArea.length == 4) {
+      query.contains('geoDistrict', liveArea[3])
     }
   }
   if (orderMode == 'createTimeDescend') {
@@ -277,62 +282,62 @@ function getAppUserList(request,response) {
   }
   var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
   query.limit(limit)
-  query.find().then((results)=>{
+  query.find().then((results)=> {
     // console.log('results',results)
 
     var userList = []
-    results.forEach((result)=>{
+    results.forEach((result)=> {
       // console.log('result',result)
-      var userInfo= {
-        id : result.id,
-        identity:result.attributes.identity,
-        status:result.attributes.status,
-        geoCity:result.attributes.geoCity,
-        nickname:result.attributes.nickname,
-        username:result.attributes.username,
-        birthday:result.attributes.birthday,
-        isVirtual:result.attributes.isVirtual,
-        type:result.attributes.type,
-        emailVerified:result.attributes.emailVerified,
-        mobilePhoneNumber:result.attributes.mobilePhoneNumber,
-        avatar:result.attributes.avatar,
-        geoDistrict:result.attributes.geoDistrict,
-        gender:result.attributes.gender,
-        authData:result.attributes.authData,
-        MobilePhoneVerified:result.attributes.mobilePhoneVerified,
+      var userInfo = {
+        id: result.id,
+        identity: result.attributes.identity,
+        status: result.attributes.status,
+        geoCity: result.attributes.geoCity,
+        nickname: result.attributes.nickname,
+        username: result.attributes.username,
+        birthday: result.attributes.birthday,
+        isVirtual: result.attributes.isVirtual,
+        type: result.attributes.type,
+        emailVerified: result.attributes.emailVerified,
+        mobilePhoneNumber: result.attributes.mobilePhoneNumber,
+        avatar: result.attributes.avatar,
+        geoDistrict: result.attributes.geoDistrict,
+        gender: result.attributes.gender,
+        authData: result.attributes.authData,
+        MobilePhoneVerified: result.attributes.mobilePhoneVerified,
         // detailId:result.attributes.detail.id,
-        geoProvince:result.attributes.geoProvince,
-        createdAt:result.createdAt
-    }
-    userList.push(userInfo)
+        geoProvince: result.attributes.geoProvince,
+        createdAt: result.createdAt
+      }
+      userList.push(userInfo)
     })
     response.success(userList)
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 }
 
-function updateAppUserEnable(request,response){
+function updateAppUserEnable(request, response) {
   var status = request.params.status
   var id = request.params.id
-  var user = AV.Object.createWithoutData('_User',id)
-  user.set('status',status)
-  user.save().then(()=>{
+  var user = AV.Object.createWithoutData('_User', id)
+  user.set('status', status)
+  user.save().then(()=> {
     response.success()
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 }
 
-function getShopByUserId(request,response) {
+function getShopByUserId(request, response) {
   var userid = request.params.id
-  var user = AV.Object.createWithoutData('_User',userid)
+  var user = AV.Object.createWithoutData('_User', userid)
   var query = new AV.Query('Shop')
-  query.equalTo('owner',user)
+  query.equalTo('owner', user)
   query.include('owner')
   query.include('targetShopCategory')
   query.include('containedTag')
-  query.first().then((result)=>{
+  query.first().then((result)=> {
 
     if (!result) {
       response.error(new Error('cannot find shop by user ' + userid))
@@ -360,26 +365,26 @@ function getShopByUserId(request,response) {
       username: result.attributes.owner.attributes.username
     }
 
-    var shop={
-      id:result.id,
-      shopName:result.attributes.shopName,
-      shopAddress:result.attributes.shopAddress,
-      status:result.attributes.status,
-      coverUrl:result.attributes.coverUrl,
-      contactNumber:result.attributes.contactNumber,
-      targetShopCategory:targetShopCategory,
-      containedTag:tags,
-      score:result.attributes.score,
-      pv:result.attributes.pv,
-      phone:result.attributes.phone,
-      geoCity:result.attributes.geoCity,
-      name:result.attributes.name,
-      openTime:result.attributes.openTime,
-      geoDistrict:result.attributes.geoDistrict,
-      album:result.attributes.album,
-      owner:owner,
-      grade:result.attributes.grade,
-      createdAt:result.createdAt
+    var shop = {
+      id: result.id,
+      shopName: result.attributes.shopName,
+      shopAddress: result.attributes.shopAddress,
+      status: result.attributes.status,
+      coverUrl: result.attributes.coverUrl,
+      contactNumber: result.attributes.contactNumber,
+      targetShopCategory: targetShopCategory,
+      containedTag: tags,
+      score: result.attributes.score,
+      pv: result.attributes.pv,
+      phone: result.attributes.phone,
+      geoCity: result.attributes.geoCity,
+      name: result.attributes.name,
+      openTime: result.attributes.openTime,
+      geoDistrict: result.attributes.geoDistrict,
+      album: result.attributes.album,
+      owner: owner,
+      grade: result.attributes.grade,
+      createdAt: result.createdAt
     }
     response.success(shop)
   }).then((err) => {
@@ -387,45 +392,45 @@ function getShopByUserId(request,response) {
   })
 }
 
-function getUserDetailById(request,response){
+function getUserDetailById(request, response) {
   var userId = request.params.userId
   var query = new AV.Query('_User')
   query.include('detail')
   // query.equalTo('objectId',userId)
-  query.get(userId).then((result)=>{
-    var userInfo= {
-      id : result.id,
-      identity:result.attributes.identity,
-      isVirtual:result.attributes.isVirtual,
-      status:result.attributes.status,
-      geoCity:result.attributes.geoCity,
-      nickname:result.attributes.nickname,
-      username:result.attributes.username,
-      birthday:result.attributes.birthday,
-      type:result.attributes.type,
-      emailVerified:result.attributes.emailVerified,
-      mobilePhoneNumber:result.attributes.mobilePhoneNumber,
-      avatar:result.attributes.avatar,
-      geoDistrict:result.attributes.geoDistrict,
-      gender:result.attributes.gender,
-      authData:result.attributes.authData,
-      MobilePhoneVerified:result.attributes.mobilePhoneVerified,
+  query.get(userId).then((result)=> {
+    var userInfo = {
+      id: result.id,
+      identity: result.attributes.identity,
+      isVirtual: result.attributes.isVirtual,
+      status: result.attributes.status,
+      geoCity: result.attributes.geoCity,
+      nickname: result.attributes.nickname,
+      username: result.attributes.username,
+      birthday: result.attributes.birthday,
+      type: result.attributes.type,
+      emailVerified: result.attributes.emailVerified,
+      mobilePhoneNumber: result.attributes.mobilePhoneNumber,
+      avatar: result.attributes.avatar,
+      geoDistrict: result.attributes.geoDistrict,
+      gender: result.attributes.gender,
+      authData: result.attributes.authData,
+      MobilePhoneVerified: result.attributes.mobilePhoneVerified,
       // detailId:result.attributes.detail.id,
-      geoProvince:result.attributes.geoProvince,
-      createdAt:result.createdAt
+      geoProvince: result.attributes.geoProvince,
+      createdAt: result.createdAt
     }
     response.success(userInfo)
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 
 
 }
 
-function addVirtualUserByAdmin(request,response){
+function addVirtualUserByAdmin(request, response) {
   var username = request.params.username
   var password = '168168'
-  var nickname = request.params.nickname?request.params.nickname:username
+  var nickname = request.params.nickname ? request.params.nickname : username
   var geo = request.params.geo
   var geoProvince = request.params.geoProvince
   var geoProvinceCode = request.params.geoProvinceCode
@@ -457,22 +462,22 @@ function addVirtualUserByAdmin(request,response){
   user.set('mobilePhoneNumber', mobilePhoneNumber)
   user.set('status', status)
   user.set('gender', gender)
-  user.set('isVirtual',1)
+  user.set('isVirtual', 1)
   // user.set('username', username)
   user.save().then((result)=> {
-    var userInfo = AV.Object.createWithoutData('_User',result.id)
-    userInfo.set('mobilePhoneVerified',true)
-    userInfo.save().then(()=>{
-      response.success({errcode: 0,success:true})
+    var userInfo = AV.Object.createWithoutData('_User', result.id)
+    userInfo.set('mobilePhoneVerified', true)
+    userInfo.save().then(()=> {
+      response.success({errcode: 0, success: true})
     }).catch((err) => {
       console.log(err)
-      response.error({errcode: 1, message: err.message,success:false})
+      response.error({errcode: 1, message: err.message, success: false})
     })
   }).catch((err) => {
     console.log(err)
-    response.error({errcode: 1, message: err.message,success:false})
+    response.error({errcode: 1, message: err.message, success: false})
   })
-  }
+}
 
 var UserManagerFunc = {
   getUserList: getUserList,
@@ -480,11 +485,11 @@ var UserManagerFunc = {
   addUserFromAdmin: addUserFromAdmin,
   deleteUserFromAdmin: deleteUserFromAdmin,
   updateUserFromAdmin: updateUserFromAdmin,
-  updateMyPassword:updateMyPassword,
-  getAppUserList:getAppUserList,
-  updateAppUserEnable:updateAppUserEnable,
-  getShopByUserId:getShopByUserId,
-  getUserDetailById:getUserDetailById,
-  addVirtualUserByAdmin:addVirtualUserByAdmin,
+  updateMyPassword: updateMyPassword,
+  getAppUserList: getAppUserList,
+  updateAppUserEnable: updateAppUserEnable,
+  getShopByUserId: getShopByUserId,
+  getUserDetailById: getUserDetailById,
+  addVirtualUserByAdmin: addVirtualUserByAdmin,
 }
 module.exports = UserManagerFunc
