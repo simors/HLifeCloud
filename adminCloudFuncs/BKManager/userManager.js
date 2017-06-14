@@ -427,12 +427,12 @@ function addVirtualUserByAdmin(request,response){
   var password = '168168'
   var nickname = request.params.nickname?request.params.nickname:username
   var geo = request.params.geo
-  var province = request.params.province
-  var city = request.params.city
-  var district = request.params.district
-  var provinceCode = request.params.provinceCode
-  var cityCode = request.params.cityCode
-  var districtCode = request.params.districtCode
+  var geoProvince = request.params.geoProvince
+  var geoProvinceCode = request.params.geoProvinceCode
+  var geoCity = request.params.geoCity
+  var geoCityCode = request.params.geoCityCode
+  var geoDistrict = request.params.geoDistrict
+  var geoDistrictCode = request.params.geoDistrictCode
   var type = 'normal'
   var mobilePhoneNumber = request.params.mobilePhoneNumber
   var status = 1
@@ -447,12 +447,12 @@ function addVirtualUserByAdmin(request,response){
   user.set('nickname', nickname)
   user.set('mobilePhoneVerified', true)
   user.set('geo', geo)
-  user.set('province', province)
-  user.set('city', city)
-  user.set('district', district)
-  user.set('provinceCode', provinceCode)
-  user.set('cityCode', cityCode)
-  user.set('districtCode', districtCode)
+  user.set('geoProvince', geoProvince)
+  user.set('geoCity', geoCity)
+  user.set('geoDistrict', geoDistrict)
+  user.set('geoProvinceCode', geoProvinceCode)
+  user.set('geoCityCode', geoCityCode)
+  user.set('geoDistrictCode', geoDistrictCode)
   user.set('type', type)
   user.set('mobilePhoneNumber', mobilePhoneNumber)
   user.set('status', status)
