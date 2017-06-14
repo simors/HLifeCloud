@@ -8,3 +8,6 @@ start.sh
 # VIM
 *~
 *.swp
+# OSX
+#
+.DS_Store
