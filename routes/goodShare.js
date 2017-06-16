@@ -15,12 +15,13 @@ var Good = AV.Object.extend('ShopGoods');
 // 查询 Shop 详情
 router.get('/:id', function(req, res, next) {
   var goodId = req.params.id;
-
+  // console.log('id',goodId)
   if(goodId) {
-    var query = new AV.Query(Good)
-    query.contains('targetShop')
+    var query = new AV.Query('ShopGoods')
+    query.include('targetShop')
     query.get(goodId).then((result) => {
       var goodInfo = result.attributes
+      // console.log('goodInf',goodInfo)
       var shopInfo = goodInfo.targetShop.attributes
       var status = goodInfo.status
       if(status === 1) {
@@ -31,7 +32,7 @@ router.get('/:id', function(req, res, next) {
           shopTitle: shopInfo.shopName || '汇邻优店',
           album:goodInfo.album || [],
           price: goodInfo.price || 0,
-          detail: goodInfo.detail || [],
+          detail: JSON.parse(goodInfo.detail) || [],
           phone: shopInfo.contactNumber || '未知电话',
           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
         })
