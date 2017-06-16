@@ -18,7 +18,7 @@ router.get('/:id', function(req, res, next) {
 
   if(goodId) {
     var query = new AV.Query(Good)
-    query.contained('targetShop')
+    query.contains('targetShop')
     query.get(goodId).then((result) => {
       var goodInfo = result.attributes
       var shopInfo = goodInfo.targetShop.attributes
