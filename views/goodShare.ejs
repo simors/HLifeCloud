@@ -31,8 +31,16 @@
         </a>
     </div>
     <header class="artical-title">
+        <div class="cover">
+            <img src="<%=coverPhoto%>">
+        </div>
         <h1 class="headline"><%=goodTitle %></h1>
+        <h1 class="headline">¥ <%=price %></h1>
+
     </header>
+    <article>
+
+    </article>
     <article>
         <% if(detail && detail.length > 0) { %>
         <% detail.forEach(( value ) => { %>

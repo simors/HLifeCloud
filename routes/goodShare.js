@@ -27,7 +27,7 @@ router.get('/:id', function(req, res, next) {
       if(status === 1) {
         res.render('goodShare', {
           goodTitle: goodInfo.goodsName || '汇邻优店',
-          coverUrl: goodInfo.coverPhoto || '',
+          coverPhoto: goodInfo.coverPhoto || '',
           originalPrice: goodInfo.originalPrice || '',
           shopTitle: shopInfo.shopName || '汇邻优店',
           album:goodInfo.album || [],
