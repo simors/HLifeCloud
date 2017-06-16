@@ -92,6 +92,8 @@ function setPromoterSysConfig(request, response) {
   client.setAsync(PREFIX + "syscfg", JSON.stringify(syscfg)).then(() => {
     globalPromoterCfg = syscfg
 
+    console.log('set promoter config: ', globalPromoterCfg)
+
     response.success({
       errcode: 0,
       message: '设置推广参数成功！',
@@ -1161,16 +1163,16 @@ function getAgentEarning(identity, income) {
 
   switch (identity) {
     case APPCONST.AGENT_PROVINCE:
-      agentEarn = provinceEarning.toFixed(3)
+      agentEarn = provinceEarning.toFixed(2)
       break
     case APPCONST.AGENT_CITY:
-      agentEarn = cityEarning.toFixed(3)
+      agentEarn = cityEarning.toFixed(2)
       break
     case APPCONST.AGENT_DISTRICT:
-      agentEarn = districtEarning.toFixed(3)
+      agentEarn = districtEarning.toFixed(2)
       break
     case APPCONST.AGENT_STREET:
-      agentEarn = streetEarning.toFixed(3)
+      agentEarn = streetEarning.toFixed(2)
       break
   }
   return agentEarn
@@ -1225,7 +1227,7 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       var identity = provinceAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       console.log('province agent:', provinceAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(3)
+      platformEarn = (platformEarn - agentEarn).toFixed(2)
       return insertPromoterInMysql(provinceAgent.id).then(() => {
         console.log('update province balance:', provinceAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
@@ -1249,7 +1251,7 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       var identity = cityAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       console.log('city agent:', cityAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(3)
+      platformEarn = (platformEarn - agentEarn).toFixed(2)
       return insertPromoterInMysql(cityAgent.id).then(() => {
         console.log('update city balance:', cityAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
@@ -1273,7 +1275,7 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       var identity = districtAgent.attributes.identity
       var agentEarn = getAgentEarning(identity, income)
       console.log('district agent:', districtAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(3)
+      platformEarn = (platformEarn - agentEarn).toFixed(2)
       return insertPromoterInMysql(districtAgent.id).then(() => {
         console.log('update district balance:', districtAgent.attributes.user.id, ', earn:', agentEarn)
         return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
@@ -1291,8 +1293,8 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       throw new Error('Update district promoter earning error')
     }
     // 更新推广员自己的收益
-    selfEarn = (income * royalty[0]).toFixed(3)
-    platformEarn = (platformEarn - selfEarn).toFixed(3)
+    selfEarn = (income * royalty[0]).toFixed(2)
+    platformEarn = (platformEarn - selfEarn).toFixed(2)
     console.log('update promoter balance:', promoter.attributes.user.id, ', earn: ', selfEarn)
     return updatePaymentBalance(mysqlConn, promoter.attributes.user.id, selfEarn).then(() => {
       console.log('update promoter earn:', selfEarn)
@@ -1309,8 +1311,8 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       upPro = upPromoter
       if (upPromoter) {
         console.log('first up promoter:', upPromoter.id)
-        onePromoterEarn = (income * royalty[1]).toFixed(3)
-        platformEarn = (platformEarn - onePromoterEarn).toFixed(3)
+        onePromoterEarn = (income * royalty[1]).toFixed(2)
+        platformEarn = (platformEarn - onePromoterEarn).toFixed(2)
         return insertPromoterInMysql(upPromoter.id).then(() => {
           console.log('update first up promoter balance:', upPromoter.attributes.user.id, ', earn:', onePromoterEarn)
           return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn)
@@ -1329,33 +1331,7 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       }
       return newUpPromoter
     })
-  }).then((upPromoter) => {
-    // 更新二级好友（上上级推广员）的分成收益
-    if (upPromoter) {
-      return getUpPromoter(upPromoter, false).then((upupPromoter) => {
-        upUpPro = upupPromoter
-        if (upupPromoter) {
-          console.log('second up promoter:', upupPromoter.id)
-          twoPromoterEarn = (income * royalty[2]).toFixed(3)
-          platformEarn = (platformEarn - twoPromoterEarn).toFixed(3)
-          return insertPromoterInMysql(upupPromoter.id).then(() => {
-            console.log('update second up promoter balance:', upupPromoter.attributes.user.id, ', earn:', twoPromoterEarn)
-            return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
-          }).then(() => {
-            console.log('update second up promoter earn:', twoPromoterEarn)
-            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY, charge)
-          })
-        } else {
-          return new Promise((resolve) => {
-            resolve()
-          })
-        }
-      })
-    }
-  }).then((insertRes) => {
-    if (insertRes && !insertRes.results.insertId) {
-      throw new Error('Update promoter earning of level two friend error')
-    }
+  }).then(() => {
     console.log('update platform earn:', platformEarn, ', promoter:', promoter.id)
     // 更新平台分成收益
     return updatePlatformEarning(mysqlConn, shopOwner, promoter.id, platformEarn, INVITE_SHOP)
@@ -1381,11 +1357,6 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
       var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
       leanAction.push(onePromoter)
-    }
-    if (upUpPro) {
-      console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
-      var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
-      leanAction.push(twoPromoter)
     }
     return Promise.all(leanAction)
   }).then(() => {
@@ -1413,13 +1384,13 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
  */
 function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty[0]
-  var royaltyEarnings = (royalty * income).toFixed(3)
+  var royaltyEarnings = (royalty * income).toFixed(2)
   var updatePaymentBalance = require('../Pingpp').updatePaymentBalance
   var INVITE_PROMOTER = require('../Pingpp').INVITE_PROMOTER
   var upPro = undefined
   var upUpPro = undefined
-  var onePromoterEarn = (globalPromoterCfg.invitePromoterRoyalty[1] * income).toFixed(3)
-  var twoPromoterEarn = (globalPromoterCfg.invitePromoterRoyalty[2] * income).toFixed(3)
+  var onePromoterEarn = (globalPromoterCfg.invitePromoterRoyalty[1] * income).toFixed(2)
+  var twoPromoterEarn = (globalPromoterCfg.invitePromoterRoyalty[2] * income).toFixed(2)
   var platformEarn = income
 
   var mysqlConn = undefined
@@ -1432,7 +1403,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then((conn) => {
-    platformEarn = (platformEarn - royaltyEarnings).toFixed(3)
+    platformEarn = (platformEarn - royaltyEarnings).toFixed(2)
     console.log('update user balance: userId = ', promoter.attributes.user.id, ', earn = ', royaltyEarnings)
     return updatePaymentBalance(conn, promoter.attributes.user.id, royaltyEarnings).then(() => {
       console.log('update promoter earning: invitedPromoter = ', invitedPromoter.id, ', toPromoter = ', promoter.id, ', promoter = ', promoter.id, ', earn = ', royaltyEarnings)
@@ -1448,7 +1419,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
       newUpPromoter = upPromoter
       upPro = upPromoter
       if (upPromoter) {
-        platformEarn = (platformEarn - onePromoterEarn).toFixed(3)
+        platformEarn = (platformEarn - onePromoterEarn).toFixed(2)
         console.log('update user balance: userId = ', upPromoter.attributes.user.id, ', earn = ', onePromoterEarn)
         return updatePaymentBalance(mysqlConn, upPromoter.attributes.user.id, onePromoterEarn).then(() => {
           console.log('update first up promoter earning: ', onePromoterEarn)
@@ -1465,29 +1436,7 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
       }
       return newUpPromoter
     })
-  }).then((upPromoter) => {
-    // 更新二级好友（上上级推广员）的分成收益
-    if (upPromoter) {
-      return getUpPromoter(upPromoter, false).then((upupPromoter) => {
-        upUpPro = upupPromoter
-        if (upupPromoter) {
-          platformEarn = (platformEarn - twoPromoterEarn).toFixed(3)
-          console.log('update user balance: userId = ', upupPromoter.attributes.user.id, ', earn = ', twoPromoterEarn)
-          return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn).then(() => {
-            console.log('update second up promoter earning: ', twoPromoterEarn)
-            return updatePromoterEarning(mysqlConn, invitedPromoter.id, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_PROMOTER, EARN_ROYALTY, charge)
-          })
-        } else {
-          return new Promise((resolve) => {
-            resolve()
-          })
-        }
-      })
-    }
-  }).then((insertRes) => {
-    if (insertRes && !insertRes.results.insertId) {
-      throw new Error('Update promoter earning of level two friend error')
-    }
+  }).then(() => {
     console.log('update platform earning:', platformEarn)
     return updatePlatformEarning(mysqlConn, invitedPromoter.id, promoter.id, platformEarn, INVITE_PROMOTER)
   }).then((insertRes) => {
@@ -1502,11 +1451,6 @@ function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
       console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
       var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
       leanAction.push(onePromoter)
-    }
-    if (upUpPro) {
-      console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
-      var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
-      leanAction.push(twoPromoter)
     }
     return Promise.all(leanAction)
   }).then(() => {
