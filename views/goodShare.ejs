@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title><%=title%></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <link rel="shortcut icon" type="image/x-icon" src="/images/hlyd_logo.png"/>
+    <link rel="stylesheet" href="/stylesheets/share.css">
+
+</head>
+<body class="">
+<section class="">
+    <div class="top-down-app">
+        <a href="/downloadLink">
+            <div class="ljyd-logo">
+                <img src="/images/hlyd_logo.png" alt=""/>
+            </div>
+            <div class="app-info">
+                <h4 class="name">
+                    汇邻优店</h4>
+                <div class="text">
+                    邻里互动，同城交易
+                </div>
+            </div>
+            <div class="button-down">
+                免费下载
+            </div>
+        </a>
+    </div>
+    <header class="artical-title">
+        <h1 class="headline"><%=goodTitle %></h1>
+    </header>
+    <article>
+        <% if(detail && detail.length > 0) { %>
+        <% detail.forEach(( value ) => { %>
+        <% if( value.type === 'COMP_TEXT') { %>
+        <%var textArray = value.text.split("\n")%>
+        <%textArray.forEach((value) =>{ %>
+        <p><%=value%></p>
+        <% }) %>
+        <% } else if( value.type === 'COMP_IMG' ) { %>
+        <div class="artical-image">
+            <img src="<%=value.url%>">
+        </div>
+        <% }%>
+        <% }) %>
+        <% } %>
+    </article>
+    <div class="down-app">
+        <a href="/downloadLink" class="button-down-app">下载汇邻优店，秀出美好生活</a>
+    </div>
+</section>
+
+</body>
+
+</html>
