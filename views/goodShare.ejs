@@ -14,7 +14,9 @@
         .swiper-container {
             width: 100%;
             height: auto;
-            max-height:300px;
+            max-height:250px;
+            margin-left:0px;
+            padding-left:0px;
         }
         .swiper-slide {
             text-align: center;
@@ -58,12 +60,12 @@
     </div>
     <header class="artical-title">
         <div class="cover">
-            <div class="banner-container swiper-container" >
-                <div class="swiper-wrapper" >
+            <div class="banner-container swiper-container"  style="margin-left:0px">
+                <div class="swiper-wrapper"  style="margin-left:0px">
                         <% if(album && album.length > 0) { %>
                         <% album.forEach(( value ) => { %>
-                    <div class="banner-slide swiper-slide" style = "width:100%;height:100%">
-                    <img src="<%=value%>">
+                    <div class="banner-slide swiper-slide" style="margin-left:0px">
+                    <img src="<%=value%>" style="margin-left:0px">
                     </div>
                     <% }) %>
                         <% } %>
