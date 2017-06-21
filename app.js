@@ -11,7 +11,12 @@ var topicShare = require('./routes/topicShare')
 var appDownload = require('./routes/appDownload')
 var inviteCode = require('./routes/inviteCodeShare')
 var download = require('./routes/download')
+var wxOauth = require('./routes/wxOauth')
+var wxProfile = require('./routes/wxProfile')
+var wxWithdraw = require('./routes/wxWithdraw')
 var AV = require('leanengine');
+var wechat = require('wechat');
+var GLOBAL_CONFIG = require('./config')
 
 var app = express();
 
@@ -19,6 +24,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+
 
 // 设置默认超时时间
 app.use(timeout('15s'));
@@ -36,6 +42,7 @@ app.get('/', function(req, res) {
   res.render('index', { currentTime: new Date() });
 });
 
+
 // 可以将一类的路由单独保存在一个文件中
 app.use('/todos', todos);
 
@@ -50,6 +57,16 @@ app.use('/appDownload', appDownload)
 app.use('/inviteCodeShare', inviteCode)
 
 app.use('/download', download)
+
+app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
+  
+}))
+
+app.use('/wxOauth', wxOauth)
+
+app.use('/wxProfile', wxProfile)
+
+app.use('/wxWithdraw', wxWithdraw)
 
 app.get('/downloadLink', function (req, res) {
   res.render('downloadLink', {})

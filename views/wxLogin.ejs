@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>登录</title>
+    <!-- 引入 WeUI -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css"/>
+    <script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
+
+</head>
+<body ontouchstart>
+<div class="weui-cells__title">汇邻优店</div>
+<div class="weui-cells weui-cells_form">
+    <div class="weui-cell">
+        <div class="weui-cell__hd">
+            <label class="weui-label">手机号</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input id="phone" class="weui-input" type="tel" placeholder="请输入手机号">
+        </div>
+    </div>
+
+    <div class="weui-cell">
+        <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+        <div class="weui-cell__bd">
+            <input id = "password" class="weui-input" type="password"  placeholder="请输入密码"/>
+        </div>
+    </div>
+</div>
+
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_primary"  id="showTooltips">登录</a>
+</div>
+</body>
+<script type="text/javascript">
+    var APP_ID = 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz';
+    var APP_KEY = 'UseC5jvqLT7TIiQWI8nRPmEl';
+    AV.init({
+        appId: APP_ID,
+        appKey: APP_KEY
+    });
+
+    var loginBtn = document.getElementById("showTooltips")
+    var phone = document.getElementById("phone")
+    var password = document.getElementById('password')
+    var openid = "<%=openid%>"
+
+    loginBtn.onclick = function () {
+//        AV.User.logInWithMobilePhone(phone.value, password.value).then(function (user) {
+//            if(user) {
+//                user.set('openid', openid)
+//                user.save()
+//                alert("登录成功")
+//                window.location.href = "/wxProfile?openid=" + openid
+//            } else {
+//                alert("手机号没有注册")
+//            }
+//        }, function (error) {
+//            alert("手机号没有注册")
+//        })
+
+        AV.User.logInWithMobilePhone(phone.value, password.value).then((user) => {
+            if(user) {
+                user.set('openid', openid)
+                return user.save()
+            } else {
+                alert("手机号没有注册")
+            }
+        }).then((user) => {
+            window.location.href = "/wxProfile?openid=" + openid
+        }).catch((error) => {
+            alert("手机号没有注册")
+        })
+
+    }
+</script>
+</html>

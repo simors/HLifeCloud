@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>提现到微信余额</title>
+    <!-- 引入 WeUI -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css"/>
+    <script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
+
+</head>
+<body ontouchstart>
+<div class="weui-cells__title">汇邻优店</div>
+<div class="weui-cells weui-cells_form">
+
+    <div class="weui-cell">
+        <Text>提现金额</Text>
+        <div class="weui-cell__hd">
+            <label class="weui-label">¥</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input id="amount" class="weui-input" type="tel" placeholder="">
+        </div>
+    </div>
+
+    <div class="weui-cell">
+        <Text>当前余额14.00元，全部提现</Text>
+    </div>
+</div>
+
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现到微信余额</a>
+</div>
+</body>
+<script type="text/javascript">
+    var APP_ID = 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz';
+    var APP_KEY = 'UseC5jvqLT7TIiQWI8nRPmEl';
+    AV.init({
+        appId: APP_ID,
+        appKey: APP_KEY
+    });
+
+    var withdrawBtn = document.getElementById('withdrawBtn')
+    var amount = document.getElementById('amount')
+    var openid = "<%=openid%>"
+
+    withdrawBtn.onclick = function () {
+        var params = {
+            channel: 'wx_pub',
+            order_no: '',
+            amount: amount.value,
+            openid: openid,
+            metadata: {},
+        }
+        AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
+            window.location.href = "/wxProfile?openid=" + openid
+        })
+
+    }
+</script>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+<title>个人信息</title>
+<!-- 引入 WeUI -->
+<link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css"/>
+<script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
+
+</head>
+<body ontouchstart>
+<div class="weui-cells__title">汇邻优店</div>
+<div class="weui-cells weui-cells_form">
+<div class="weui-cell">
+    <div class="weui-cell__hd">
+        <img width="100px" height="100px" src="<%=avatar%>"/>
+    </div>
+</div>
+
+<div class="weui-cell">
+    <div class="weui-cell__hd"><label class="weui-label">余额</label></div>
+    <div class="weui-cell__bd">
+        <Text>¥ <%=balance%></Text>
+    </div>
+</div>
+</div>
+
+<div class="weui-btn-area">
+<a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现到微信余额</a>
+</div>
+</body>
+<script type="text/javascript">
+
+var withdrawBtn = document.getElementById('withdrawBtn')
+withdrawBtn.onclick = function () {
+    window.location.href = "/wxWithdraw"
+}
+</script>
+</html>

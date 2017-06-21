@@ -479,6 +479,8 @@ function paymentEvent(request, response) {
 }
 
 function createTransfers(request, response) {
+
+  console.log("createTransfers")
   var order_no = request.params.order_no
   var amount = parseInt(request.params.amount).toFixed(0) * 100 //人民币分
   var card_number = request.params.card_number
@@ -487,6 +489,7 @@ function createTransfers(request, response) {
   var channel = request.params.channel
   var open_bank_code = request.params.open_bank_code
   var open_bank = request.params.open_bank
+  var openid = request.params.openid   //微信用户openid
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
@@ -552,35 +555,35 @@ function createTransfers(request, response) {
       }
         break
       case 'wx_pub': {
-        // pingpp.transfers.create({
-        //   order_no: order_no,
-        //   app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-        //   channel: "wx_pub",// 微信公众号支付
-        //   amount: amount,
-        //   currency: "cny",
-        //   type: "b2c",
-        //   recipient: account, //微信openId
-        //   extra: {
-        //     user_name: userName,
-        //     force_check: true,
-        //   },
-        //   description: "Your Description",
-        //   metadata: metadata,
-        // }, function (err, transfer) {
-        //   if (err != null) {
-        //     console.log(err)
-        //     response.error({
-        //       errcode: 1,
-        //       message: err.message,
-        //     })
-        //     return
-        //   }
-        //   response.success({
-        //     errcode: 0,
-        //     message: 'wx create transfers success!',
-        //     transfer: transfer,
-        //   })
-        // })
+        pingpp.transfers.create({
+          order_no: order_no,
+          app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+          channel: "wx_pub",// 微信公众号支付
+          amount: amount,
+          currency: "cny",
+          type: "b2c",
+          recipient: openid, //微信openId
+          extra: {
+            // user_name: userName,
+            // force_check: true,
+          },
+          description: "Your Description",
+          metadata: metadata,
+        }, function (err, transfer) {
+          if (err != null) {
+            console.log('pingpp.transfers.create', err)
+            response.error({
+              errcode: 1,
+              message: err.message,
+            })
+            return
+          }
+          response.success({
+            errcode: 0,
+            message: 'wx create transfers success!',
+            transfer: transfer,
+          })
+        })
       }
         break
       case 'alipay': {

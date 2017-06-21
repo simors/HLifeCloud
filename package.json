@@ -35,7 +35,10 @@
     "qrcode": "^0.8.1",
     "querystring": "^0.2.0",
     "redis": "^2.7.1",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "wechat": "^2.1.0",
+    "wechat-oauth": "^1.2.1",
+    "weui": "^1.1.0"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"

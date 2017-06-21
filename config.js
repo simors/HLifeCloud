@@ -60,6 +60,13 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
 }
 
+var wxConfig = {
+  token: 'y87y87y4rhkh3iuh',
+  appid: 'wxc13204ac7a37acb4',
+  encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
+  appSecret: '6d98755c0738ee954b7f17c535aa0725',
+}
+
 var GLOBAL_CONFIG = {
   REDIS_AUTH: REDIS_AUTH,
   REDIS_URL: REDIS_URL,
@@ -75,6 +82,8 @@ var GLOBAL_CONFIG = {
   PINGPP_API_KEY: PINGPP_LIVE_API_KEY,
 
   APP_DOWNLOAD_LINK: APP_DOWNLOAD_LINK,
+
+  wxConfig: wxConfig,
 }
 
 module.exports = GLOBAL_CONFIG
