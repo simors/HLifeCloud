@@ -876,10 +876,12 @@ function submitCompleteShopInfo(request, response) {
   var contactNumber = payload.contactNumber
   var contactNumber2 = payload.contactNumber2
   var ourSpecial = payload.ourSpecial
-   if(payload.album&&payload.album.length)
-   {album = payload.album}
-  if(payload.coverUrl)
-  {coverUrl = payload.coverUrl}
+  if (payload.album && payload.album.length) {
+    album = payload.album
+  }
+  if (payload.coverUrl) {
+    coverUrl = payload.coverUrl
+  }
   var tagIds = payload.tagIds
   var targetShopCategory = null
   // if(album&&album.length){
@@ -959,11 +961,11 @@ function submitEditShopInfo(request, response) {
   shop.set('contactNumber', contactNumber)
   shop.set('contactNumber2', contactNumber2)
   shop.set('ourSpecial', ourSpecial)
-  if(album&&album.length){
-    shop.set('album',album)
+  if (album && album.length) {
+    shop.set('album', album)
   }
-  if(coverUrl){
-    shop.set('coverUrl',coverUrl)
+  if (coverUrl) {
+    shop.set('coverUrl', coverUrl)
   }
   if (geo) {
     var geoArr = geo.split(',')
@@ -982,12 +984,12 @@ function submitEditShopInfo(request, response) {
 
   // console.log('_submitEditShopInfo.payload===', payload)
   // console.log('_submitEditShopInfo.shop===', shop)
-   shop.save().then((shopInfo)=> {
+  shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
-     response.success({errcode: 0, goodsInfo: shopInfo})
+    response.success({errcode: 0, goodsInfo: shopInfo})
   }, (err)=> {
     // console.log(err)
-     response.error({errcode: 1, message: '店铺更新失败'})
+    response.error({errcode: 1, message: '店铺更新失败'})
   })
 }
 
@@ -1011,7 +1013,7 @@ function fetchNearbyShops(request, response) {
     query.equalTo('targetShopCategory', targetShopCategory)
   }
 
-  if(shopTagId) {
+  if (shopTagId) {
     var shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
     query.equalTo('containedTag', shopTag)
   }
@@ -1034,7 +1036,7 @@ function fetchNearbyShops(request, response) {
       notIncludeQuery.equalTo('targetShopCategory', notTargetShopCategory)
     }
 
-    if(shopTagId) {
+    if (shopTagId) {
       var notShopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
       notIncludeQuery.equalTo('containedTag', notShopTag)
     }
