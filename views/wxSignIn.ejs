@@ -20,9 +20,29 @@
             <input id="phone" class="weui-input" type="tel" placeholder="请输入手机号">
         </div>
     </div>
+    <div class="weui-cell weui-cell_vcode">
+        <div class="weui-cell__hd">
+            <label class="weui-label">手机号</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" type="tel" placeholder="请输入手机号">
+        </div>
+        <div class="weui-cell__ft">
+            <a href="javascript:;" class="weui-vcode-btn">获取验证码</a>
+        </div>
+    </div>
+    <div class="weui-cell weui-cell_vcode">
+        <div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" type="number" placeholder="请输入验证码"/>
+        </div>
+        <div class="weui-cell__ft">
+            <img class="weui-vcode-img" src="./images/vcode.jpg" />
+        </div>
+    </div>
 
     <div class="weui-cell">
-        <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+        <div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
         <div class="weui-cell__bd">
             <input id = "password" class="weui-input" type="password"  placeholder="请输入密码"/>
         </div>
@@ -45,30 +65,31 @@
     var phone = document.getElementById("phone")
     var password = document.getElementById('password')
     var openid = "<%=openid%>"
+    var accessToken = "<%=accessToken%>"
+    var unionid = "<%=unionid%>"
+    var expires_in = "<%=expires_in%>"
+
+    var authData = {
+        "openid": unionid,
+        "access_token": accessToken,
+        "expires_at": Date.parse(expires_in),
+    }
+    var platform = 'weixin'
 
     loginBtn.onclick = function () {
-//        AV.User.logInWithMobilePhone(phone.value, password.value).then(function (user) {
-//            if(user) {
-//                user.set('openid', openid)
-//                user.save()
-//                alert("登录成功")
-//                window.location.href = "/wxProfile?openid=" + openid
-//            } else {
-//                alert("手机号没有注册")
-//            }
-//        }, function (error) {
-//            alert("手机号没有注册")
-//        })
-
-        AV.User.logInWithMobilePhone(phone.value, password.value).then((user) => {
+        AV.User.signUpOrlogInWithMobilePhone(phone.value, password.value).then((user) => {
+            alert(authData)
+            return AV.User.associateWithAuthData(user, platform, authData)
+        }).then((user) => {
             if(user) {
                 user.set('openid', openid)
                 return user.save()
-            } else {
-                alert("手机号没有注册")
             }
-        }).then((user) => {
+            return null
+        }).then((loginedUser) => {
+
             window.location.href = "/wxProfile?openid=" + openid
+
         }).catch((error) => {
             alert("手机号没有注册")
         })

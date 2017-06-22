@@ -26,32 +26,57 @@ router.get('/callback', function (req, res, next) {
     console.log(result)
     var accessToken = result.data.access_token;
     var openid = result.data.openid
+    var unionid = result.data.unionid
+    var expires_in = result.data.expires_in
 
-    var query = new AV.Query(User)
-      query.equalTo('openid', openid)
-    query.find().then(function (result) {
-      if(result && result.length == 0) {
-        res.render('wxLogin', {
-          openid: openid
+    var params = {
+      accessToken: accessToken,
+      openid: openid,
+      unionid: unionid,
+      expires_in: expires_in,
+    }
+
+    AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid}).then((result) => {
+      if(result.isSignIn) {  //已经注册
+        res.render('wxProfile', {
+          accessToken: accessToken,
+          unionid: unionid,
+          expires_in: expires_in,
         })
-
-      } else if(result && result.length == 1) {
-        res.redirect('/wxProfile?openid=' + openid)
-
-        res.render('wxProfile', {})
-      } else {
-        console.log("query User error:", result)
+      } else {  //待注册登录
+        res.render('wxSignIn', {
+          accessToken: accessToken,
+          unionid: unionid,
+          expires_in: expires_in,
+          openid: openid,
+        })
       }
-    }, function (error) {
-      next(new Error('Failed to get userinfo ' + req.query.code));
+    }).catch((error) => {
+
     })
 
-
-    // client.getUser(openid, function (err, result) {
-    //   var userInfo = result
-    //   // res.json(userInfo)
-    //   res.redirect('/wxLogin')
+    // var query = new AV.Query(User)
+    //   query.equalTo('openid', openid)
+    // query.find().then(function (result) {
+    //   if(result && result.length == 0) {
+    //     res.render('wxLogin', {
+    //       openid: openid,
+    //       accessToken: accessToken,
+    //       unionid: unionid,
+    //       expires_in: expires_in,
+    //     })
+    //
+    //   } else if(result && result.length == 1) {
+    //     res.redirect('/wxProfile?openid=' + openid)
+    //
+    //     res.render('wxProfile', {})
+    //   } else {
+    //     console.log("query User error:", result)
+    //   }
+    // }, function (error) {
+    //   next(new Error('Failed to get userinfo ' + req.query.code));
     // })
+
   })
 })
 
