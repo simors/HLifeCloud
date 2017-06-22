@@ -75,6 +75,7 @@ function getAllRoleList(request, response) {
 function addUserFromAdmin(request, response) {
   var username = request.params.name
   var password = request.params.password
+  var phone = request.params.phone
   var roleList = request.params.roleList
   var promises = []
   //console.log('role',roleList)
@@ -83,6 +84,8 @@ function addUserFromAdmin(request, response) {
   var adminUser = new AdminUser()
   adminUser.set('username', username)
   adminUser.set('password', password)
+  adminUser.set('phone', phone)
+
   adminUser.save().then((result)=> {
     var user = AV.Object.createWithoutData('AdminUser', result.id)
     roleList.forEach((result)=> {
@@ -114,47 +117,54 @@ function updateUserFromAdmin(request, response) {
   var user = AV.Object.createWithoutData('AdminUser', request.params.key)
   var promises = []
   user.set('password', request.params.password)
-  user.save().then(()=> {
-    var query = new AV.Query('UserRole')
-    query.equalTo('adminUser', user)
-    query.find().then((results)=> {
-        if (results) {
-          results.forEach((result)=> {
-              var adminRole = AV.Object.createWithoutData('UserRole', result.id)
-              // console.log('hahahahahahaha',adminRole)
-              adminRole.destroy()
-              // console.log('hahahahahahaha')
-            }
-          )
-        }
-        //console.log(arr)
-        var willRoles = []
-        request.params.roleList.forEach((role)=> {
-          // role = Trim(role)
-          var roleQuery = new AV.Query('_Role')
-          roleQuery.equalTo('name', role)
-          promises.push(
-            roleQuery.first().then((roleInfo)=> {
-                var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
-                var UserRole = AV.Object.extend('UserRole')
-                var userRole = new UserRole()
-                userRole.set('adminUser', user)
-                userRole.set('role', roleObject)
-                userRole.save()
-              },
-              (err)=> {
-                response.error(err)
-              }))
-        })
-        Promise.all(promises).then(()=> {
-          response.success()
-        })
-      },
-      (err)=> {
-        response.error(err)
-      }
-    )
+  if( request.params.phone){
+    user.set('password', request.params.phone)
 
+  }
+  user.save().then(()=> {
+    if(request.params.roleList&&request.params.roleList.length){
+      var query = new AV.Query('UserRole')
+      query.equalTo('adminUser', user)
+      query.find().then((results)=> {
+          if (results) {
+            results.forEach((result)=> {
+                var adminRole = AV.Object.createWithoutData('UserRole', result.id)
+                // console.log('hahahahahahaha',adminRole)
+                adminRole.destroy()
+                // console.log('hahahahahahaha')
+              }
+            )
+          }
+          //console.log(arr)
+          var willRoles = []
+          request.params.roleList.forEach((role)=> {
+            // role = Trim(role)
+            var roleQuery = new AV.Query('_Role')
+            roleQuery.equalTo('name', role)
+            promises.push(
+              roleQuery.first().then((roleInfo)=> {
+                  var roleObject = AV.Object.createWithoutData('_Role', roleInfo.id)
+                  var UserRole = AV.Object.extend('UserRole')
+                  var userRole = new UserRole()
+                  userRole.set('adminUser', user)
+                  userRole.set('role', roleObject)
+                  userRole.save()
+                },
+                (err)=> {
+                  response.error(err)
+                }))
+          })
+          Promise.all(promises).then(()=> {
+            response.success()
+          })
+        },
+        (err)=> {
+          response.error(err)
+        }
+      )
+    }else{
+      response.success()
+    }
   }, (err)=> {
     response.error(err)
   })
@@ -200,6 +210,7 @@ function updateMyPassword(request, response) {
   var query = new AV.Query('AdminUser')
   query.equalTo('username', request.params.username)
   query.equalTo('password', request.params.password)
+
   query.first().then((result)=> {
     //console.log('hahaha',result.id)
     if (result) {

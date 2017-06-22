@@ -77,7 +77,11 @@ function getPermissionListOnlyByLogin(request, response) {
   query.first().then((userInfo)=> {
 
     var userId = userInfo.id
-
+    var user = {
+      username:userInfo.attributes.username,
+      password:userInfo.attributes.password,
+      phone:userInfo.attributes.phone
+    }
     var user = new AV.Object.createWithoutData('AdminUser', userId)
    // var role = new AV.Object.createWithoutData('_Role', roleId)
     var query = new AV.Query('UserRole')
@@ -125,7 +129,7 @@ function getPermissionListOnlyByLogin(request, response) {
 
       })
       Promise.all(promises).then(()=>{
-        response.success(permssionList)
+        response.success({permssionList:permssionList,userInfo:user})
       })
     }, (err)=> {
       response.error(err)
