@@ -18,9 +18,7 @@ function getUserList(request, response) {
   userQuery.find().then((results)=> {
     results.forEach((result)=> {
       var query = new AV.Query('UserRole')
-
       var user = new AV.Object.createWithoutData('AdminUser', result.id)
-
       query.equalTo('adminUser', user)
       query.equalTo('enable', true)
       var limit = request.params.limit ? request.params.limit : 100    // 默认只返回10条数据
@@ -41,6 +39,7 @@ function getUserList(request, response) {
             id: result.id,
             username: result.attributes.username,
             password: result.attributes.password,
+            phone:result.attributes.phone,
             roleList: roleList
           })
         })
