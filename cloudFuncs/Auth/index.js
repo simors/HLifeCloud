@@ -605,6 +605,38 @@ function getUserById(userId) {
   return query.get(userId)
 }
 
+/**
+ * 通过微信unionid判断用户是否注册
+ * @param request
+ * @param response
+ */
+function isWXUnionIdSignIn(request, response) {
+  console.log("isWXUnionIdSignIn params:", request.params)
+  var unionid = request.params.unionid
+
+  var query = new AV.Query('_User')
+  query.equalTo("authData.weixin.openid", unionid)
+
+  return query.find().then((result) => {
+    if(result.length >= 1) {
+      response.success({
+        isSignIn: true
+      })
+    } else {
+      response.success({
+        isSignIn: false
+      })
+    }
+
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: -1,
+    })
+  })
+}
+
+
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
@@ -619,6 +651,7 @@ var authFunc = {
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo,
   getUserById: getUserById,
+  isWXUnionIdSignIn: isWXUnionIdSignIn,
 }
 
 module.exports = authFunc
