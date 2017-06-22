@@ -5,6 +5,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var todos = require('./routes/todos');
+var goodShare = require('./routes/goodShare');
+
 var shopPromotionShare = require('./routes/shopPromotionShare')
 var shopShare = require('./routes/shopShare')
 var topicShare = require('./routes/topicShare')
@@ -49,6 +51,8 @@ app.use('/todos', todos);
 app.use('/shopPromotionShare', shopPromotionShare)
 
 app.use('/shopShare', shopShare)
+
+app.use('/goodShare', goodShare)
 
 app.use('/topicShare', topicShare)
 

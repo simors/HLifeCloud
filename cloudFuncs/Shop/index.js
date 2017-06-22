@@ -844,6 +844,7 @@ function fetchNearbyShopPromotion(request, response) {
 
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('ShopPromotion')
+    notIncludeQuery.equalTo('status', "1")
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
@@ -875,10 +876,12 @@ function submitCompleteShopInfo(request, response) {
   var contactNumber = payload.contactNumber
   var contactNumber2 = payload.contactNumber2
   var ourSpecial = payload.ourSpecial
-   if(payload.album&&payload.album.length)
-   {album = payload.album}
-  if(payload.coverUrl)
-  {coverUrl = payload.coverUrl}
+  if (payload.album && payload.album.length) {
+    album = payload.album
+  }
+  if (payload.coverUrl) {
+    coverUrl = payload.coverUrl
+  }
   var tagIds = payload.tagIds
   var targetShopCategory = null
   // if(album&&album.length){
@@ -904,7 +907,7 @@ function submitCompleteShopInfo(request, response) {
     shop.set('coverUrl', coverUrl)
   }
 
-  if (album) {
+  if (album && album.length) {
     shop.set('album', album)
   }
 
@@ -958,11 +961,11 @@ function submitEditShopInfo(request, response) {
   shop.set('contactNumber', contactNumber)
   shop.set('contactNumber2', contactNumber2)
   shop.set('ourSpecial', ourSpecial)
-  if(album&&album.length){
-    shop.set('album',album)
+  if (album && album.length) {
+    shop.set('album', album)
   }
-  if(coverUrl){
-    shop.set('coverUrl',coverUrl)
+  if (coverUrl) {
+    shop.set('coverUrl', coverUrl)
   }
   if (geo) {
     var geoArr = geo.split(',')
@@ -981,12 +984,12 @@ function submitEditShopInfo(request, response) {
 
   // console.log('_submitEditShopInfo.payload===', payload)
   // console.log('_submitEditShopInfo.shop===', shop)
-   shop.save().then((shopInfo)=> {
+  shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
-     response.success({errcode: 0, goodsInfo: shopInfo})
+    response.success({errcode: 0, goodsInfo: shopInfo})
   }, (err)=> {
     // console.log(err)
-     response.error({errcode: 1, message: '店铺更新失败'})
+    response.error({errcode: 1, message: '店铺更新失败'})
   })
 }
 
@@ -1010,7 +1013,7 @@ function fetchNearbyShops(request, response) {
     query.equalTo('targetShopCategory', targetShopCategory)
   }
 
-  if(shopTagId) {
+  if (shopTagId) {
     var shopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
     query.equalTo('containedTag', shopTag)
   }
@@ -1025,13 +1028,20 @@ function fetchNearbyShops(request, response) {
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('Shop')
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
-    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
-  }
+    notIncludeQuery.equalTo('status', 1)
+    notIncludeQuery.equalTo('payment', 1)
+    notIncludeQuery.exists('coverUrl')
+    if (shopCategoryId) {
+      var notTargetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryId)
+      notIncludeQuery.equalTo('targetShopCategory', notTargetShopCategory)
+    }
 
-  if (1 == sortId) {
-    query.descending('score')
-  } else if (3 == sortId) {
-    query.descending('grade')
+    if (shopTagId) {
+      var notShopTag = AV.Object.createWithoutData('ShopTag', shopTagId)
+      notIncludeQuery.equalTo('containedTag', notShopTag)
+    }
+    notIncludeQuery.select(['objectId'])
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
 
   //用 include 告知服务端需要返回的关联属性对应的对象的详细信息，而不仅仅是 objectId

@@ -37,9 +37,9 @@ function fetchUserFollowees(request, response) {
   var userId = request.params.userId
 
   var user = null
-  if(userId) {
+  if (userId) {
     user = AV.Object.createWithoutData('_User', userId)
-  }else {
+  } else {
     user = request.currentUser
   }
 
@@ -50,8 +50,8 @@ function fetchUserFollowees(request, response) {
   query.addDescending('createdAt')
   query.limit(5) // 最多返回 5 条结果
 
-  if(!isRefresh) { //分页查询
-    if(!lastCreatedAt) {
+  if (!isRefresh) { //分页查询
+    if (!lastCreatedAt) {
       response.error({
         code: -3,
         message: 'lastCreatedAt为空'
@@ -61,13 +61,13 @@ function fetchUserFollowees(request, response) {
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
 
-  return query.find().then(function(results) {
+  return query.find().then(function (results) {
     // console.log('_Followee.results====', results)
 
-    try{
+    try {
       var userFollowees = []
 
-      if(results && results.length) {
+      if (results && results.length) {
         var shopOrQueryArr = []
         var topicOrQueryArr = []
         var followerQueryArr = []
@@ -84,13 +84,13 @@ function fetchUserFollowees(request, response) {
           shopQuery.equalTo('owner', owner)
           shopQuery.equalTo('status', 1)
           shopOrQueryArr.push(shopQuery)
-     
+
           var topicQuery = new AV.Query('Topics')
           topicQuery.equalTo('user', owner)
           topicQuery.equalTo('status', 1)
           topicQuery.addDescending('createdAt')
           topicQuery.limit(1)//最新发布的话题
-          
+
           topicOrQueryArr.push(topicQuery.find())
 
           var followerQuery = new AV.Query('_Follower')
@@ -101,26 +101,26 @@ function fetchUserFollowees(request, response) {
         var shopOrQuery = AV.Query.or.apply(null, shopOrQueryArr)
         shopOrQuery.include(['targetShopCategory', 'inviter', 'containedTag', 'containedPromotions'])
 
-        shopOrQuery.find().then((shopLcInfos)=>{
+        shopOrQuery.find().then((shopLcInfos)=> {
           // console.log('shopOrQuery...shopLcInfos=====', shopLcInfos)
           var shopInfos = shopUtil.shopFromLeancloudObject(shopLcInfos)
           authUtils.userInfosConcatShopInfo(userFollowees, shopInfos)
           // console.log('shopOrQuery...userFollowees=====', userFollowees)
 
-          Promise.all(topicOrQueryArr).then((topicLcInfos)=>{
+          Promise.all(topicOrQueryArr).then((topicLcInfos)=> {
             // console.log('topicLcInfos===************', topicLcInfos)
             var topicInfos = []
-            if(topicLcInfos && topicLcInfos.length) {
-              topicLcInfos.forEach((topicLcInfo)=>{
+            if (topicLcInfos && topicLcInfos.length) {
+              topicLcInfos.forEach((topicLcInfo)=> {
                 var topicInfo = authUtils.topicInfoFromLeancloudObject(topicLcInfo[0])
                 topicInfos.push(topicInfo)
               })
               authUtils.userInfosConcatTopicInfo(userFollowees, topicInfos)
             }
 
-            Promise.all(followerQueryArr).then((followersCounts)=>{
+            Promise.all(followerQueryArr).then((followersCounts)=> {
               // console.log('followersCounts====', followersCounts)
-              userFollowees.forEach((item, index)=>{
+              userFollowees.forEach((item, index)=> {
                 item.followersCounts = followersCounts[index]
               })
 
@@ -129,7 +129,7 @@ function fetchUserFollowees(request, response) {
                 message: '成功',
                 userFollowees: userFollowees,
               })
-            }, (err)=>{
+            }, (err)=> {
               response.success({
                 code: 0,
                 message: '成功',
@@ -137,7 +137,7 @@ function fetchUserFollowees(request, response) {
               })
             })
 
-          }, (err)=>{
+          }, (err)=> {
             response.success({
               code: 0,
               message: '成功',
@@ -145,7 +145,7 @@ function fetchUserFollowees(request, response) {
             })
           })
 
-        }, (err)=>{
+        }, (err)=> {
 
           response.success({
             code: 0,
@@ -154,22 +154,22 @@ function fetchUserFollowees(request, response) {
           })
         })
 
-      }else {
+      } else {
         response.success({
           code: 0,
           message: '成功',
           userFollowees: userFollowees
         })
       }
-      
-    }catch(error) {
+
+    } catch (error) {
       response.error({
         code: -2,
         message: err.message || '失败'
       })
     }
 
-  }, function(err) {
+  }, function (err) {
     response.error({
       code: -1,
       message: err.message || '失败'
@@ -183,9 +183,9 @@ function fetchUserFollowers(request, response) {
   var userId = request.params.userId
 
   var user = null
-  if(userId) {
+  if (userId) {
     user = AV.Object.createWithoutData('_User', userId)
-  }else {
+  } else {
     user = request.currentUser
   }
 
@@ -196,8 +196,8 @@ function fetchUserFollowers(request, response) {
   query.addDescending('createdAt')
   query.limit(5) // 最多返回 5 条结果
 
-  if(!isRefresh) { //分页查询
-    if(!lastCreatedAt) {
+  if (!isRefresh) { //分页查询
+    if (!lastCreatedAt) {
       response.error({
         code: -3,
         message: 'lastCreatedAt为空'
@@ -207,13 +207,13 @@ function fetchUserFollowers(request, response) {
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
 
-  return query.find().then(function(results) {
+  return query.find().then(function (results) {
     // console.log('_Followee.results====', results)
 
-    try{
+    try {
       var userFollowers = []
 
-      if(results && results.length) {
+      if (results && results.length) {
         var shopOrQueryArr = []
         var topicOrQueryArr = []
         var followerQueryArr = []
@@ -230,13 +230,13 @@ function fetchUserFollowers(request, response) {
           shopQuery.equalTo('owner', owner)
           shopQuery.equalTo('status', 1)
           shopOrQueryArr.push(shopQuery)
-     
+
           var topicQuery = new AV.Query('Topics')
           topicQuery.equalTo('user', owner)
           topicQuery.equalTo('status', 1)
           topicQuery.addDescending('createdAt')
           topicQuery.limit(1)//最新发布的话题
-          
+
           topicOrQueryArr.push(topicQuery.find())
 
           var followerQuery = new AV.Query('_Follower')
@@ -247,26 +247,26 @@ function fetchUserFollowers(request, response) {
         var shopOrQuery = AV.Query.or.apply(null, shopOrQueryArr)
         shopOrQuery.include(['targetShopCategory', 'inviter', 'containedTag', 'containedPromotions'])
 
-        shopOrQuery.find().then((shopLcInfos)=>{
+        shopOrQuery.find().then((shopLcInfos)=> {
           // console.log('shopOrQuery...shopLcInfos=====', shopLcInfos)
           var shopInfos = shopUtil.shopFromLeancloudObject(shopLcInfos)
           authUtils.userInfosConcatShopInfo(userFollowers, shopInfos)
           // console.log('shopOrQuery...userFollowers=====', userFollowers)
 
-          Promise.all(topicOrQueryArr).then((topicLcInfos)=>{
+          Promise.all(topicOrQueryArr).then((topicLcInfos)=> {
             // console.log('topicLcInfos===************', topicLcInfos)
             var topicInfos = []
-            if(topicLcInfos && topicLcInfos.length) {
-              topicLcInfos.forEach((topicLcInfo)=>{
+            if (topicLcInfos && topicLcInfos.length) {
+              topicLcInfos.forEach((topicLcInfo)=> {
                 var topicInfo = authUtils.topicInfoFromLeancloudObject(topicLcInfo[0])
                 topicInfos.push(topicInfo)
               })
               authUtils.userInfosConcatTopicInfo(userFollowers, topicInfos)
             }
 
-            Promise.all(followerQueryArr).then((followersCounts)=>{
+            Promise.all(followerQueryArr).then((followersCounts)=> {
               // console.log('followersCounts====', followersCounts)
-              userFollowers.forEach((item, index)=>{
+              userFollowers.forEach((item, index)=> {
                 item.followersCounts = followersCounts[index]
               })
 
@@ -275,7 +275,7 @@ function fetchUserFollowers(request, response) {
                 message: '成功',
                 userFollowers: userFollowers,
               })
-            }, (err)=>{
+            }, (err)=> {
               response.success({
                 code: 0,
                 message: '成功',
@@ -283,7 +283,7 @@ function fetchUserFollowers(request, response) {
               })
             })
 
-          }, (err)=>{
+          }, (err)=> {
             response.success({
               code: 0,
               message: '成功',
@@ -291,7 +291,7 @@ function fetchUserFollowers(request, response) {
             })
           })
 
-        }, (err)=>{
+        }, (err)=> {
 
           response.success({
             code: 0,
@@ -300,22 +300,22 @@ function fetchUserFollowers(request, response) {
           })
         })
 
-      }else {
+      } else {
         response.success({
           code: 0,
           message: '成功',
           userFollowers: userFollowers
         })
       }
-      
-    }catch(error) {
+
+    } catch (error) {
       response.error({
         code: -2,
         message: err.message || '失败'
       })
     }
 
-  }, function(err) {
+  }, function (err) {
     response.error({
       code: -1,
       message: err.message || '失败'
@@ -328,7 +328,7 @@ function login(request, response) {
   var phone = request.params.phone + '';
   var password = request.params.password + '';
 
-  if(token) {
+  if (token) {
     AV.User.become(token).then((userLcObj) => {
 
       var currentDate = new Date()
@@ -355,7 +355,7 @@ function login(request, response) {
         message: '自动登陆失败'
       })
     })
-  }else if(phone && password) {
+  } else if (phone && password) {
     AV.User.logInWithMobilePhone(phone, password).then((userLcObj) => {
 
       var currentDate = new Date()
@@ -408,31 +408,31 @@ function updateUserLocationInfo(request, response) {
   var latitude = request.params.latitude;
   var longitude = request.params.longitude;
   var geoPoint = null
-  if(latitude && longitude) {
+  if (latitude && longitude) {
     geoPoint = new AV.GeoPoint([latitude, longitude])
   }
 
   var userInfo = AV.Object.createWithoutData('_User', userId)
-  if(province) {
+  if (province) {
     userInfo.set('geoProvince', province + "")
     userInfo.set('geoProvinceCode', provinceCode + "")
   }
-  if(city) {
+  if (city) {
     userInfo.set('geoCity', city + "")
     userInfo.set('geoCityCode', cityCode + "")
   }
-  if(district) {
+  if (district) {
     userInfo.set('geoDistrict', district + "")
     userInfo.set('geoDistrictCode', districtCode + "")
   }
 
-  if(geoPoint) {
+  if (geoPoint) {
     userInfo.set('geo', geoPoint)
   }
 
-  return userInfo.save().then(function(result){
+  return userInfo.save().then(function (result) {
     response.success(result)
-  }, function(error){
+  }, function (error) {
     response.error('update fail', error)
   })
 }
@@ -441,22 +441,22 @@ function getDocterList(request, response) {
   var query = new AV.Query('Doctor')
   query.include(['user'])
   query.find().then((results) => {
-      var doctorList = []
-      results.forEach((result) => {
-        var doctor = result.attributes
-        var userInfo = doctor.user.attributes
-        // console.log("getDocterList userInfo:", userInfo)
-        doctorList.push({
-          userId: doctor.user.id,
-          doctorId: result.id,
-          username: doctor.name,
-          department: doctor.department,
-          phone: doctor.phone,
-          organization: doctor.organization,
-          spec: doctor.spec,
-          desc: doctor.desc,
-          avatar: userInfo.avatar,
-        })
+    var doctorList = []
+    results.forEach((result) => {
+      var doctor = result.attributes
+      var userInfo = doctor.user.attributes
+      // console.log("getDocterList userInfo:", userInfo)
+      doctorList.push({
+        userId: doctor.user.id,
+        doctorId: result.id,
+        username: doctor.name,
+        department: doctor.department,
+        phone: doctor.phone,
+        organization: doctor.organization,
+        spec: doctor.spec,
+        desc: doctor.desc,
+        avatar: userInfo.avatar,
+      })
     })
     response.success(doctorList)
   })
@@ -476,14 +476,14 @@ function getDocterGroup(request, response) {
         var doctorInfo = doctor.attributes
         var userInfo = doctorInfo.user.attributes
         doctorList.push({
-        userId: doctorInfo.user.id,
-        doctorId: doctor.id,
-        username: doctorInfo.name,
-        department: doctorInfo.department,
-        phone: doctorInfo.phone,
-        organization: doctorInfo.organization,
-        avatar: userInfo.avatar,
-      })
+          userId: doctorInfo.user.id,
+          doctorId: doctor.id,
+          username: doctorInfo.name,
+          department: doctorInfo.department,
+          phone: doctorInfo.phone,
+          organization: doctorInfo.organization,
+          avatar: userInfo.avatar,
+        })
       })
       response.success(doctorList)
     })
@@ -567,7 +567,7 @@ function getArticleLikers(request, response) {
   query.find().then(function (results) {
     if (results) {
       results.forEach(function (result) {
-        var likeInfo=result.attributes
+        var likeInfo = result.attributes
 
         likersList.push({
           authorId: result.id,
@@ -587,7 +587,11 @@ function getArticleLikers(request, response) {
 function setUserNickname(request, response) {
   var userId = request.params.userId
   var nickname = request.params.nickname
+  var avatarUri = request.params.avatarUri
   var user = AV.Object.createWithoutData('_User', userId)
+  if (avatarUri) {
+    user.set('avatar', avatarUri)
+  }
   user.set('nickname', nickname)
   user.save().then(() => {
     response.success({

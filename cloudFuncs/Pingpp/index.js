@@ -367,7 +367,7 @@ function paymentEvent(request, response) {
 
   return insertChargeInMysql(charge).then(() => {
     if (promoterId) {
-      console.log('invoke promoter paid:', promoterId)
+      console.log('invoke promoter paid:', promoterId, ', ', amount)
       var promoter = undefined
       return promoterFunc.getPromoterById(promoterId).then((promoterInfo) => {
         promoter = promoterInfo
