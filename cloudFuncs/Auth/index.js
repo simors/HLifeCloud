@@ -611,7 +611,6 @@ function getUserById(userId) {
  * @param response
  */
 function isWXUnionIdSignIn(request, response) {
-  console.log("isWXUnionIdSignIn params:", request.params)
   var unionid = request.params.unionid
 
   var query = new AV.Query('_User')
