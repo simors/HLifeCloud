@@ -876,7 +876,7 @@ function submitCompleteShopInfo(request, response) {
   var contactNumber = payload.contactNumber
   var contactNumber2 = payload.contactNumber2
   var ourSpecial = payload.ourSpecial
-  
+
   var tagIds = payload.tagIds
   var targetShopCategory = null
   if (shopCategoryObjectId) {
