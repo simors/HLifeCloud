@@ -10,10 +10,16 @@ var AV = require('leanengine');
 var User = AV.Object.extend('_User');
 
 router.get('/', function (req, res, next) {
-  var openid = req.query.openid;
+  var phone = req.params.phone
+  var unionid = req.params.unionid
   var avatar = undefined
   var query = new AV.Query(User)
-  query.equalTo('openid', openid)
+  if(phone) {
+    query.equalTo('mobilePhoneNumber', phone)
+  }
+  if(unionid) {
+    query.equalTo('authData.weixin.openid', unionid)
+  }
 
   query.first().then((userInfo) => {
     avatar = userInfo.attributes.avatar
@@ -23,6 +29,11 @@ router.get('/', function (req, res, next) {
     res.render('wxProfile', {
       avatar: avatar,
       balance: result.balance,
+    })
+  }).catch((error) => {
+    res.render('wxProfile', {
+      avatar: avatar,
+      balance: 0,
     })
   })
 

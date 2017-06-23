@@ -65,6 +65,7 @@ var wxConfig = {
   appid: 'wxc13204ac7a37acb4',
   encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
   appSecret: '6d98755c0738ee954b7f17c535aa0725',
+  checkSignature: true,
 }
 
 var GLOBAL_CONFIG = {

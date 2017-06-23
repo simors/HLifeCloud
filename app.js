@@ -16,6 +16,7 @@ var download = require('./routes/download')
 var wxOauth = require('./routes/wxOauth')
 var wxProfile = require('./routes/wxProfile')
 var wxWithdraw = require('./routes/wxWithdraw')
+var wxSignIn = require('./routes/wxSignIn')
 var AV = require('leanengine');
 var wechat = require('wechat');
 var GLOBAL_CONFIG = require('./config')
@@ -63,7 +64,20 @@ app.use('/inviteCodeShare', inviteCode)
 app.use('/download', download)
 
 app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
-  
+  var message = req.weixin;
+
+  switch (message.MsgType) {
+    case 'text':
+      res.reply({
+        type: 'text',
+        content: '欢迎'
+      })
+      break;
+    case 'event':
+      break
+    default:
+      break
+  }
 }))
 
 app.use('/wxOauth', wxOauth)
@@ -71,6 +85,8 @@ app.use('/wxOauth', wxOauth)
 app.use('/wxProfile', wxProfile)
 
 app.use('/wxWithdraw', wxWithdraw)
+
+app.use('/wxSignIn', wxSignIn)
 
 app.get('/downloadLink', function (req, res) {
   res.render('downloadLink', {})

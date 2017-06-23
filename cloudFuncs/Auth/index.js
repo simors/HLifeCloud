@@ -639,6 +639,7 @@ function isWXUnionIdSignIn(request, response) {
   })
 }
 
+
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,

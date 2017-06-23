@@ -29,53 +29,28 @@ router.get('/callback', function (req, res, next) {
     var unionid = result.data.unionid
     var expires_in = result.data.expires_in
 
-    var params = {
-      accessToken: accessToken,
-      openid: openid,
-      unionid: unionid,
-      expires_in: expires_in,
-    }
+    client.getUser(openid, function (err, result) {
+      var wxUserInfo = result;
+      var nickname = wxUserInfo.nickname
+      var headimgurl = wxUserInfo.headimgurl
 
-    AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid}).then((result) => {
-      if(result.isSignIn) {  //已经注册
-        res.render('wxProfile', {
-          accessToken: accessToken,
-          unionid: unionid,
-          expires_in: expires_in,
-        })
-      } else {  //待注册登录
-        res.render('wxSignIn', {
-          accessToken: accessToken,
-          unionid: unionid,
-          expires_in: expires_in,
-          openid: openid,
-        })
-      }
-    }).catch((error) => {
+      AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid}).then((result) => {
+        if(result.isSignIn) {  //已经注册
+          res.redirect('/wxProfile?unionid' + unionid)
+        } else {  //待注册登录
+          res.render('wxSignIn', {
+            accessToken: accessToken,
+            unionid: unionid,
+            expires_in: expires_in,
+            openid: openid,
+            nickname: nickname,
+            headimgurl: headimgurl,
+          })
+        }
+      }).catch((error) => {
 
+      })
     })
-
-    // var query = new AV.Query(User)
-    //   query.equalTo('openid', openid)
-    // query.find().then(function (result) {
-    //   if(result && result.length == 0) {
-    //     res.render('wxLogin', {
-    //       openid: openid,
-    //       accessToken: accessToken,
-    //       unionid: unionid,
-    //       expires_in: expires_in,
-    //     })
-    //
-    //   } else if(result && result.length == 1) {
-    //     res.redirect('/wxProfile?openid=' + openid)
-    //
-    //     res.render('wxProfile', {})
-    //   } else {
-    //     console.log("query User error:", result)
-    //   }
-    // }, function (error) {
-    //   next(new Error('Failed to get userinfo ' + req.query.code));
-    // })
 
   })
 })
