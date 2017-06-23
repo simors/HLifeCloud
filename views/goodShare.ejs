@@ -37,6 +37,7 @@
             -webkit-align-items: center;
             align-items: center;
         }
+
     </style>
 </head>
 <body class="">
@@ -70,11 +71,9 @@
                     <% }) %>
                         <% } %>
                 </div>
+                <div class="swiper-pagination"></div>
                 <!--需要焦点按钮时加这段div-->
             </div>
-                    <!--<div class="swiper-slide"><img src="<%=album[0]%></div>-->
-                    <!--<div class="swiper-slide"><img src="<%=album[1]%></div>-->
-                    <!--<div class="swiper-slide"><img src="<%=album[2]%></div>-->
         </div>
         <h1 class="headline"><%=goodTitle %></h1>
         <h1 class="headline">¥ <%=price %></h1>
@@ -107,6 +106,9 @@
 <script type="text/javascript">
     var mySwiper = new Swiper('.banner-container',{
         loop: true, //用来循环播放
+        pagination: '.swiper-pagination',
+//        paginationClickable: true,
+
     });
     setInterval("mySwiper.slideNext()", 2000); //加定时器的目的是：点击焦点按钮后，自动播放你所点击的那张图片的下一张
 </script>
