@@ -117,8 +117,7 @@ function updateUserFromAdmin(request, response) {
   var promises = []
   user.set('password', request.params.password)
   if( request.params.phone){
-    user.set('password', request.params.phone)
-
+    user.set('phone', request.params.phone)
   }
   user.save().then(()=> {
     if(request.params.roleList&&request.params.roleList.length){
