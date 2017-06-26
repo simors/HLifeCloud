@@ -137,11 +137,52 @@ function getTopicComments(topicId) {
 	})
 }
 
+function fetchTopicList(request,response){
+	var payload = request.params.payload
+	var categoryId = payload.categoryId
+	var query = new AV.Query('Topics')
+	if (payload.type == "topics" && categoryId) {
+		var category = AV.Object.createWithoutData('TopicCategory', categoryId);
+		query.equalTo('category', category)
+	}
+	if (payload.userId && (payload.type == 'userTopics'||payload.type == "myTopics")) {
+		var user = AV.Object.createWithoutData('_User', payload.userId)
+		query.equalTo('user', user)
+	}
+	query.equalTo('status',1)
+	if (payload.type == "pickedTopics") {
+		query.equalTo('picked', true)
+	}
+	var isRefresh = payload.isRefresh
+	var lastCreatedAt = payload.lastCreatedAt
+	var lastUpdatedAt = payload.lastUpdatedAt
+	if (!isRefresh) { //分页查询
+		if(lastCreatedAt) {
+			query.lessThan('createdAt', new Date(lastCreatedAt))
+		}
+	}
+	query.limit(10) // 最多返回 10 条结果
+	query.include('user')
+	query.descending('createdAt')
+	return query.find().then(function (results) {
+		var topicList = []
+		results.forEach((result)=>{
+			var user = result.attributes.user
+			result.user=user
+			topicList.push({topic:result,user:user})
+		})
+		response.success(topicList)
+	},  (err)=> {
+		response.error(err)
+	})
+}
 
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
 	getTopicComments: getTopicComments,
+	fetchTopicList:fetchTopicList,
+
 
 }
 
