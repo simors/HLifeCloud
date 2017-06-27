@@ -33,7 +33,7 @@ function fetchTopicComments(request, response) {
 	    query.lessThan('createdAt', new Date(lastCreatedAt))
 	  }
 
-	  query.limit(20)
+	  query.limit(5)
 	  
 	  query.include(['user']);
 	  query.include(['parentComment']);
