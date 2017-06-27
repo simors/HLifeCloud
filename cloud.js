@@ -49,6 +49,7 @@ AV.Cloud.define('configSetShareDomain', configFunc.setShareDomain)
 AV.Cloud.define('hLifeFetchTopicComments', topicFunc.fetchTopicComments)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
 AV.Cloud.define('fetchTopicList', topicFunc.fetchTopicList)
+AV.Cloud.define('fetchTopicDetailInfo', topicFunc.fetchTopicDetailInfo)
 
 
 //店铺app端
