@@ -33,7 +33,7 @@ function fetchTopicComments(request, response) {
 	    query.lessThan('createdAt', new Date(lastCreatedAt))
 	  }
 
-	  query.limit(50)
+	  query.limit(20)
 	  
 	  query.include(['user']);
 	  query.include(['parentComment']);
@@ -88,9 +88,9 @@ function fetchTopicComments(request, response) {
 		      				})
 		      			}
 	      			}catch(err) {
-	      				console.log('kfjdk.err-----', err)
+	      				// console.log('kfjdk.err-----', err)
 	      			}
-	      			
+
 
 	      			response.success(topicComments)
 	      		}, (error) => {
