@@ -88,7 +88,7 @@ function fetchTopicComments(request, response) {
 		      				})
 		      			}
 	      			}catch(err) {
-	      				// console.log('kfjdk.err-----', err)
+	      				console.log('kfjdk.err-----', err)
 	      			}
 
 
@@ -177,17 +177,11 @@ function fetchTopicList(request,response){
 	})
 }
 
-function fetchTopicLikerUser(request,response) {
-
-}
-
-
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
 	getTopicComments: getTopicComments,
 	fetchTopicList:fetchTopicList,
-	fetchTopicLikerUser:fetchTopicLikerUser,
 
 
 }
