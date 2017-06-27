@@ -33,7 +33,7 @@ function fetchTopicComments(request, response) {
 	    query.lessThan('createdAt', new Date(lastCreatedAt))
 	  }
 
-	  query.limit(5)
+	  query.limit(50)
 	  
 	  query.include(['user']);
 	  query.include(['parentComment']);
@@ -177,11 +177,17 @@ function fetchTopicList(request,response){
 	})
 }
 
+function fetchTopicLikerUser(request,response) {
+
+}
+
+
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
 	getTopicComments: getTopicComments,
 	fetchTopicList:fetchTopicList,
+	fetchTopicLikerUser:fetchTopicLikerUser,
 
 
 }
