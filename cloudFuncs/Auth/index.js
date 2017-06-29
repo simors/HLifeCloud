@@ -617,6 +617,10 @@ function getUserById(userId) {
 function isWXUnionIdSignIn(request, response) {
   var unionid = request.params.unionid
 
+  if(!unionid)
+    response.error({
+      errcode: -1,
+    })
   var query = new AV.Query('_User')
   query.equalTo("authData.weixin.openid", unionid)
 
@@ -639,6 +643,49 @@ function isWXUnionIdSignIn(request, response) {
   })
 }
 
+/**
+ * 现有账户绑定微信账户
+ * @param request
+ * @param response
+ */
+function bindWithWeixin(request, response) {
+  var userId = request.params.userId
+  var wx_name = request.params.name
+  var wx_avatar = request.params.avatar
+  var unionid = request.params.unionid
+  var accessToken = request.params.accessToken
+  var expiration = request.params.expiration
+
+  var user = AV.Object.createWithoutData('_User', userId)
+
+  var authData = {
+    "openid": unionid,
+    "access_token": accessToken,
+    "expires_at": Date.parse(expiration),
+  }
+  var platform = 'weixin'
+
+  AV.User.associateWithAuthData(user, platform, authData).then((authUser) => {
+    if(authUser && !authUser.attributes.nickname)
+      authUser.set('nickname', wx_name)
+    if(authUser && !authUser.attributes.avatar)
+      authUser.set('avatar', wx_avatar)
+    return authUser.save()
+  }).then((bindUser) => {
+    console.log("bindUser", bindUser)
+    response.success({
+      userInfo: bindUser
+    })
+  }).catch((err) => {
+    console.log("bindWithWeixin", err)
+    response.error({
+      errcode: -1,
+      message: '绑定微信失败'
+    })
+  })
+
+}
+
 
 var authFunc = {
   constructUserInfo: constructUserInfo,
@@ -655,6 +702,7 @@ var authFunc = {
   updateUserLocationInfo: updateUserLocationInfo,
   getUserById: getUserById,
   isWXUnionIdSignIn: isWXUnionIdSignIn,
+  bindWithWeixin: bindWithWeixin,
 }
 
 module.exports = authFunc

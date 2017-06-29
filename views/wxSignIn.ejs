@@ -74,7 +74,6 @@
              return
          }
         AV.User.signUpOrlogInWithMobilePhone(phone.value, smsCode.value).then((user) => {
-            alert(authData)
             return AV.User.associateWithAuthData(user, platform, authData)
         }).then((user) => {
             alert("登录成功")
@@ -89,6 +88,10 @@
         }).then((loginedUser) => {
             window.location.href = "/wxProfile?phone=" + phone.value
 
+            return AV.Cloud.run('promoterSyncPromoterInfo', {userId: loginedUser.id})
+
+        }).then((result) => {
+            console.log("promoterSyncPromoterInfo result:", result)
         }).catch((error) => {
             console.log(error)
             alert("登录注册失败")

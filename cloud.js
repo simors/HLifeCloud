@@ -29,6 +29,8 @@ AV.Cloud.define('hLifeUpdateUserLocationInfo', authFunc.updateUserLocationInfo)
 // 邀请码
 AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
 AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
+AV.Cloud.define('utilBindWechatOpenid',utilFunc.bindWechatOpenid)
+AV.Cloud.define('utilGetWechatUpUserOpenid',utilFunc.getWechatUpUserOpenid)
 
 AV.Cloud.define('hLifeFetchUserFollowees', authFunc.fetchUserFollowees)
 AV.Cloud.define('hLifeFetchUserFollowers', authFunc.fetchUserFollowers)
@@ -41,6 +43,7 @@ AV.Cloud.define('hLifeGetUsers', authFunc.getUsers)
 AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('isWXUnionIdSignIn', authFunc.isWXUnionIdSignIn)
+AV.Cloud.define('bindWithWeixin', authFunc.bindWithWeixin)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)
@@ -176,6 +179,9 @@ AV.Cloud.define('promoterGetTotalPerformance', PromoterFunc.getTotalPerformanceS
 AV.Cloud.define('promoterGetAreaAgentManager', PromoterFunc.getAreaAgentManagers)
 AV.Cloud.define('promoterGetPromoterByNameOrId', PromoterFunc.fetchPromoterByNameOrId)
 AV.Cloud.define('promoterGetEarningRecords', PromoterFunc.fetchEarningRecords)
+AV.Cloud.define('promoterSyncPromoterInfo', PromoterFunc.syncPromoterInfo)
+AV.Cloud.define('promoterSupplementPromoterInfo', PromoterFunc.supplementPromoterInfo)
+AV.Cloud.define('promoterGetPromoterQrCode', PromoterFunc.getPromoterQrCode)
 
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)

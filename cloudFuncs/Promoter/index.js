@@ -10,6 +10,15 @@ var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
 var APPCONST = require('../../constants/appConst')
 var mysqlUtil = require('../util/mysqlUtil')
+var wechatBoundOpenidFunc = require('../util/wechatBoundOpenid')
+var WechatAPI = require('wechat-api');
+var Request = require('request');
+var fs = require('fs');
+
+
+
+var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+
 
 const PREFIX = 'promoter:'
 
@@ -2009,6 +2018,206 @@ function fetchEarningRecords(request, response) {
   })
 }
 
+/**
+ * 微信用户注册同步推广员信息表
+ * @param request
+ * @param response
+ */
+function syncPromoterInfo(request, response) {
+  console.log("syncPromoterInfo params:", request.params)
+  var userId = request.params.userId
+
+  var currentUser = AV.Object.createWithoutData('_User', userId)
+
+  currentUser.fetch().then((user) => {
+    var currentUserOpenid = user.get('openid')
+    return wechatBoundOpenidFunc.getUpUserOpenid(currentUserOpenid)
+  }).then((reply) => {
+    if(!reply)
+      return new Promise((resolve) => {resolve()})
+    var upUserOpenid = reply
+    var userQuery = new AV.Query('_User')
+    userQuery.equalTo('openid', upUserOpenid)
+    return userQuery.first()
+  }).then((upUser) => {
+    var existQuery = new AV.Query('Promoter')
+
+    existQuery.equalTo('user', currentUser)
+    existQuery.first().then((promoter) => {
+      if(promoter) {
+        var promoterUpUser = promoter.attributes.upUser
+        if(promoterUpUser) {
+          return new Promise((resolve) => {resolve()})
+        } else {
+          promoter.set('upUser', upUser)
+          return promoter.save()
+        }
+      } else {
+        var Promoter = AV.Object.extend('Promoter')
+        var promoter = new Promoter()
+        promoter.set('user', currentUser)
+        promoter.set('upUser', upUser)
+        return promoter.save()
+      }
+    }).then((promoter) => {
+      if(promoter) {
+        response.success({
+          errcode: 0,
+          promoter: promoter
+        })
+      } else {
+        response.error({
+          errcode: 1,
+          message: '推广员信息已经绑定'
+        })
+      }
+    })
+
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: 1,
+      message: '同步推广员信息失败',
+    })
+  })
+}
+
+/**
+ * 补充用户推广员信息
+ * @param request
+ * @param response
+ */
+function supplementPromoterInfo(request, response) {
+  var userId = request.params.userId
+
+  var currentUser = AV.Object.createWithoutData('_User', userId)
+  var existQuery = new AV.Query('Promoter')
+
+  existQuery.equalTo('user', currentUser)
+  existQuery.first().then((result) => {
+    if(!result) {
+      var Promoter = AV.Object.extend('Promoter')
+      var promoter = new Promoter()
+      promoter.set('user', currentUser)
+      return promoter.save()
+    }
+    return new Promise((resolve) => {resolve(result)})
+  }).then((promoter) => {
+    if(promoter) {
+      response.success({
+        errcode: 0,
+        promoter: promoter,
+      })
+    } else {
+      response.error({
+        errcode: 1,
+        message: '补充用户推广员信息失败',
+      })
+    }
+  }).catch((err) => {
+    console.log('syncPromoterInfo', err)
+    response.error({
+      errcode: 1,
+      message: '补充用户推广员信息失败',
+    })
+  })
+
+}
+
+/**
+ * 获取我的推广二维码
+ * @param request
+ * @param response
+ */
+function getPromoterQrCode(request, response) {
+  var openid = request.params.openid
+  var unionid = request.params.unionid
+
+  if(!openid && !unionid) {
+    response.error({
+      errcode: 1,
+      message: '参数错误',
+    })
+  }
+
+  var query = new AV.Query('_User')
+  if(openid) {
+    query.equalTo("openid", openid)
+  }
+  if(unionid) {
+    query.equalTo("authData.weixin.openid", unionid)
+  }
+
+  query.first().then((user) => {
+    if(!user) {
+      response.success({
+        isSignIn: false
+      })
+    } else {
+      var existQuery = new AV.Query('Promoter')
+      existQuery.equalTo('user', user)
+      existQuery.first().then((promoter) => {
+        if(promoter) {
+          var qrcode = promoter.get('qrcode')
+          if(!qrcode) {
+            wechat_api.createLimitQRCode(openid, function (err, result) {
+
+              var ticket = result.ticket
+               new Promise(function (resolve, reject) {
+                Request({
+                  url: wechat_api.showQRCodeURL(ticket),
+                  encoding: 'base64'
+                }, function(err, res, body) {
+                  resolve(body);
+                });
+              }).then((body) => {
+                fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
+                  wechat_api.uploadMaterial('./qrcode.jpeg', 'image', function (err, result) {
+                    var mediaId = result.media_id
+                    var data = {base64: body}
+                    var file = new AV.File('qrcode.jpeg', data)
+                    file.save().then(function (file) {
+                      var url = file.url()
+                      var qrcode = {
+                        mediaId: mediaId,
+                        url: url,
+                      }
+                      promoter.set('qrcode', qrcode)
+                      promoter.save().then(function (promoter) {
+                        response.success({
+                          isSignIn: true,
+                          qrcode: qrcode
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          } else {
+            response.success({
+              isSignIn: true,
+              qrcode: qrcode
+            })
+          }
+        } else {
+          response.success({
+            isSignIn: false
+          })
+        }
+      })
+
+    }
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: 1,
+      message: '获取我的二维码失败',
+    })
+  })
+
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2045,6 +2254,9 @@ var PromoterFunc = {
   getAreaAgentManagers: getAreaAgentManagers,
   fetchPromoterByNameOrId: fetchPromoterByNameOrId,
   fetchEarningRecords: fetchEarningRecords,
+  syncPromoterInfo: syncPromoterInfo,
+  supplementPromoterInfo: supplementPromoterInfo,
+  getPromoterQrCode: getPromoterQrCode,
 }
 
 module.exports = PromoterFunc

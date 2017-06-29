@@ -62,9 +62,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
 var wxConfig = {
   token: 'y87y87y4rhkh3iuh',
-  appid: 'wxc13204ac7a37acb4',
+  appid: 'wx3dfde3f7184c8c51',
   encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-  appSecret: '6d98755c0738ee954b7f17c535aa0725',
+  appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
   checkSignature: true,
 }
 

@@ -13,7 +13,7 @@ var client = new OAuth(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appS
 var User = AV.Object.extend('_User');
 
 router.get('/', function (req, res, next) {
-  var domain = "http://hlyd-dev.leanapp.cn"
+  var domain = "http://067c71ab.ngrok.io"
   var auth_callback_url = domain + '/wxOauth/callback'
   var url = client.getAuthorizeURL(auth_callback_url, '', 'snsapi_userinfo');
   console.log(url)
