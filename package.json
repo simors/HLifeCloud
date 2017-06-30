@@ -23,6 +23,7 @@
     "dateformat": "^2.0.0",
     "ejs": "2.3.1",
     "express": "4.12.3",
+    "images": "^3.0.0",
     "inherit": "^2.2.6",
     "leancloud-realtime": "^3.3.4",
     "leancloud-realtime-plugin-typed-messages": "^1.0.0",

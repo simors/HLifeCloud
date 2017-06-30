@@ -14,6 +14,8 @@ var wechatBoundOpenidFunc = require('../util/wechatBoundOpenid')
 var WechatAPI = require('wechat-api');
 var Request = require('request');
 var fs = require('fs');
+var images = require("images");
+
 
 
 
@@ -2154,6 +2156,8 @@ function getPromoterQrCode(request, response) {
         isSignIn: false
       })
     } else {
+      var avatar = user.attributes.avatar
+
       var existQuery = new AV.Query('Promoter')
       existQuery.equalTo('user', user)
       existQuery.first().then((promoter) => {
@@ -2172,25 +2176,48 @@ function getPromoterQrCode(request, response) {
                 });
               }).then((body) => {
                 fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
-                  wechat_api.uploadMaterial('./qrcode.jpeg', 'image', function (err, result) {
-                    var mediaId = result.media_id
-                    var data = {base64: body}
-                    var file = new AV.File('qrcode.jpeg', data)
-                    file.save().then(function (file) {
-                      var url = file.url()
-                      var qrcode = {
-                        mediaId: mediaId,
-                        url: url,
-                      }
-                      promoter.set('qrcode', qrcode)
-                      promoter.save().then(function (promoter) {
-                        response.success({
-                          isSignIn: true,
-                          qrcode: qrcode
+                  if(!err) {
+
+                    Request({
+                      url: avatar,
+                      encoding: 'base64'
+                    }, function (err, res, body) {
+                      fs.writeFile('./avatar.png', body, 'base64', function (err) {
+                        var background = './public/images/qrcode_template.png'
+                        var logo = './public/images/hlyd_logo.png'
+                        var qrcode = './qrcode.jpeg'
+                        var localAvatar = './avatar.png'
+                        composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
+                          wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
+                            var mediaId = result.media_id
+                            var data = {base64: body}
+                            var file = new AV.File('./myQrCode.png', data)
+                            file.save().then(function (file) {
+                              //删除生成的临时图片
+                              fs.unlink('./myQrCode.png')
+                              fs.unlink('./qrcode.jpeg')
+                              fs.unlink(localAvatar)
+
+                              var url = file.url()
+                              var qrcode = {
+                                mediaId: mediaId,
+                                url: url,
+                              }
+                              promoter.set('qrcode', qrcode)
+                              promoter.save().then(function (promoter) {
+                                response.success({
+                                  isSignIn: true,
+                                  qrcode: qrcode
+                                })
+                              })
+                            })
+                          })
                         })
                       })
                     })
-                  })
+
+                  }
+
                 })
               })
             })
@@ -2214,6 +2241,28 @@ function getPromoterQrCode(request, response) {
       errcode: 1,
       message: '获取我的二维码失败',
     })
+  })
+
+}
+
+function composeQrCodeImage(background, qrcode, logo, avatar, name) {
+  images(background).draw(
+    images(qrcode).size(320),
+    215, 824    //二维码左上角合成坐标
+  ).draw(
+    images(80, 80).fill(0xff, 0xff, 0xff).draw(
+      images(logo).size(76), 2, 2
+    ),
+    335, 944   //汇邻优店左上角合成坐标
+  ).draw(
+    images(avatar).size(64),
+    210, 720    //个人头像合成坐标
+  ).save("myQrCode.png", {
+    quality: 50
+  })
+
+  return new Promise((resolve, reject) => {
+    resolve()
   })
 
 }
