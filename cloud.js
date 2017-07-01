@@ -48,8 +48,12 @@ AV.Cloud.define('bindWithWeixin', authFunc.bindWithWeixin)
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)
 AV.Cloud.define('configSetShareDomain', configFunc.setShareDomain)
+
+//话题app端
 AV.Cloud.define('hLifeFetchTopicComments', topicFunc.fetchTopicComments)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
+AV.Cloud.define('fetchTopicList', topicFunc.fetchTopicList)
+
 
 //店铺app端
 AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)

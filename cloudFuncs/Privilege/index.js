@@ -67,7 +67,7 @@ function getMenuListByLogin(request, response) {
 function getPermissionListOnlyByLogin(request, response) {
   var username = request.params.username
   var password = request.params.password
-  var permssionList = []
+  var permissionList = []
   var query = new AV.Query('AdminUser')
   query.equalTo('username',username)
   query.equalTo('password',password)
@@ -77,7 +77,7 @@ function getPermissionListOnlyByLogin(request, response) {
   query.first().then((userInfo)=> {
 
     var userId = userInfo.id
-    var user = {
+    var userDetail = {
       username:userInfo.attributes.username,
       password:userInfo.attributes.password,
       phone:userInfo.attributes.phone
@@ -111,7 +111,7 @@ function getPermissionListOnlyByLogin(request, response) {
             // console.log('2', result.attributes.permission.attributes.subMenu)
             // console.log('3',result.attributes.permission.attributes.name)
             // console.log('4',result.attributes.permission.attributes.key)
-            permssionList.push({
+            permissionList.push({
               subPermission: result.attributes.permission.attributes.subMenu,
               menu:result.attributes.permission.attributes.menu,
 
@@ -129,7 +129,7 @@ function getPermissionListOnlyByLogin(request, response) {
 
       })
       Promise.all(promises).then(()=>{
-        response.success({permssionList:permssionList,userInfo:user})
+        response.success({permissionList:permissionList,userInfo:userDetail})
       })
     }, (err)=> {
       response.error(err)
@@ -137,7 +137,7 @@ function getPermissionListOnlyByLogin(request, response) {
   }, (err)=> {
     response.error(err)
   }).catch((error) => {
-    response.error({error: 'password or username error'})
+    response.error({error: '用户名或密码错误'})
   })
 }
 var PrivilegeFunc = {
