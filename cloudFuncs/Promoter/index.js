@@ -2250,7 +2250,7 @@ function composeQrCodeImage(background, qrcode, logo, avatar, name) {
     images(qrcode).size(320),
     215, 824    //二维码左上角合成坐标
   ).draw(
-    images(80, 80).fill(0xff, 0xff, 0xff).draw(
+    images(80, 80).draw(
       images(logo).size(76), 2, 2
     ),
     335, 944   //汇邻优店左上角合成坐标
@@ -2264,7 +2264,6 @@ function composeQrCodeImage(background, qrcode, logo, avatar, name) {
   return new Promise((resolve, reject) => {
     resolve()
   })
-
 }
 
 var PromoterFunc = {

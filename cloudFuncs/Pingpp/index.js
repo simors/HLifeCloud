@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/3/27.
  */
+var AV = require('leanengine');
 var Crypto = require('crypto');
 var GLOBAL_CONFIG = require('../../config')
 var pingpp = require('pingpp')(GLOBAL_CONFIG.PINGPP_API_KEY)
@@ -258,8 +259,17 @@ function updatePaymentInfoInMysql(paymentInfo) {
     return mysqlUtil.query(conn, sql, [paymentInfo.userId])
   }).then((queryRes) => {
     if (queryRes.results[0].cnt == 1) {
-      sql = "UPDATE `PaymentInfo` SET `card_number` = ?, `id_name` = ?, `open_bank_code` = ?, `open_bank` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
-      return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount, paymentInfo.userId])
+      if(paymentInfo.channel == 'alipay') {
+        sql = "UPDATE `PaymentInfo` SET `card_number` = ?, `id_name` = ?, `open_bank_code` = ?, `open_bank` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
+        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount, paymentInfo.userId])
+      } else if (paymentInfo.channel == 'wx_pub') {
+        sql = "UPDATE `PaymentInfo` SET `open_id` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
+        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.openid, paymentInfo.amount, paymentInfo.userId])
+      } else {
+        return new Promise((resolve) => {
+          resolve()
+        })
+      }
     } else {
       return new Promise((resolve) => {
         resolve()
@@ -528,6 +538,7 @@ function createTransfers(request, response) {
 
           if (transfer.metadata.userId) {
             var paymentInfo = {
+              channel: transfer.channel,
               userId: transfer.metadata.userId,
               card_number: transfer.extra.card_number,
               user_name: transfer.extra.user_name,
@@ -578,11 +589,38 @@ function createTransfers(request, response) {
             })
             return
           }
-          response.success({
-            errcode: 0,
-            message: 'wx create transfers success!',
-            transfer: transfer,
+
+          console.log(transfer)
+          var query = new AV.Query('_User')
+          query.equalTo("openid", transfer.recipient)
+          query.first().then((user) => {
+            if(user) {
+              var paymentInfo = {
+                channel: transfer.channel,
+                userId: user.id,
+                openid: transfer.recipient,
+                amount: (transfer.amount).toFixed(0) * 0.01,
+              }
+              console.log("updatePaymentInfoInMysql", paymentInfo)
+              updatePaymentInfoInMysql(paymentInfo).then(() => {
+                response.success({
+                  errcode: 0,
+                  message: 'allinpay create transfers success!',
+                  transfer: transfer,
+                })
+              }).catch((error) => {
+                response.error(error)
+              })
+            } else {
+              response.error({
+                errcode: 1,
+                message: "没有找到用户信息",
+              })
+            }
+          }).catch((error) => {
+            response.error(error)
           })
+
         })
       }
         break
