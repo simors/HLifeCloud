@@ -48,7 +48,7 @@ var memu = {
         {
           "type":"view",
           "name":"我的钱包",
-          "url":"http://067c71ab.ngrok.io/wxOauth"
+          "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
         },
         {
           "type":"view",
@@ -109,7 +109,7 @@ app.use('/inviteCodeShare', inviteCode)
 app.use('/download', download)
 
 app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
-  var message = req.weixin;
+
   console.log('weixin  message:', message)
 
   switch (message.MsgType) {
@@ -124,20 +124,35 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
       if(message.Event === 'CLICK' && message.EventKey === 'MY_QRCODE') {
         var openid = message.FromUserName
 
-        AV.Cloud.run('promoterGetPromoterQrCode', {openid: openid}).then((result) => {
-          if(result.isSignIn && result.qrcode) {
-            res.reply({
-              type: 'image',
-              content: {
-                mediaId: result.qrcode.mediaId
+        var query = new AV.Query('_User')
+        query.equalTo("openid", openid)
+        query.first().then((user) => {
+          if(user && user.attributes.authData) {
+            var unionid = user.attributes.authData.weixin.openid
+            AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
+              if(result.isSignIn && result.qrcode) {
+                res.reply({
+                  type: 'image',
+                  content: {
+                    mediaId: result.qrcode.mediaId
+                  }
+                })
+              } else {
+                res.reply([{
+                  title: '登录注册',
+                  description: '请登录注册',
+                  picurl: 'https://simors.github.io/ljyd_blog/ic_launcher.png',
+                  url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
+                }])
               }
             })
+
           } else {
             res.reply([{
               title: '登录注册',
               description: '请登录注册',
               picurl: 'https://simors.github.io/ljyd_blog/ic_launcher.png',
-              url: 'http://067c71ab.ngrok.io/wxOauth'
+              url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
             }])
           }
         })
@@ -145,7 +160,7 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
       } else if(message.Event === 'subscribe') {
         var scene_id = message.EventKey
         var openid = message.FromUserName
-        var upUser_openid = scene_id.slice(8)
+        var upUser_unionid = scene_id.slice(8)
 
         var query = new AV.Query('_User')
         query.equalTo("openid", openid)
@@ -153,10 +168,10 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
         query.first().then((result) => {
           if(!result) {
             var params = {
-              openid: openid,
-              upUserOpenid: upUser_openid
+              unionid: result.attributes.authData.weixin.openid,
+              upUserUnionid: upUser_unionid
             }
-            return AV.Cloud.run('utilBindWechatOpenid', params)
+            return AV.Cloud.run('utilBindWechatUnionid', params)
           }
           return new Promise((resolve) => {
             resolve()

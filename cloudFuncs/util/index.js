@@ -9,8 +9,8 @@ var wechatBoundOpenidFunc = require('./wechatBoundOpenid')
 var utilFunc = {
   getInvitationCode: inviteCodeFunc.getInvitationCode,
   verifyInvitationCode: inviteCodeFunc.verifyInvitationCode,
-  bindWechatOpenid: wechatBoundOpenidFunc.bindWechatOpenid,
-  getWechatUpUserOpenid: wechatBoundOpenidFunc.getWechatUpUserOpenid,
+  bindWechatUnionid: wechatBoundOpenidFunc.bindWechatUnionid,
+  getWechatUpUserUnionid: wechatBoundOpenidFunc.getWechatUpUserUnionid,
 }
 
 module.exports = utilFunc

@@ -7,9 +7,9 @@ var redis = require('redis');
 var GLOBAL_CONFIG = require('../../config')
 
 
-const PREFIX = 'openid:'
+const PREFIX = 'unionid:'
 
-function bindOpenid(upUserOpenid, openid) {
+function bindUionid(upUserUnionid, unionid) {
   Promise.promisifyAll(redis.RedisClient.prototype);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
   client.auth(GLOBAL_CONFIG.REDIS_AUTH)
@@ -19,12 +19,12 @@ function bindOpenid(upUserOpenid, openid) {
   client.on('error', function (err) {
     console.log("error:", err)
   });
-  var key = PREFIX + openid
+  var key = PREFIX + unionid
   return client.getAsync(key).then((reply) => {
     if (reply != null) {
       return false
     } else {
-      client.setAsync(key, upUserOpenid)
+      client.setAsync(key, upUserUnionid)
       return true
     }
   }).finally(() => {
@@ -33,13 +33,13 @@ function bindOpenid(upUserOpenid, openid) {
 
 }
 
-function bindWechatOpenid(request, response) {
-  openid = request.params.openid
-  upUserOpenid = request.params.upUserOpenid
+function bindWechatUnionid(request, response) {
+  unionid = request.params.unionid
+  upUserUnionid = request.params.upUserUnionid
 
 
-  if (openid && upUserOpenid) {
-    bindOpenid(upUserOpenid, openid).then((reply) => {
+  if (unionid && upUserUnionid) {
+    bindUionid(upUserUnionid, unionid).then((reply) => {
       if (reply) {
         response.success({
           errcode: 0,
@@ -60,7 +60,7 @@ function bindWechatOpenid(request, response) {
   }
 }
 
-function getUpUserOpenid(openid) {
+function getUpUserUnionid(unionid) {
   Promise.promisifyAll(redis.RedisClient.prototype);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
   client.auth(GLOBAL_CONFIG.REDIS_AUTH)
@@ -70,7 +70,7 @@ function getUpUserOpenid(openid) {
   client.on('error', function (err) {
     console.log("error:", err)
   });
-  var key = PREFIX + openid
+  var key = PREFIX + unionid
   return client.getAsync(key).then((reply) => {
     if(reply != null) {
       return reply
@@ -80,11 +80,11 @@ function getUpUserOpenid(openid) {
   })
 }
 
-function getWechatUpUserOpenid(request, response) {
-  var openid = request.params.openid
+function getWechatUpUserUnionid(request, response) {
+  var unionid = request.params.unionid
 
-  if(openid) {
-    getUpUserOpenid(openid).then((reply) => {
+  if(unionid) {
+    getUpUserUnionid(unionid).then((reply) => {
       if (reply) {
         response.success({
           errcode: 0,
@@ -108,9 +108,9 @@ function getWechatUpUserOpenid(request, response) {
 
 
 var wechatBoundOpenidFunc = {
-  bindWechatOpenid: bindWechatOpenid,
-  getUpUserOpenid: getUpUserOpenid,
-  getWechatUpUserOpenid: getWechatUpUserOpenid
+  bindWechatUnionid: bindWechatUnionid,
+  getUpUserUnionid: getUpUserUnionid,
+  getWechatUpUserUnionid: getWechatUpUserUnionid
 
 }
 

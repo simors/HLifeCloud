@@ -40,25 +40,7 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 //应用下载链接配置
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
-if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
-  REDIS_DB = DEBUG_REDIS
-  MYSQL_USER = MYSQL_DEV_USER
-  MYSQL_PWD = MYSQL_DEV_PWD
-  MYSQL_DB = MYSQL_DEV_DB
-  PINGPP_APP_ID = PINGPP_DEV_APP_ID
-} else if (process.env.LEANCLOUD_APP_ID === 'TUVjJ5HHNmopfJeREa4IcB1T-gzGzoHsz') {
-  REDIS_DB = PRE_REDIS
-  MYSQL_USER = MYSQL_PRE_USER
-  MYSQL_PWD = MYSQL_PRE_PWD
-  MYSQL_DB = MYSQL_PRE_DB
-  PINGPP_APP_ID = PINGPP_PRE_APP_ID
-} else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
-  REDIS_DB = PROD_REDIS
-  MYSQL_USER = MYSQL_PROD_USER
-  MYSQL_PWD = MYSQL_PROD_PWD
-  MYSQL_DB = MYSQL_PROD_DB
-  PINGPP_APP_ID = PINGPP_PRO_APP_ID
-}
+var MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
 
 var wxConfig = {
   token: 'y87y87y4rhkh3iuh',
@@ -67,6 +49,55 @@ var wxConfig = {
   appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
   checkSignature: true,
 }
+
+if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
+  REDIS_DB = DEBUG_REDIS
+  MYSQL_USER = MYSQL_DEV_USER
+  MYSQL_PWD = MYSQL_DEV_PWD
+  MYSQL_DB = MYSQL_DEV_DB
+  PINGPP_APP_ID = PINGPP_DEV_APP_ID
+
+  MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
+  wxConfig = {
+    token: 'y87y87y4rhkh3iuh',
+    appid: 'wx3dfde3f7184c8c51',
+    encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
+    appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
+    checkSignature: true,
+  }
+
+} else if (process.env.LEANCLOUD_APP_ID === 'TUVjJ5HHNmopfJeREa4IcB1T-gzGzoHsz') {
+  REDIS_DB = PRE_REDIS
+  MYSQL_USER = MYSQL_PRE_USER
+  MYSQL_PWD = MYSQL_PRE_PWD
+  MYSQL_DB = MYSQL_PRE_DB
+  PINGPP_APP_ID = PINGPP_PRE_APP_ID
+
+  MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
+  wxConfig = {
+    token: '456789tyuioghjk',
+    appid: 'wx310b23ce34f394a0',
+    encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
+    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
+    checkSignature: true,
+  }
+} else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
+  REDIS_DB = PROD_REDIS
+  MYSQL_USER = MYSQL_PROD_USER
+  MYSQL_PWD = MYSQL_PROD_PWD
+  MYSQL_DB = MYSQL_PROD_DB
+  PINGPP_APP_ID = PINGPP_PRO_APP_ID
+
+  MP_SERVER_DOMAIN = "http://hlyd-pro.leanapp.cn"
+  wxConfig = {
+    token: '456789tyuioghjk',
+    appid: 'wx310b23ce34f394a0',
+    encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
+    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
+    checkSignature: true,
+  }
+}
+
 
 var GLOBAL_CONFIG = {
   REDIS_AUTH: REDIS_AUTH,
@@ -85,6 +116,8 @@ var GLOBAL_CONFIG = {
   APP_DOWNLOAD_LINK: APP_DOWNLOAD_LINK,
 
   wxConfig: wxConfig,
+
+  MP_SERVER_DOMAIN: MP_SERVER_DOMAIN
 }
 
 module.exports = GLOBAL_CONFIG

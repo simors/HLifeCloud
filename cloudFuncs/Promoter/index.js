@@ -2032,8 +2032,9 @@ function syncPromoterInfo(request, response) {
   var currentUser = AV.Object.createWithoutData('_User', userId)
 
   currentUser.fetch().then((user) => {
-    var currentUserOpenid = user.get('openid')
-    return wechatBoundOpenidFunc.getUpUserOpenid(currentUserOpenid)
+    var authData = user.get('authData')
+    var currentUserUnionid = authData.weixin.openid
+    return wechatBoundOpenidFunc.getUpUserUnionid(currentUserUnionid)
   }).then((reply) => {
     if(!reply)
       return new Promise((resolve) => {resolve()})
@@ -2132,10 +2133,9 @@ function supplementPromoterInfo(request, response) {
  * @param response
  */
 function getPromoterQrCode(request, response) {
-  var openid = request.params.openid
   var unionid = request.params.unionid
 
-  if(!openid && !unionid) {
+  if(!unionid) {
     response.error({
       errcode: 1,
       message: '参数错误',
@@ -2143,12 +2143,8 @@ function getPromoterQrCode(request, response) {
   }
 
   var query = new AV.Query('_User')
-  if(openid) {
-    query.equalTo("openid", openid)
-  }
-  if(unionid) {
-    query.equalTo("authData.weixin.openid", unionid)
-  }
+
+  query.equalTo("authData.weixin.openid", unionid)
 
   query.first().then((user) => {
     if(!user) {
@@ -2164,7 +2160,7 @@ function getPromoterQrCode(request, response) {
         if(promoter) {
           var qrcode = promoter.get('qrcode')
           if(!qrcode) {
-            wechat_api.createLimitQRCode(openid, function (err, result) {
+            wechat_api.createLimitQRCode(unionid, function (err, result) {
 
               var ticket = result.ticket
                new Promise(function (resolve, reject) {
@@ -2190,27 +2186,31 @@ function getPromoterQrCode(request, response) {
                         composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
                           wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
                             var mediaId = result.media_id
-                            var data = {base64: body}
-                            var file = new AV.File('./myQrCode.png', data)
-                            file.save().then(function (file) {
-                              //删除生成的临时图片
-                              fs.unlink('./myQrCode.png')
-                              fs.unlink('./qrcode.jpeg')
-                              fs.unlink(localAvatar)
 
-                              var url = file.url()
-                              var qrcode = {
-                                mediaId: mediaId,
-                                url: url,
-                              }
-                              promoter.set('qrcode', qrcode)
-                              promoter.save().then(function (promoter) {
-                                response.success({
-                                  isSignIn: true,
-                                  qrcode: qrcode
+                            fs.readFile('./myQrCode.png', 'base64', function (err, buffer) {
+                              var data = {base64: buffer}
+                              var file = new AV.File('./myQrCode.png', data)
+                              file.save().then(function (file) {
+                                //删除生成的临时图片
+                                fs.unlink('./myQrCode.png')
+                                fs.unlink('./qrcode.jpeg')
+                                fs.unlink(localAvatar)
+
+                                var url = file.url()
+                                var qrcode = {
+                                  mediaId: mediaId,
+                                  url: url,
+                                }
+                                promoter.set('qrcode', qrcode)
+                                promoter.save().then(function (promoter) {
+                                  response.success({
+                                    isSignIn: true,
+                                    qrcode: qrcode
+                                  })
                                 })
                               })
                             })
+
                           })
                         })
                       })

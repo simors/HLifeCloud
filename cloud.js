@@ -29,8 +29,8 @@ AV.Cloud.define('hLifeUpdateUserLocationInfo', authFunc.updateUserLocationInfo)
 // 邀请码
 AV.Cloud.define('utilVerifyInvitationCode', utilFunc.verifyInvitationCode)
 AV.Cloud.define('utilGetInvitationCode',utilFunc.getInvitationCode)
-AV.Cloud.define('utilBindWechatOpenid',utilFunc.bindWechatOpenid)
-AV.Cloud.define('utilGetWechatUpUserOpenid',utilFunc.getWechatUpUserOpenid)
+AV.Cloud.define('utilBindWechatUnionid',utilFunc.bindWechatUnionid)
+AV.Cloud.define('utilGetWechatUpUserUnionid',utilFunc.getWechatUpUserUnionid)
 
 AV.Cloud.define('hLifeFetchUserFollowees', authFunc.fetchUserFollowees)
 AV.Cloud.define('hLifeFetchUserFollowers', authFunc.fetchUserFollowers)
