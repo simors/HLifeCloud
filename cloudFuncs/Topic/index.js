@@ -399,6 +399,52 @@ function fetchUserUps(request,response){
 	})
 }
 
+function upByUser(request,response){
+	var userId = request.params.userId
+	var user = AV.Object.createWithoutData('_User',userId)
+	var upType = request.params.upType
+	var targetId = request.params.targetId
+	var upItem = undefined
+	var query = new AV.Query('Up')
+
+	if(upType=='topic'){
+		upItem = AV.Object.createWithoutData('Topics',targetId)
+	} else if(upType=='topicComment'){
+		upItem = AV.Object.createWithoutData('TopicComments',targetId)
+	}
+
+	query.equalTo('targetId', targetId)
+
+	query.equalTo('user',user)
+	query.equalTo('upType',upType)
+	query.equalTo('status',true)
+	query.find().then((result)=>{
+		console.log('result',result)
+		if(result&&result.length){
+			response.error({message:'您已经点赞过！'})
+		}else{
+			var Up = AV.Object.extend('Up')
+			var up = new Up()
+			up.set('user',user)
+			up.set('targetId',targetId)
+			up.set('status',true)
+			up.set('upType',upType)
+			up.save().then((item)=>{
+				upItem.increment("likeCount", 1)
+				upItem.save().then(()=>{
+					response.success(item.attributes.targetId)
+				},(err)=>{
+					response.error(err)
+				})
+			},(err)=>{
+				response.error(err)
+			})
+		}
+	},(err)=>{
+		response.error(err)
+	})
+}
+
 
 
 var topicFunc = {
@@ -409,6 +455,7 @@ var topicFunc = {
 	fetchTopicDetailInfo:fetchTopicDetailInfo,
 	fetchTopicCommentsV2:fetchTopicCommentsV2,
 	fetchUserUps:fetchUserUps,
+	upByUser: upByUser,
 
 }
 

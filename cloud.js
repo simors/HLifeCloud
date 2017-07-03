@@ -50,8 +50,9 @@ AV.Cloud.define('hLifeFetchTopicComments', topicFunc.fetchTopicComments)
 AV.Cloud.define('disableTopicByUser', topicFunc.disableTopicByUser)
 AV.Cloud.define('fetchTopicList', topicFunc.fetchTopicList)
 AV.Cloud.define('fetchTopicDetailInfo', topicFunc.fetchTopicDetailInfo)
-AV.Cloud.define('fetchTopicCommentsV2', topicFunc.fetchTopicCommentsV2)
-AV.Cloud.define('fetchUserUps', topicFunc.fetchUserUps)
+AV.Cloud.define('hlifeTopicFetchComments', topicFunc.fetchTopicCommentsV2)
+AV.Cloud.define('hlifeTopicFetchUserUps', topicFunc.fetchUserUps)
+AV.Cloud.define('hlifeTopicUpByUser', topicFunc.upByUser)
 
 
 //店铺app端
