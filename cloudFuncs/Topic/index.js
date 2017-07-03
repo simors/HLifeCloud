@@ -310,13 +310,105 @@ function fetchTopicDetailInfo(request,response){
 	})
 }
 
+function fetchTopicCommentsV2(request,response){
+	var topicId = request.params.topicId
+	var commentId = request.params.commentId
+	var isRefresh = request.params.isRefresh;
+	var lastCreatedAt = request.params.lastCreatedAt;
+	var query = new AV.Query('TopicComments')
+
+	if(topicId&&topicId!=''){
+		var topic = AV.Object.createWithoutData('Topics', topicId)
+		query.equalTo('topic', topic)
+	}
+
+	if(commentId&&commentId!=''){
+		var comment = AV.Object.createWithoutData('TopicComments', commentId)
+		query.equalTo('parentComment', comment)
+	}
+
+	// console.log('isRefresh====', isRefresh)
+	// console.log('lastCreatedAt====', lastCreatedAt)
+	// if(!isRefresh && lastCreatedAt) { //分页查询
+	// 	query.lessThan('createdAt', new Date(lastCreatedAt))
+	// }
+
+	query.limit(10)
+
+	query.include(['user']);
+	query.include(['parentComment']);
+	query.include(['parentComment.user']);
+	query.descending('createdAt')
+	query.find().then((results)=>{
+		var topicCommentList = []
+		results.forEach((result)=>{
+			console.log('result===<',result)
+			var position = result.attributes.position
+			var parentComent = result.attributes.parentComment
+			var topicComment = {
+				topicId : result.attributes.topic.id,
+				parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
+				parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+				parentCommentNickname : parentComent?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+				parentCommentId : parentComent?result.attributes.parentComment.id:undefined,
+				upCount : result.attributes.likeCount,
+				authorUsername : result.attributes.user.attributes.username,
+				authorNickname : result.attributes.user.attributes.nickname,
+				authorId : result.attributes.user.id,
+				authorAvatar : result.attributes.user.attributes.avatar,
+				createdAt : result.createdAt,
+				address : position.address,
+				city : position.city,
+				longitude : position.longitude,
+				latitude : position.latitude,
+				streetNumber : position.streetNumber,
+				street : position.street,
+				province : position.province,
+				country : position.country,
+				district : position.district
+			}
+			topicCommentList.push(topicComment)
+		})
+		response.success(topicCommentList)
+	},(err)=>{
+		response.error(err)
+	})
+}
+
+function fetchUserUps(request,response){
+	var userId = request.params.userId
+	var user = AV.Object.createWithoutData('_User',userId)
+	var query = new AV.Query('Up')
+	query.equalTo('user',user)
+	// query.equalTo('upType','topicComment')
+	query.equalTo('status',true)
+	query.find().then((results)=>{
+		var commentList = []
+		var topicList = []
+		results.forEach((result)=>{
+			if(result.attributes.upType == 'topicComment'){
+				commentList.push(result.attributes.targetId)
+
+			}else if(result.attributes.upType == 'topic'){
+				topicList.push(result.attributes.targetId)
+			}
+		})
+		response.success({commentList:commentList,topicList:topicList})
+	},(err)=>{
+		response.error(err)
+	})
+}
+
+
+
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
 	getTopicComments: getTopicComments,
 	fetchTopicList:fetchTopicList,
 	fetchTopicDetailInfo:fetchTopicDetailInfo,
-
+	fetchTopicCommentsV2:fetchTopicCommentsV2,
+	fetchUserUps:fetchUserUps,
 
 }
 
