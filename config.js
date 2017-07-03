@@ -42,13 +42,7 @@ var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 var MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
 
-var wxConfig = {
-  token: 'y87y87y4rhkh3iuh',
-  appid: 'wx3dfde3f7184c8c51',
-  encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-  appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
-  checkSignature: true,
-}
+var wxConfig = undefined
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   REDIS_DB = DEBUG_REDIS
@@ -59,7 +53,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
   wxConfig = {
-    token: 'y87y87y4rhkh3iuh',
+    token: 'huilinyoudian2017dev',
     appid: 'wx3dfde3f7184c8c51',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
     appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
@@ -75,10 +69,10 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
   wxConfig = {
-    token: '456789tyuioghjk',
-    appid: 'wx310b23ce34f394a0',
+    token: 'huilinyoudian2017pre',
+    appid: 'wx34ac208b373814d2',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
+    appSecret: 'd121a1921db870cc3e37f148cb7cc257',
     checkSignature: true,
   }
 } else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
@@ -91,9 +85,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MP_SERVER_DOMAIN = "http://hlyd-pro.leanapp.cn"
   wxConfig = {
     token: '456789tyuioghjk',
-    appid: 'wx310b23ce34f394a0',
+    appid: 'wxc13204ac7a37acb4',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
+    appSecret: '6d98755c0738ee954b7f17c535aa0725',
     checkSignature: true,
   }
 }

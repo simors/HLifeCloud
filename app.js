@@ -108,7 +108,9 @@ app.use('/inviteCodeShare', inviteCode)
 
 app.use('/download', download)
 
+console.log("wxConfig:", GLOBAL_CONFIG.wxConfig)
 app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
+  var message = req.weixin;
 
   console.log('weixin  message:', message)
 
