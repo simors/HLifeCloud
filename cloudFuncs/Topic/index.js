@@ -294,7 +294,7 @@ function fetchTopicDetailInfo(request,response){
 						followers:followers,
 						likes:likes,
 						likeUsers:likeUsers,
-						userUpShopInfo,userUpShopInfo,
+						userUpShopInfo:userUpShopInfo,
 					})
 				},(err)=>{
 					response.error(err)
