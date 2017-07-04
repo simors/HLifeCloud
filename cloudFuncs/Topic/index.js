@@ -341,11 +341,14 @@ function fetchTopicCommentsV2(request,response){
 	query.descending('createdAt')
 	query.find().then((results)=>{
 		var topicCommentList = []
+		var allComments = []
+		var commentList = []
 		results.forEach((result)=>{
 			console.log('result===<',result)
 			var position = result.attributes.position
 			var parentComent = result.attributes.parentComment
 			var topicComment = {
+				commentId : result.id,
 				topicId : result.attributes.topic.id,
 				parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
 				parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
@@ -368,9 +371,10 @@ function fetchTopicCommentsV2(request,response){
 				country : position.country,
 				district : position.district
 			}
-			topicCommentList.push(topicComment)
+			allComments.push(topicComment)
+			commentList.push(topicComment.commentId)
 		})
-		response.success(topicCommentList)
+		response.success({allComments:allComments,commentList:commentList})
 	},(err)=>{
 		response.error(err)
 	})
