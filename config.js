@@ -85,9 +85,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd-pro.leanapp.cn"
   wxConfig = {
-    token: '456789tyuioghjk',
+    token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
-    encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
+    encodingAESKey: 'tZJ0FCYMKL3vdCTlj9Mj8VGmSJIBz0rNDjci4ncmqRn',
     appSecret: '6d98755c0738ee954b7f17c535aa0725',
     checkSignature: true,
   }
