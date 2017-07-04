@@ -13,6 +13,7 @@ router.get('/', function (req, res, next) {
   var phone = req.params.phone
   var unionid = req.params.unionid
   var avatar = undefined
+  var nickname = unionid
   var query = new AV.Query(User)
   if(phone) {
     query.equalTo('mobilePhoneNumber', phone)
@@ -23,15 +24,18 @@ router.get('/', function (req, res, next) {
 
   query.first().then((userInfo) => {
     avatar = userInfo.attributes.avatar
+    nickname = userInfo.attributes.nickname
     return AV.Cloud.run('hLifeGetPaymentInfoByUserId', {userId: userInfo.id})
   }).then((result) => {
     console.log("avatar", avatar)
     res.render('wxProfile', {
       avatar: avatar,
       balance: result.balance,
+      nickname: nickname,
     })
   }).catch((error) => {
     res.render('wxProfile', {
+      nickname: nickname,
       avatar: avatar,
       balance: 0,
     })

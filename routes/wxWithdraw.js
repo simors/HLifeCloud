@@ -8,8 +8,10 @@ var AV = require('leanengine');
 router.get('/', function (req, res, next) {
   var openid = req.query.openid;
 
+  console.log("render wxWithdraw.ejs")
   res.render('wxWithdraw', {
     openid: openid,
+    balance: 14,
   })
 })
 

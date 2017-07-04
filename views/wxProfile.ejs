@@ -10,24 +10,35 @@
 
 </head>
 <body ontouchstart>
-<div class="weui-cells__title">汇邻优店</div>
-<div class="weui-cells weui-cells_form">
-<div class="weui-cell">
-    <div class="weui-cell__hd">
-        <img width="100px" height="100px" src="<%=avatar%>"/>
+<div class="weui-flex" style="background-color: #EFEFF4; height: 58px; align-items: center">
+    <div style="font-size: 11px; margin-left: 15px">汇邻优店账号</div>
+    <div style="height: 29px; width: 29px; border-radius: 14px; overflow: hidden; margin-left: 64px">
+        <img width="29px" height="29px" src="<%=avatar%>"/>
+        <div style="margin-left: 5px"><%=nickname%></div>
     </div>
-</div>
+    <div class="weui-flex__item" style="margin-left: 5px; font-size: 17px"><%=nickname%></div>
 
-<div class="weui-cell">
-    <div class="weui-cell__hd"><label class="weui-label">余额</label></div>
-    <div class="weui-cell__bd">
-        <Text>¥ <%=balance%></Text>
-    </div>
 </div>
+<div >
+    <div style="padding-top: 45px; text-align: center">
+        <Text style="font-size: 40px">¥ <%=balance%></Text>
+    </div>
+    <div style="padding-bottom: 50px; text-align: center">
+        <Text style="font-size: 17px; color: #888888;;">账户余额</Text>
+    </div>
 </div>
 
 <div class="weui-btn-area">
-<a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现到微信余额</a>
+    <a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现到微信余额</a>
+</div>
+<div class="weui-btn-area" style="background-color: #f8f8f8">
+    <a class="weui-btn weui-btn_primary"  id="recordBtn">查看交易明细</a>
+</div>
+<div class="weui-footer weui-footer_fixed-bottom">
+    <p class="weui-footer__links">
+        <a href="javascript:;" class="weui-footer__link">常见问题</a>
+    </p>
+    <p class="weui-footer__text">本服务由长沙小吉网络科技提供</p>
 </div>
 </body>
 <script type="text/javascript">

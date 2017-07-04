@@ -143,7 +143,7 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
                 res.reply([{
                   title: '登录注册',
                   description: '请登录注册',
-                  picurl: 'https://simors.github.io/ljyd_blog/ic_launcher.png',
+                  picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
                   url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
                 }])
               }
@@ -153,7 +153,7 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
             res.reply([{
               title: '登录注册',
               description: '请登录注册',
-              picurl: 'https://simors.github.io/ljyd_blog/ic_launcher.png',
+              picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
               url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
             }])
           }

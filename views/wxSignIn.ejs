@@ -3,16 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-    <title>登录注册</title>
+    <title>账号关联</title>
     <!-- 引入 WeUI -->
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css"/>
     <script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
 
 </head>
 <body ontouchstart>
-<div class="weui-cells__title">汇邻优店</div>
+<div class="weui-cells__title" style="height: 45px">填写手机号</div>
 <div class="weui-cells weui-cells_form">
-    <div class="weui-cell weui-cell_vcode">
+    <div class="weui-cell">
+        <div class="weui-cell__hd">
+            <label class="weui-label">国家/地区</label>
+        </div>
+        <div class="weui-cell__bd">
+            <select class="weui-select" name="select2">
+                <option value="1">+86</option>
+                <option value="2">+80</option>
+                <option value="3">+84</option>
+                <option value="4">+87</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="weui-cell">
         <div class="weui-cell__hd">
             <label class="weui-label">手机号</label>
         </div>
@@ -27,12 +41,12 @@
     <div class="weui-cell">
         <div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
         <div class="weui-cell__bd">
-            <input id = "smsCode" class="weui-input" type="password"  placeholder="请输入验证码"/>
+            <input id = "smsCode" class="weui-input" style="height: 44px" type="number"  placeholder="请输入验证码"/>
         </div>
     </div>
 </div>
 
-<div class="weui-btn-area">
+<div class="weui-btn-area" style="margin-top: 59px">
     <a class="weui-btn weui-btn_primary"  id="showTooltips">登录</a>
 </div>
 </body>
@@ -41,7 +55,9 @@
         height: 44px;
         font-size: 17px;
         color: #3CC51F;
-        margin-right: 10px;
+        margin-right: 0px;
+        border-width: 0px;
+        background-color: inherit;
     }
 </style>
 <script type="text/javascript">

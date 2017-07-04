@@ -9,27 +9,21 @@
     <script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
 
 </head>
-<body ontouchstart>
-<div class="weui-cells__title">汇邻优店</div>
-<div class="weui-cells weui-cells_form">
-
-    <div class="weui-cell">
-        <Text>提现金额</Text>
-        <div class="weui-cell__hd">
-            <label class="weui-label">¥</label>
-        </div>
-        <div class="weui-cell__bd">
-            <input id="amount" class="weui-input" type="tel" placeholder="">
-        </div>
+<body ontouchstart style="background-color: #f0f0f2">
+<div style="background-color: #ffffff; border-width: 1px; border-style: solid; border-color: #000000; border-radius: 3px; margin-left: 7.5px; margin-right: 7.5px; margin-top: 15px; margin-bottom: 15px; padding-left: 13px; padding-right: 13px; padding-top: 13px">
+    <Text style="font-size: 16px">提现金额</Text>
+    <div style="display: flex; border-bottom: solid; border-bottom-width: inherit;border-bottom-color: #0d0d0d; padding-top: 20px; padding-bottom: 20px; align-items: center">
+        <label style="font-size: 20px">¥</label>
+        <input autofocus type="number" style="font-size: 40px; border-width: 0px; width: 200px; margin-left: 10px" />
     </div>
-
-    <div class="weui-cell">
-        <Text>当前余额14.00元，全部提现</Text>
+    <div style="padding-top: 10px; padding-bottom: 10px">
+        <Text>当前余额<%=balance%>元，</Text>
+        <a id="withdrawAll" href="">全部提现</a>
     </div>
 </div>
 
 <div class="weui-btn-area">
-    <a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现到微信余额</a>
+    <a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现</a>
 </div>
 </body>
 <script type="text/javascript">
@@ -41,6 +35,7 @@
     });
 
     var withdrawBtn = document.getElementById('withdrawBtn')
+    var withdrawAll = document.getElementById('withdrawAll')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
 
@@ -70,5 +65,9 @@
         });
         return uuid;
     };
+
+    withdrawAll.onclick = function () {
+
+    }
 </script>
 </html>
