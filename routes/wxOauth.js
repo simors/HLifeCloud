@@ -36,7 +36,7 @@ router.get('/callback', function (req, res, next) {
 
       AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid}).then((result) => {
         if(result.isSignIn) {  //已经注册
-          res.redirect('/wxProfile?unionid' + unionid)
+          res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
         } else {  //待注册登录
           res.render('wxSignIn', {
             appId: process.env.LEANCLOUD_APP_ID,

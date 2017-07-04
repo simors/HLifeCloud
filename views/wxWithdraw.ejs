@@ -14,11 +14,11 @@
     <Text style="font-size: 16px">提现金额</Text>
     <div style="display: flex; border-bottom: solid; border-bottom-width: inherit;border-bottom-color: #0d0d0d; padding-top: 20px; padding-bottom: 20px; align-items: center">
         <label style="font-size: 20px">¥</label>
-        <input autofocus type="number" style="font-size: 40px; border-width: 0px; width: 200px; margin-left: 10px" />
+        <input id="amount" type="number" style="font-size: 40px; border-width: 0px; width: 200px; margin-left: 10px" />
     </div>
     <div style="padding-top: 10px; padding-bottom: 10px">
         <Text>当前余额<%=balance%>元，</Text>
-        <a id="withdrawAll" href="">全部提现</a>
+        <a id="withdrawAll" href="javascript:void(0);">全部提现</a>
     </div>
 </div>
 
@@ -42,7 +42,7 @@
         var params = {
             channel: 'wx_pub',
             order_no: generateUUID().replace(/-/g, '').substr(0, 16),
-            amount: 1,
+            amount: amount.value,
             openid: openid,
             metadata: {},
         }
@@ -66,7 +66,7 @@
     };
 
     withdrawAll.onclick = function () {
-
+        amount.setAttribute('value', <%=balance%>)
     }
 </script>
 </html>

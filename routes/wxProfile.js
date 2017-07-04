@@ -10,10 +10,13 @@ var AV = require('leanengine');
 var User = AV.Object.extend('_User');
 
 router.get('/', function (req, res, next) {
-  var phone = req.params.phone
-  var unionid = req.params.unionid
+  console.log("req.query:", req.query)
+
+  var phone = req.query.phone
+  var unionid = req.query.unionid
+  var openid = req.query.openid
   var avatar = undefined
-  var nickname = unionid
+  var nickname = undefined
   var query = new AV.Query(User)
   if(phone) {
     query.equalTo('mobilePhoneNumber', phone)
@@ -29,12 +32,14 @@ router.get('/', function (req, res, next) {
   }).then((result) => {
     console.log("avatar", avatar)
     res.render('wxProfile', {
+      openid: openid,
       avatar: avatar,
       balance: result.balance,
       nickname: nickname,
     })
   }).catch((error) => {
     res.render('wxProfile', {
+      openid: openid,
       nickname: nickname,
       avatar: avatar,
       balance: 0,
