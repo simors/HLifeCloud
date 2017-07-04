@@ -39,6 +39,8 @@ router.get('/callback', function (req, res, next) {
           res.redirect('/wxProfile?unionid' + unionid)
         } else {  //待注册登录
           res.render('wxSignIn', {
+            appId: process.env.LEANCLOUD_APP_ID,
+            appKey: process.env.LEANCLOUD_APP_KEY,
             accessToken: accessToken,
             unionid: unionid,
             expires_in: expires_in,

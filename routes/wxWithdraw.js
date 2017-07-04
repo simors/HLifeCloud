@@ -5,6 +5,7 @@
 var router = require('express').Router();
 var AV = require('leanengine');
 
+
 router.get('/', function (req, res, next) {
   var openid = req.query.openid;
 
@@ -12,6 +13,8 @@ router.get('/', function (req, res, next) {
   res.render('wxWithdraw', {
     openid: openid,
     balance: 14,
+    appId: process.env.LEANCLOUD_APP_ID,
+    appKey: process.env.LEANCLOUD_APP_KEY,
   })
 })
 

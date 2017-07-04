@@ -40,9 +40,10 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 //应用下载链接配置
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
+//微信公众平台配置
 var MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
-
 var wxConfig = undefined
+
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   REDIS_DB = DEBUG_REDIS

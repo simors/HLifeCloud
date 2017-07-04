@@ -12,6 +12,8 @@ var User = AV.Object.extend('_User');
 router.get('/', function (req, res, next) {
 
   res.render('wxSignIn', {
+    appId: process.env.LEANCLOUD_APP_ID,
+    appKey: process.env.LEANCLOUD_APP_KEY,
     accessToken: "",
     unionid: "",
     expires_in: "",
