@@ -29,10 +29,12 @@ router.get('/', function (req, res, next) {
     nickname = userInfo.attributes.nickname
     return AV.Cloud.run('hLifeGetPaymentInfoByUserId', {userId: userInfo.id})
   }).then((result) => {
+    console.log("hLifeGetPaymentInfoByUserId: result", result)
+    var balance = result.balance.toFixed(2)
     res.render('wxProfile', {
       openid: openid,
       avatar: avatar,
-      balance: result.balance,
+      balance: balance,
       nickname: nickname,
     })
   }).catch((error) => {

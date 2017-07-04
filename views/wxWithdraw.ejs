@@ -37,8 +37,13 @@
     var withdrawAll = document.getElementById('withdrawAll')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
+    var balance = parseFloat("<%=balance%>").toFixed(2)
 
     withdrawBtn.onclick = function () {
+        if(amount.value <= 0 || amount.value > balance) {
+            alert("金额有误")
+            return
+        }
         var params = {
             channel: 'wx_pub',
             order_no: generateUUID().replace(/-/g, '').substr(0, 16),
@@ -65,7 +70,7 @@
     };
 
     withdrawAll.onclick = function () {
-        amount.setAttribute('value', <%=balance%>)
+        amount.setAttribute('value', balance)
     }
 </script>
 </html>
