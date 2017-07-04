@@ -254,7 +254,7 @@ function fetchUserLikeTopicInfo(payload){
 	var upType = payload.upType
 	var currentUser = AV.Object.createWithoutData('_User',payload.userId)
 
-	let query = new AV.Query('Up')
+	var query = new AV.Query('Up')
 	query.equalTo('targetId', topicId)
 	query.equalTo('upType', upType)
 	query.equalTo('user', currentUser)
@@ -354,6 +354,7 @@ function fetchTopicCommentsV2(request,response){
 				upCount : result.attributes.likeCount,
 				authorUsername : result.attributes.user.attributes.username,
 				authorNickname : result.attributes.user.attributes.nickname,
+				commentCount : result.attributes.commentCount,
 				authorId : result.attributes.user.id,
 				authorAvatar : result.attributes.user.attributes.avatar,
 				createdAt : result.createdAt,
@@ -445,7 +446,38 @@ function upByUser(request,response){
 	})
 }
 
+function pubulishTopicComment(request,response){
+	var payload = request.params.payload
+	var TopicComment = AV.Object.extend('TopicComments')
+	var topicComment = new TopicComment()
+	var topic = AV.Object.createWithoutData('Topics', payload.topicId)
+	var user = AV.Object.createWithoutData('_User', payload.userId)
+	var parentComment = AV.Object.createWithoutData('TopicComments', payload.commentId)
 
+	topicComment.set('geoPoint', payload.geoPoint)
+	topicComment.set('position', payload.position)
+	topicComment.set('topic', topic)
+	topicComment.set('user', user)
+	topicComment.set('content', payload.content)
+
+	if (payload.commentId) {
+		topicComment.set('parentComment', parentComment)
+	}
+
+	topicComment.save().then((comment)=>{
+		topic.increment("commentNum", 1)
+		topic.save().then((topic)=>{
+
+			response.success()
+		},(err)=>{
+			response.error(err)
+		})
+
+	},(err)=>{
+		response.error(err)
+	})
+
+}
 
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
@@ -456,6 +488,7 @@ var topicFunc = {
 	fetchTopicCommentsV2:fetchTopicCommentsV2,
 	fetchUserUps:fetchUserUps,
 	upByUser: upByUser,
+	pubulishTopicComment:pubulishTopicComment
 
 }
 
