@@ -46,7 +46,6 @@
             openid: openid,
             metadata: {},
         }
-        console.log("hLifeCreateTransfers", params)
         AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
             window.location.href = "/wxProfile?openid=" + openid
         }).catch((err) => {

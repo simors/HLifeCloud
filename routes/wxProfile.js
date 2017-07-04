@@ -10,7 +10,6 @@ var AV = require('leanengine');
 var User = AV.Object.extend('_User');
 
 router.get('/', function (req, res, next) {
-  console.log("req.query:", req.query)
 
   var phone = req.query.phone
   var unionid = req.query.unionid
@@ -30,7 +29,6 @@ router.get('/', function (req, res, next) {
     nickname = userInfo.attributes.nickname
     return AV.Cloud.run('hLifeGetPaymentInfoByUserId', {userId: userInfo.id})
   }).then((result) => {
-    console.log("avatar", avatar)
     res.render('wxProfile', {
       openid: openid,
       avatar: avatar,
