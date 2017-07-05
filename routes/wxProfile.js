@@ -14,7 +14,7 @@ router.get('/', function (req, res, next) {
   var phone = req.query.phone
   var unionid = req.query.unionid
   var openid = req.query.openid
-  var userId = unionid
+  var userId = undefined
   var avatar = undefined
   var nickname = undefined
   var query = new AV.Query(User)
@@ -25,13 +25,16 @@ router.get('/', function (req, res, next) {
     query.equalTo('authData.weixin.openid', unionid)
   }
 
+  if(openid) {
+    query.equalTo('openid', openid)
+  }
+
   query.first().then((userInfo) => {
     userId = userInfo.id
     avatar = userInfo.attributes.avatar
     nickname = userInfo.attributes.nickname
     return AV.Cloud.run('hLifeGetPaymentInfoByUserId', {userId: userId})
   }).then((result) => {
-    console.log("hLifeGetPaymentInfoByUserId: result", result)
     var balance = result.balance.toFixed(2)
     res.render('wxProfile', {
       userId: userId,
