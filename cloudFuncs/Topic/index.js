@@ -464,15 +464,23 @@ function pubulishTopicComment(request,response){
 	topicComment.set('user', user)
 	topicComment.set('content', payload.content)
 
-	if (payload.commentId) {
+	if (payload.commentId&&payload.commentId!='') {
 		topicComment.set('parentComment', parentComment)
 	}
 
 	topicComment.save().then((comment)=>{
 		topic.increment("commentNum", 1)
 		topic.save().then((topic)=>{
-
-			response.success()
+			if(payload.commentId&&payload.commentId!=''){
+				parentComment.increment("commentCount",1)
+				parentComment.save().then(()=>{
+					response.success()
+				},(err)=>{
+					response.error(err)
+				})
+			}else{
+				response.success()
+			}
 		},(err)=>{
 			response.error(err)
 		})
