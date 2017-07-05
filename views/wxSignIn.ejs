@@ -91,7 +91,6 @@
         AV.User.signUpOrlogInWithMobilePhone(phone.value, smsCode.value).then((user) => {
             return AV.User.associateWithAuthData(user, platform, authData)
         }).then((user) => {
-            alert("登录成功")
             console.log("user", user)
             if(user) {
                 !user.attributes.nickname && user.set('nickname', nickname)
@@ -101,12 +100,10 @@
             }
             return null
         }).then((loginedUser) => {
-            window.location.href = "/wxProfile?phone=" + phone.value
-
             return AV.Cloud.run('promoterSyncPromoterInfo', {userId: loginedUser.id})
-
         }).then((result) => {
             console.log("promoterSyncPromoterInfo result:", result)
+            window.location.href = "/wxProfile?phone=" + phone.value + "&openid=" + openid + "&unionid=" + unionid
         }).catch((error) => {
             console.log(error)
         })
@@ -140,7 +137,6 @@
             wait = 60;
         } else if(wait == 60) {
              AV.Cloud.requestSmsCode(phone.value).then(function (success) {
-                 alert("短信验证码请求成功")
                  o.setAttribute("disabled", true);
                  o.style.color = '#B2B2B2'
                  o.value="重新发送(" + wait + ")";

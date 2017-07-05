@@ -29,7 +29,6 @@ var GLOBAL_CONFIG = require('./config')
 var app = express();
 
 var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
-
 var memu = {
   "button":[
     {
@@ -49,11 +48,6 @@ var memu = {
           "type":"view",
           "name":"我的钱包",
           "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-        },
-        {
-          "type":"view",
-          "name":"汇邻优店",
-          "url":"http://baidu.com"
         }
       ]
     }]

@@ -45,12 +45,13 @@
 
     var balance = "<%=balance%>"
     var openid = "<%=openid%>"
+    var userId = "<%=userId%>"
 
     var withdrawBtn = document.getElementById('withdrawBtn')
     if(parseInt(balance) > 0) {
         withdrawBtn.setAttribute('class', "weui-btn weui-btn_primary")
         withdrawBtn.onclick = function () {
-            window.location.href = "/wxWithdraw?openid=" + openid + "&balance=" + balance
+            window.location.href = "/wxWithdraw?openid=" + openid + "&balance=" + balance + "&userId=" + userId
         }
     }
 

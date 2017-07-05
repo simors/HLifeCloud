@@ -83,7 +83,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_PROD_DB
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
 
-  MP_SERVER_DOMAIN = "http://hlyd-pro.leanapp.cn"
+  MP_SERVER_DOMAIN = "http://share.xiaojee.cn"
   wxConfig = {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',

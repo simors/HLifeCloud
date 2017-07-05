@@ -37,6 +37,7 @@
     var withdrawAll = document.getElementById('withdrawAll')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
+    var userId = "<%=userId%>"
     var balance = parseFloat("<%=balance%>").toFixed(2)
 
     withdrawBtn.onclick = function () {
@@ -49,7 +50,7 @@
             order_no: generateUUID().replace(/-/g, '').substr(0, 16),
             amount: amount.value,
             openid: openid,
-            metadata: {},
+            metadata: {userId: userId},
         }
         AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
             window.location.href = "/wxProfile?openid=" + openid

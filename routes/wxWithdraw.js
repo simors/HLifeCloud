@@ -9,8 +9,10 @@ var AV = require('leanengine');
 router.get('/', function (req, res, next) {
   var openid = req.query.openid;
   var balance = req.query.balance;
+  var userId = req.query.userId;
 
   res.render('wxWithdraw', {
+    userId: userId,
     openid: openid,
     balance: balance,
     appId: process.env.LEANCLOUD_APP_ID,
