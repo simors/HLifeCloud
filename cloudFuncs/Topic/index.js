@@ -344,7 +344,6 @@ function fetchTopicCommentsV2(request,response){
 		var allComments = []
 		var commentList = []
 		results.forEach((result)=>{
-			console.log('result===<',result)
 			var position = result.attributes.position
 			var parentComent = result.attributes.parentComment
 			var topicComment = {
@@ -361,16 +360,17 @@ function fetchTopicCommentsV2(request,response){
 				authorId : result.attributes.user.id,
 				authorAvatar : result.attributes.user.attributes.avatar,
 				createdAt : result.createdAt,
-				address : position.address,
-				city : position.city,
-				longitude : position.longitude,
-				latitude : position.latitude,
-				streetNumber : position.streetNumber,
-				street : position.street,
-				province : position.province,
-				country : position.country,
-				district : position.district
+				address : position?position.address:undefined,
+				city : position?position.city:undefined,
+				longitude : position?position.longitude:undefined,
+				latitude : position?position.latitude:undefined,
+				streetNumber : position?position.streetNumber:undefined,
+				street : position?position.street:undefined,
+				province : position?position.province:undefined,
+				country : position?position.country:undefined,
+				district : position?position.district:undefined
 			}
+			console.log('result===<',result.id)
 			allComments.push(topicComment)
 			commentList.push(topicComment.commentId)
 		})
