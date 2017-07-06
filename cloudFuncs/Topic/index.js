@@ -484,7 +484,6 @@ function pubulishTopicComment(request,response){
 		},(err)=>{
 			response.error(err)
 		})
-
 	},(err)=>{
 		response.error(err)
 	})
