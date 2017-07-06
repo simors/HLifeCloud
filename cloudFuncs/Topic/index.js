@@ -347,6 +347,7 @@ function fetchTopicCommentsV2(request,response){
 			var position = result.attributes.position
 			var parentComent = result.attributes.parentComment
 			var topicComment = {
+				content: result.attributes.content,
 				commentId : result.id,
 				topicId : result.attributes.topic.id,
 				parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
