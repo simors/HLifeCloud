@@ -666,13 +666,17 @@ function bindWithWeixin(request, response) {
   var platform = 'weixin'
 
   AV.User.associateWithAuthData(user, platform, authData).then((authUser) => {
-    if(authUser && !authUser.attributes.nickname)
-      authUser.set('nickname', wx_name)
-    if(authUser && !authUser.attributes.avatar)
-      authUser.set('avatar', wx_avatar)
-    return authUser.save()
+    if(authUser) {
+      user.fetch().then(function (userInfo) {
+        if(userInfo && userInfo.get('nickname'))
+          userInfo.set('nickname', wx_name)
+        if(userInfo && userInfo.get('avatar'))
+          userInfo.set('avatar', wx_name)
+        userInfo.save()
+      })
+    }
+    return authUser
   }).then((bindUser) => {
-    console.log("bindUser", bindUser)
     response.success({
       userInfo: bindUser
     })
