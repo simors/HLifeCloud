@@ -329,9 +329,9 @@ function fetchTopicCommentsV2(request,response){
 
 	// console.log('isRefresh====', isRefresh)
 	// console.log('lastCreatedAt====', lastCreatedAt)
-	// if(!isRefresh && lastCreatedAt) { //分页查询
-	// 	query.lessThan('createdAt', new Date(lastCreatedAt))
-	// }
+	if(!isRefresh && lastCreatedAt) { //分页查询
+		query.lessThan('createdAt', new Date(lastCreatedAt))
+	}
 
 	query.limit(10)
 
@@ -371,7 +371,7 @@ function fetchTopicCommentsV2(request,response){
 				country : position?position.country:undefined,
 				district : position?position.district:undefined
 			}
-			console.log('result===<',result.id)
+			// console.log('result===<',result.id)
 			allComments.push(topicComment)
 			commentList.push(topicComment.commentId)
 		})
@@ -425,7 +425,7 @@ function upByUser(request,response){
 	query.equalTo('upType',upType)
 	query.equalTo('status',true)
 	query.find().then((result)=>{
-		console.log('result',result)
+		// console.log('result',result)
 		if(result&&result.length){
 			response.error({message:'您已经点赞过！'})
 		}else{
