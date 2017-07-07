@@ -44,6 +44,7 @@ AV.Cloud.define('getArticleLikers',authFunc.getArticleLikers)
 AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('isWXUnionIdSignIn', authFunc.isWXUnionIdSignIn)
 AV.Cloud.define('bindWithWeixin', authFunc.bindWithWeixin)
+AV.Cloud.define('isWXBindByPhone', authFunc.isWXBindByPhone)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)

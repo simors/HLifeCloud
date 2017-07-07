@@ -675,6 +675,8 @@ function bindWithWeixin(request, response) {
         userInfo.save()
       })
     }
+
+
     return authUser
   }).then((bindUser) => {
     response.success({
@@ -690,6 +692,39 @@ function bindWithWeixin(request, response) {
 
 }
 
+/**
+ * 通过手机号码判断用户是否绑定微信
+ * @param request
+ * @param response
+ */
+function isWXBindByPhone(request, response) {
+  var phone = request.params.phone
+
+  if(!phone)
+    response.error({
+      errcode: -1,
+    })
+  var query = new AV.Query('_User')
+  query.equalTo("mobilePhoneNumber", phone)
+  query.exists('authData')
+
+  query.first().then((user) => {
+    if(user) {
+      response.success({
+        wxAuthed: true
+      })
+    } else {
+      response.success({
+        wxAuthed: false
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+    response.error({
+      errcode: -1,
+    })
+  })
+}
 
 var authFunc = {
   constructUserInfo: constructUserInfo,
@@ -707,6 +742,7 @@ var authFunc = {
   getUserById: getUserById,
   isWXUnionIdSignIn: isWXUnionIdSignIn,
   bindWithWeixin: bindWithWeixin,
+  isWXBindByPhone: isWXBindByPhone,
 }
 
 module.exports = authFunc
