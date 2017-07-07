@@ -671,7 +671,7 @@ function bindWithWeixin(request, response) {
         if(userInfo && userInfo.get('nickname'))
           userInfo.set('nickname', wx_name)
         if(userInfo && userInfo.get('avatar'))
-          userInfo.set('avatar', wx_name)
+          userInfo.set('avatar', wx_avatar)
         userInfo.save()
       })
     }
