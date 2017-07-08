@@ -350,6 +350,7 @@ function fetchTopicCommentsV2(request,response){
 			var position = result.attributes.position
 			var parentComment = result.attributes.parentComment
 			var replyComment = result.attributes.replyComment
+      var user = result.attributes.user
 			var topicComment = {
 				content: result.attributes.content,
 				commentId : result.id,
@@ -363,11 +364,11 @@ function fetchTopicCommentsV2(request,response){
 				replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
 				replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
 				upCount : result.attributes.likeCount,
-				authorUsername : result.attributes.user.attributes.username,
-				authorNickname : result.attributes.user.attributes.nickname,
+				authorUsername : user?result.attributes.user.attributes.username:undefined,
+				authorNickname : user?result.attributes.user.attributes.nickname:undefined,
 				commentCount : result.attributes.commentCount,
-				authorId : result.attributes.user.id,
-				authorAvatar : result.attributes.user.attributes.avatar,
+				authorId : user?result.attributes.user.id:undefined,
+				authorAvatar : user?user.attributes.avatar:undefined,
 				createdAt : result.createdAt,
 				address : position?position.address:undefined,
 				city : position?position.city:undefined,
@@ -496,31 +497,36 @@ function pubulishTopicComment(request,response){
 					query.include(['replyComment.user'])
 					query.get(comment.id).then((result)=>{
 						var position = result.attributes.position
-						var parentComent = result.attributes.parentComment
+						var parentComment = result.attributes.parentComment
+            var user = result.attributes.user
 						var commentInfo = {
-							content: result.attributes.content,
-							commentId : result.id,
-							topicId : result.attributes.topic.id,
-							parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
-							parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
-							parentCommentNickname : parentComent?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
-							parentCommentId : parentComent?result.attributes.parentComment.id:undefined,
-							upCount : result.attributes.likeCount,
-							authorUsername : result.attributes.user.attributes.username,
-							authorNickname : result.attributes.user.attributes.nickname,
-							commentCount : result.attributes.commentCount,
-							authorId : result.attributes.user.id,
-							authorAvatar : result.attributes.user.attributes.avatar,
-							createdAt : result.createdAt,
-							address : position?position.address:undefined,
-							city : position?position.city:undefined,
-							longitude : position?position.longitude:undefined,
-							latitude : position?position.latitude:undefined,
-							streetNumber : position?position.streetNumber:undefined,
-							street : position?position.street:undefined,
-							province : position?position.province:undefined,
-							country : position?position.country:undefined,
-							district : position?position.district:undefined
+              content: result.attributes.content,
+              commentId : result.id,
+              topicId : result.attributes.topic.id,
+              parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+              parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+              parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+              parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+              replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+              replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+              replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+              replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
+              upCount : result.attributes.likeCount,
+              authorUsername : user?result.attributes.user.attributes.username:undefined,
+              authorNickname : user?result.attributes.user.attributes.nickname:undefined,
+              commentCount : result.attributes.commentCount,
+              authorId : user?result.attributes.user.id:undefined,
+              authorAvatar : user?user.attributes.avatar:undefined,
+              createdAt : result.createdAt,
+              address : position?position.address:undefined,
+              city : position?position.city:undefined,
+              longitude : position?position.longitude:undefined,
+              latitude : position?position.latitude:undefined,
+              streetNumber : position?position.streetNumber:undefined,
+              street : position?position.street:undefined,
+              province : position?position.province:undefined,
+              country : position?position.country:undefined,
+              district : position?position.district:undefined
 						}
 						response.success(commentInfo)
 					},(err)=>{
@@ -538,34 +544,35 @@ function pubulishTopicComment(request,response){
 					var position = result.attributes.position
 					var parentComment = result.attributes.parentComment
 					var replyComment = result.attributes.replyComment
+          var user = result.attributes.user
 					var commentInfo = {
-						content: result.attributes.content,
-						commentId : result.id,
-						topicId : result.attributes.topic.id,
-						parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
-						parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
-						parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
-						parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
-						replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
-						replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
-						replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
-						replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
-						upCount : result.attributes.likeCount,
-						authorUsername : result.attributes.user.attributes.username,
-						authorNickname : result.attributes.user.attributes.nickname,
-						commentCount : result.attributes.commentCount,
-						authorId : result.attributes.user.id,
-						authorAvatar : result.attributes.user.attributes.avatar,
-						createdAt : result.createdAt,
-						address : position?position.address:undefined,
-						city : position?position.city:undefined,
-						longitude : position?position.longitude:undefined,
-						latitude : position?position.latitude:undefined,
-						streetNumber : position?position.streetNumber:undefined,
-						street : position?position.street:undefined,
-						province : position?position.province:undefined,
-						country : position?position.country:undefined,
-						district : position?position.district:undefined
+            content: result.attributes.content,
+            commentId : result.id,
+            topicId : result.attributes.topic.id,
+            parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+            parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+            parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+            parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+            replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+            replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+            replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+            replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
+            upCount : result.attributes.likeCount,
+            authorUsername : user?result.attributes.user.attributes.username:undefined,
+            authorNickname : user?result.attributes.user.attributes.nickname:undefined,
+            commentCount : result.attributes.commentCount,
+            authorId : user?result.attributes.user.id:undefined,
+            authorAvatar : user?user.attributes.avatar:undefined,
+            createdAt : result.createdAt,
+            address : position?position.address:undefined,
+            city : position?position.city:undefined,
+            longitude : position?position.longitude:undefined,
+            latitude : position?position.latitude:undefined,
+            streetNumber : position?position.streetNumber:undefined,
+            street : position?position.street:undefined,
+            province : position?position.province:undefined,
+            country : position?position.country:undefined,
+            district : position?position.district:undefined
 					}
 					response.success(commentInfo)
 				},(err)=>{
