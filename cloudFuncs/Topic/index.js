@@ -457,7 +457,7 @@ function pubulishTopicComment(request,response){
 	var topicComment = new TopicComment()
 	var topic = AV.Object.createWithoutData('Topics', payload.topicId)
 	var user = AV.Object.createWithoutData('_User', payload.userId)
-	var parentComment = AV.Object.createWithoutData('TopicComments', payload.commentId)
+	var parentComment = undefined
 
 	topicComment.set('geoPoint', payload.geoPoint)
 	topicComment.set('position', payload.position)
@@ -466,6 +466,7 @@ function pubulishTopicComment(request,response){
 	topicComment.set('content', payload.content)
 
 	if (payload.commentId&&payload.commentId!='') {
+		parentComment = 	AV.Object.createWithoutData('TopicComments', payload.commentId)
 		topicComment.set('parentComment', parentComment)
 	}
 
