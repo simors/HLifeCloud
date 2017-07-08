@@ -338,6 +338,9 @@ function fetchTopicCommentsV2(request,response){
 	query.include(['user']);
 	query.include(['parentComment']);
 	query.include(['parentComment.user']);
+	query.include(['replyComment'])
+	query.include(['replyComment.user'])
+
 	query.descending('createdAt')
 	query.find().then((results)=>{
 		var topicCommentList = []
@@ -345,15 +348,20 @@ function fetchTopicCommentsV2(request,response){
 		var commentList = []
 		results.forEach((result)=>{
 			var position = result.attributes.position
-			var parentComent = result.attributes.parentComment
+			var parentComment = result.attributes.parentComment
+			var replyComment = result.attributes.replyComment
 			var topicComment = {
 				content: result.attributes.content,
 				commentId : result.id,
 				topicId : result.attributes.topic.id,
-				parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
-				parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
-				parentCommentNickname : parentComent?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
-				parentCommentId : parentComent?result.attributes.parentComment.id:undefined,
+				parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+				parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+				parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+				parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+				replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+				replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+				replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+				replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
 				upCount : result.attributes.likeCount,
 				authorUsername : result.attributes.user.attributes.username,
 				authorNickname : result.attributes.user.attributes.nickname,
@@ -458,7 +466,7 @@ function pubulishTopicComment(request,response){
 	var topic = AV.Object.createWithoutData('Topics', payload.topicId)
 	var user = AV.Object.createWithoutData('_User', payload.userId)
 	var parentComment = undefined
-
+	var replyComment = undefined
 	topicComment.set('geoPoint', payload.geoPoint)
 	topicComment.set('position', payload.position)
 	topicComment.set('topic', topic)
@@ -468,6 +476,10 @@ function pubulishTopicComment(request,response){
 	if (payload.commentId&&payload.commentId!='') {
 		parentComment = 	AV.Object.createWithoutData('TopicComments', payload.commentId)
 		topicComment.set('parentComment', parentComment)
+	}
+	if(payload.replyId&&payload.replyId != ''){
+		replyComment = 	AV.Object.createWithoutData('TopicComments', payload.replyId)
+		topicComment.set('replyComment', replyComment)
 	}
 
 	topicComment.save().then((comment)=>{
@@ -480,6 +492,8 @@ function pubulishTopicComment(request,response){
 					query.include(['user']);
 					query.include(['parentComment']);
 					query.include(['parentComment.user']);
+					query.include(['replyComment'])
+					query.include(['replyComment.user'])
 					query.get(comment.id).then((result)=>{
 						var position = result.attributes.position
 						var parentComent = result.attributes.parentComment
@@ -522,15 +536,20 @@ function pubulishTopicComment(request,response){
 				query.include(['parentComment.user']);
 				query.get(comment.id).then((result)=>{
 					var position = result.attributes.position
-					var parentComent = result.attributes.parentComment
+					var parentComment = result.attributes.parentComment
+					var replyComment = result.attributes.replyComment
 					var commentInfo = {
 						content: result.attributes.content,
 						commentId : result.id,
 						topicId : result.attributes.topic.id,
-						parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
-						parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
-						parentCommentNickname : parentComent?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
-						parentCommentId : parentComent?result.attributes.parentComment.id:undefined,
+						parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+						parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+						parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+						parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+						replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+						replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+						replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+						replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
 						upCount : result.attributes.likeCount,
 						authorUsername : result.attributes.user.attributes.username,
 						authorNickname : result.attributes.user.attributes.nickname,
