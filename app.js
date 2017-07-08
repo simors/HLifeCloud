@@ -48,7 +48,12 @@ var memu = {
           "type":"view",
           "name":"我的钱包",
           "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-        }
+        },
+        {
+          "type":"view",
+          "name":"我的推广",
+          "url": 'http://7550725b.ngrok.io'
+        },
       ]
     }]
 }

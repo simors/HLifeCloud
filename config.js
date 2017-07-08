@@ -41,7 +41,7 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
-var MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
+var MP_SERVER_DOMAIN = "http://98bb4fc8.ngrok.io"
 var wxConfig = undefined
 
 
@@ -52,7 +52,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://067c71ab.ngrok.io"
+  MP_SERVER_DOMAIN = "http://98bb4fc8.ngrok.io"
   wxConfig = {
     token: 'huilinyoudian2017dev',
     appid: 'wx3dfde3f7184c8c51',
