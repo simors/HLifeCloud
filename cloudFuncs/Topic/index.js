@@ -475,7 +475,7 @@ function pubulishTopicComment(request,response){
 			if(payload.commentId&&payload.commentId!=''){
 				parentComment.increment("commentCount",1)
 				parentComment.save().then(()=>{
-					let query = new AV.Query('TopicComments')
+					var query = new AV.Query('TopicComments')
 					query.include(['user']);
 					query.include(['parentComment']);
 					query.include(['parentComment.user']);
