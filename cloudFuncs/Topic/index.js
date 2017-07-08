@@ -475,7 +475,42 @@ function pubulishTopicComment(request,response){
 			if(payload.commentId&&payload.commentId!=''){
 				parentComment.increment("commentCount",1)
 				parentComment.save().then(()=>{
-					response.success()
+					let query = new AV.Query('TopicComments')
+					query.include(['user']);
+					query.include(['parentComment']);
+					query.include(['parentComment.user']);
+					query.get(comment.id).then((result)=>{
+						var position = result.attributes.position
+						var parentComent = result.attributes.parentComment
+						var commentInfo = {
+							content: result.attributes.content,
+							commentId : result.id,
+							topicId : result.attributes.topic.id,
+							parentCommentContent : parentComent?result.attributes.parentComment.attributes.content:undefined,
+							parentCommentUserName : parentComent?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+							parentCommentNickname : parentComent?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+							parentCommentId : parentComent?result.attributes.parentComment.id:undefined,
+							upCount : result.attributes.likeCount,
+							authorUsername : result.attributes.user.attributes.username,
+							authorNickname : result.attributes.user.attributes.nickname,
+							commentCount : result.attributes.commentCount,
+							authorId : result.attributes.user.id,
+							authorAvatar : result.attributes.user.attributes.avatar,
+							createdAt : result.createdAt,
+							address : position?position.address:undefined,
+							city : position?position.city:undefined,
+							longitude : position?position.longitude:undefined,
+							latitude : position?position.latitude:undefined,
+							streetNumber : position?position.streetNumber:undefined,
+							street : position?position.street:undefined,
+							province : position?position.province:undefined,
+							country : position?position.country:undefined,
+							district : position?position.district:undefined
+						}
+						response.success(commentInfo)
+					},(err)=>{
+						response.error(err)
+					})
 				},(err)=>{
 					response.error(err)
 				})
