@@ -397,14 +397,17 @@ function fetchUserUps(request,response){
 	query.equalTo('user',user)
 	// query.equalTo('upType','topicComment')
 	query.equalTo('status',true)
+	query.limit(1000)
+	query.descending('createdAt')
 	query.find().then((results)=>{
 		var commentList = []
 		var topicList = []
 		results.forEach((result)=>{
-			if(result.attributes.upType == 'topicComment'){
+			// console.log('resultslength',result.attributes.upType)
+			if(result.attributes.upType == 'topicComment'&&result.attributes.targetId&&result.attributes.targetId!=''){
 				commentList.push(result.attributes.targetId)
 
-			}else if(result.attributes.upType == 'topic'){
+			}else if(result.attributes.upType == 'topic'&&result.attributes.targetId&&result.attributes.targetId!=''){
 				topicList.push(result.attributes.targetId)
 			}
 		})
@@ -433,6 +436,7 @@ function upByUser(request,response){
 	query.equalTo('user',user)
 	query.equalTo('upType',upType)
 	query.equalTo('status',true)
+
 	query.find().then((result)=>{
 		// console.log('result',result)
 		if(result&&result.length){
