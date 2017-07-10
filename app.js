@@ -181,10 +181,16 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
           //do nothing
         })
 
-        res.reply({
-          type: 'text',
-          content: '欢迎光临'
+        wechat_api.getUser(openid, function (err, result) {
+          console.log("result:", result)
         })
+
+        res.reply([{
+          title: '登录注册',
+          description: '请登录注册',
+          picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
+          url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
+        }])
 
       }
       break

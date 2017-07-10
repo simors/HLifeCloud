@@ -256,11 +256,148 @@ function fetchShopCommentUpedUserList(request, response) {
 }
 
 /**
- * 店铺注册认证
+ * 店铺注册认证（老接口，app更新后修养废弃）
  * @param request
  * @param response
  */
 function shopCertificate(request, response) {
+  var inviteCode = request.params.inviteCode
+  var phone = request.params.phone
+  var shopName = request.params.shopName
+  var shopAddress = request.params.shopAddress
+  var geo = request.params.geo
+  var geoProvince = request.params.geoProvince
+  var geoProvinceCode = request.params.geoProvinceCode
+  var geoCityCode = request.params.geoCityCode
+  var geoDistrictCode = request.params.geoDistrictCode
+  var geoCity = request.params.geoCity
+  var geoDistrict = request.params.geoDistrict
+
+  var currentUser = request.currentUser
+  if (!currentUser) {
+    var userId = request.params.userId
+    if (userId) {
+      currentUser = AV.Object.createWithoutData('_User', userId)
+    } else {
+      response.error({
+        errcode: 1,
+        message: '获取用户信息失败',
+      })
+      return
+    }
+  }
+
+  var existQuery = new AV.Query('Shop')
+  existQuery.equalTo('owner', currentUser)
+  existQuery.first().then((shop) => {
+    if (shop) {
+      response.error({
+        errcode: 1,
+        message: '该用户已有店铺，不能重复注册',
+      })
+    } else {
+      inviteCodeFunc.verifyCode(inviteCode).then(function (reply) {
+        if (!reply) {
+          response.error({
+            errcode: 1,
+            message: '邀请码无效，请向推广员重新获取邀请码',
+          })
+          return
+        }
+
+        var inviterId = reply
+
+        var Shop = AV.Object.extend('Shop')
+        var shop = new Shop()
+        var inviter = AV.Object.createWithoutData('_User', inviterId)
+
+        shop.set('phone', phone + '')
+        shop.set('shopName', shopName + '')
+        shop.set('shopAddress', shopAddress + '')
+        if (geo) {
+          var geoArr = geo.split(',')
+          var latitude = parseFloat(geoArr[0])
+          var longitude = parseFloat(geoArr[1])
+          var numberGeoArr = [latitude, longitude]
+          var point = new AV.GeoPoint(numberGeoArr)
+          shop.set('geo', point)
+        }
+        shop.set('geoProvince', geoProvince + '')
+        shop.set('geoProvinceCode', geoProvinceCode + '')
+        shop.set('geoCity', geoCity + '')
+        shop.set('geoCityCode', geoCityCode + '')
+        shop.set('geoDistrict', geoDistrict + '')
+        shop.set('geoDistrictCode', geoDistrictCode + '')
+        shop.set('owner', currentUser)
+        shop.set('inviter', inviter)
+        currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
+
+        var savePromoter = PromoterFunc.getPromoterByUserId(inviterId).then((upPromoter) => {
+          console.log('getPromoterByUserId shop invite promoter id is: ', upPromoter.id)
+          PromoterFunc.incrementInviteShopNum(upPromoter.id)
+        }, (reason) => {
+          console.log('getPromoterByUserId.reason====', reason)
+          return reason
+        })
+
+        Promise.all([currentUser.save(), savePromoter]).then(() => {
+          return shop.save()
+        }).then((shopInfo) => {
+          response.success({
+            errcode: 0,
+            message: '店铺注册认证成功',
+            shopInfo: shopInfo
+          })
+        }, function (reason) {
+          console.log('shopCertificate.Promise.all.reason====', reason)
+          response.error({
+            errcode: 1,
+            message: '店铺注册认证失败，请与客服联系',
+          })
+        }).catch((err) => {
+          console.log('shopCertificate.Promise.all.catch.err====', err)
+          response.error({
+            errcode: 1,
+            message: '店铺注册认证失败，请与客服联系',
+          })
+        })
+      }, function (reason) {
+        console.log("shopCertificate.verifyCode.reason====", reason)
+        response.error({
+          errcode: 1,
+          message: '邀请码校验失败，请重新获取'
+        })
+      }).catch(function (error) {
+        console.log("shopCertificate.verifyCode.catch.error====", error)
+        response.error({
+          errcode: 1,
+          message: '邀请码校验失败，请重新获取',
+        })
+      })
+    }
+  }, (err) => {
+    console.log('query exist shop error: ', err)
+    response.error({
+      errcode: 1,
+      message: '注册店铺失败，请与客服联系'
+    })
+  }).catch((err) => {
+    console.log('shop regist error: ', err)
+    response.error({
+      errcode: 1,
+      message: '注册店铺失败，请与客服联系'
+    })
+  })
+}
+
+
+/**
+ * 店铺注册认证(新接口：店铺邀请者信息通过Promoter表来指定)
+ * @param request
+ * @param response
+ */
+function shopCertificateNew(request, response) {
+
   var phone = request.params.phone
   var shopName = request.params.shopName
   var shopAddress = request.params.shopAddress
@@ -298,38 +435,36 @@ function shopCertificate(request, response) {
       var query = new AV.Query('Promoter')
       query.equalTo('user', currentUser)
       query.first().then((promoter) => {
-        PromoterFunc.getUpPromoter(promoter, false).then((upPromoter) => {
-          var Shop = AV.Object.extend('Shop')
-          var shop = new Shop()
+        return PromoterFunc.getUpPromoter(promoter, false)
+      }).then((upPromoter) => {
+        var Shop = AV.Object.extend('Shop')
+        var shop = new Shop()
 
-          shop.set('phone', phone + '')
-          shop.set('shopName', shopName + '')
-          shop.set('shopAddress', shopAddress + '')
-          if (geo) {
-            var geoArr = geo.split(',')
-            var latitude = parseFloat(geoArr[0])
-            var longitude = parseFloat(geoArr[1])
-            var numberGeoArr = [latitude, longitude]
-            var point = new AV.GeoPoint(numberGeoArr)
-            shop.set('geo', point)
-          }
-          shop.set('geoProvince', geoProvince + '')
-          shop.set('geoProvinceCode', geoProvinceCode + '')
-          shop.set('geoCity', geoCity + '')
-          shop.set('geoCityCode', geoCityCode + '')
-          shop.set('geoDistrict', geoDistrict + '')
-          shop.set('geoDistrictCode', geoDistrictCode + '')
-          shop.set('owner', currentUser)
-          shop.set('inviter', upPromoter)
-          currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
+        shop.set('phone', String(phone))
+        shop.set('shopName', String(shopName))
+        shop.set('shopAddress', String(shopAddress))
+        console.log("geo", geo)
+        if (geo) {
+          var geoArr = geo.split(',')
+          var latitude = parseFloat(geoArr[0])
+          var longitude = parseFloat(geoArr[1])
+          var numberGeoArr = [latitude, longitude]
+          var point = new AV.GeoPoint(numberGeoArr)
+          shop.set('geo', point)
+        }
+        shop.set('geoProvince', String(geoProvince))
+        shop.set('geoProvinceCode',String(geoProvinceCode))
+        shop.set('geoCity', String(geoCity))
+        shop.set('geoCityCode', String(geoCityCode))
+        shop.set('geoDistrict', String(geoDistrict))
+        shop.set('geoDistrictCode', String(geoDistrictCode))
+        shop.set('owner', currentUser)
+        if(upPromoter) {
+          shop.set('inviter', upPromoter.attributes.user)
+        }
 
-          var savePromoter = new Promise((resolve) => {resolve()})
-
-          if(upPromoter) {
-            savePromoter = PromoterFunc.incrementInviteShopNum(upPromoter.id)
-          }
-
-          Promise.all([currentUser.save(), savePromoter]).then(() => {
+        if(upPromoter) {
+          PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
             return shop.save()
           }).then((shopInfo) => {
             response.success({
@@ -337,42 +472,40 @@ function shopCertificate(request, response) {
               message: '店铺注册认证成功',
               shopInfo: shopInfo
             })
-          }, function (reason) {
-            console.log('shopCertificate.Promise.all.reason====', reason)
+          }).catch((err) => {
+            console.log(err)
+
             response.error({
               errcode: 1,
               message: '店铺注册认证失败，请与客服联系',
+            })
+          })
+        } else {
+          shop.save().then((shopInfo) => {
+            response.success({
+              errcode: 0,
+              message: '店铺注册认证成功',
+              shopInfo: shopInfo
             })
           }).catch((err) => {
-            console.log('shopCertificate.Promise.all.catch.err====', err)
+            console.log(err)
             response.error({
               errcode: 1,
               message: '店铺注册认证失败，请与客服联系',
             })
           })
-        }, (err) => {
-          console.log(err)
-          response.error({
-            errcode: 1,
-            message: "无法获取到上一级推广好友"
-          })
-        })
-      }, (err) => {
-        console.log(err)
+        }
+
+      }).catch((error) => {
+        console.log(error)
         response.error({
           errcode: 1,
-          message: "获取用户的推广上下级信息失败"
+          message: '店铺注册认证失败，请与客服联系',
         })
       })
     }
-  }, (err) => {
-    console.log('query exist shop error: ', err)
-    response.error({
-      errcode: 1,
-      message: '注册店铺失败，请与客服联系'
-    })
   }).catch((err) => {
-    console.log('shop regist error: ', err)
+    console.log(err)
     response.error({
       errcode: 1,
       message: '注册店铺失败，请与客服联系'
@@ -1062,6 +1195,7 @@ var shopFunc = {
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
+  shopCertificateNew: shopCertificateNew,
 }
 
 module.exports = shopFunc
