@@ -98,7 +98,7 @@
                 user.set('openid', openid)
                 return user.save()
             }
-            return null
+            return Promise.resolve(user)
         }).then((loginedUser) => {
             return AV.Cloud.run('promoterSyncPromoterInfo', {userId: loginedUser.id})
         }).then((result) => {
@@ -130,7 +130,6 @@
     //验证码获取倒计时
     var wait=60;
     function time(o) {
-        console.log('wait:', wait)
         if (wait == 0) {
             o.removeAttribute("disabled");
             o.value="获取验证码";

@@ -12,49 +12,87 @@ var client = new OAuth(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appS
 // 详见： https://leancloud.cn/docs/js_guide.html#对象
 var User = AV.Object.extend('_User');
 
+function wechatGetAccessToken(code) {
+  return new Promise(function (resolve, reject) {
+    client.getAccessToken(code, function (err, result) {
+      if(err) {
+        reject(new Error('获取微信授权access_token失败'))
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
+
+function wechatGetUser(openid) {
+  return new Promise(function (resolve, reject) {
+    client.getUser(openid, function (err, result) {
+      if(err) {
+        reject(new Error('获取微信用户信息失败'))
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
+
 router.get('/', function (req, res, next) {
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/wxOauth/callback'
   var url = client.getAuthorizeURL(auth_callback_url, '', 'snsapi_userinfo');
-  console.log(url)
   res.redirect(url)
 })
 
 router.get('/callback', function (req, res, next) {
   var code = req.query.code;
-  client.getAccessToken(code, function (err, result) {
-    console.log(result)
-    var accessToken = result.data.access_token;
-    var openid = result.data.openid
-    var unionid = result.data.unionid
-    var expires_in = result.data.expires_in
+  var accessToken = undefined
+  var openid = undefined
+  var unionid = undefined
+  var expires_in = undefined
 
-    client.getUser(openid, function (err, result) {
-      var wxUserInfo = result;
-      var nickname = wxUserInfo.nickname
-      var headimgurl = wxUserInfo.headimgurl
+  wechatGetAccessToken(code).then((result) => {
+    accessToken = result.data.access_token;
+    openid = result.data.openid
+    unionid = result.data.unionid
+    expires_in = result.data.expires_in
 
-      AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid}).then((result) => {
-        if(result.isSignIn) {  //已经注册
-          res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
-        } else {  //待注册登录
-          res.render('wxSignIn', {
-            appId: process.env.LEANCLOUD_APP_ID,
-            appKey: process.env.LEANCLOUD_APP_KEY,
-            accessToken: accessToken,
-            unionid: unionid,
-            expires_in: expires_in,
-            openid: openid,
-            nickname: nickname,
-            headimgurl: headimgurl,
-          })
-        }
-      }).catch((error) => {
-
+    return AV.Cloud.run('isWXUnionIdSignIn', {unionid: unionid})
+  }).then((result) => {
+    if(!result.isSignIn) {
+      return wechatGetUser(openid)
+    } else {
+      console.log("微信用户已注册！")
+      return Promise.resolve()
+    }
+  }).then((userInfo) => {
+    if(userInfo) {
+      var nickname = userInfo.nickname
+      var headimgurl = userInfo.headimgurl
+      var authData = {
+        "openid": unionid,
+        "access_token": accessToken,
+        "expires_at": Date.parse(expires_in),
+      }
+      var platform = 'weixin'
+      var leanUser = new AV.User()
+      leanUser.set('type', 'normal')
+      leanUser.set('nickname', nickname)
+      leanUser.set('username', unionid)
+      leanUser.set('avatar', headimgurl)
+      leanUser.set('openid', openid)
+      return AV.User.associateWithAuthData(leanUser, platform, authData).then((user) => {
+        return AV.Cloud.run('promoterSyncPromoterInfo', {userId: user.id})
       })
-    })
-
+    } else {
+      return Promise.resolve()
+    }
+  }).then(() => {
+    res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
+  }).catch((error) => {
+    console.log(error)
   })
+
+
 })
 
 module.exports = router

@@ -139,22 +139,18 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
                   }
                 })
               } else {
-                res.reply([{
-                  title: '登录注册',
-                  description: '请登录注册',
-                  picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
-                  url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-                }])
+                res.reply({
+                  type: 'text',
+                  content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+                })
               }
             })
 
           } else {
-            res.reply([{
-              title: '登录注册',
-              description: '请登录注册',
-              picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
-              url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-            }])
+            res.reply({
+              type: 'text',
+              content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+            })
           }
         })
 
@@ -174,23 +170,15 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
             }
             return AV.Cloud.run('utilBindWechatUnionid', params)
           }
-          return new Promise((resolve) => {
-            resolve()
-          })
+          return new Promise.resolve()
         }).then((result) => {
           //do nothing
         })
 
-        wechat_api.getUser(openid, function (err, result) {
-          console.log("result:", result)
+        res.reply({
+          type: 'text',
+          content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
         })
-
-        res.reply([{
-          title: '登录注册',
-          description: '请登录注册',
-          picurl: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/images/login_cover.png',
-          url: GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-        }])
 
       }
       break
