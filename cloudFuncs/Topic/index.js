@@ -175,13 +175,15 @@ function fetchTopicList(request,response){
 	query.descending('createdAt')
 	return query.find().then(function (results) {
 		var topicList = []
+		var topics = []
 		results.forEach((result)=>{
 			var position = result.attributes.position
 			var user = result.attributes.user
 			var topic = topicUtil.newTopicFromLeanCloudObject(result)
-			topicList.push(topic)
+			topics.push(topic)
+			topicList.push(topic.objectId)
 		})
-		response.success(topicList)
+		response.success({topics:topics,topicList:topicList})
 	},  (err)=> {
 		response.error(err)
 	})
