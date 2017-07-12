@@ -141,7 +141,15 @@ function getTopicComments(topicId) {
 function fetchTopicList(request,response){
 	var payload = request.params.payload
 	var categoryId = payload.categoryId
+	var province = payload.province
+	var city = payload.city
 	var query = new AV.Query('Topics')
+	if(payload.type == 'localTopics'){
+		if(city && city != '全国') {
+			query.equalTo('city', city)
+			query.equalTo('province', province)
+		}
+	}
 	if (payload.type == "topics" && categoryId) {
 		var category = AV.Object.createWithoutData('TopicCategory', categoryId);
 		query.equalTo('category', category)
@@ -168,9 +176,34 @@ function fetchTopicList(request,response){
 	return query.find().then(function (results) {
 		var topicList = []
 		results.forEach((result)=>{
+			var position = result.attributes.position
 			var user = result.attributes.user
-			result.user=user
-			topicList.push({topic:result,user:user})
+			topicList.push({
+				content: result.attributes.content, //话题内容
+				title: result.attributes.title,
+				abstract:result.attributes.abstract,
+				imgGroup: result.attributes.imgGroup, //图片
+				objectId: result.id,  //话题id
+				categoryId: result.attributes.category.id,  //属于的分类
+				categoryName: result.attributes.category.attributes.title, // 话题分类名
+				nickname: user?result.attributes.user.attributes.nickname:undefined, //所属用户昵称
+				username: user?result.attributes.user.attributes.username:undefined, //所属用户昵称
+				userId:user?result.attributes.user.id:undefined,     // 所属用户的id
+				createdAt: result.createdAt,  //创建时间
+				avatar: user?result.attributes.user.attributes.avatar:undefined,  //所属用户头像
+				commentNum: result.attributes.commentNum, //评论数
+				likeCount: result.attributes.likeCount, //点赞数
+				address : position?position.address:undefined,
+				city : position?position.city:undefined,
+				longitude : position?position.longitude:undefined,
+				latitude : position?position.latitude:undefined,
+				streetNumber : position?position.streetNumber:undefined,
+				street : position?position.street:undefined,
+				province : position?position.province:undefined,
+				country : position?position.country:undefined,
+				district : position?position.district:undefined,
+				userUpdatedAt : user?user.updatedAt:undefined,
+			})
 		})
 		response.success(topicList)
 	},  (err)=> {
@@ -591,6 +624,7 @@ function pubulishTopicComment(request,response){
 	})
 
 }
+
 
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
