@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/3/27.
  */
+var redis = require('redis');
 var AV = require('leanengine');
 var Crypto = require('crypto');
 var GLOBAL_CONFIG = require('../../config')
@@ -10,6 +11,7 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 var dateFormat = require('dateformat')
+
 
 // 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
@@ -21,6 +23,9 @@ const WITHDRAW = 5              // 取现
 // 异常状态
 const NOT_FIXED = 1             // 异常未被处理
 const FIXED = 2                 // 异常已被处理
+
+// 支付费率
+const PREFIX = 'paymentFree:'
 
 /**
  * 更新异常交易记录
@@ -984,6 +989,75 @@ function fetchDealRecords(request, response) {
   })
 }
 
+/**
+ * 设置提现手续费费率
+ * @param request
+ * @param response
+ */
+function setWithdrawFree(request, response) {
+  var channel = request.params.channel
+  var free = request.params.free
+
+  Promise.promisifyAll(redis.RedisClient.prototype)
+  var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.auth(GLOBAL_CONFIG.REDIS_AUTH)
+  client.select(GLOBAL_CONFIG.REDIS_DB)
+  // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
+  // 主从切换等原因造成短暂不可用导致应用进程退出。
+  client.on('error', function (err) {
+    response.error({errcode: 1, message: '设置费率失败，请重试！'})
+  })
+
+  client.setAsync(PREFIX + channel, free).then((free) => {
+    response.success({
+      errcode: 0,
+      message: '设置费率成功！',
+    })  }).finally(() => {
+    client.quit()
+  })
+
+}
+
+/**
+ * @param channel  支付渠道
+ * @returns free
+ */
+function getPaymentFreeByChannel(channel) {
+  Promise.promisifyAll(redis.RedisClient.prototype)
+  var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
+  client.auth(GLOBAL_CONFIG.REDIS_AUTH)
+  client.select(GLOBAL_CONFIG.REDIS_DB)
+  // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
+  // 主从切换等原因造成短暂不可用导致应用进程退出。
+  client.on('error', function (err) {
+    return Promise.reject(err)
+  })
+
+  return client.getAsync(PREFIX + channel).then((free) => {
+    return free
+  }).finally(() => {
+    client.quit()
+  })
+
+}
+/**
+ * 获取提现手续费费率
+ * @param request
+ * @param response
+ */
+function getWithdrawFree(request, response) {
+  var channel = request.params.channel
+
+  getPaymentFreeByChannel(channel).then((free) => {
+    response.success({
+      errcode: 0,
+      free: free
+    })
+  }).catch(() => {
+    response.error({errcode: 1, message: '获取费率失败'})
+  })
+}
+
 
 var PingppFunc = {
   INVITE_PROMOTER: INVITE_PROMOTER,
@@ -1003,6 +1077,8 @@ var PingppFunc = {
   PingppFuncTest: PingppFuncTest,
   updateUserDealRecords: updateUserDealRecords,
   fetchDealRecords: fetchDealRecords,
+  setWithdrawFree: setWithdrawFree,
+  getWithdrawFree: getWithdrawFree
 }
 
 module.exports = PingppFunc

@@ -210,6 +210,8 @@ AV.Cloud.define('hLifeSetPaymentPassword', PingppFunc.setPaymentPassword)
 AV.Cloud.define('hLifePaymentPasswordAuth', PingppFunc.paymentPasswordAuth)
 AV.Cloud.define('PingppFuncTest', PingppFunc.PingppFuncTest)
 AV.Cloud.define('pingPPFetchDealRecords', PingppFunc.fetchDealRecords)
+AV.Cloud.define('pingPPGetWithdrawFree', PingppFunc.getWithdrawFree)
+AV.Cloud.define('pingPPSetWithdrawFree', PingppFunc.setWithdrawFree)
 
 // 统计方法
 AV.Cloud.define('statPromoterPerformance', statFunc.statPromoterPerformance)
