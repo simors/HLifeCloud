@@ -25,7 +25,7 @@ const NOT_FIXED = 1             // 异常未被处理
 const FIXED = 2                 // 异常已被处理
 
 // 支付费率
-const PREFIX = 'paymentFree:'
+const PREFIX = 'paymentFee:'
 
 /**
  * 更新异常交易记录
@@ -186,6 +186,7 @@ function insertChargeInMysql(charge) {
 function insertTransferInMysql(transfer) {
   var sql = ""
   var mysqlConn = undefined
+
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
     sql = "SELECT count(1) as cnt FROM `DealRecords` WHERE `order_no` = ? LIMIT 1"
@@ -204,9 +205,7 @@ function insertTransferInMysql(transfer) {
       }
       return updateUserDealRecords(mysqlConn, deal)
     } else {
-      return new Promise((resolve) => {
-        resolve()
-      })
+      return Promise.resolve()
     }
   }).catch((err) => {
     throw err
@@ -258,6 +257,11 @@ function updatePaymentInfoInMysql(paymentInfo) {
 
   var sql = ""
   var mysqlConn = undefined
+  var fee = paymentInfo.fee || 0
+  var feeAmount = paymentInfo.amount * fee
+  if(feeAmount < 1)
+    feeAmount = 1
+
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
     sql = "SELECT count(1) as cnt FROM `PaymentInfo` WHERE `userId` = ? LIMIT 1"
@@ -266,19 +270,15 @@ function updatePaymentInfoInMysql(paymentInfo) {
     if (queryRes.results[0].cnt == 1) {
       if(paymentInfo.channel == 'alipay') {
         sql = "UPDATE `PaymentInfo` SET `card_number` = ?, `id_name` = ?, `open_bank_code` = ?, `open_bank` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
-        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount, paymentInfo.userId])
+        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount + feeAmount, paymentInfo.userId])
       } else if (paymentInfo.channel == 'wx_pub') {
         sql = "UPDATE `PaymentInfo` SET `open_id` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
-        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.openid, paymentInfo.amount, paymentInfo.userId])
+        return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.openid, paymentInfo.amount + feeAmount, paymentInfo.userId])
       } else {
-        return new Promise((resolve) => {
-          resolve()
-        })
+        return Promise.resolve()
       }
     } else {
-      return new Promise((resolve) => {
-        resolve()
-      })
+      return Promise.resolve()
     }
   }).catch((err) => {
     throw err
@@ -606,8 +606,10 @@ function createTransfers(request, response) {
                 openid: transfer.recipient,
                 amount: (transfer.amount).toFixed(0) * 0.01,
               }
-              console.log("updatePaymentInfoInMysql", paymentInfo)
-              updatePaymentInfoInMysql(paymentInfo).then(() => {
+              getPaymentFeeByChannel('wx_pub').then((fee) => {
+                paymentInfo.fee = fee
+                return updatePaymentInfoInMysql(paymentInfo)
+              }).then(() => {
                 response.success({
                   errcode: 0,
                   message: 'allinpay create transfers success!',
@@ -699,9 +701,13 @@ function createTransfers(request, response) {
 
 function transfersEvent(request, response) {
   var transfer = request.params.data.object
+  var channel = transfer.channel
 
+  if(channel == 'wx_pub') {
 
-  return insertTransferInMysql(transfer).then(() => {
+  }
+
+  insertTransferInMysql(transfer).then(() => {
     response.success({
       errcode: 0,
       message: 'transfersEvent response success!',
@@ -994,9 +1000,9 @@ function fetchDealRecords(request, response) {
  * @param request
  * @param response
  */
-function setWithdrawFree(request, response) {
+function setWithdrawFee(request, response) {
   var channel = request.params.channel
-  var free = request.params.free
+  var fee = request.params.fee
 
   Promise.promisifyAll(redis.RedisClient.prototype)
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
@@ -1008,7 +1014,7 @@ function setWithdrawFree(request, response) {
     response.error({errcode: 1, message: '设置费率失败，请重试！'})
   })
 
-  client.setAsync(PREFIX + channel, free).then((free) => {
+  client.setAsync(PREFIX + channel, fee).then((fee) => {
     response.success({
       errcode: 0,
       message: '设置费率成功！',
@@ -1020,9 +1026,9 @@ function setWithdrawFree(request, response) {
 
 /**
  * @param channel  支付渠道
- * @returns free
+ * @returns fee
  */
-function getPaymentFreeByChannel(channel) {
+function getPaymentFeeByChannel(channel) {
   Promise.promisifyAll(redis.RedisClient.prototype)
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
   client.auth(GLOBAL_CONFIG.REDIS_AUTH)
@@ -1033,8 +1039,8 @@ function getPaymentFreeByChannel(channel) {
     return Promise.reject(err)
   })
 
-  return client.getAsync(PREFIX + channel).then((free) => {
-    return free
+  return client.getAsync(PREFIX + channel).then((fee) => {
+    return fee
   }).finally(() => {
     client.quit()
   })
@@ -1045,13 +1051,13 @@ function getPaymentFreeByChannel(channel) {
  * @param request
  * @param response
  */
-function getWithdrawFree(request, response) {
+function getWithdrawFee(request, response) {
   var channel = request.params.channel
 
-  getPaymentFreeByChannel(channel).then((free) => {
+  getPaymentFeeByChannel(channel).then((fee) => {
     response.success({
       errcode: 0,
-      free: free
+      fee: fee
     })
   }).catch(() => {
     response.error({errcode: 1, message: '获取费率失败'})
@@ -1077,8 +1083,8 @@ var PingppFunc = {
   PingppFuncTest: PingppFuncTest,
   updateUserDealRecords: updateUserDealRecords,
   fetchDealRecords: fetchDealRecords,
-  setWithdrawFree: setWithdrawFree,
-  getWithdrawFree: getWithdrawFree
+  setWithdrawFee: setWithdrawFee,
+  getWithdrawFee: getWithdrawFee
 }
 
 module.exports = PingppFunc
