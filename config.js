@@ -52,7 +52,8 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+  // MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+  MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
   wxConfig = {
     token: 'huilinyoudian2017dev',
     appid: 'wx3dfde3f7184c8c51',

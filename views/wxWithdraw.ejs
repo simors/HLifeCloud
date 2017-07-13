@@ -14,7 +14,7 @@
     <Text style="font-size: 16px">提现金额</Text>
     <div style="display: flex; border-bottom: solid; border-bottom-width: inherit;border-bottom-color: #0d0d0d; padding-top: 20px; padding-bottom: 20px; align-items: center">
         <label style="font-size: 20px">¥</label>
-        <input id="amount" type="number" style="font-size: 40px; border-width: 0px; width: 200px; margin-left: 10px" />
+        <input id="amount" type="number" style="font-size: 40px; border-width: 0px; width: 300px; margin-left: 10px" />
     </div>
     <div style="padding-top: 10px; padding-bottom: 10px">
         <Text>当前余额<%=balance%>元，</Text>
@@ -23,8 +23,16 @@
 </div>
 
 <div class="weui-btn-area">
-    <a class="weui-btn weui-btn_primary"  id="withdrawBtn">提现</a>
+    <a class="weui-btn weui-btn_primary" href="javascript:void(0);" id="withdrawBtn">提现</a>
 </div>
+<div id="loadingToast" style="display:none;">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-loading weui-icon_toast"></i>
+        <p class="weui-toast__content">转账处理中</p>
+    </div>
+</div>
+
 </body>
 <script type="text/javascript">
 
@@ -35,6 +43,7 @@
 
     var withdrawBtn = document.getElementById('withdrawBtn')
     var withdrawAll = document.getElementById('withdrawAll')
+    var toast = document.getElementById('loadingToast')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
     var userId = "<%=userId%>"
@@ -57,7 +66,8 @@
         }).catch((err) => {
             alert(err)
         })
-
+        withdrawBtn.setAttribute('class', "weui-btn weui-btn_disabled")
+        toast.setAttribute('style', "display:block;")
     }
 
     function generateUUID(){
