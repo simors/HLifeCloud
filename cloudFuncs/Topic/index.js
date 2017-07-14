@@ -172,6 +172,7 @@ function fetchTopicList(request,response){
 	}
 	query.limit(10) // 最多返回 10 条结果
 	query.include('user')
+	query.include('category')
 	query.descending('createdAt')
 	return query.find().then(function (results) {
 		var topicList = []
