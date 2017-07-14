@@ -159,7 +159,7 @@ function fetchTopicList(request,response){
 		query.equalTo('user', user)
 	}
 	query.equalTo('status',1)
-	if (payload.type == "pickedTopics") {
+	if (payload.type == "pickedTopics"||payload.type == "mainPageTopics") {
 		query.equalTo('picked', true)
 	}
 	var isRefresh = payload.isRefresh
