@@ -128,7 +128,7 @@ function newTopicCommentFromLeanCloudObject(result){
 		province : position?position.province:undefined,
 		country : position?position.country:undefined,
 		district : position?position.district:undefined,
-		createdDate : numberUtils.formatLeancloudTime(createdAt, 'YYYY-MM-DD')
+		createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')
 	}
 	return comment
 }
@@ -161,6 +161,7 @@ function newTopicFromLeanCloudObject(result) {
 		country : position?position.country:undefined,
 		district : position?position.district:undefined,
 		userUpdatedAt : user?user.updatedAt:undefined,
+		createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')
 	}
 	return topic
 }
