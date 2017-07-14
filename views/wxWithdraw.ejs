@@ -46,6 +46,7 @@
     var toast = document.getElementById('loadingToast')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
+    var unionid = "<%=unionid%>"
     var userId = "<%=userId%>"
     var balance = parseFloat("<%=balance%>").toFixed(2)
 
@@ -62,9 +63,9 @@
             metadata: {userId: userId},
         }
         AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
-            window.location.href = "/wxProfile?openid=" + openid
+            window.location.href = "/wxProfile?openid=" + openid + "&unionid=" + unionid
         }).catch((err) => {
-            alert(err)
+            window.location.href = "/wxError"
         })
         withdrawBtn.setAttribute('class', "weui-btn weui-btn_disabled")
         toast.setAttribute('style', "display:block;")

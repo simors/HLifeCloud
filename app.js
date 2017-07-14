@@ -17,6 +17,7 @@ var wxOauth = require('./routes/wxOauth')
 var wxProfile = require('./routes/wxProfile')
 var wxWithdraw = require('./routes/wxWithdraw')
 var wxSignIn = require('./routes/wxSignIn')
+var wxError = require('./routes/wxError')
 var AV = require('leanengine');
 var WechatAPI = require('wechat-api');
 var wechat = require('wechat');
@@ -107,7 +108,8 @@ app.use('/inviteCodeShare', inviteCode)
 
 app.use('/download', download)
 
-console.log("wxConfig:", GLOBAL_CONFIG.wxConfig)
+app.use('/wxError', wxError)
+
 app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
   var message = req.weixin;
 
@@ -125,19 +127,29 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
       if(message.Event === 'CLICK' && message.EventKey === 'MY_QRCODE') {
         var openid = message.FromUserName
 
-        var query = new AV.Query('_User')
-        query.equalTo("openid", openid)
-        query.first().then((user) => {
-          if(user && user.attributes.authData) {
-            var unionid = user.attributes.authData.weixin.openid
-            AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
-              if(result.isSignIn && result.qrcode) {
-                res.reply({
-                  type: 'image',
-                  content: {
-                    mediaId: result.qrcode.mediaId
+        wechat_api.getUser(openid, function (err, result) {
+          if(!err) {
+            var unionid = result.unionid
+            var query = new AV.Query('_User')
+            query.equalTo("authData.weixin.openid", unionid)
+            query.first().then((user) => {
+              if(user && user.attributes.authData) {
+                AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
+                  if(result.isSignIn && result.qrcode) {
+                    res.reply({
+                      type: 'image',
+                      content: {
+                        mediaId: result.qrcode.mediaId
+                      }
+                    })
+                  } else {
+                    res.reply({
+                      type: 'text',
+                      content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+                    })
                   }
                 })
+
               } else {
                 res.reply({
                   type: 'text',
@@ -145,39 +157,35 @@ app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
                 })
               }
             })
-
           } else {
             res.reply({
               type: 'text',
-              content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+              content: '获取信息失败'
             })
           }
         })
-
       } else if(message.Event === 'subscribe') {
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
-
-        var query = new AV.Query('_User')
-        query.equalTo("openid", openid)
-
-        query.first().then((result) => {
-          if(!result) {
+        wechat_api.getUser(openid, function (err, result) {
+          if(!err) {
+            var unionid = result.unionid
             var params = {
-              unionid: result.attributes.authData.weixin.openid,
+              unionid: unionid,
               upUserUnionid: upUser_unionid
             }
             return AV.Cloud.run('utilBindWechatUnionid', params)
+          } else {
+            return Promise.resolve()
           }
-          return new Promise.resolve()
-        }).then((result) => {
-          //do nothing
-        })
-
-        res.reply({
-          type: 'text',
-          content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+        }).then(() => {
+          res.reply({
+            type: 'text',
+            content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+          })
+        }).catch((error) => {
+          console.log("subscribe:", error)
         })
 
       }
