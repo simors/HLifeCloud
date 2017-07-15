@@ -443,8 +443,14 @@ function upByUser(request,response){
 			up.save().then((item)=>{
 				upItem.increment("likeCount", 1)
 				upItem.save().then(()=>{
-				  var upDetail = topicUtil.upFromLeancloudObject(item)
-					response.success(upDetail)
+          var upQuery = new AV.Query('Up')
+          upQuery.include('user')
+          upQuery.get(item.id).then((up)=>{
+            var upDetail = topicUtil.upFromLeancloudObject(up)
+            response.success(upDetail)
+          },(err)=>{
+            response.error(err)
+          })
 				},(err)=>{
 					response.error(err)
 				})
