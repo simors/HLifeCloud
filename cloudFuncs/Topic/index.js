@@ -249,7 +249,7 @@ function fetchTopicLikeUsers(payload) {
 				var user = {
 					nickname:userInfo.attributes.nickname,
 					userId:userInfo.id,
-					createdAt:userInfo.createdAt,
+					createdAt:result.createdAt,
 					avatar:userInfo.attributes.avatar
 				}
 				topicLikeUsers.push(user)
@@ -294,29 +294,18 @@ function fetchUserLikeTopicInfo(payload){
 
 function fetchTopicDetailInfo(request,response){
 	var topicId = request.params.topicId
-	var authorId = request.params.authorId
+	// var authorId = request.params.authorId
 	var userId = request.params.userId
 	var upType = 'topic'
-	fetchOtherUserFollowersTotalCount({userId:authorId}).then((followers)=>{
-		fetchTopicLikesCount({topicId:topicId,upType:upType}).then((likes)=>{
+	fetchOtherUserFollowersTotalCount({userId:userId}).then((followersCount)=>{
 			fetchTopicLikeUsers({topicId:topicId,upType:upType}).then((likeUsers)=>{
-				fetchUserLikeTopicInfo({userId:userId,topicId:topicId,upType:upType}).then((userUpShopInfo)=>{
-					console.log('userUpShopInfo',userUpShopInfo)
 					response.success({
-						followers:followers,
-						likes:likes,
+						followerCount:followersCount,
 						likeUsers:likeUsers,
-						userUpShopInfo:userUpShopInfo,
 					})
-				},(err)=>{
-					response.error(err)
-				})
 			},(err)=>{
 				response.error(err)
 			})
-		},(err)=>{
-			response.error(err)
-		})
 	},(err)=>{
 		response.error(err)
 	})
