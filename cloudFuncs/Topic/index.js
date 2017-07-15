@@ -224,7 +224,7 @@ function fetchTopicLikesCount(payload) {
 
 function fetchTopicLikeUsers(payload) {
 	var topicId = payload.topicId
-	var isRefresh = true
+	var isRefresh = payload.isRefresh
 	var lastCreatedAt = payload.lastCreatedAt
 
 	var query = new AV.Query('Up')
@@ -295,7 +295,7 @@ function fetchTopicDetailInfo(request,response){
 	var userId = request.params.userId
 	var upType = 'topic'
 	fetchOtherUserFollowersTotalCount({userId:userId}).then((followersCount)=>{
-			fetchTopicLikeUsers({topicId:topicId,upType:upType}).then((likeUsers)=>{
+			fetchTopicLikeUsers({topicId:topicId,upType:upType,isRefresh:true}).then((likeUsers)=>{
 					response.success({
 						followerCount:followersCount,
 						likeUsers:likeUsers,
@@ -306,6 +306,28 @@ function fetchTopicDetailInfo(request,response){
 	},(err)=>{
 		response.error(err)
 	})
+}
+
+function fetchUpsByTopicId(request,response){
+  var topicId = request.params.topicId
+  // var authorId = request.params.authorId
+  var isRefresh = request.params.isRefresh
+  var lastCreatedAt = request.params.lastCreatedAt
+
+  var upType = 'topic'
+  var payload = {
+    topicId: topicId,
+    isRefresh: isRefresh,
+    lastCreatedAt: lastCreatedAt,
+    upType: upType,
+  }
+    fetchTopicLikeUsers(payload).then((ups)=>{
+      response.success({
+        ups:ups,
+      })
+    },(err)=>{
+      response.error(err)
+    })
 }
 
 function fetchTopicCommentsV2(request,response){
@@ -511,12 +533,13 @@ var topicFunc = {
   disableTopicByUser: disableTopicByUser,
   fetchTopicComments: fetchTopicComments,
 	getTopicComments: getTopicComments,
-	fetchTopicList:fetchTopicList,
-	fetchTopicDetailInfo:fetchTopicDetailInfo,
-	fetchTopicCommentsV2:fetchTopicCommentsV2,
-	fetchUserUps:fetchUserUps,
+	fetchTopicList: fetchTopicList,
+	fetchTopicDetailInfo: fetchTopicDetailInfo,
+	fetchTopicCommentsV2: fetchTopicCommentsV2,
+	fetchUserUps: fetchUserUps,
 	upByUser: upByUser,
-	pubulishTopicComment:pubulishTopicComment
+	pubulishTopicComment: pubulishTopicComment,
+  fetchUpsByTopicId: fetchUpsByTopicId
 
 }
 
