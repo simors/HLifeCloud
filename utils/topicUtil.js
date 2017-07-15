@@ -21,7 +21,7 @@ function upFromLeancloudObject(lcObj) {
     		var user = attrs.user
     		// console.log('user====', user)
     		var userAttrs = user.attributes
-
+				var avatar = userAttrs.avatar
     		var nickname = userAttrs.nickname
     		// console.log('userAttrs====', userAttrs)
     		if(!nickname) {
@@ -30,8 +30,10 @@ function upFromLeancloudObject(lcObj) {
     		}
 
     		upInfo.user = {
+					avatar: avatar,
     			id: user.id,
     			nickname: nickname
+
     		}
     	}else if(['upType', 'targetId', 'status'].indexOf(key) != -1) {
     		upInfo[key] = attrs[key]
@@ -168,6 +170,8 @@ function newTopicFromLeanCloudObject(result) {
 	}
 	return topic
 }
+
+
 var topicUtil = {
   topicCommentFromLeancloudObject: topicCommentFromLeancloudObject,
   upFromLeancloudObject: upFromLeancloudObject,

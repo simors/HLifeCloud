@@ -242,23 +242,17 @@ function fetchTopicLikeUsers(payload) {
 
 	// console.log('fetchTopicLikeUsers.query===', query)
 	return query.find().then((results)=> {
-		var topicLikeUsers = []
+		var upList = []
 		if (results) {
 			results.forEach((result) => {
-				var userInfo = result.attributes.user
-        console.log('userinfo',userInfo)
-        if(userInfo){
-          var user = {
-            nickname:userInfo.attributes.nickname,
-            userId:userInfo.id,
-            createdAt:result.createdAt,
-            avatar:userInfo.attributes.avatar
-          }
-          topicLikeUsers.push(user)
-        }
+
+
+          var up = topicUtil.upFromLeancloudObject(result)
+          upList.push(up)
+
 			})
 		}
-		return topicLikeUsers
+		return upList
 	}, function (err) {
 		return err
 	})
