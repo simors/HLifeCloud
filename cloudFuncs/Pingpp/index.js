@@ -11,6 +11,7 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 var dateFormat = require('dateformat')
+var mpMsgFuncs = require('../../mpFuncs/Message')
 
 
 // 收益来源分类
@@ -452,6 +453,8 @@ function paymentEvent(request, response) {
       })
     }
   }).then(() => {
+    //发送微信通知消息
+    mpMsgFuncs.sendPaymentMessage()
     response.success({
       errcode: 0,
       message: 'paymentEvent charge into mysql success!',
