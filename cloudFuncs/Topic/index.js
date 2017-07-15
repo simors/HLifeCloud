@@ -246,13 +246,16 @@ function fetchTopicLikeUsers(payload) {
 		if (results) {
 			results.forEach((result) => {
 				var userInfo = result.attributes.user
-				var user = {
-					nickname:userInfo.attributes.nickname,
-					userId:userInfo.id,
-					createdAt:result.createdAt,
-					avatar:userInfo.attributes.avatar
-				}
-				topicLikeUsers.push(user)
+        console.log('userinfo',userInfo)
+        if(userInfo){
+          var user = {
+            nickname:userInfo.attributes.nickname,
+            userId:userInfo.id,
+            createdAt:result.createdAt,
+            avatar:userInfo.attributes.avatar
+          }
+          topicLikeUsers.push(user)
+        }
 			})
 		}
 		return topicLikeUsers
