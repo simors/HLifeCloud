@@ -2,8 +2,7 @@
  * Created by wanpeng on 2017/7/14.
  */
 var GLOBAL_CONFIG = require('../../config')
-var OAuth = require('wechat-oauth');
-var client = new OAuth(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var client = require('../util/wechatUtil').oauth_client
 
 
 function userAuthRequest(req, res) {

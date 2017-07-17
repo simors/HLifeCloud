@@ -2,11 +2,10 @@
  * Created by wanpeng on 2017/7/15.
  */
 var wechat = require('wechat');
-var WechatAPI = require('wechat-api');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
 
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var wechat_api = require('../util/wechatUtil').wechat_api
 
 function wechatServer(req, res, next) {
   var message = req.weixin;

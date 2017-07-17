@@ -1,10 +1,9 @@
 /**
  * Created by wanpeng on 2017/7/15.
  */
-var WechatAPI = require('wechat-api')
 var GLOBAL_CONFIG = require('../../config')
 
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret)
+var wechat_api = require('../util/wechatUtil').wechat_api
 
 function createMenu() {
   var memu = {
@@ -30,7 +29,7 @@ function createMenu() {
           {
             "type":"view",
             "name":"我的推广",
-            "url": 'http://7550725b.ngrok.io'
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promoter/performance/1'
           },
         ]
       }]

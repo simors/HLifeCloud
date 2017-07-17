@@ -2,9 +2,8 @@
  * Created by wanpeng on 2017/7/14.
  */
 var GLOBAL_CONFIG = require('../../config')
-var WechatAPI = require('wechat-api');
 
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var wechat_api = require('../util/wechatUtil').wechat_api
 
 /**
  * 发送打赏模板消息
