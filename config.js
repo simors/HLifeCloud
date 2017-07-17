@@ -41,7 +41,13 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
-var MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+var MP_SERVER_DOMAIN = "http://dev.lean.ngrok.io"
+var MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
+var REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8" //微信模版消息id：打赏功能
+var WITHDRAW_TMP_ID = ""  //微信模版消息id：提现通知
+var GOODS_TMP_ID = ""   //微信模版消息id：商品交易支付通知
+var SHOP_TMP_ID = ""  //微信模版消息id：邀请店铺支付通知
+
 var wxConfig = undefined
 
 
@@ -52,12 +58,14 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+  MP_SERVER_DOMAIN = "http://dev.lean.ngrok.io"
+  MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
+  REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
   wxConfig = {
     token: 'huilinyoudian2017dev',
-    appid: 'wx3dfde3f7184c8c51',
+    appid: 'wx310b23ce34f394a0',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
+    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
     checkSignature: true,
   }
 
@@ -69,6 +77,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
+  MP_CLIENT_DOMAIN = "http://139.196.84.116"
+  REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
+
   wxConfig = {
     token: 'huilinyoudian2017pre',
     appid: 'wx34ac208b373814d2',
@@ -84,6 +95,8 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
 
   MP_SERVER_DOMAIN = "http://share.xiaojee.cn"
+  MP_CLIENT_DOMAIN = "http://120.77.220.234"
+  REWARD_TMP_ID = "ELAwKkLzY0dnVYaYGWbuJIOXMTuVwz7qKDO2-TAWaL4"
   wxConfig = {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
@@ -112,7 +125,13 @@ var GLOBAL_CONFIG = {
 
   wxConfig: wxConfig,
 
-  MP_SERVER_DOMAIN: MP_SERVER_DOMAIN
+  MP_SERVER_DOMAIN: MP_SERVER_DOMAIN,
+  MP_CLIENT_DOMAIN: MP_CLIENT_DOMAIN,
+  REWARD_TMP_ID: REWARD_TMP_ID,
+  WITHDRAW_TMP_ID: WITHDRAW_TMP_ID,
+  GOODS_TMP_ID: GOODS_TMP_ID,
+  SHOP_TMP_ID: SHOP_TMP_ID,
+
 }
 
 module.exports = GLOBAL_CONFIG
