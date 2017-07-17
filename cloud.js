@@ -60,6 +60,8 @@ AV.Cloud.define('hlifeTopicFetchUserUps', topicFunc.fetchUserUps)
 AV.Cloud.define('hlifeTopicUpByUser', topicFunc.upByUser)
 AV.Cloud.define('hlifeTopicPubulishTopicComment', topicFunc.pubulishTopicComment)
 AV.Cloud.define('fetchUpsByTopicId', topicFunc.fetchUpsByTopicId)
+AV.Cloud.define('topicPublishTopic', topicFunc.topicPublishTopic)
+AV.Cloud.define('topicUpdateTopic', topicFunc.topicUpdateTopic)
 
 
 //店铺app端
