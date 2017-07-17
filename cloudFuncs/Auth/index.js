@@ -604,6 +604,40 @@ function setUserNickname(request, response) {
   })
 }
 
+function setUserOpenid(openid, unionid) {
+  if(!openid || !unionid) {
+    return Promise.reject()
+  }
+
+  var query  = AV.Query('_User')
+  query.equalTo("authData.weixin.openid", unionid)
+  query.doesNotExist('openid')
+
+  return query.first().then((user) => {
+    if(user) {
+      user.set('openid', openid)
+      return user.save()
+    } else {
+      return Promise.resolve()
+    }
+  }).catch((error) => {
+    console.log('setUserOpenid:', error)
+    throw error
+  })
+}
+
+function getOpenidById(userId) {
+  if(!userId) {
+    return Promise.reject()
+  }
+  var user = AV.Object.createWithoutData('_User', userId)
+  return user.fetch().then((userInfo) => {
+    return userInfo.get('openid')
+  }).catch((error) => {
+    throw error
+  })
+}
+
 function getUserById(userId) {
   var query = new AV.Query('_User')
   return query.get(userId)
@@ -726,6 +760,16 @@ function isWXBindByPhone(request, response) {
   })
 }
 
+function authTest(request, response) {
+  var userId = request.params.userId
+
+  getOpenidById(userId).then((openid) => {
+    response.success({
+      openid: openid
+    })
+  })
+}
+
 var authFunc = {
   constructUserInfo: constructUserInfo,
   fetchUserFollowees: fetchUserFollowees,
@@ -743,6 +787,9 @@ var authFunc = {
   isWXUnionIdSignIn: isWXUnionIdSignIn,
   bindWithWeixin: bindWithWeixin,
   isWXBindByPhone: isWXBindByPhone,
+  setUserOpenid: setUserOpenid,
+  getOpenidById: getOpenidById,
+  authTest: authTest
 }
 
 module.exports = authFunc

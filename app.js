@@ -1,4 +1,6 @@
 'use strict';
+var AV = require('leanengine');
+var wechat = require('wechat');
 var express = require('express');
 var timeout = require('connect-timeout');
 var path = require('path');
@@ -17,55 +19,11 @@ var wxOauth = require('./routes/wxOauth')
 var wxProfile = require('./routes/wxProfile')
 var wxWithdraw = require('./routes/wxWithdraw')
 var wxSignIn = require('./routes/wxSignIn')
-var AV = require('leanengine');
-var WechatAPI = require('wechat-api');
-var wechat = require('wechat');
-var fs = require('fs');
-var request = require('request');
-
-
+var wxError = require('./routes/wxError')
+var mpServerFuncs = require('./mpFuncs/Server')
 var GLOBAL_CONFIG = require('./config')
 
 var app = express();
-
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
-var memu = {
-  "button":[
-    {
-      "type":"click",
-      "name":"我的二维码",
-      "key":"MY_QRCODE"
-    },
-    {
-      "type":"view",
-      "name":"下载app",
-      "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
-    },
-    {
-      'name': '个人中心',
-      'sub_button': [
-        {
-          "type":"view",
-          "name":"我的钱包",
-          "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
-        },
-        {
-          "type":"view",
-          "name":"我的推广",
-          "url": 'http://7550725b.ngrok.io'
-        },
-      ]
-    }]
-}
-
-
-wechat_api.createMenu(memu, function (err, result) {
-  if(result.errcode === 0) {
-    console.log("微信公众号菜单创建成功")
-  } else {
-    console.log(err)
-  }
-})
 
 // 设置模板引擎
 app.set('views', path.join(__dirname, 'views'));
@@ -107,85 +65,9 @@ app.use('/inviteCodeShare', inviteCode)
 
 app.use('/download', download)
 
-console.log("wxConfig:", GLOBAL_CONFIG.wxConfig)
-app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, function (req, res, next) {
-  var message = req.weixin;
+app.use('/wxError', wxError)
 
-  console.log('weixin  message:', message)
-
-  switch (message.MsgType) {
-    case 'text':
-      res.reply({
-        type: 'text',
-        content: '欢迎'
-      })
-      break;
-    case 'event':
-
-      if(message.Event === 'CLICK' && message.EventKey === 'MY_QRCODE') {
-        var openid = message.FromUserName
-
-        var query = new AV.Query('_User')
-        query.equalTo("openid", openid)
-        query.first().then((user) => {
-          if(user && user.attributes.authData) {
-            var unionid = user.attributes.authData.weixin.openid
-            AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
-              if(result.isSignIn && result.qrcode) {
-                res.reply({
-                  type: 'image',
-                  content: {
-                    mediaId: result.qrcode.mediaId
-                  }
-                })
-              } else {
-                res.reply({
-                  type: 'text',
-                  content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-                })
-              }
-            })
-
-          } else {
-            res.reply({
-              type: 'text',
-              content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-            })
-          }
-        })
-
-      } else if(message.Event === 'subscribe') {
-        var scene_id = message.EventKey
-        var openid = message.FromUserName
-        var upUser_unionid = scene_id.slice(8)
-
-        var query = new AV.Query('_User')
-        query.equalTo("openid", openid)
-
-        query.first().then((result) => {
-          if(!result) {
-            var params = {
-              unionid: result.attributes.authData.weixin.openid,
-              upUserUnionid: upUser_unionid
-            }
-            return AV.Cloud.run('utilBindWechatUnionid', params)
-          }
-          return new Promise.resolve()
-        }).then((result) => {
-          //do nothing
-        })
-
-        res.reply({
-          type: 'text',
-          content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-        })
-
-      }
-      break
-    default:
-      break
-  }
-}))
+app.use('/weixin', wechat(GLOBAL_CONFIG.wxConfig, mpServerFuncs.wechatServer))
 
 app.use('/wxOauth', wxOauth)
 

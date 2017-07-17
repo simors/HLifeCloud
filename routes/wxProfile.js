@@ -11,24 +11,18 @@ var User = AV.Object.extend('_User');
 
 router.get('/', function (req, res, next) {
 
-  var phone = req.query.phone
   var unionid = req.query.unionid
   var openid = req.query.openid
   var userId = undefined
   var avatar = undefined
   var nickname = undefined
+
+  if(!unionid || !openid) {
+    next("参数错误！")
+  }
+
   var query = new AV.Query(User)
-  if(phone) {
-    query.equalTo('mobilePhoneNumber', phone)
-  }
-  if(unionid) {
-    query.equalTo('authData.weixin.openid', unionid)
-  }
-
-  if(openid) {
-    query.equalTo('openid', openid)
-  }
-
+  query.equalTo('authData.weixin.openid', unionid)
   query.first().then((userInfo) => {
     userId = userInfo.id
     avatar = userInfo.attributes.avatar
@@ -38,6 +32,7 @@ router.get('/', function (req, res, next) {
     var balance = result.balance.toFixed(2)
     res.render('wxProfile', {
       userId: userId,
+      unionid: unionid,
       openid: openid,
       avatar: avatar,
       balance: balance,
@@ -46,6 +41,7 @@ router.get('/', function (req, res, next) {
   }).catch((error) => {
     res.render('wxProfile', {
       userId: userId,
+      unionid: unionid,
       openid: openid,
       nickname: nickname,
       avatar: avatar,

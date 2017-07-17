@@ -22,6 +22,7 @@ var topicFunc = require('./cloudFuncs/Topic')
 var statFunc = require('./cloudFuncs/Statistics/PerformanceStat')
 var searchFunc = require('./cloudFuncs/Search')
 var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
+var mpMsgFuncs = require('./mpFuncs/Message')
 /**
  * 云函数
  */
@@ -45,6 +46,8 @@ AV.Cloud.define('hLifeSetUserNickname', authFunc.setUserNickname)
 AV.Cloud.define('isWXUnionIdSignIn', authFunc.isWXUnionIdSignIn)
 AV.Cloud.define('bindWithWeixin', authFunc.bindWithWeixin)
 AV.Cloud.define('isWXBindByPhone', authFunc.isWXBindByPhone)
+AV.Cloud.define('setUserOpenid', authFunc.setUserOpenid)
+AV.Cloud.define('authTest', authFunc.authTest)
 
 AV.Cloud.define('hLifeFetchAppServicePhone', configFunc.fetchAppServicePhone)
 AV.Cloud.define('configGetShareDomain', configFunc.getShareDomain)
@@ -230,5 +233,8 @@ AV.Cloud.define('searchFetchSearchResult', searchFunc.fetchSearchResult)
 AV.Cloud.define('searchFetchUserResult', searchFunc.fetchUserResult)
 AV.Cloud.define('searchFetchShopResult', searchFunc.fetchShopResult)
 AV.Cloud.define('searchFetchTopicResult', searchFunc.fetchTopicResult)
+
+//微信api
+AV.Cloud.define('wechatMessageTest', mpMsgFuncs.wechatMessageTest)
 
 module.exports = AV.Cloud;

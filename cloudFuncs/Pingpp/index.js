@@ -11,6 +11,8 @@ var mysqlUtil = require('../util/mysqlUtil')
 var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 var dateFormat = require('dateformat')
+var mpMsgFuncs = require('../../mpFuncs/Message')
+var authFunc = require('../../cloudFuncs/Auth')
 
 
 // 收益来源分类
@@ -201,13 +203,15 @@ function insertTransferInMysql(transfer) {
         charge_id: transfer.id,
         order_no: transfer.order_no,
         channel: transfer.channel,
-        transaction_no: transfer.transaction_no
+        transaction_no: transfer.transaction_no,
+        feeAmount: transfer.feeAmount
       }
       return updateUserDealRecords(mysqlConn, deal)
     } else {
       return Promise.resolve()
     }
   }).catch((err) => {
+    console.log(err)
     throw err
   }).finally(() => {
     if (mysqlConn) {
@@ -268,7 +272,7 @@ function updatePaymentInfoInMysql(paymentInfo) {
     return mysqlUtil.query(conn, sql, [paymentInfo.userId])
   }).then((queryRes) => {
     if (queryRes.results[0].cnt == 1) {
-      if(paymentInfo.channel == 'alipay') {
+      if(paymentInfo.channel == 'allinpay') {
         sql = "UPDATE `PaymentInfo` SET `card_number` = ?, `id_name` = ?, `open_bank_code` = ?, `open_bank` = ?, `balance` = `balance` - ? WHERE `userId` = ?"
         return mysqlUtil.query(queryRes.conn, sql, [paymentInfo.card_number, paymentInfo.user_name, paymentInfo.open_bank_code, paymentInfo.open_bank, paymentInfo.amount + feeAmount, paymentInfo.userId])
       } else if (paymentInfo.channel == 'wx_pub') {
@@ -363,8 +367,9 @@ function updateUserDealRecords(conn, deal) {
   var order_no = deal.order_no || ''
   var channel = deal.channel || ''
   var transaction_no = deal.transaction_no || ''
-  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `charge_id`, `order_no`, `channel`, `transaction_no`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, charge_id, order_no, channel, transaction_no])
+  var feeAmount = deal.feeAmount || 0
+  var recordSql = 'INSERT INTO `DealRecords` (`from`, `to`, `cost`, `promoterId`, `deal_type`, `charge_id`, `order_no`, `channel`, `transaction_no`, `fee`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  return mysqlUtil.query(conn, recordSql, [deal.from, deal.to, deal.cost, promoterId, deal.deal_type, charge_id, order_no, channel, transaction_no, feeAmount])
 }
 
 function paymentEvent(request, response) {
@@ -374,6 +379,7 @@ function paymentEvent(request, response) {
   var fromUser = charge.metadata.fromUser
   var toUser = charge.metadata.toUser
   var dealType = charge.metadata.dealType
+  var topicTitle = charge.metadata.topicTitle
   var amount = charge.amount * 0.01 //单位为 元
   var upPromoterId = undefined
   var shopInviterId = undefined
@@ -449,6 +455,19 @@ function paymentEvent(request, response) {
       })
     }
   }).then(() => {
+    //发送微信通知消息
+    authFunc.getOpenidById(toUser).then((openid) => {
+      switch (dealType) {
+        case 'REWARD':
+          mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
+          break
+        case 'BUY_GOODS':
+          break
+        default:
+          break
+      }
+    })
+
     response.success({
       errcode: 0,
       message: 'paymentEvent charge into mysql success!',
@@ -503,7 +522,6 @@ function createTransfers(request, response) {
   var metadata = request.params.metadata
   var channel = request.params.channel
   var open_bank_code = request.params.open_bank_code
-  var open_bank = request.params.open_bank
   var openid = request.params.openid   //微信用户openid
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
@@ -578,7 +596,8 @@ function createTransfers(request, response) {
           amount: amount,
           currency: "cny",
           type: "b2c",
-          recipient: openid, //微信openId
+          // recipient: openid, //微信openId
+          recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //测试
           extra: {
             // user_name: userName,
             // force_check: true,
@@ -586,7 +605,9 @@ function createTransfers(request, response) {
           description: "Your Description",
           metadata: metadata,
         }, function (err, transfer) {
-          if (err != null) {
+          console.log("ping++ create transfers transfer:", transfer)
+          console.log("ping++ create transfers err:", err)
+          if (err != null ) {
             console.log('pingpp.transfers.create', err)
             response.error({
               errcode: 1,
@@ -595,39 +616,31 @@ function createTransfers(request, response) {
             return
           }
 
-          console.log(transfer)
-          var query = new AV.Query('_User')
-          query.equalTo("openid", transfer.recipient)
-          query.first().then((user) => {
-            if(user) {
-              var paymentInfo = {
-                channel: transfer.channel,
-                userId: user.id,
-                openid: transfer.recipient,
-                amount: (transfer.amount).toFixed(0) * 0.01,
-              }
-              getPaymentFeeByChannel('wx_pub').then((fee) => {
-                paymentInfo.fee = fee
-                return updatePaymentInfoInMysql(paymentInfo)
-              }).then(() => {
-                response.success({
-                  errcode: 0,
-                  message: 'allinpay create transfers success!',
-                  transfer: transfer,
-                })
-              }).catch((error) => {
-                response.error(error)
-              })
-            } else {
-              response.error({
-                errcode: 1,
-                message: "没有找到用户信息",
-              })
+          if(transfer.metadata.userId) {
+            var paymentInfo = {
+              channel: transfer.channel,
+              userId: transfer.metadata.userId,
+              openid: transfer.recipient,
+              amount: (transfer.amount).toFixed(0) * 0.01,
             }
-          }).catch((error) => {
-            response.error(error)
-          })
-
+            getPaymentFeeByChannel('wx_pub').then((fee) => {
+              paymentInfo.fee = fee
+              return updatePaymentInfoInMysql(paymentInfo)
+            }).then(() => {
+              response.success({
+                errcode: 0,
+                message: 'allinpay create transfers success!',
+                transfer: transfer,
+              })
+            }).catch((error) => {
+              response.error(error)
+            })
+          } else {
+            response.error({
+              errcode: 1,
+              message: "没有找到用户信息",
+            })
+          }
         })
       }
         break
@@ -700,14 +713,19 @@ function createTransfers(request, response) {
 }
 
 function transfersEvent(request, response) {
+  console.log("transfersEvent", request.params)
+
   var transfer = request.params.data.object
-  var channel = transfer.channel
 
-  if(channel == 'wx_pub') {
-
-  }
-
-  insertTransferInMysql(transfer).then(() => {
+  getPaymentFeeByChannel(transfer.channel).then((fee) => {
+    var feeAmount = (transfer.amount * 0.01 * fee).toFixed(2)
+    if(feeAmount < 1.0) {
+      transfer.feeAmount = 1.0
+    } else {
+      transfer.feeAmount = feeAmount
+    }
+    return insertTransferInMysql(transfer)
+  }).then(() => {
     response.success({
       errcode: 0,
       message: 'transfersEvent response success!',
@@ -1040,6 +1058,19 @@ function getPaymentFeeByChannel(channel) {
   })
 
   return client.getAsync(PREFIX + channel).then((fee) => {
+    if(fee)
+      return fee
+    switch (channel) {
+      case 'wx_pub':
+        fee = 0.006
+        break
+      case 'allinpay':
+        fee = 0
+        break
+      default:
+        fee = 0
+        break
+    }
     return fee
   }).finally(() => {
     client.quit()
