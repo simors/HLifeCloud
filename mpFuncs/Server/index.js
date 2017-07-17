@@ -7,6 +7,63 @@ var GLOBAL_CONFIG = require('../../config')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
+var generateQrcode = function (req, res, next) {
+  var message = req.weixin
+  if(message.Event != 'CLICK') {
+    return
+  }
+  var openid = message.FromUserName
+  wechat_api.getUser(openid, function (err, result) {
+    if(!err) {
+      var unionid = result.unionid
+      var query = new AV.Query('_User')
+      query.equalTo("authData.weixin.openid", unionid)
+      query.first().then((user) => {
+        if(user && user.attributes.authData) {
+          AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
+            if(result.isSignIn && result.qrcode) {
+              res.reply({
+                type: 'image',
+                content: {
+                  mediaId: result.qrcode.mediaId
+                }
+              })
+            } else {
+              res.reply({
+                type: 'text',
+                content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+              })
+            }
+          })
+
+        } else {
+          res.reply({
+            type: 'text',
+            content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+          })
+        }
+      })
+    } else {
+      res.reply({
+        type: 'text',
+        content: '获取信息失败'
+      })
+    }
+  })
+}
+
+var newUserGuide = function (req, res, next) {
+  res.reply({
+    type: 'text',
+    content: '请查看新手指引'
+  })
+}
+
+var exeClickEvent = {
+  MY_QRCODE: generateQrcode,
+  NEW_USER_GUIDE: newUserGuide,
+}
+
 function wechatServer(req, res, next) {
   var message = req.weixin;
   console.log('weixin  message:', message)
@@ -20,45 +77,8 @@ function wechatServer(req, res, next) {
       })
       break;
     case 'event':
-      if(message.Event === 'CLICK' && message.EventKey === 'MY_QRCODE') {
-        var openid = message.FromUserName
-        wechat_api.getUser(openid, function (err, result) {
-          if(!err) {
-            var unionid = result.unionid
-            var query = new AV.Query('_User')
-            query.equalTo("authData.weixin.openid", unionid)
-            query.first().then((user) => {
-              if(user && user.attributes.authData) {
-                AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
-                  if(result.isSignIn && result.qrcode) {
-                    res.reply({
-                      type: 'image',
-                      content: {
-                        mediaId: result.qrcode.mediaId
-                      }
-                    })
-                  } else {
-                    res.reply({
-                      type: 'text',
-                      content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-                    })
-                  }
-                })
-
-              } else {
-                res.reply({
-                  type: 'text',
-                  content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-                })
-              }
-            })
-          } else {
-            res.reply({
-              type: 'text',
-              content: '获取信息失败'
-            })
-          }
-        })
+      if(message.Event === 'CLICK') {
+        exeClickEvent[message.EventKey](req, res, next)
       } else if(message.Event === 'subscribe') {
         var scene_id = message.EventKey
         var openid = message.FromUserName

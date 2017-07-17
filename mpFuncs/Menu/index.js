@@ -9,9 +9,19 @@ function createMenu() {
   var memu = {
     "button":[
       {
-        "type":"click",
-        "name":"我的二维码",
-        "key":"MY_QRCODE"
+        'name': '汇邻优店',
+        'sub_button': [
+          {
+            "type":"click",
+            "name":"我的二维码",
+            "key":"MY_QRCODE"
+          },
+          {
+            "type":"click",
+            "name":"新手指引",
+            "key":"NEW_USER_GUIDE"
+          },
+        ]
       },
       {
         "type":"view",
@@ -32,7 +42,8 @@ function createMenu() {
             "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promoter/performance/1'
           },
         ]
-      }]
+      }
+    ]
   }
 
   wechat_api.createMenu(memu, function (err, result) {
