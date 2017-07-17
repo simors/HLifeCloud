@@ -12,6 +12,7 @@ var Promise = require('bluebird')
 var shopFunc = require('../../cloudFuncs/Shop')
 var dateFormat = require('dateformat')
 var mpMsgFuncs = require('../../mpFuncs/Message')
+var authFunc = require('../../cloudFuncs/Auth')
 
 
 // 收益来源分类
@@ -378,6 +379,7 @@ function paymentEvent(request, response) {
   var fromUser = charge.metadata.fromUser
   var toUser = charge.metadata.toUser
   var dealType = charge.metadata.dealType
+  var topicTitle = charge.metadata.topicTitle
   var amount = charge.amount * 0.01 //单位为 元
   var upPromoterId = undefined
   var shopInviterId = undefined
@@ -454,7 +456,18 @@ function paymentEvent(request, response) {
     }
   }).then(() => {
     //发送微信通知消息
-    mpMsgFuncs.sendPaymentMessage()
+    authFunc.getOpenidById(toUser).then((openid) => {
+      switch (dealType) {
+        case 'REWARD':
+          mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
+          break
+        case 'BUY_GOODS':
+          break
+        default:
+          break
+      }
+    })
+
     response.success({
       errcode: 0,
       message: 'paymentEvent charge into mysql success!',
