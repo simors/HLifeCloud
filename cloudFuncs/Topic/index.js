@@ -535,6 +535,68 @@ function pubulishTopicComment(request,response){
 
 }
 
+function topicPublishTopic(request,response) {
+	var payload = request.params.payload
+	var Topics = AV.Object.extend('Topics')
+	let topic = new Topics()
+
+	var topicCategory = AV.Object.createWithoutData('TopicCategory', payload.categoryId)
+	var user = AV.Object.createWithoutData('_User', payload.userId)
+
+	topic.set('geoPoint', payload.geoPoint)
+	topic.set('position', payload.position)
+	topic.set('city', payload.city)
+	topic.set('district', payload.district)
+	topic.set('province', payload.province)
+	topic.set('category', topicCategory)
+	topic.set('user', user)
+	topic.set('imgGroup', payload.imgGroup)
+	topic.set('content', payload.content)
+	topic.set('title', payload.title)
+	topic.set('abstract', payload.abstract)
+	topic.set('commentNum', 0)
+	topic.set('likeCount', 0)
+	topic.save().then(function (result) {
+		var query = new AV.Query('_User')
+		query.include('user')
+		query.include('category')
+		query.get(result.id).then((item)=>{
+			var topicInfo = topicUtil.newTopicFromLeanCloudObject(item)
+			response.success(topicInfo)
+		},(err)=>{
+			response.error(err)
+		})
+	},  (err)=> {
+		response.error(err)
+	})
+}
+
+function topicUpdateTopic(request,response) {
+	var payload = request.params.payload
+	var topic = AV.Object.createWithoutData('Topics', payload.topicId)
+
+	var topicCategory = AV.Object.createWithoutData('TopicCategory', payload.categoryId)
+
+	topic.set('category', topicCategory)
+	topic.set('imgGroup', payload.imgGroup)
+	topic.set('content', payload.content)
+	topic.set('title', payload.title)
+	topic.set('abstract', payload.abstract)
+
+	topic.save(null, {fetchWhenSave: true}).then(function (result) {
+		var query = new AV.Query('_User')
+		query.include('user')
+		query.include('category')
+		query.get(result.id).then((item)=>{
+			var topicInfo = topicUtil.newTopicFromLeanCloudObject(item)
+			response.success(topicInfo)
+		},(err)=>{
+			response.error(err)
+		})	},  (error)=> {
+		response.error(error)
+	})
+
+}
 
 var topicFunc = {
   disableTopicByUser: disableTopicByUser,
@@ -546,7 +608,9 @@ var topicFunc = {
 	fetchUserUps: fetchUserUps,
 	upByUser: upByUser,
 	pubulishTopicComment: pubulishTopicComment,
-  fetchUpsByTopicId: fetchUpsByTopicId
+  fetchUpsByTopicId: fetchUpsByTopicId,
+	topicPublishTopic: topicPublishTopic,
+	topicUpdateTopic: topicUpdateTopic
 
 }
 
