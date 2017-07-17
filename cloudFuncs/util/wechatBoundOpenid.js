@@ -9,7 +9,7 @@ var GLOBAL_CONFIG = require('../../config')
 
 const PREFIX = 'unionid:'
 
-function bindUionid(upUserUnionid, unionid) {
+function bindWechatUnionid(upUserUnionid, unionid) {
   Promise.promisifyAll(redis.RedisClient.prototype);
   var client = redis.createClient(GLOBAL_CONFIG.REDIS_PORT, GLOBAL_CONFIG.REDIS_URL)
   client.auth(GLOBAL_CONFIG.REDIS_AUTH)
@@ -33,32 +33,6 @@ function bindUionid(upUserUnionid, unionid) {
 
 }
 
-function bindWechatUnionid(request, response) {
-  unionid = request.params.unionid
-  upUserUnionid = request.params.upUserUnionid
-
-
-  if (unionid && upUserUnionid) {
-    bindUionid(upUserUnionid, unionid).then((reply) => {
-      if (reply) {
-        response.success({
-          errcode: 0,
-          reply: reply,
-        })
-      } else {
-        response.error({
-          errcode: 1,
-          reply: undefined,
-        })
-      }
-    })
-  } else {
-    response.error({
-      errcode: 1,
-      reply: undefined,
-    })
-  }
-}
 
 function getUpUserUnionid(unionid) {
   Promise.promisifyAll(redis.RedisClient.prototype);

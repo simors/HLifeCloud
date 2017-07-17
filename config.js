@@ -43,9 +43,10 @@ var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 //微信公众平台配置
 var MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
 var REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8" //微信模版消息id：打赏功能
-var WITHDRAW_TMP_ID = ""  //微信模版消息id：提现通知
-var GOODS_TMP_ID = ""   //微信模版消息id：商品交易支付通知
-var SHOP_TMP_ID = ""  //微信模版消息id：邀请店铺支付通知
+var WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"  //微信模版消息id：提现通知
+var GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"   //微信模版消息id：商品交易支付通知
+var SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"  //微信模版消息id：邀请店铺支付通知
+var INVITER_TMP_ID = "zVnC2WLMts3fJCnz2qkXAmVTGXtVprrYn6zthreOan0"
 
 var wxConfig = undefined
 
@@ -59,6 +60,11 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
   REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
+  SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"
+  GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"
+  WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"
+  INVITER_TMP_ID = "zVnC2WLMts3fJCnz2qkXAmVTGXtVprrYn6zthreOan0"
+
   // MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
   wxConfig = {
     token: 'huilinyoudian2017dev',
@@ -77,7 +83,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
   REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
-
+  SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
+  GOODS_TMP_ID = "MLQiVmfbpgIaNvSLp45GVv-H2JGmhXo79Q88kFVcHdM	"
+  WITHDRAW_TMP_ID = "cI49vYLgEK20N6o59nEi08kSc2f_jLyvYMJr8Dx7nNs"
   wxConfig = {
     token: 'huilinyoudian2017pre',
     appid: 'wx34ac208b373814d2',
@@ -94,6 +102,11 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://share.xiaojee.cn"
   REWARD_TMP_ID = "ELAwKkLzY0dnVYaYGWbuJIOXMTuVwz7qKDO2-TAWaL4"
+  SHOP_TMP_ID = "NzBXdCA-95TJnjJYMU8RGPRKhKs4AhNO_fCc9wnRD_w"
+  GOODS_TMP_ID = "yosEBCYJmJotmcwSYedRqszjwEiQRnHQTHZ--g-1wG4"
+  WITHDRAW_TMP_ID = "KOdhXfTtCpaCLyrrawOZQ-uvjkCn6woH7vbWgoZ5SCY"
+  INVITER_TMP_ID = "sz1HhceF0hT0QuXF3w9-oHJNGWfFnmkca0uX1_8eKd4"
+
   wxConfig = {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
@@ -127,6 +140,7 @@ var GLOBAL_CONFIG = {
   WITHDRAW_TMP_ID: WITHDRAW_TMP_ID,
   GOODS_TMP_ID: GOODS_TMP_ID,
   SHOP_TMP_ID: SHOP_TMP_ID,
+  INVITER_TMP_ID: INVITER_TMP_ID,
 
 }
 

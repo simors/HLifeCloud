@@ -15,6 +15,9 @@ var WechatAPI = require('wechat-api');
 var Request = require('request');
 var fs = require('fs');
 var images = require("images");
+var mpMsgFuncs = require('../../mpFuncs/Message')
+var authFunc = require('../../cloudFuncs/Auth')
+
 
 
 
@@ -2064,6 +2067,15 @@ function syncPromoterInfo(request, response) {
       }
     }).then((promoter) => {
       if(promoter) {
+        var upUserOpenid = undefined
+        authFunc.getOpenidById(upUser).then((openid) => {
+          upUserOpenid = openid
+          return authFunc.getUserById(currentUser)
+        }).then((leanUser) => {
+          var nickname = leanUser.attributes.nickname
+          var city = leanUser.attributes.geoCity
+          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+        })
         response.success({
           errcode: 0,
           promoter: promoter

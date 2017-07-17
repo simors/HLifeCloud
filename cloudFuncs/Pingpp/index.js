@@ -462,6 +462,12 @@ function paymentEvent(request, response) {
           mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
           break
         case 'BUY_GOODS':
+          authFunc.getNicknameById(fromUser).then((nickname) => {
+            mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
+          })
+          break
+        case 'INVITE_SHOP':
+          mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
           break
         default:
           break
@@ -726,6 +732,13 @@ function transfersEvent(request, response) {
     }
     return insertTransferInMysql(transfer)
   }).then(() => {
+    var account = ""
+    if(transfer.channel == 'allinpay') {
+      account = transfer.extra.card_number
+    } else if( transfer.channel == 'wx_pub') {
+      account = transfer.metadata.nickname
+    }
+    mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount, account, transfer.channel, new Date())
     response.success({
       errcode: 0,
       message: 'transfersEvent response success!',

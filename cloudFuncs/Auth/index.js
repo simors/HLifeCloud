@@ -638,6 +638,18 @@ function getOpenidById(userId) {
   })
 }
 
+function getNicknameById(userId) {
+  if(!userId) {
+    return Promise.reject()
+  }
+  var user = AV.Object.createWithoutData('_User', userId)
+  return user.fetch().then((userInfo) => {
+    return userInfo.get('nickname')
+  }).catch((error) => {
+    throw error
+  })
+}
+
 function getUserById(userId) {
   var query = new AV.Query('_User')
   return query.get(userId)
@@ -763,10 +775,9 @@ function isWXBindByPhone(request, response) {
 function authTest(request, response) {
   var userId = request.params.userId
 
-  getOpenidById(userId).then((openid) => {
-    response.success({
-      openid: openid
-    })
+  getUserById(userId).then((result) => {
+    console.log("getUserById", result)
+    response.success()
   })
 }
 
@@ -784,6 +795,7 @@ var authFunc = {
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo,
   getUserById: getUserById,
+  getNicknameById: getNicknameById,
   isWXUnionIdSignIn: isWXUnionIdSignIn,
   bindWithWeixin: bindWithWeixin,
   isWXBindByPhone: isWXBindByPhone,
