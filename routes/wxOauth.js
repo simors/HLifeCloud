@@ -32,6 +32,7 @@ router.get('/callback', function (req, res, next) {
       mpAuthFuncs.getUserInfo(openid).then((userInfo) => {
         var nickname = userInfo.nickname
         var headimgurl = userInfo.headimgurl
+        var city = userInfo.city
         var authData = {
           "openid": unionid,
           "access_token": accessToken,
@@ -44,8 +45,9 @@ router.get('/callback', function (req, res, next) {
         leanUser.set('username', unionid)
         leanUser.set('avatar', headimgurl)
         leanUser.set('openid', openid)
+        leanUser.set('geoCity', city)
         return AV.User.associateWithAuthData(leanUser, platform, authData)
-      }).then(() => {
+      }).then((user) => {
         return AV.Cloud.run('promoterSyncPromoterInfo', {userId: user.id})
       }).then(() => {
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
@@ -59,7 +61,6 @@ router.get('/callback', function (req, res, next) {
     console.log(error)
     res.redirect('/wxError')
   })
-
 
 })
 
