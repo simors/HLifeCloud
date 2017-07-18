@@ -516,10 +516,6 @@ function pubulishTopicComment(request,response){
 				query.include(['parentComment']);
 				query.include(['parentComment.user']);
 				query.get(comment.id).then((result)=>{
-					var position = result.attributes.position
-					var parentComment = result.attributes.parentComment
-					var replyComment = result.attributes.replyComment
-          var user = result.attributes.user
 					var commentInfo = topicUtil.newTopicCommentFromLeanCloudObject(result)
 					response.success(commentInfo)
 				},(err)=>{
@@ -556,13 +552,16 @@ function topicPublishTopic(request,response) {
 	topic.set('abstract', payload.abstract)
 	topic.set('commentNum', 0)
 	topic.set('likeCount', 0)
-	topic.save().then(function (result) {
-		var query = new AV.Query('_User')
+	topic.save().then( (result)=> {
+		var query = new AV.Query('Topics')
 		query.include('user')
 		query.include('category')
 		query.get(result.id).then((item)=>{
 			var topicInfo = topicUtil.newTopicFromLeanCloudObject(item)
-			response.success(topicInfo)
+			// console.log('result.====>',result)
+			// console.log('topicInfo.====>',topicInfo)
+
+			response.success(item)
 		},(err)=>{
 			response.error(err)
 		})
@@ -584,7 +583,7 @@ function topicUpdateTopic(request,response) {
 	topic.set('abstract', payload.abstract)
 
 	topic.save(null, {fetchWhenSave: true}).then(function (result) {
-		var query = new AV.Query('_User')
+		var query = new AV.Query('Topics')
 		query.include('user')
 		query.include('category')
 		query.get(result.id).then((item)=>{
