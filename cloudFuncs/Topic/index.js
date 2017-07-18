@@ -538,7 +538,7 @@ function pubulishTopicComment(request,response){
 function topicPublishTopic(request,response) {
 	var payload = request.params.payload
 	var Topics = AV.Object.extend('Topics')
-	let topic = new Topics()
+	var topic = new Topics()
 
 	var topicCategory = AV.Object.createWithoutData('TopicCategory', payload.categoryId)
 	var user = AV.Object.createWithoutData('_User', payload.userId)
