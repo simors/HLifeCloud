@@ -561,7 +561,7 @@ function topicPublishTopic(request,response) {
 			// console.log('result.====>',result)
 			// console.log('topicInfo.====>',topicInfo)
 
-			response.success(item)
+			response.success(topicInfo)
 		},(err)=>{
 			response.error(err)
 		})
