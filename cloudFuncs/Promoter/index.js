@@ -183,6 +183,113 @@ function savePromoterInviteCode(promoterId, inviteCode) {
 }
 
 /**
+ * 微信用户注册同步推广员信息表
+ * @param request
+ * @param response
+ */
+function syncPromoterInfo(request, response) {
+  var userId = request.params.userId
+  var upUserOpenid = undefined
+
+  bindPromoterInfo(userId).then((upUser) => {
+    upUserOpenid = upUser.attributes.openid
+    return authFunc.getUserById(userId)
+  }).then((leanUser) => {
+    var nickname = leanUser.attributes.nickname
+    var city = leanUser.attributes.geoCity
+    mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+  }).catch((error) => {
+    response.error(error)
+  })
+}
+
+function createPromoter(userId) {
+  var currentUser = AV.Object.createWithoutData('_User', userId)
+  var Promoter = AV.Object.extend('Promoter')
+
+  var currentUserInfo = undefined
+  var promoterQuery = new AV.Query('Promoter')
+
+
+  return currentUser.fetch().then((userInfo) => {
+    currentUserInfo = userInfo
+    promoterQuery.equalTo('user', userInfo)
+    return promoterQuery.first()
+  }).then((promoter) => {
+    if(promoter) {
+      return promoter
+    } else {
+      promoter = new Promoter()
+      promoter.set('user', currentUserInfo)
+      promoter.set('liveProvince', "")
+      promoter.set('liveCity', "")
+      promoter.set('liveDistrict', "")
+      promoter.set('payment', 1)
+      promoter.set('shopEarnings', 0)
+      promoter.set('royaltyEarnings', 0)
+      promoter.set('inviteShopNum', 0)
+      promoter.set('teamMemNum', 0)
+      promoter.set('level', 1)
+      promoter.set('province', "")
+      promoter.set('city', "")
+      promoter.set('district', "")
+      promoter.set('street', "")
+      return promoter.save()
+    }
+  }).catch((error) => {
+    throw error
+  })
+}
+
+function getUpUserFromRedis(userId) {
+  var currentUser = AV.Object.createWithoutData('_User', userId)
+
+  return currentUser.fetch().then((userInfo) => {
+    var authData = userInfo.get('authData')
+    var currentUserUnionid = authData.weixin.openid
+    return wechatBoundOpenidFunc.getUpUserUnionid(currentUserUnionid)
+  }).then((unionId) => {
+    var userQuery = new AV.Query('_User')
+    userQuery.equalTo('authData.weixin.openid', unionId)
+    return userQuery.first()
+  }).then((upUserInfo) => {
+    if(!upUserInfo) {
+      throw new Error("没有找到用户信息")
+    }
+    return upUserInfo
+  }).catch((error) => {
+    throw error
+  })
+}
+
+function bindPromoterInfo(userId) {
+  var currentPromoter = undefined
+  var upUser = undefined
+
+  createPromoter(userId).then((promoter) => {
+    currentPromoter = promoter
+    return getUpUserFromRedis(userId)
+  }).then((user) => {
+    upUser = user
+    currentPromoter.set('upUser', upUser)
+    var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
+      incrementTeamMem(upPromoter.id)
+    }).catch((err) => {
+      throw err
+    })
+
+    return Promise.all([currentPromoter.save(), incTeamMem])
+  }).then(() => {
+    return insertPromoterInMysql(currentPromoter.id)
+  }).then(() => {
+    return upUser
+  }).catch((error) => {
+    throw error
+  })
+
+}
+
+/**
  * 用户认证为推广员
  * @param request
  * @param response
@@ -2023,79 +2130,7 @@ function fetchEarningRecords(request, response) {
   })
 }
 
-/**
- * 微信用户注册同步推广员信息表
- * @param request
- * @param response
- */
-function syncPromoterInfo(request, response) {
-  console.log("syncPromoterInfo params:", request.params)
-  var userId = request.params.userId
 
-  var currentUser = AV.Object.createWithoutData('_User', userId)
-
-  currentUser.fetch().then((user) => {
-    var authData = user.get('authData')
-    var currentUserUnionid = authData.weixin.openid
-    return wechatBoundOpenidFunc.getUpUserUnionid(currentUserUnionid)
-  }).then((reply) => {
-    if(!reply)
-      return new Promise((resolve) => {resolve()})
-    var upUserOpenid = reply
-    var userQuery = new AV.Query('_User')
-    userQuery.equalTo('openid', upUserOpenid)
-    return userQuery.first()
-  }).then((upUser) => {
-    var existQuery = new AV.Query('Promoter')
-
-    existQuery.equalTo('user', currentUser)
-    existQuery.first().then((promoter) => {
-      if(promoter) {
-        var promoterUpUser = promoter.attributes.upUser
-        if(promoterUpUser) {
-          return new Promise((resolve) => {resolve()})
-        } else {
-          promoter.set('upUser', upUser)
-          return promoter.save()
-        }
-      } else {
-        var Promoter = AV.Object.extend('Promoter')
-        var promoter = new Promoter()
-        promoter.set('user', currentUser)
-        promoter.set('upUser', upUser)
-        return promoter.save()
-      }
-    }).then((promoter) => {
-      if(promoter) {
-        var upUserOpenid = undefined
-        authFunc.getOpenidById(upUser).then((openid) => {
-          upUserOpenid = openid
-          return authFunc.getUserById(currentUser)
-        }).then((leanUser) => {
-          var nickname = leanUser.attributes.nickname
-          var city = leanUser.attributes.geoCity
-          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
-        })
-        response.success({
-          errcode: 0,
-          promoter: promoter
-        })
-      } else {
-        response.error({
-          errcode: 1,
-          message: '推广员信息已经绑定'
-        })
-      }
-    })
-
-  }).catch((err) => {
-    console.log(err)
-    response.error({
-      errcode: 1,
-      message: '同步推广员信息失败',
-    })
-  })
-}
 
 /**
  * 补充用户推广员信息
@@ -2278,6 +2313,19 @@ function composeQrCodeImage(background, qrcode, logo, avatar, name) {
   })
 }
 
+function promoterTest(request, response) {
+  var userId = request.params.userId
+
+  getUpUserFromRedis(userId).then((upUser) => {
+    console.log("getUpUserFromRedis", upUser)
+    response.success(upUser)
+
+  }).catch((error) => {
+    response.error(error)
+  })
+
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2317,6 +2365,8 @@ var PromoterFunc = {
   syncPromoterInfo: syncPromoterInfo,
   supplementPromoterInfo: supplementPromoterInfo,
   getPromoterQrCode: getPromoterQrCode,
+  bindPromoterInfo: bindPromoterInfo,
+  promoterTest: promoterTest
 }
 
 module.exports = PromoterFunc

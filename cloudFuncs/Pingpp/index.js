@@ -805,17 +805,17 @@ function idNameCardNumberIdentify(request, response) {
   })
 }
 
-function getPaymentInfoByUserId(request, response) {
-  var userId = request.params.userId
-
+function fetchPaymentInfoByUserId(userId) {
   var sql = ""
   var mysqlConn = undefined
+  var paymentInfo = {}
+
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
     sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id`, `open_bank_code`, `open_bank` FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
-    if (queryRes.results.length > 0) {
+    if(queryRes.results.length > 0) {
       var balance = queryRes.results[0].balance || 0
       var id_name = queryRes.results[0].id_name || undefined
       var id_number = queryRes.results[0].id_number || undefined
@@ -827,7 +827,7 @@ function getPaymentInfoByUserId(request, response) {
       var open_bank_code = queryRes.results[0].open_bank_code || undefined
       var open_bank = queryRes.results[0].open_bank || undefined
 
-      response.success({
+      paymentInfo = {
         userId: userId,
         balance: balance,
         id_name: id_name,
@@ -839,20 +839,25 @@ function getPaymentInfoByUserId(request, response) {
         open_id: open_id,
         open_bank_code: open_bank_code,
         open_bank: open_bank,
-      })
-      return
+      }
     }
-    response.error({
-      errcode: 1,
-      message: '未找到支付信息',
-    })
-
-  }).catch((err) => {
-    response.error(err)
+    return paymentInfo
+  }).catch((error) => {
+    throw error
   }).finally(() => {
     if (mysqlConn) {
       mysqlUtil.release(mysqlConn)
     }
+  })
+}
+
+function getPaymentInfoByUserId(request, response) {
+  var userId = request.params.userId
+
+  fetchPaymentInfoByUserId(userId).then((paymentInfo) => {
+    response.success(paymentInfo)
+  }).catch((error) => {
+    response.error(error)
   })
 }
 
@@ -1128,7 +1133,8 @@ var PingppFunc = {
   updateUserDealRecords: updateUserDealRecords,
   fetchDealRecords: fetchDealRecords,
   setWithdrawFee: setWithdrawFee,
-  getWithdrawFee: getWithdrawFee
+  getWithdrawFee: getWithdrawFee,
+  fetchPaymentInfoByUserId: fetchPaymentInfoByUserId
 }
 
 module.exports = PingppFunc

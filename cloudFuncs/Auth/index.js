@@ -655,6 +655,20 @@ function getUserById(userId) {
   return query.get(userId)
 }
 
+function isSignInByUnionId(unionid) {
+  var query = new AV.Query('_User')
+  query.equalTo("authData.weixin.openid", unionid)
+  return query.find().then((result) => {
+    if(result.length >= 1) {
+      return true
+    } else {
+      return false
+    }
+  }).catch((error) => {
+    throw error
+  })
+}
+
 /**
  * 通过微信unionid判断用户是否注册
  * @param request
@@ -670,8 +684,8 @@ function isWXUnionIdSignIn(request, response) {
   var query = new AV.Query('_User')
   query.equalTo("authData.weixin.openid", unionid)
 
-  return query.find().then((result) => {
-    if(result.length >= 1) {
+  isSignInByUnionId(unionid).then((result) => {
+    if(result) {
       response.success({
         isSignIn: true
       })
@@ -680,11 +694,10 @@ function isWXUnionIdSignIn(request, response) {
         isSignIn: false
       })
     }
-
-  }).catch((err) => {
-    console.log(err)
+  }).catch((error) => {
+    console.log('isSignInByUnionId', error)
     response.error({
-      errcode: -1,
+      errcode: -1
     })
   })
 }
@@ -797,6 +810,7 @@ var authFunc = {
   getUserById: getUserById,
   getNicknameById: getNicknameById,
   isWXUnionIdSignIn: isWXUnionIdSignIn,
+  isSignInByUnionId: isSignInByUnionId,
   bindWithWeixin: bindWithWeixin,
   isWXBindByPhone: isWXBindByPhone,
   setUserOpenid: setUserOpenid,

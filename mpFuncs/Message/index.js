@@ -208,7 +208,7 @@ function sendWithdrawTmpMsg(openid, amount, account, channel, created) {
 
 /**
  * 邀请人通知
- * @param {String} openid 用户的openid
+ * @param {String} openid 邀请者的openid
  * @param {String} username 用户姓名
  * @param {String} city  城市
  */
