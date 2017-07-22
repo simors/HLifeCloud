@@ -58,14 +58,14 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+  // MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
   REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
   SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"
   GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"
   WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"
   INVITER_TMP_ID = "zVnC2WLMts3fJCnz2qkXAmVTGXtVprrYn6zthreOan0"
 
-  // MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
+  MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
   wxConfig = {
     token: 'huilinyoudian2017dev',
     appid: 'wx3dfde3f7184c8c51',

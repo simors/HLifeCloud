@@ -26,7 +26,7 @@ router.get('/callback', function (req, res, next) {
 
     return authFunc.isSignInByUnionId(unionid)
   }).then((result) => {
-    if(!result.isSignIn) {
+    if(!result) {
       mpAuthFuncs.getUserInfo(openid).then((userInfo) => {
         var nickname = userInfo.nickname
         var headimgurl = userInfo.headimgurl

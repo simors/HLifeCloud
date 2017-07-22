@@ -609,7 +609,7 @@ function setUserOpenid(openid, unionid) {
     return Promise.reject()
   }
 
-  var query  = AV.Query('_User')
+  var query = new AV.Query('_User')
   query.equalTo("authData.weixin.openid", unionid)
   query.doesNotExist('openid')
 
