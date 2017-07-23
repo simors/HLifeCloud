@@ -458,15 +458,15 @@ function paymentEvent(request, response) {
     //发送微信通知消息
     authFunc.getOpenidById(toUser).then((openid) => {
       switch (dealType) {
-        case 'REWARD':
+        case REWARD:
           mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
           break
-        case 'BUY_GOODS':
+        case BUY_GOODS:
           authFunc.getNicknameById(fromUser).then((nickname) => {
             mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
           })
           break
-        case 'INVITE_SHOP':
+        case INVITE_SHOP:
           mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
           break
         default:

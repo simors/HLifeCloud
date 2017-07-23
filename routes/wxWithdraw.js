@@ -11,6 +11,7 @@ router.get('/', function (req, res, next) {
   var balance = req.query.balance;
   var userId = req.query.userId;
   var nickname = req.query.nickname;
+  var unionid = req.query.unionid;
 
   res.render('wxWithdraw', {
     userId: userId,
