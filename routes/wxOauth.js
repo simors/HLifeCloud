@@ -48,13 +48,14 @@ router.get('/callback', function (req, res, next) {
       }).then((user) => {
         return PromoterFunc.bindPromoterInfo(user.id)
       }).then((upUser) => {
-        var upUserOpenid = upUser.attributes.openid
-        authFunc.getUserById(userId).then((leanUser) => {
-          var nickname = leanUser.attributes.nickname
-          var city = leanUser.attributes.geoCity
-          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
-        })
-
+        if(upUser) {
+          var upUserOpenid = upUser.attributes.openid
+          authFunc.getUserById(userId).then((leanUser) => {
+            var nickname = leanUser.attributes.nickname
+            var city = leanUser.attributes.geoCity
+            mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+          })
+        }
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
       })
     } else {
