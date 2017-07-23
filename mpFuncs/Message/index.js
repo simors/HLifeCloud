@@ -3,8 +3,9 @@
  */
 var GLOBAL_CONFIG = require('../../config')
 var WechatAPI = require('wechat-api');
+var mpTokenFuncs = require('../Token')
 
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret, mpTokenFuncs.getApiTokenFromRedis, mpTokenFuncs.setApiTokenToRedis);
 
 /**
  * 发送打赏模板消息

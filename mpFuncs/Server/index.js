@@ -6,8 +6,9 @@ var WechatAPI = require('wechat-api');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
+var mpTokenFuncs = require('../../mpFuncs/Token')
 
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret, mpTokenFuncs.getApiTokenFromRedis, mpTokenFuncs.setApiTokenToRedis);
 
 function wechatServer(req, res, next) {
   var message = req.weixin;
