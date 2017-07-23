@@ -3,7 +3,9 @@
  */
 var GLOBAL_CONFIG = require('../../config')
 var OAuth = require('wechat-oauth');
-var client = new OAuth(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret);
+var mpTokenFuncs = require('../Token')
+
+var client = new OAuth(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret, mpTokenFuncs.getOauthTokenFromMysql, mpTokenFuncs.setOauthTokenToMysql);
 
 
 function userAuthRequest(req, res) {
