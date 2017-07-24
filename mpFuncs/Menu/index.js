@@ -5,6 +5,7 @@ var GLOBAL_CONFIG = require('../../config')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
+
 function createMenu() {
   var memu = {
     "button":[

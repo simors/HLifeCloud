@@ -458,10 +458,16 @@ function paymentEvent(request, response) {
     //发送微信通知消息
     authFunc.getOpenidById(toUser).then((openid) => {
       switch (dealType) {
-        case 'REWARD':
+        case REWARD:
           mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
           break
-        case 'BUY_GOODS':
+        case BUY_GOODS:
+          authFunc.getNicknameById(fromUser).then((nickname) => {
+            mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
+          })
+          break
+        case INVITE_SHOP:
+          mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
           break
         default:
           break
@@ -726,6 +732,13 @@ function transfersEvent(request, response) {
     }
     return insertTransferInMysql(transfer)
   }).then(() => {
+    var account = ""
+    if(transfer.channel == 'allinpay') {
+      account = transfer.extra.card_number
+    } else if( transfer.channel == 'wx_pub') {
+      account = transfer.metadata.nickname
+    }
+    mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount, account, transfer.channel, new Date())
     response.success({
       errcode: 0,
       message: 'transfersEvent response success!',
@@ -792,17 +805,17 @@ function idNameCardNumberIdentify(request, response) {
   })
 }
 
-function getPaymentInfoByUserId(request, response) {
-  var userId = request.params.userId
-
+function fetchPaymentInfoByUserId(userId) {
   var sql = ""
   var mysqlConn = undefined
+  var paymentInfo = {}
+
   return mysqlUtil.getConnection().then((conn) => {
     mysqlConn = conn
     sql = "SELECT `id_name`, `id_number`, `card_number`, `phone_number`, `balance`, `password`, `alipay_account`, `open_id`, `open_bank_code`, `open_bank` FROM `PaymentInfo` WHERE `userId` = ? "
     return mysqlUtil.query(conn, sql, [userId])
   }).then((queryRes) => {
-    if (queryRes.results.length > 0) {
+    if(queryRes.results.length > 0) {
       var balance = queryRes.results[0].balance || 0
       var id_name = queryRes.results[0].id_name || undefined
       var id_number = queryRes.results[0].id_number || undefined
@@ -814,7 +827,7 @@ function getPaymentInfoByUserId(request, response) {
       var open_bank_code = queryRes.results[0].open_bank_code || undefined
       var open_bank = queryRes.results[0].open_bank || undefined
 
-      response.success({
+      paymentInfo = {
         userId: userId,
         balance: balance,
         id_name: id_name,
@@ -826,20 +839,25 @@ function getPaymentInfoByUserId(request, response) {
         open_id: open_id,
         open_bank_code: open_bank_code,
         open_bank: open_bank,
-      })
-      return
+      }
     }
-    response.error({
-      errcode: 1,
-      message: '未找到支付信息',
-    })
-
-  }).catch((err) => {
-    response.error(err)
+    return paymentInfo
+  }).catch((error) => {
+    throw error
   }).finally(() => {
     if (mysqlConn) {
       mysqlUtil.release(mysqlConn)
     }
+  })
+}
+
+function getPaymentInfoByUserId(request, response) {
+  var userId = request.params.userId
+
+  fetchPaymentInfoByUserId(userId).then((paymentInfo) => {
+    response.success(paymentInfo)
+  }).catch((error) => {
+    response.error(error)
   })
 }
 
@@ -1115,7 +1133,8 @@ var PingppFunc = {
   updateUserDealRecords: updateUserDealRecords,
   fetchDealRecords: fetchDealRecords,
   setWithdrawFee: setWithdrawFee,
-  getWithdrawFee: getWithdrawFee
+  getWithdrawFee: getWithdrawFee,
+  fetchPaymentInfoByUserId: fetchPaymentInfoByUserId
 }
 
 module.exports = PingppFunc

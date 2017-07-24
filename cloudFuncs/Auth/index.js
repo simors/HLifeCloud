@@ -609,7 +609,7 @@ function setUserOpenid(openid, unionid) {
     return Promise.reject()
   }
 
-  var query  = AV.Query('_User')
+  var query = new AV.Query('_User')
   query.equalTo("authData.weixin.openid", unionid)
   query.doesNotExist('openid')
 
@@ -638,9 +638,35 @@ function getOpenidById(userId) {
   })
 }
 
+function getNicknameById(userId) {
+  if(!userId) {
+    return Promise.reject()
+  }
+  var user = AV.Object.createWithoutData('_User', userId)
+  return user.fetch().then((userInfo) => {
+    return userInfo.get('nickname')
+  }).catch((error) => {
+    throw error
+  })
+}
+
 function getUserById(userId) {
   var query = new AV.Query('_User')
   return query.get(userId)
+}
+
+function isSignInByUnionId(unionid) {
+  var query = new AV.Query('_User')
+  query.equalTo("authData.weixin.openid", unionid)
+  return query.find().then((result) => {
+    if(result.length >= 1) {
+      return true
+    } else {
+      return false
+    }
+  }).catch((error) => {
+    throw error
+  })
 }
 
 /**
@@ -658,8 +684,8 @@ function isWXUnionIdSignIn(request, response) {
   var query = new AV.Query('_User')
   query.equalTo("authData.weixin.openid", unionid)
 
-  return query.find().then((result) => {
-    if(result.length >= 1) {
+  isSignInByUnionId(unionid).then((result) => {
+    if(result) {
       response.success({
         isSignIn: true
       })
@@ -668,11 +694,10 @@ function isWXUnionIdSignIn(request, response) {
         isSignIn: false
       })
     }
-
-  }).catch((err) => {
-    console.log(err)
+  }).catch((error) => {
+    console.log('isSignInByUnionId', error)
     response.error({
-      errcode: -1,
+      errcode: -1
     })
   })
 }
@@ -763,10 +788,9 @@ function isWXBindByPhone(request, response) {
 function authTest(request, response) {
   var userId = request.params.userId
 
-  getOpenidById(userId).then((openid) => {
-    response.success({
-      openid: openid
-    })
+  getUserById(userId).then((result) => {
+    console.log("getUserById", result)
+    response.success()
   })
 }
 
@@ -784,7 +808,9 @@ var authFunc = {
   setUserNickname: setUserNickname,
   updateUserLocationInfo: updateUserLocationInfo,
   getUserById: getUserById,
+  getNicknameById: getNicknameById,
   isWXUnionIdSignIn: isWXUnionIdSignIn,
+  isSignInByUnionId: isSignInByUnionId,
   bindWithWeixin: bindWithWeixin,
   isWXBindByPhone: isWXBindByPhone,
   setUserOpenid: setUserOpenid,

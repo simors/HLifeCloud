@@ -35,7 +35,6 @@
 
 </body>
 <script type="text/javascript">
-
     AV.init({
         appId: "<%=appId%>",
         appKey: "<%=appKey%>"
@@ -48,6 +47,7 @@
     var openid = "<%=openid%>"
     var unionid = "<%=unionid%>"
     var userId = "<%=userId%>"
+    var nickname = "<%=nickname%>"
     var balance = parseFloat("<%=balance%>").toFixed(2)
 
     withdrawBtn.onclick = function () {
@@ -60,7 +60,10 @@
             order_no: generateUUID().replace(/-/g, '').substr(0, 16),
             amount: amount.value,
             openid: openid,
-            metadata: {userId: userId},
+            metadata: {
+                userId: userId,
+                nickname: nickname
+            },
         }
         AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
             window.location.href = "/wxProfile?openid=" + openid + "&unionid=" + unionid

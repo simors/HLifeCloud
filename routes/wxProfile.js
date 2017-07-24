@@ -4,6 +4,7 @@
 'use strict';
 var router = require('express').Router();
 var AV = require('leanengine');
+var PingppFunc = require('../cloudFuncs/Pingpp')
 
 // `AV.Object.extend` 方法一定要放在全局变量，否则会造成堆栈溢出。
 // 详见： https://leancloud.cn/docs/js_guide.html#对象
@@ -27,7 +28,7 @@ router.get('/', function (req, res, next) {
     userId = userInfo.id
     avatar = userInfo.attributes.avatar
     nickname = userInfo.attributes.nickname
-    return AV.Cloud.run('hLifeGetPaymentInfoByUserId', {userId: userId})
+    return PingppFunc.fetchPaymentInfoByUserId(userId)
   }).then((result) => {
     var balance = result.balance.toFixed(2)
     res.render('wxProfile', {

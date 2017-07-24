@@ -4,6 +4,7 @@
 var wechat = require('wechat');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
+var utilFunc = require('../../cloudFuncs/util')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
@@ -101,22 +102,17 @@ function wechatServer(req, res, next) {
         var upUser_unionid = scene_id.slice(8)
         wechat_api.getUser(openid, function (err, result) {
           if(!err) {
-            var unionid = result.unionid
-            var params = {
-              unionid: unionid,
-              upUserUnionid: upUser_unionid
-            }
-            return AV.Cloud.run('utilBindWechatUnionid', params)
+            utilFunc.bindWechatUnionid(result.unionid, upUser_unionid).then((result) => {
+              if(!result)
+                console.log("bindWechatUnionid failed!")
+            })
           } else {
-            return Promise.resolve()
+            console.log("subscribe", err)
           }
-        }).then(() => {
           res.reply({
             type: 'text',
             content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
           })
-        }).catch((error) => {
-          console.log("subscribe:", error)
         })
       }
       break
