@@ -199,6 +199,7 @@ function syncPromoterInfo(request, response) {
     var nickname = leanUser.attributes.nickname
     var city = leanUser.attributes.geoCity
     mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+    response.success()
   }).catch((error) => {
     response.error(error)
   })
@@ -267,7 +268,7 @@ function bindPromoterInfo(userId) {
   var currentPromoter = undefined
   var upUser = undefined
 
-  createPromoter(userId).then((promoter) => {
+  return createPromoter(userId).then((promoter) => {
     currentPromoter = promoter
     return getUpUserFromRedis(userId)
   }).then((user) => {
