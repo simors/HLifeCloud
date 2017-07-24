@@ -84,10 +84,11 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
   MP_CLIENT_DOMAIN = "http://139.196.84.116"
-  REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
-  SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
-  GOODS_TMP_ID = "MLQiVmfbpgIaNvSLp45GVv-H2JGmhXo79Q88kFVcHdM	"
-  WITHDRAW_TMP_ID = "cI49vYLgEK20N6o59nEi08kSc2f_jLyvYMJr8Dx7nNs"
+  REWARD_TMP_ID = "K6Y6On2Ya12S8N32rT8GsDSyrRZGWf9K10HLWF8bMDo"
+  SHOP_TMP_ID = "oMEz008Y4ThT1y_8ZFTe5VRdft-DmkcONVc-3Syty0k"
+  GOODS_TMP_ID = "-yvrwRNpJEDp19XDMUCjE_wC5RISR5Sl56RRxT1528M"
+  WITHDRAW_TMP_ID = "kowSnrTAXf9VjDtF5iFvyChSJNxyMPfhHcZ9gbbA4zI"
+  INVITER_TMP_ID = "_b0VCP2HDejrZDqv7wnIhdE5RRL1jeVLSz7dUOpJKbA"
   wxConfig = {
     token: 'huilinyoudian2017pre',
     appid: 'wxd1cc733cd20fdaea',
