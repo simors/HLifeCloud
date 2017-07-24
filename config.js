@@ -90,9 +90,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   WITHDRAW_TMP_ID = "cI49vYLgEK20N6o59nEi08kSc2f_jLyvYMJr8Dx7nNs"
   wxConfig = {
     token: 'huilinyoudian2017pre',
-    appid: 'wx34ac208b373814d2',
+    appid: 'wxd1cc733cd20fdaea',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: 'd121a1921db870cc3e37f148cb7cc257',
+    appSecret: 'dab2ea29d6e68629cbec6ca1317d4239',
     checkSignature: true,
   }
 } else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
