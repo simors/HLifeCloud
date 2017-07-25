@@ -41,7 +41,7 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
-var MP_SERVER_DOMAIN = "http://dev.lean.ngrok.io"
+var MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
 var MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
 var REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8" //微信模版消息id：打赏功能
 var WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"  //微信模版消息id：提现通知
@@ -59,7 +59,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://dev.lean.ngrok.io"
+  MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
   MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
   REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
   SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"
@@ -69,9 +69,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
-    appid: 'wx310b23ce34f394a0',
+    appid: 'wx34ac208b373814d2',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: '7adbbfa310520160c6a3bc63bfe05d0b',
+    appSecret: 'd121a1921db870cc3e37f148cb7cc257',
     checkSignature: true,
   }
 
