@@ -18,6 +18,8 @@ var images = require("images");
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
 var mpTokenFuncs = require('../../mpFuncs/Token')
+var gm = require('gm')
+// var gm = require('gm').subClass({imageMagick: true})
 
 
 
@@ -2176,6 +2178,104 @@ function supplementPromoterInfo(request, response) {
 
 }
 
+function createPromoterQrCode(unionid) {
+
+  var query = new AV.Query('_User')
+
+  query.equalTo("authData.weixin.openid", unionid)
+
+  return query.first().then((user) => {
+    if(!user) {
+      return Promise.resolve({isSignIn: false})
+    } else {
+      var avatar = user.attributes.avatar
+
+      var existQuery = new AV.Query('Promoter')
+      existQuery.equalTo('user', user)
+      existQuery.first().then((promoter) => {
+        if(promoter) {
+          var qrcode = promoter.get('qrcode')
+          if(!qrcode) {
+            wechat_api.createLimitQRCode(unionid, function (err, result) {
+
+              var ticket = result.ticket
+              new Promise(function (resolve, reject) {
+                Request({
+                  url: wechat_api.showQRCodeURL(ticket),
+                  encoding: 'base64'
+                }, function(err, res, body) {
+                  resolve(body);
+                });
+              }).then((body) => {
+                fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
+                  if(!err) {
+
+                    Request({
+                      url: avatar,
+                      encoding: 'base64'
+                    }, function (err, res, body) {
+                      fs.writeFile('./avatar.png', body, 'base64', function (err) {
+                        var background = './public/images/qrcode_template.png'
+                        var logo = './public/images/hlyd_logo.png'
+                        var qrcode = './qrcode.jpeg'
+                        var localAvatar = './avatar.png'
+                        composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
+                          wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
+                            var mediaId = result.media_id
+
+                            fs.readFile('./myQrCode.png', 'base64', function (err, buffer) {
+                              var data = {base64: buffer}
+                              var file = new AV.File('./myQrCode.png', data)
+                              file.save().then(function (file) {
+                                //删除生成的临时图片
+                                fs.unlink('./myQrCode.png')
+                                fs.unlink('./qrcode.jpeg')
+                                fs.unlink(localAvatar)
+
+                                var url = file.url()
+                                var qrcode = {
+                                  mediaId: mediaId,
+                                  url: url,
+                                }
+                                promoter.set('qrcode', qrcode)
+                                promoter.save().then(function (promoter) {
+                                  return Promise.resolve({
+                                    isSignIn: true,
+                                    qrcode: qrcode
+                                  })
+                                })
+                              })
+                            })
+
+                          })
+                        })
+                      })
+                    })
+
+                  }
+
+                })
+              })
+            })
+          } else {
+            return Promise.resolve({
+              isSignIn: true,
+              qrcode: qrcode
+            })
+          }
+        } else {
+          return Promise.resolve({
+            isSignIn: false
+          })
+        }
+      })
+
+    }
+  }).catch((err) => {
+    return Promise.reject(new Error("获取我的二维码失败"))
+  })
+}
+
 /**
  * 获取我的推广二维码
  * @param request
@@ -2316,15 +2416,22 @@ function composeQrCodeImage(background, qrcode, logo, avatar, name) {
 }
 
 function promoterTest(request, response) {
-  var userId = request.params.userId
 
-  getUpUserFromRedis(userId).then((upUser) => {
-    console.log("getUpUserFromRedis", upUser)
-    response.success(upUser)
+  var backgroundUrl = "http://ac-k5rltwmf.clouddn.com/a3542dcca297337bed95.png"
+  var oneUrl = "http://ac-k5rltwmf.clouddn.com/c38c5dcdb0016437a15d.jpg"
+  var twoUrl = "http://ac-k5rltwmf.clouddn.com/062cb5af8ff54d5c3305.jpg"
 
-  }).catch((error) => {
-    response.error(error)
+  gm(Request(backgroundUrl))
+    .composite(oneUrl).geometry('+100+100').resize(200, 200)
+    .write('./gmTest.png', function (err) {
+    console.log("gm error", err)
+    if(!err) {
+      console.log("write gmTest.png success!")
+      response.success()
+    }
+
   })
+
 
 }
 
@@ -2368,6 +2475,7 @@ var PromoterFunc = {
   supplementPromoterInfo: supplementPromoterInfo,
   getPromoterQrCode: getPromoterQrCode,
   bindPromoterInfo: bindPromoterInfo,
+  createPromoterQrCode: createPromoterQrCode,
   promoterTest: promoterTest
 }
 
