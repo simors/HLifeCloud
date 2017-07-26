@@ -635,7 +635,7 @@ function createTransfers(request, response) {
             }).then(() => {
               response.success({
                 errcode: 0,
-                message: 'allinpay create transfers success!',
+                message: 'wx_pub create transfers success!',
                 transfer: transfer,
               })
             }).catch((error) => {

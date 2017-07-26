@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/7/15.
  */
+var Promise = require('bluebird');
 var wechat = require('wechat');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
@@ -102,7 +103,7 @@ function wechatServer(req, res, next) {
         var upUser_unionid = scene_id.slice(8)
         wechat_api.getUser(openid, function (err, result) {
           if(!err) {
-            utilFunc.bindWechatUnionid(result.unionid, upUser_unionid).then((result) => {
+            utilFunc.bindWechatUnionid(upUser_unionid, result.unionid).then((result) => {
               if(!result)
                 console.log("bindWechatUnionid failed!")
             })

@@ -1,7 +1,7 @@
 'use strict';
 var AV = require('leanengine');
 var mpMenuFuncs = require('./mpFuncs/Menu')
-var wechatUtil = require('./mpFuncs/util/wechatUtil').wechat_api
+var wechat_api = require('./mpFuncs/util/wechatUtil').wechat_api
 
 AV.init({
   appId: process.env.LEANCLOUD_APP_ID,
@@ -13,11 +13,13 @@ AV.init({
 AV.Cloud.useMasterKey();
 
 //获取微信公众号api token &创建菜单
-wechatUtil.getLatestToken(function (err, token) {
-  if(!err) {
+wechat_api.getLatestToken(function (err, token) {
+  if(err) {
     console.warn("获取微信公众号token失败", err)
+  } else {
+    wechat_api.clearQuota()
+    mpMenuFuncs.createMenu();
   }
-  mpMenuFuncs.createMenu();
 })
 
 var app = require('./app');

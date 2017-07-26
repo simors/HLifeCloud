@@ -638,6 +638,23 @@ function getOpenidById(userId) {
   })
 }
 
+function getUnionidById(userId) {
+  if(!userId) {
+    return Promise.reject()
+  }
+  var user = AV.Object.createWithoutData('_User', userId)
+  return user.fetch().then((userInfo) => {
+    var authData = userInfo.get('authData')
+    if(authData) {
+      return authData.weixin.openid
+    } else {
+      return undefined
+    }
+  }).catch((error) => {
+    throw error
+  })
+}
+
 function getNicknameById(userId) {
   if(!userId) {
     return Promise.reject()
@@ -815,6 +832,7 @@ var authFunc = {
   isWXBindByPhone: isWXBindByPhone,
   setUserOpenid: setUserOpenid,
   getOpenidById: getOpenidById,
+  getUnionidById: getUnionidById,
   authTest: authTest
 }
 
