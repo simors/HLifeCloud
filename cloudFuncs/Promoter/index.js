@@ -18,8 +18,8 @@ var images = require("images");
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
 var mpTokenFuncs = require('../../mpFuncs/Token')
-var gm = require('gm')
-// var gm = require('gm').subClass({imageMagick: true})
+// var gm = require('gm')
+var gm = require('gm').subClass({imageMagick: true})
 var mpQrcodeFuncs = require('../../mpFuncs/Qrcode')
 var mpMaterialFuncs = require('../../mpFuncs/Material')
 var util = require('../../cloudFuncs/util')
@@ -2328,20 +2328,24 @@ function createPromoterQrCode(userId) {
   var avatar = undefined
   var nickname = undefined
   var mediaId = undefined
-  var tmpPromoterQrcodrPath = __dirname + '/promoterQrcode.png'
+  var tmpPromoterQrcodrPath = unionid + 'promoterQrcode.jpeg'
 
   return user.fetch().then(() => {
     var authData = user.get('authData')
     unionid = authData && authData.weixin.openid
     avatar = user.get('avatar')
     nickname = user.get('nickname')
-
+    console.log("avatar:",  avatar)
     return mpQrcodeFuncs.createLimitQRCode(unionid)
   }).then((qrcodeUrl) => {
     return new Promise(function (resolve, reject) {
       gm(background)
-        // .draw('image Over 210, 720 64, 64 ' + avatar)
-        .drawText(100, 100, "Simors")
+        .font("./public/SansCN-Regular.TTF", 40)
+        .fontSize(40)
+        .drawText(320, 760, "绿蚁网络")
+        .draw('image Over 210, 720 64, 64 "' + avatar + '"')
+        .draw('image Over 215, 824 320, 320 "' + qrcodeUrl + '"')
+        .draw('image Over 335, 944 80, 80 "' + logo + '"')
         .write(tmpPromoterQrcodrPath, function (err) {
           if(err) {
             console.log("GraphicsMagick error", err)
@@ -2380,34 +2384,6 @@ function createPromoterQrCode(userId) {
 }
 
 function promoterTest(request, response) {
-  var backgroundUrl = "http://ac-k5rltwmf.clouddn.com/a3542dcca297337bed95.png"
-  var oneUrl = "http://ac-k5rltwmf.clouddn.com/c38c5dcdb0016437a15d.jpg"
-  var twoUrl = "http://ac-k5rltwmf.clouddn.com/062cb5af8ff54d5c3305.jpg"
-  var googleLogo = "https://www.google.co.jp/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
-
-  // gm(Request(backgroundUrl))
-  //   .font('/Users/wanpeng/Downloads/SourceHanSansCN-Regular/SourceHanSansCN-Regular.TTF')
-  //   .drawText(335, 960, '绿蚁网络')
-  //   .composite(twoUrl)
-  //   .geometry('+100+100')
-  //   .write('./gmTest.png', function (err) {
-  //   console.log("gm error", err)
-  //   if(!err) {
-  //     console.log("write gmTest.png success!")
-  //     response.success()
-  //   }
-  // })
-
-  // gm(Request(backgroundUrl))
-  //   .draw('image Over 100, 100 100, 100 "http://ac-k5rltwmf.clouddn.com/c38c5dcdb0016437a15d.jpg"')
-  //   .draw('image Over 100, 400 100, 100 "http://ac-k5rltwmf.clouddn.com/062cb5af8ff54d5c3305.jpg"')
-  //   .write('./gmTest.png', function (err) {
-  //     console.log("gm error", err)
-  //     if(!err) {
-  //       console.log("write gmTest.png success!")
-  //       response.success()
-  //     }
-  //   })
 
   var userId = "59776b3d8d6d810057e9dcfa"
   createPromoterQrCode(userId).then((result) => {
