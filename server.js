@@ -14,7 +14,7 @@ AV.Cloud.useMasterKey();
 
 //获取微信公众号api token
 wechatUtil.getLatestToken(function (err, token) {
-  if(!err) {
+  if(err) {
     console.warn("获取微信公众号token失败", err)
   }
 })
