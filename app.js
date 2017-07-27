@@ -22,7 +22,6 @@ var wxSignIn = require('./routes/wxSignIn')
 var wxError = require('./routes/wxError')
 var mpServerFuncs = require('./mpFuncs/Server')
 var GLOBAL_CONFIG = require('./config')
-var test = require('./routes/test')
 
 var app = express();
 
@@ -77,8 +76,6 @@ app.use('/wxProfile', wxProfile)
 app.use('/wxWithdraw', wxWithdraw)
 
 app.use('/wxSignIn', wxSignIn)
-
-app.use('/test', test)
 
 app.get('/downloadLink', function (req, res) {
   res.render('downloadLink', {})
