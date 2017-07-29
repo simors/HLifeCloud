@@ -138,58 +138,6 @@ router.get('/callback/:id', function (req, res, next) {
 
 })
 
-//
-// router.get('/callback', function (req, res, next) {
-//   var code = req.query.code
-//   var upUser_unionId = undefined
-//
-//   console.log("callback code:", code)
-//   authFunc.getUnionidById(userId).then((unionId) => {
-//     upUser_unionId = unionId
-//     return mpAuthFuncs.getAccessToken(code)
-//   }).then((result) => {
-//     var unionid = result.data.unionid
-//     return utilFunc.bindWechatUnionid(upUser_unionId, unionid)
-//   }).then(() => {
-//     var query = new AV.Query(Topics)
-//     query.include('user')
-//     return query.get(topicId)
-//   }).then((topic) => {
-//     topicFunc.getTopicComments(topicId).then((results) => {
-//       var comments = []
-//       if(results && results.length > 0) {
-//         comments = results
-//       }
-//
-//       var topicInfo = topic.attributes
-//       var user = topicInfo.user.attributes
-//       var status = topicInfo.status
-//       var createdAt = new Date(topic.createdAt.valueOf())
-//       if(status) {
-//         res.render('topicShare', {
-//           title: topicInfo.title || '优店话题',
-//           content: JSON.parse(topicInfo.content) || null,
-//           abstract: topicInfo.abstract || '优店话题摘要',
-//           author: user.nickname || '邻家小二',
-//           comments: comments,
-//           timestamp: util.getConversationTime(createdAt.getTime()),
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         })
-//       } else {
-//         res.render('shareError', {
-//           title: topicInfo.title || '优店话题',
-//           message: "话题文章已经被删除！",
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         });
-//       }
-//     })
-//   }).catch((error) => {
-//     console.log("TopicShare error:", error)
-//     res.render('wxError', {
-//       errorMessage: "话题分享失败",
-//     })
-//   })
-// })
 
 
 module.exports = router;

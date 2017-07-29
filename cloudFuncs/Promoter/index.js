@@ -2384,14 +2384,13 @@ function createPromoterQrCode(userId) {
 }
 
 function promoterTest(request, response) {
-
-  var userId = "59776b3d8d6d810057e9dcfa"
-  createPromoterQrCode(userId).then((result) => {
-    console.log("createPromoterQrCode", result)
-    response.success(result)
-  }).catch((error) => {
-    response.error(error)
-  })
+  // var userId = "59776b3d8d6d810057e9dcfa"
+  // createPromoterQrCode(userId).then((result) => {
+  //   console.log("createPromoterQrCode", result)
+  //   response.success(result)
+  // }).catch((error) => {
+  //   response.error(error)
+  // })
 }
 
 var PromoterFunc = {
