@@ -61,11 +61,11 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
   MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
-  REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
-  SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"
-  GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"
-  WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"
-  INVITER_TMP_ID = "zVnC2WLMts3fJCnz2qkXAmVTGXtVprrYn6zthreOan0"
+  REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
+  SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
+  GOODS_TMP_ID = "MLQiVmfbpgIaNvSLp45GVv-H2JGmhXo79Q88kFVcHdM"
+  WITHDRAW_TMP_ID = "cI49vYLgEK20N6o59nEi08kSc2f_jLyvYMJr8Dx7nNs"
+  INVITER_TMP_ID = "A_ugyWk9ZALz0FukC42Oalf8wwqhrIPudPSTZIvzqKg"
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
