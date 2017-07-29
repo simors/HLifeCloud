@@ -7,7 +7,6 @@ var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../config')
 var topicFunc = require('../cloudFuncs/Topic')
 var util = require('../utils/util');
-var OAuth = require('wechat-oauth');
 var mpAuthFuncs = require('../mpFuncs/Auth')
 var authFunc = require('../cloudFuncs/Auth')
 var utilFunc = require('../cloudFuncs/util')
