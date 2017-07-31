@@ -18,6 +18,9 @@ router.get('/callback', function (req, res, next) {
   var unionid = undefined
   var expires_in = undefined
 
+  var currentUserNickname = undefined
+  var currentUserCity = undefined
+
   mpAuthFuncs.getAccessToken(code).then((result) => {
     accessToken = result.data.access_token;
     openid = result.data.openid
@@ -28,9 +31,9 @@ router.get('/callback', function (req, res, next) {
   }).then((result) => {
     if(!result) {
       mpAuthFuncs.getUserInfo(openid).then((userInfo) => {
-        var nickname = userInfo.nickname
+        var currentUserNickname = userInfo.nickname
         var headimgurl = userInfo.headimgurl
-        var city = userInfo.city
+        var currentUserCity = userInfo.city
         var authData = {
           "openid": unionid,
           "access_token": accessToken,
@@ -39,22 +42,19 @@ router.get('/callback', function (req, res, next) {
         var platform = 'weixin'
         var leanUser = new AV.User()
         leanUser.set('type', 'normal')
-        leanUser.set('nickname', nickname)
+        leanUser.set('nickname', currentUserNickname)
         leanUser.set('username', unionid)
         leanUser.set('avatar', headimgurl)
         leanUser.set('openid', openid)
-        leanUser.set('geoCity', city)
+        leanUser.set('geoCity', currentUserCity)
         return AV.User.associateWithAuthData(leanUser, platform, authData)
       }).then((user) => {
         return PromoterFunc.bindPromoterInfo(user.id)
       }).then((upUser) => {
         if(upUser) {
           var upUserOpenid = upUser.attributes.openid
-          authFunc.getUserById(upUser.id).then((leanUser) => {
-            var nickname = leanUser.attributes.nickname
-            var city = leanUser.attributes.geoCity
-            mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
-          })
+          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, currentUserNickname, currentUserCity)
+
         }
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
       })
