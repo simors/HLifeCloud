@@ -84,6 +84,8 @@ AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
 AV.Cloud.define('submitCompleteShopInfo',shopFunc.submitCompleteShopInfo)
 AV.Cloud.define('submitEditShopInfo',shopFunc.submitEditShopInfo)
 AV.Cloud.define('shopFetchNearbyShops', shopFunc.fetchNearbyShops)
+AV.Cloud.define('submitShopPromotion', shopFunc.submitShopPromotion)
+AV.Cloud.define('fetchNearbyShopGoodPromotion', shopFunc.fetchNearbyShopGoodPromotion)
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)
@@ -92,6 +94,7 @@ AV.Cloud.define('goodsShopGoodsOnline', goodsFunc.shopGoodsOnline)
 AV.Cloud.define('goodsShopGoodsOffline', goodsFunc.shopGoodsOffline)
 AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
 AV.Cloud.define('goodsFetchGoodsList', goodsFunc.fetchShopGoods)
+
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)

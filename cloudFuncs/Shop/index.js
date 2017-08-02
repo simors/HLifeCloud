@@ -988,6 +988,46 @@ function fetchNearbyShopPromotion(request, response) {
   })
 }
 
+/**
+ * 获取周边店铺商品推广信息
+ * @param request
+ * @param response
+ */
+function fetchNearbyShopGoodPromotion(request, response) {
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
+  var limit = request.params.limit || 20
+
+  var query = new AV.Query('ShopGoodPromotion')
+  query.equalTo('status', "1")
+  query.include(['targetGood', 'targetGood.targetShop','targetGood.targetShop.owner'])
+  query.limit(limit)
+
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
+
+  if (lastDistance) {
+    var notIncludeQuery = new AV.Query('ShopPromotion')
+    notIncludeQuery.equalTo('status', "1")
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
+
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(constructShopPromotion(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  })
+}
+
 function submitCompleteShopInfo(request, response) {
   var payload = request.params.payload
   // var shop = request.params.shop
@@ -1043,6 +1083,8 @@ function submitEditShopInfo(request, response) {
   var shop = AV.Object.createWithoutData('Shop', request.params.shop.shopId)
   var album = request.params.shop.album
   var coverUrl = request.params.shop.coverUrl
+  var shopCategoryObjectId = payload.shopCategoryObjectId
+
 
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
@@ -1059,13 +1101,19 @@ function submitEditShopInfo(request, response) {
   var geoProvinceCode = shop.geoProvinceCode
   var geoCityCode = shop.geoCityCode
   var geoDistrictCode = shop.geoDistrictCode
-
+  var targetShopCategory = null
   var containedTag = []
   if (tagIds && tagIds.length) {
     tagIds.forEach((tagId) => {
       containedTag.push(AV.Object.createWithoutData('ShopTag', tagId))
     })
   }
+
+  if (shopCategoryObjectId) {
+    targetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryObjectId)
+    shop.set('targetShopCategory', targetShopCategory)
+  }
+
   shop.set('shopName', shopName)
   shop.set('shopAddress', shopAddress)
   shop.set('containedTag', containedTag)
@@ -1174,6 +1222,74 @@ function fetchNearbyShops(request, response) {
   })
 }
 
+function submitShopPromotion(request,response) {
+  // console.log('submitShopPromotion.payload===', payload)
+  var payload = request.params.payload
+  var shopId = payload.shopId
+  var shopPromotionId = payload.shopPromotionId
+  var status = payload.status
+  var startDate = payload.startDate
+  var endDate = payload.endDate
+
+  var typeId = payload.typeId + ""
+  var type = payload.type
+  var typeDesc = payload.typeDesc
+  var coverUrl = payload.coverUrl
+  var title = payload.title
+  var promotingPrice = payload.promotingPrice
+  var originalPrice = payload.originalPrice
+  var abstract = payload.abstract
+  var promotionDetailInfo = payload.promotionDetailInfo
+  var geo = payload.geo
+
+  if(Object.prototype.toString.call(promotionDetailInfo) === '[object Array]') {
+    promotionDetailInfo = JSON.stringify(promotionDetailInfo)
+  }
+
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+
+  var shopPromotion = null
+  if(shopPromotionId) {
+    shopPromotion = AV.Object.createWithoutData('ShopPromotion', shopPromotionId)
+    shopPromotion.set('status', status)
+  }else {
+    var ShopPromotion = AV.Object.extend('ShopPromotion')
+    shopPromotion = new ShopPromotion()
+  }
+
+  shopPromotion.set('targetShop', shop)
+  shopPromotion.set('startDate', startDate)
+  shopPromotion.set('endDate', endDate)
+  shopPromotion.set('typeId', typeId)
+  shopPromotion.set('type', type)
+  shopPromotion.set('typeDesc', typeDesc)
+  shopPromotion.set('coverUrl', coverUrl)
+  shopPromotion.set('title', title)
+  shopPromotion.set('promotingPrice', promotingPrice)
+  shopPromotion.set('originalPrice', originalPrice)
+  shopPromotion.set('abstract', abstract)
+  shopPromotion.set('promotionDetailInfo', promotionDetailInfo)
+  shopPromotion.set('geo', geo)
+
+  shopPromotion.save().then((results) => {
+    // console.log('submitShopPromotion===results=', results)
+    if(!shopPromotionId || (shopPromotionId && '1' == status)) {
+      var promotion = AV.Object.createWithoutData('ShopPromotion', results.id)
+      shop.addUnique('containedPromotions', [promotion])
+      // console.log('shop/////>>>>>>>>>>', shop)
+       shop.save().then((result)=>{
+        response.success()
+        // console.log('rep---->>>>', rep)
+      }, (error)=>{
+        response.error(error)
+        // console.log('error.........>>>>', error)
+      })
+    }
+  }, function (err) {
+    response.error(err)
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1196,6 +1312,8 @@ var shopFunc = {
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
   shopCertificateNew: shopCertificateNew,
+  submitShopPromotion: submitShopPromotion,
+  fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion
 }
 
 module.exports = shopFunc
