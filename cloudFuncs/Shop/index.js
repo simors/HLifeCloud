@@ -1225,56 +1225,41 @@ function fetchNearbyShops(request, response) {
 function submitShopPromotion(request,response) {
   // console.log('submitShopPromotion.payload===', payload)
   var payload = request.params.payload
-  var shopId = payload.shopId
-  var shopPromotionId = payload.shopPromotionId
+  var goodId= payload.goodId
   var status = payload.status
   var startDate = payload.startDate
   var endDate = payload.endDate
-
-  var typeId = payload.typeId + ""
+  var shopId = payload.shopId
+  var typeId = payload.typeId
   var type = payload.type
   var typeDesc = payload.typeDesc
-  var coverUrl = payload.coverUrl
-  var title = payload.title
-  var promotingPrice = payload.promotingPrice
-  var originalPrice = payload.originalPrice
+  var promotingPrice = payload.price
   var abstract = payload.abstract
-  var promotionDetailInfo = payload.promotionDetailInfo
   var geo = payload.geo
 
-  if(Object.prototype.toString.call(promotionDetailInfo) === '[object Array]') {
-    promotionDetailInfo = JSON.stringify(promotionDetailInfo)
+    var ShopPromotion = AV.Object.extend('ShopGoodromotion')
+    var shopPromotion = new ShopPromotion()
+  if (goodId) {
+    var  good = AV.Object.createWithoutData('ShopGoods', goodId)
+    shopPromotion.set('targetGood', good)
   }
-
-  var shop = AV.Object.createWithoutData('Shop', shopId)
-
-  var shopPromotion = null
-  if(shopPromotionId) {
-    shopPromotion = AV.Object.createWithoutData('ShopPromotion', shopPromotionId)
-    shopPromotion.set('status', status)
-  }else {
-    var ShopPromotion = AV.Object.extend('ShopPromotion')
-    shopPromotion = new ShopPromotion()
+  var shop = null
+  if (shopId) {
+    shop = AV.Object.createWithoutData('Shop', shopId)
   }
-
-  shopPromotion.set('targetShop', shop)
   shopPromotion.set('startDate', startDate)
   shopPromotion.set('endDate', endDate)
   shopPromotion.set('typeId', typeId)
   shopPromotion.set('type', type)
   shopPromotion.set('typeDesc', typeDesc)
-  shopPromotion.set('coverUrl', coverUrl)
-  shopPromotion.set('title', title)
   shopPromotion.set('promotingPrice', promotingPrice)
   shopPromotion.set('originalPrice', originalPrice)
   shopPromotion.set('abstract', abstract)
-  shopPromotion.set('promotionDetailInfo', promotionDetailInfo)
   shopPromotion.set('geo', geo)
 
   shopPromotion.save().then((results) => {
     // console.log('submitShopPromotion===results=', results)
-    if(!shopPromotionId || (shopPromotionId && '1' == status)) {
-      var promotion = AV.Object.createWithoutData('ShopPromotion', results.id)
+      var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
       shop.addUnique('containedPromotions', [promotion])
       // console.log('shop/////>>>>>>>>>>', shop)
        shop.save().then((result)=>{
@@ -1284,7 +1269,6 @@ function submitShopPromotion(request,response) {
         response.error(error)
         // console.log('error.........>>>>', error)
       })
-    }
   }, function (err) {
     response.error(err)
   })
