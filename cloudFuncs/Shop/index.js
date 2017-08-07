@@ -1237,7 +1237,7 @@ function submitShopPromotion(request,response) {
   var abstract = payload.abstract
   var geo = payload.geo
 
-    var ShopPromotion = AV.Object.extend('ShopGoodromotion')
+    var ShopPromotion = AV.Object.extend('ShopGoodPromotion')
     var shopPromotion = new ShopPromotion()
   if (goodId) {
     var  good = AV.Object.createWithoutData('ShopGoods', goodId)
