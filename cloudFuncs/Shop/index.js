@@ -1253,12 +1253,10 @@ function submitShopPromotion(request,response) {
   shopPromotion.set('type', type)
   shopPromotion.set('typeDesc', typeDesc)
   shopPromotion.set('promotingPrice', promotingPrice)
-  shopPromotion.set('originalPrice', originalPrice)
   shopPromotion.set('abstract', abstract)
   shopPromotion.set('geo', geo)
-
+  shopPromotion.set('status',status)
   shopPromotion.save().then((results) => {
-    // console.log('submitShopPromotion===results=', results)
       var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
       shop.addUnique('containedPromotions', [promotion])
       // console.log('shop/////>>>>>>>>>>', shop)
