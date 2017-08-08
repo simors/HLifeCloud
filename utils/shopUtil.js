@@ -257,13 +257,49 @@ function shopCommentsConcatReplys(shopComments, replys) {
 }
 
 
+function promotionFromLeancloudObject(leanPromotion, showUser) {
+  // var constructUserInfo = require('../cloudFuncs/Auth').constructUserInfo
+  var prompAttr = leanPromotion.attributes
+  var goodAttr = leanPromotion.attributes.targetGood.attributes
+  var shopAttr = goodAttr.targetShop.attributes
+  var promotion = {}
+
+  promotion.id = leanPromotion.id
+  promotion.startDate = leanPromotion.startDate
+  promotion.endDate = leanPromotion.endDate
+  promotion.coverPhoto = goodAttr.coverPhoto
+  promotion.typeId = prompAttr.typeId
+  promotion.type = prompAttr.type
+  promotion.typeDesc = prompAttr.typeDesc
+  promotion.goodName = goodAttr.goodName
+  promotion.goodId = prompAttr.targetGood.id
+  promotion.abstract = prompAttr.abstract
+  promotion.promotionPrice = prompAttr.promotionPrice
+  promotion.originalPrice = goodAttr.originalPrice
+  promotion.price = goodAttr.price
+  promotion.album = goodAttr.album
+  promotion.detail = goodAttr.detail
+  promotion.goodUpadatedAt = prompAttr.targetGood.updatedAt
+
+  promotion.status = prompAttr.status
+  promotion.geo = shopAttr.geo
+  promotion.shopId = goodAttr.targetShop.id
+  promotion.shopName = shopAttr.shopName
+  promotion.shopDistrict = shopAttr.geoDistrict
+  promotion.createdAt = leanPromotion.createdAt
+  promotion.updatedAt = leanPromotion.updatedAt
+  return promotion
+}
+
+
 var shopUtil = {
   shopFromLeancloudObject: shopFromLeancloudObject,
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
   shopCommentReplyFromLeancloudObject: shopCommentReplyFromLeancloudObject,
   shopCommentsConcatReplys: shopCommentsConcatReplys,
   shopCommentUpFromLeancloudObject: shopCommentUpFromLeancloudObject,
-  shopCommentsConcatUps: shopCommentsConcatUps
+  shopCommentsConcatUps: shopCommentsConcatUps,
+  promotionFromLeancloudObject:promotionFromLeancloudObject
 }
 
 module.exports = shopUtil
