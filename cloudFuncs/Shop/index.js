@@ -1008,7 +1008,7 @@ function fetchNearbyShopGoodPromotion(request, response) {
 
   if (lastDistance) {
     var notIncludeQuery = new AV.Query('ShopGoodPromotion')
-    notIncludeQuery.equalTo('status', "1")
+    notIncludeQuery.equalTo('status', 1)
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
