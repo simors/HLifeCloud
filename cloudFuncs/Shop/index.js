@@ -1252,7 +1252,7 @@ function submitShopPromotion(request,response) {
   shopPromotion.set('typeId', typeId)
   shopPromotion.set('type', type)
   shopPromotion.set('typeDesc', typeDesc)
-  shopPromotion.set('promotingPrice', promotingPrice)
+  shopPromotion.set('promotionPrice', promotingPrice)
   shopPromotion.set('abstract', abstract)
   shopPromotion.set('geo', geo)
   shopPromotion.set('status',status)
