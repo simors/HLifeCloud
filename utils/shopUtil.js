@@ -271,7 +271,7 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   promotion.typeId = prompAttr.typeId
   promotion.type = prompAttr.type
   promotion.typeDesc = prompAttr.typeDesc
-  promotion.goodName = goodAttr.goodName
+  promotion.goodName = goodAttr.goodsName
   promotion.goodId = prompAttr.targetGood.id
   promotion.abstract = prompAttr.abstract
   promotion.promotionPrice = prompAttr.promotionPrice
