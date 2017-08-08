@@ -994,24 +994,24 @@ function fetchNearbyShopPromotion(request, response) {
  * @param response
  */
 function fetchNearbyShopGoodPromotion(request, response) {
-  // var geo = request.params.geo
-  // var lastDistance = request.params.lastDistance
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
   var limit = request.params.limit || 20
 
   var query = new AV.Query('ShopGoodPromotion')
   query.equalTo('status', 1)
-  query.include(['targetGood', 'targetGood.targetShop','targetGood.targetShop.owner'])
+  query.include(['targetGood', 'targetGood.targetShop'])
   query.limit(limit)
 
-  // var point = new AV.GeoPoint(geo)
-  // query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
 
-  // if (lastDistance) {
-  //   var notIncludeQuery = new AV.Query('ShopGoodPromotion')
-  //   notIncludeQuery.equalTo('status', "1")
-  //   notIncludeQuery.withinKilometers('geo', point, lastDistance)
-  //   query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
-  // }
+  if (lastDistance) {
+    var notIncludeQuery = new AV.Query('ShopGoodPromotion')
+    notIncludeQuery.equalTo('status', "1")
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
 
   query.find().then((results) => {
     var promotions = []
