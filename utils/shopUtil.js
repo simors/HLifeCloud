@@ -279,6 +279,8 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   promotion.price = goodAttr.price
   promotion.album = goodAttr.album
   promotion.detail = goodAttr.detail
+  promotion.goodStatus = goodAttr.status
+
   promotion.goodUpadatedAt = prompAttr.targetGood.updatedAt
 
   promotion.status = prompAttr.status
