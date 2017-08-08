@@ -1007,7 +1007,7 @@ function fetchNearbyShopGoodPromotion(request, response) {
   query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
 
   if (lastDistance) {
-    var notIncludeQuery = new AV.Query('ShopPromotion')
+    var notIncludeQuery = new AV.Query('ShopGoodPromotion')
     notIncludeQuery.equalTo('status', "1")
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
