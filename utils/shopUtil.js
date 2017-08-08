@@ -281,7 +281,7 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   promotion.detail = goodAttr.detail
   promotion.goodStatus = goodAttr.status
 
-  promotion.goodUpadatedAt = prompAttr.targetGood.updatedAt
+  promotion.goodUpdatedAt = prompAttr.targetGood.updatedAt
 
   promotion.status = prompAttr.status
   promotion.geo = shopAttr.geo
