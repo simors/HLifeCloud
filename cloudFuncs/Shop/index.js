@@ -1233,7 +1233,7 @@ function submitShopPromotion(request,response) {
   var typeId = payload.typeId
   var type = payload.type
   var typeDesc = payload.typeDesc
-  var promotingPrice = payload.price
+  var promotionPrice = payload.price
   var abstract = payload.abstract
   var geo = payload.geo
 
@@ -1252,7 +1252,7 @@ function submitShopPromotion(request,response) {
   shopPromotion.set('typeId', typeId)
   shopPromotion.set('type', type)
   shopPromotion.set('typeDesc', typeDesc)
-  shopPromotion.set('promotionPrice', promotingPrice)
+  shopPromotion.set('promotionPrice', promotionPrice)
   shopPromotion.set('abstract', abstract)
   shopPromotion.set('geo', geo)
   shopPromotion.set('status',status)
