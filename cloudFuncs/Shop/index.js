@@ -453,17 +453,17 @@ function shopCertificateNew(request, response) {
           shop.set('geo', point)
         }
         shop.set('geoProvince', String(geoProvince))
-        shop.set('geoProvinceCode',String(geoProvinceCode))
+        shop.set('geoProvinceCode', String(geoProvinceCode))
         shop.set('geoCity', String(geoCity))
         shop.set('geoCityCode', String(geoCityCode))
         shop.set('geoDistrict', String(geoDistrict))
         shop.set('geoDistrictCode', String(geoDistrictCode))
         shop.set('owner', currentUser)
-        if(upPromoter) {
+        if (upPromoter) {
           shop.set('inviter', upPromoter.attributes.user)
         }
 
-        if(upPromoter) {
+        if (upPromoter) {
           PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
             return shop.save()
           }).then((shopInfo) => {
@@ -1012,8 +1012,8 @@ function fetchNearbyShopGoodPromotion(request, response) {
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
-  query.lessThanOrEqualTo('startDate',nowDate)
-  query.greaterThanOrEqualTo('endDate',nowDate)
+  // query.lessThanOrEqualTo('startDate', nowDate)
+  query.greaterThanOrEqualTo('endDate', nowDate)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
@@ -1223,10 +1223,10 @@ function fetchNearbyShops(request, response) {
   })
 }
 
-function submitShopPromotion(request,response) {
+function submitShopPromotion(request, response) {
   // console.log('submitShopPromotion.payload===', payload)
   var payload = request.params.payload
-  var goodId= payload.goodId
+  var goodId = payload.goodId
   var status = payload.status
   var startDate = payload.startDate
   var endDate = payload.endDate
@@ -1238,10 +1238,10 @@ function submitShopPromotion(request,response) {
   var abstract = payload.abstract
   var geo = payload.geo
 
-    var ShopPromotion = AV.Object.extend('ShopGoodPromotion')
-    var shopPromotion = new ShopPromotion()
+  var ShopPromotion = AV.Object.extend('ShopGoodPromotion')
+  var shopPromotion = new ShopPromotion()
   if (goodId) {
-    var  good = AV.Object.createWithoutData('ShopGoods', goodId)
+    var good = AV.Object.createWithoutData('ShopGoods', goodId)
     shopPromotion.set('targetGood', good)
   }
   var shop = null
@@ -1258,18 +1258,19 @@ function submitShopPromotion(request,response) {
   shopPromotion.set('promotionPrice', promotionPrice)
   shopPromotion.set('abstract', abstract)
   shopPromotion.set('geo', geo)
-  shopPromotion.set('status',status)
+  shopPromotion.set('status', status)
   shopPromotion.save().then((results) => {
-      var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
-      shop.addUnique('containedPromotions', [promotion])
-      // console.log('shop/////>>>>>>>>>>', shop)
-       shop.save().then((result)=>{
-        response.success()
-        // console.log('rep---->>>>', rep)
-      }, (error)=>{
-        response.error(error)
-        // console.log('error.........>>>>', error)
-      })
+    var good = AV.Object.createWithoutData('ShopGoods', goodId)
+    var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
+    good.set('promotion', promotion)
+    // console.log('shop/////>>>>>>>>>>', shop)
+    good.save().then((result)=> {
+      response.success()
+      // console.log('rep---->>>>', rep)
+    }, (error)=> {
+      response.error(error)
+      // console.log('error.........>>>>', error)
+    })
   }, function (err) {
     response.error(err)
   })
@@ -1280,13 +1281,13 @@ function fetchPromotionsByShopId(request, response) {
   var limit = request.params.limit || 20
   var query = new AV.Query('ShopGoodPromotion')
   var status = request.params.status
-  if(status || status == 0){
+  if (status || status == 0) {
     query.equalTo('status', status)
   }
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
   var shop = AV.Object.createWithoutData('Shop', shopId)
-  query.equalTo('targetShop',shop)
+  query.equalTo('targetShop', shop)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
