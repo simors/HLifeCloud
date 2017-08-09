@@ -261,7 +261,7 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   // var constructUserInfo = require('../cloudFuncs/Auth').constructUserInfo
   var prompAttr = leanPromotion.attributes
   var goodAttr = leanPromotion.attributes.targetGood.attributes
-  var shopAttr = goodAttr.targetShop.attributes
+  var shopAttr = prompAttr.targetShop.attributes
   var promotion = {}
 
   promotion.id = leanPromotion.id
@@ -285,7 +285,7 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
 
   promotion.status = prompAttr.status
   promotion.geo = shopAttr.geo
-  promotion.shopId = goodAttr.targetShop.id
+  promotion.shopId = prompAttr.targetShop.id
   promotion.shopName = shopAttr.shopName
   promotion.shopDistrict = shopAttr.geoDistrict
   promotion.createdAt = leanPromotion.createdAt

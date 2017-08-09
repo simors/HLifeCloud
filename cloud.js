@@ -86,6 +86,7 @@ AV.Cloud.define('submitEditShopInfo',shopFunc.submitEditShopInfo)
 AV.Cloud.define('shopFetchNearbyShops', shopFunc.fetchNearbyShops)
 AV.Cloud.define('submitShopPromotion', shopFunc.submitShopPromotion)
 AV.Cloud.define('fetchNearbyShopGoodPromotion', shopFunc.fetchNearbyShopGoodPromotion)
+AV.Cloud.define('fetchPromotionsByShopId', shopFunc.fetchPromotionsByShopId)
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)

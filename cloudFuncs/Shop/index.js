@@ -1000,7 +1000,7 @@ function fetchNearbyShopGoodPromotion(request, response) {
   var nowDate = request.params.nowDate
   var query = new AV.Query('ShopGoodPromotion')
   query.equalTo('status', 1)
-  query.include(['targetGood', 'targetGood.targetShop'])
+  query.include(['targetGood', 'targetShop'])
   query.limit(limit)
 
   var point = new AV.GeoPoint(geo)
@@ -1247,6 +1247,8 @@ function submitShopPromotion(request,response) {
   var shop = null
   if (shopId) {
     shop = AV.Object.createWithoutData('Shop', shopId)
+    shopPromotion.set('targetShop', shop)
+
   }
   shopPromotion.set('startDate', startDate)
   shopPromotion.set('endDate', endDate)
@@ -1273,6 +1275,30 @@ function submitShopPromotion(request,response) {
   })
 }
 
+function fetchPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 20
+  var query = new AV.Query('ShopGoodPromotion')
+  query.equalTo('status', 1)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop',shop)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1296,7 +1322,8 @@ var shopFunc = {
   submitEditShopInfo: submitEditShopInfo,
   shopCertificateNew: shopCertificateNew,
   submitShopPromotion: submitShopPromotion,
-  fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion
+  fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
+  fetchPromotionsByShopId: fetchPromotionsByShopId
 }
 
 module.exports = shopFunc
