@@ -997,7 +997,7 @@ function fetchNearbyShopGoodPromotion(request, response) {
   var geo = request.params.geo
   var lastDistance = request.params.lastDistance
   var limit = request.params.limit || 20
-
+  var nowDate = request.params.nowDate
   var query = new AV.Query('ShopGoodPromotion')
   query.equalTo('status', 1)
   query.include(['targetGood', 'targetGood.targetShop'])
@@ -1012,7 +1012,8 @@ function fetchNearbyShopGoodPromotion(request, response) {
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
     query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
   }
-
+  query.lessThanOrEqualTo('startDate',nowDate)
+  query.greaterThanOrEqualTo('endDate',nowDate)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
