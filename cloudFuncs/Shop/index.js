@@ -802,7 +802,7 @@ function updateShopLocationInfo(request, response) {
   }
 
   return shop.save().then(function (result) {
-    response.success(result)
+      response.success(result)
   }, function (error) {
     console.log('updateShopLocationInfo.error====', error)
     response.error('update fail', error)
@@ -1128,12 +1128,13 @@ function submitEditShopInfo(request, response) {
   if (coverUrl) {
     shop.set('coverUrl', coverUrl)
   }
+  var point = undefined
   if (geo) {
     var geoArr = geo.split(',')
     var latitude = parseFloat(geoArr[0])
     var longitude = parseFloat(geoArr[1])
     var numberGeoArr = [latitude, longitude]
-    var point = new AV.GeoPoint(numberGeoArr)
+    point = new AV.GeoPoint(numberGeoArr)
     shop.set('geo', point)
   }
   shop.set('geoProvince', geoProvince)
@@ -1147,7 +1148,23 @@ function submitEditShopInfo(request, response) {
   // console.log('_submitEditShopInfo.shop===', shop)
   shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
-    response.success({errcode: 0, goodsInfo: shopInfo})
+    if (geo) {
+      var query = new AV.Query('ShopGoodPromotion')
+      query.equalTo('targetShop', shop)
+      query.find().then((promotions)=> {
+        var localPromotions = []
+        promotions.forEach((item)=> {
+          item.set('geo', point)
+        })
+        return AV.Object.saveAll(promotions);
+      }).then((promotionList)=>{
+        response.success({errcode: 0, goodsInfo: shopInfo})
+      },(error)=>{
+        response.error({errcode: 1, message: '店铺更新失败'})
+      })
+    }else {
+      response.success({errcode: 0, goodsInfo: shopInfo})
+    }
   }, (err)=> {
     // console.log(err)
     response.error({errcode: 1, message: '店铺更新失败'})
