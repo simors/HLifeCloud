@@ -1279,7 +1279,10 @@ function fetchPromotionsByShopId(request, response) {
   var shopId = request.params.shopId
   var limit = request.params.limit || 20
   var query = new AV.Query('ShopGoodPromotion')
-  query.equalTo('status', 1)
+  var status = request.params.status
+  if(status || status == 0){
+    query.equalTo('status', status)
+  }
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
   var shop = AV.Object.createWithoutData('Shop', shopId)
