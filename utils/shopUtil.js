@@ -265,8 +265,8 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   var promotion = {}
 
   promotion.id = leanPromotion.id
-  promotion.startDate = leanPromotion.startDate
-  promotion.endDate = leanPromotion.endDate
+  promotion.startDate = prompAttr.startDate
+  promotion.endDate = prompAttr.endDate
   promotion.coverPhoto = goodAttr.coverPhoto
   promotion.typeId = prompAttr.typeId
   promotion.type = prompAttr.type
