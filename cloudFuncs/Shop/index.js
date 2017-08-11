@@ -1298,10 +1298,15 @@ function fetchOpenPromotionsByShopId(request, response) {
   var limit = request.params.limit || 20
   var query = new AV.Query('ShopGoodPromotion')
   var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
   var status = request.params.status
   query.equalTo('status', 1)
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
+  if(lastCreatedAt){
+    query.lessThan('createdAt',new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
   query.greaterThanOrEqualTo('endDate',nowDate)
@@ -1324,6 +1329,7 @@ function fetchCloPromotionsByShopId(request, response) {
   var shopId = request.params.shopId
   var limit = request.params.limit || 20
   var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
   var status = request.params.status
   var queryClo = new AV.Query('ShopGoodPromotion')
   queryClo.equalTo('status',0)
@@ -1334,6 +1340,10 @@ function fetchCloPromotionsByShopId(request, response) {
   query.limit(limit)
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
+  if(lastCreatedAt){
+    query.lessThan('createdAt',new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
