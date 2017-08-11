@@ -1293,21 +1293,18 @@ function submitShopPromotion(request, response) {
   })
 }
 
-function fetchProPromotionsByShopId(request, response) {
+function fetchOpenPromotionsByShopId(request, response) {
   var shopId = request.params.shopId
   var limit = request.params.limit || 20
   var query = new AV.Query('ShopGoodPromotion')
   var nowDate = request.params.nowDate
   var status = request.params.status
-  if (status || status == 0) {
-    query.equalTo('status', 1)
-  }
+  query.equalTo('status', 1)
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
   query.greaterThanOrEqualTo('endDate',nowDate)
-  query.lessThanOrEqualTo('startDate',nowDate)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
@@ -1316,39 +1313,10 @@ function fetchProPromotionsByShopId(request, response) {
     response.success({errcode: 0, promotions: promotions})
   }, (err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取进行中活动失败'})
+    response.error({errcode: 1, message: '获取启用活动失败'})
   }).catch((err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取进行中活动失败'})
-  })
-}
-
-function fetchPrePromotionsByShopId(request, response) {
-  var shopId = request.params.shopId
-  var limit = request.params.limit || 20
-  var query = new AV.Query('ShopGoodPromotion')
-  var nowDate = request.params.nowDate
-  var status = request.params.status
-  if (status || status == 0) {
-    query.equalTo('status', 1)
-  }
-  query.include(['targetGood', 'targetShop'])
-  query.limit(limit)
-  var shop = AV.Object.createWithoutData('Shop', shopId)
-  query.equalTo('targetShop', shop)
-  query.greaterThanOrEqualTo('startDate',nowDate)
-  query.find().then((results) => {
-    var promotions = []
-    results.forEach((promp) => {
-      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
-    })
-    response.success({errcode: 0, promotions: promotions})
-  }, (err) => {
-    console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取预上线活动失败'})
-  }).catch((err) => {
-    console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取预上线活动失败'})
+    response.error({errcode: 1, message: '获取启用活动失败'})
   })
 }
 
@@ -1374,10 +1342,10 @@ function fetchCloPromotionsByShopId(request, response) {
     response.success({errcode: 0, promotions: promotions})
   }, (err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取预上线活动失败'})
+    response.error({errcode: 1, message: '获取关闭活动失败'})
   }).catch((err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取预上线活动失败'})
+    response.error({errcode: 1, message: '获取关闭活动失败'})
   })
 }
 
@@ -1405,8 +1373,7 @@ var shopFunc = {
   shopCertificateNew: shopCertificateNew,
   submitShopPromotion: submitShopPromotion,
   fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
-  fetchProPromotionsByShopId: fetchProPromotionsByShopId,
-  fetchPrePromotionsByShopId: fetchPrePromotionsByShopId,
+  fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
   fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
 
 }
