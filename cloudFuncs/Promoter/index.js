@@ -42,29 +42,69 @@ const defaultPromoterConfig = {
     street_agent: 0.4
   },
   upgradeTable: {
-    promoter_level_1: {
-      team: 100,
-      shop: 200,
+    promoter_level_1: {     // 少尉
+      team: 49,
+      shop: 0,
       royalty: [0.5, 0.1, 0.02]
     },
-    promoter_level_2: {
-      team: 500,
-      shop: 1000,
+    promoter_level_2: {     // 中尉
+      team: 99,
+      shop: 0,
       royalty: [0.5, 0.12, 0.02]
     },
-    promoter_level_3: {
-      team: 1000,
-      shop: 3000,
+    promoter_level_3: {     // 上尉
+      team: 199,
+      shop: 0,
       royalty: [0.5, 0.14, 0.02]
     },
-    promoter_level_4: {
-      team: 5000,
-      shop: 10000,
+    promoter_level_4: {     // 少校
+      team: 499,
+      shop: 0,
       royalty: [0.5, 0.16, 0.02]
     },
-    promoter_level_5: {
-      team: 10000,
-      shop: 30000,
+    promoter_level_5: {     // 中校
+      team: 999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_6: {     // 上校
+      team: 1999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_7: {     // 大校
+      team: 4999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_8: {     // 少将
+      team: 9999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_9: {     // 中将
+      team: 19999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_10: {     // 上将
+      team: 49999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_11: {     // 少帅
+      team: 99999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_12: {     // 中帅
+      team: 199999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_13: {     // 大帅
+      team: 99999999,
+      shop: 0,
       royalty: [0.5, 0.18, 0.02]
     },
   },
@@ -622,6 +662,9 @@ function incrementInviteShopNum(promoterId) {
  */
 function defaultUpgradeStandard(promoter) {
   var level = promoter.attributes.level
+  if (level == 13) {    // 到达最高级
+    return level
+  }
   var teamMemNum = promoter.attributes.teamMemNum
   var inviteShopNum = promoter.attributes.inviteShopNum
   var team = 0
@@ -642,6 +685,38 @@ function defaultUpgradeStandard(promoter) {
     case 4:
       team = globalPromoterCfg.upgradeTable.promoter_level_4.team
       shop = globalPromoterCfg.upgradeTable.promoter_level_4.shop
+      break
+    case 5:
+      team = globalPromoterCfg.upgradeTable.promoter_level_5.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_5.shop
+      break
+    case 6:
+      team = globalPromoterCfg.upgradeTable.promoter_level_6.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_6.shop
+      break
+    case 7:
+      team = globalPromoterCfg.upgradeTable.promoter_level_7.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_7.shop
+      break
+    case 8:
+      team = globalPromoterCfg.upgradeTable.promoter_level_8.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_8.shop
+      break
+    case 9:
+      team = globalPromoterCfg.upgradeTable.promoter_level_9.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_9.shop
+      break
+    case 10:
+      team = globalPromoterCfg.upgradeTable.promoter_level_10.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_10.shop
+      break
+    case 11:
+      team = globalPromoterCfg.upgradeTable.promoter_level_11.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_11.shop
+      break
+    case 12:
+      team = globalPromoterCfg.upgradeTable.promoter_level_12.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_12.shop
       break
     default:    // 已经是最高级别
       return level
