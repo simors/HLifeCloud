@@ -16,6 +16,9 @@ var ejs = require('ejs')
 var fs = require('fs')
 
 const CHINA_WIDTH = 5500.0      // 全国最大宽度
+const shopPromotionMaxNum = 3   // 店铺最多活动数量
+const promotionPayByDay = 10    // 店铺推广日费用
+
 
 function constructShopInfo(leanShop) {
   var shop = {}
@@ -564,42 +567,7 @@ function getShopInviter(request, response) {
   })
 }
 
-function getShopPromotionMaxNum(request, response) {
 
-  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNum)=> {
-    // console.log('redisUtils.getAsync.shopPromotionMaxNum===', shopPromotionMaxNum)
-
-    if (!shopPromotionMaxNum || shopPromotionMaxNum < 0) {
-      var query = new AV.Query('SystemConfig')
-      query.equalTo('cfgName', systemConfigNames.SHOP_PROMOTION_MAX_NUM)
-      query.first().then((result)=> {
-        shopPromotionMaxNum = parseInt(result.attributes.cfgValue)
-        // console.log('redisUtils.query.shopPromotionMaxNum===', shopPromotionMaxNum)
-        redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
-        response.success({
-          errcode: '0',
-          message: shopPromotionMaxNum
-        })
-      }, (error)=> {
-        response.error({
-          errcode: '-1',
-          message: error.message || '网络异常'
-        })
-      })
-    } else {
-      response.success({
-        errcode: '0',
-        message: shopPromotionMaxNum
-      })
-    }
-  }, (error)=> {
-    response.error({
-      errcode: '-1',
-      message: error.message || '网络异常'
-    })
-  })
-
-}
 
 /**
  * 根据店铺id获取店铺信息
@@ -1359,6 +1327,50 @@ function fetchCloPromotionsByShopId(request, response) {
   })
 }
 
+function getShopPromotionMaxNum(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNumRedis)=> {
+    if (!shopPromotionMaxNumRedis || shopPromotionMaxNumRedis < 0) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
+        response.success({
+          errcode: '0',
+          message: shopPromotionMaxNum
+        })
+      } else {
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNumRedis
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
+  })
+}
+
+function getShopPromotionDayPay(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((promotionDayPay)=> {
+    if (!promotionDayPay || promotionDayPay < 0) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, promotionPayByDay)
+      response.success({
+        errcode: '0',
+        message: promotionPayByDay
+      })
+    } else {
+      response.success({
+        errcode: '0',
+        message: promotionDayPay
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1385,6 +1397,7 @@ var shopFunc = {
   fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
   fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
   fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
+  getShopPromotionDayPay: getShopPromotionDayPay,
 
 }
 
