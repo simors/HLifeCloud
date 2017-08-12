@@ -125,6 +125,7 @@ function fetchShopGoods(request, response) {
   if (lastUpdateTime) {
     query.lessThan('updatedAt', new Date(lastUpdateTime))
   }
+  query.include(['promotion'])
   query.descending('updatedAt')
   query.limit(limit)
 
