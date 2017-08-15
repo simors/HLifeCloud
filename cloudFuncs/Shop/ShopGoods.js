@@ -144,10 +144,12 @@ function fetchShopGoods(request, response) {
   if (lastUpdateTime) {
     query.lessThan('updatedAt', new Date(lastUpdateTime))
   }
+  query.include(['promotion','targetShop'])
   query.descending('updatedAt')
   query.limit(limit)
 
   query.find().then((goods) => {
+
     response.success({errcode: 0, goods: goods})
   }, (err) => {
     console.log('err in fetchShopGoods:', err)

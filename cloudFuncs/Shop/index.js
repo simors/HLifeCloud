@@ -16,6 +16,9 @@ var ejs = require('ejs')
 var fs = require('fs')
 
 const CHINA_WIDTH = 5500.0      // 全国最大宽度
+const shopPromotionMaxNum = 3   // 店铺最多活动数量
+const promotionPayByDay = 10    // 店铺推广日费用
+
 
 function constructShopInfo(leanShop) {
   if (!leanShop) {
@@ -580,42 +583,7 @@ function getShopInviter(request, response) {
   })
 }
 
-function getShopPromotionMaxNum(request, response) {
 
-  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNum)=> {
-    // console.log('redisUtils.getAsync.shopPromotionMaxNum===', shopPromotionMaxNum)
-
-    if (!shopPromotionMaxNum || shopPromotionMaxNum < 0) {
-      var query = new AV.Query('SystemConfig')
-      query.equalTo('cfgName', systemConfigNames.SHOP_PROMOTION_MAX_NUM)
-      query.first().then((result)=> {
-        shopPromotionMaxNum = parseInt(result.attributes.cfgValue)
-        // console.log('redisUtils.query.shopPromotionMaxNum===', shopPromotionMaxNum)
-        redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
-        response.success({
-          errcode: '0',
-          message: shopPromotionMaxNum
-        })
-      }, (error)=> {
-        response.error({
-          errcode: '-1',
-          message: error.message || '网络异常'
-        })
-      })
-    } else {
-      response.success({
-        errcode: '0',
-        message: shopPromotionMaxNum
-      })
-    }
-  }, (error)=> {
-    response.error({
-      errcode: '-1',
-      message: error.message || '网络异常'
-    })
-  })
-
-}
 
 /**
  * 根据店铺id获取店铺信息
@@ -1309,18 +1277,23 @@ function submitShopPromotion(request, response) {
   })
 }
 
-function fetchPromotionsByShopId(request, response) {
+function fetchOpenPromotionsByShopId(request, response) {
   var shopId = request.params.shopId
   var limit = request.params.limit || 20
   var query = new AV.Query('ShopGoodPromotion')
+  var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
   var status = request.params.status
-  if (status || status == 0) {
-    query.equalTo('status', status)
-  }
+  query.equalTo('status', 1)
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
+  if(lastCreatedAt){
+    query.lessThan('createdAt',new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
+  query.greaterThanOrEqualTo('endDate',nowDate)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
@@ -1329,10 +1302,88 @@ function fetchPromotionsByShopId(request, response) {
     response.success({errcode: 0, promotions: promotions})
   }, (err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+    response.error({errcode: 1, message: '获取启用活动失败'})
   }).catch((err) => {
     console.log('error in fetchNearbyShopPromotion: ', err)
-    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  })
+}
+
+function fetchCloPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 20
+  var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
+  var status = request.params.status
+  var queryClo = new AV.Query('ShopGoodPromotion')
+  queryClo.equalTo('status',0)
+  var queryDat = new AV.Query('ShopGoodPromotion')
+  queryDat.lessThanOrEqualTo('endDate',nowDate)
+  var query =  AV.Query.or(queryClo,queryDat)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', shop)
+  if(lastCreatedAt){
+    query.lessThan('createdAt',new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取关闭活动失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取关闭活动失败'})
+  })
+}
+
+function getShopPromotionMaxNum(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNumRedis)=> {
+    if (!shopPromotionMaxNumRedis || shopPromotionMaxNumRedis < 0) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
+        response.success({
+          errcode: '0',
+          message: shopPromotionMaxNum
+        })
+      } else {
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNumRedis
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
+  })
+}
+
+function getShopPromotionDayPay(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((promotionDayPay)=> {
+    if (!promotionDayPay || promotionDayPay < 0) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, promotionPayByDay)
+      response.success({
+        errcode: '0',
+        message: promotionPayByDay
+      })
+    } else {
+      response.success({
+        errcode: '0',
+        message: promotionDayPay
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
   })
 }
 
@@ -1360,7 +1411,10 @@ var shopFunc = {
   shopCertificateNew: shopCertificateNew,
   submitShopPromotion: submitShopPromotion,
   fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
-  fetchPromotionsByShopId: fetchPromotionsByShopId
+  fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
+  fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
+  getShopPromotionDayPay: getShopPromotionDayPay,
+
 }
 
 module.exports = shopFunc
