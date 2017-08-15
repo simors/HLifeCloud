@@ -12,6 +12,26 @@ const ORDER_STATUS = {
   DELETED: 4,       // 已删除
 }
 
+function constructShopOrder(order) {
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var constructShopInfo = require('../Shop').constructShopInfo
+  var constructShopGoods = require('../Shop/ShopGoods').constructShopGoods
+  var shopOrder = {}
+  var orderAttr = order.attributes
+  shopOrder.id = order.id
+  shopOrder.receiver = orderAttr.receiver
+  shopOrder.receiverPhone = orderAttr.receiverPhone
+  shopOrder.receiverAddr = orderAttr.receiverAddr
+  shopOrder.goodsAmount = orderAttr.goodsAmount
+  shopOrder.paid = orderAttr.paid
+  shopOrder.orderStatus = orderAttr.orderStatus
+  shopOrder.remark = orderAttr.remark
+  shopOrder.buyer = constructUserInfo(orderAttr.buyer)
+  shopOrder.vendor = constructShopInfo(orderAttr.vendor)
+  shopOrder.goods = constructShopGoods(orderAttr.goods)
+  return shopOrder
+}
+
 /**
  * 新建订单
  * @param order
@@ -128,7 +148,7 @@ function queryShopOrders(request, response) {
     var vendor = AV.Object.createWithoutData('Shop', vendorId)
     query.equalTo('vendor', vendor)
   }
-  query.containsAll('orderStatus', orderStatus)
+  query.containedIn('orderStatus', orderStatus)
   if (lastTime) {
     query.lessThan('createdAt', new Date(lastTime))
   }
@@ -137,7 +157,14 @@ function queryShopOrders(request, response) {
   query.include(['buyer', 'vendor', 'goods'])
 
   query.find().then((results) => {
-    response.success(results)
+    var shopOrders = []
+    results.forEach((order) => {
+      shopOrders.push(constructShopOrder(order))
+    })
+    response.success({
+      errcode: 0,
+      shopOrders: shopOrders
+    })
   }, (err) => {
     console.log('error in queryShopOrders', err)
     response.error({

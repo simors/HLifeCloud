@@ -18,8 +18,14 @@ var fs = require('fs')
 const CHINA_WIDTH = 5500.0      // 全国最大宽度
 
 function constructShopInfo(leanShop) {
+  if (!leanShop) {
+    return undefined
+  }
   var shop = {}
   var shopAttr = leanShop.attributes
+  if (!shopAttr) {
+    return undefined
+  }
   shop.id = leanShop.id
   shop.name = shopAttr.name
   shop.phone = shopAttr.phone
@@ -98,7 +104,13 @@ function constructShopInfo(leanShop) {
 
 function constructShopPromotion(leanPromotion, showUser) {
   var constructUserInfo = require('../Auth').constructUserInfo
+  if (!leanPromotion) {
+    return undefined
+  }
   var prompAttr = leanPromotion.attributes
+  if (!prompAttr) {
+    return undefined
+  }
   var promotion = {}
   promotion.id = leanPromotion.id
   promotion.coverUrl = prompAttr.coverUrl
@@ -114,13 +126,17 @@ function constructShopPromotion(leanPromotion, showUser) {
   promotion.geo = prompAttr.geo
 
   var targetShop = {}
-  var targetShopAttr = prompAttr.targetShop.attributes
-  targetShop.id = prompAttr.targetShop.id
-  targetShop.shopName = targetShopAttr.shopName
-  targetShop.geoDistrict = targetShopAttr.geoDistrict
-  targetShop.geo = targetShopAttr.geo
-  if (showUser) {
-    targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  if (prompAttr.targetShop) {
+    var targetShopAttr = prompAttr.targetShop.attributes
+    targetShop.id = prompAttr.targetShop.id
+    targetShop.shopName = targetShopAttr.shopName
+    targetShop.geoDistrict = targetShopAttr.geoDistrict
+    targetShop.geo = targetShopAttr.geo
+    if (showUser) {
+      targetShop.owner = constructUserInfo(targetShopAttr.owner)
+    }
+  } else {
+    targetShop = undefined
   }
 
   promotion.targetShop = targetShop

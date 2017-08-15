@@ -4,6 +4,25 @@
 var Promise = require('bluebird')
 var AV = require('leanengine')
 
+function constructShopGoods(goods) {
+  if (!goods) {
+    return undefined
+  }
+  var shopGoods = {}
+  var shopGoodsAttr = goods.attributes
+  if (!shopGoodsAttr) {
+    return undefined
+  }
+  shopGoods.goodsName = shopGoodsAttr.goodsName
+  shopGoods.price = shopGoodsAttr.price
+  shopGoods.originalPrice = shopGoodsAttr.originalPrice
+  shopGoods.coverPhoto = shopGoodsAttr.coverPhoto
+  shopGoods.album = shopGoodsAttr.album
+  shopGoods.detail = shopGoodsAttr.detail
+  shopGoods.status = shopGoodsAttr.status
+  return shopGoods
+}
+
 function addNewShopGoods(request, response) {
   var shopId = request.params.shopId
   var goodsName = request.params.goodsName
@@ -140,6 +159,7 @@ function fetchShopGoods(request, response) {
 }
 
 var GoodsFunc = {
+  constructShopGoods: constructShopGoods,
   addNewShopGoods: addNewShopGoods,
   modifyShopGoodsInfo: modifyShopGoodsInfo,
   shopGoodsOnline: shopGoodsOnline,
