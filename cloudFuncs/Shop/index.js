@@ -1387,6 +1387,17 @@ function getShopPromotionDayPay(request, response) {
   })
 }
 
+function closeShopPromotion(request,response){
+  var promotionId = request.params.promotionId
+  var promotion = AV.Object.createWithoutData('ShopGoodPromotion',promotionId)
+  promotion.set('status',0)
+  promotion.save().then((item)=>{
+    response.success({errcode:'0',message:'关闭成功'})
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1414,6 +1425,7 @@ var shopFunc = {
   fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
   fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
   getShopPromotionDayPay: getShopPromotionDayPay,
+  closeShopPromotion: closeShopPromotion
 
 }
 

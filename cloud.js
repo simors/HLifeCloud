@@ -90,6 +90,7 @@ AV.Cloud.define('fetchNearbyShopGoodPromotion', shopFunc.fetchNearbyShopGoodProm
 AV.Cloud.define('fetchCloPromotionsByShopId', shopFunc.fetchCloPromotionsByShopId)
 AV.Cloud.define('fetchOpenPromotionsByShopId', shopFunc.fetchOpenPromotionsByShopId)
 AV.Cloud.define('getShopPromotionDayPay', shopFunc.getShopPromotionDayPay)
+AV.Cloud.define('closeShopPromotion', shopFunc.closeShopPromotion)
 
 
 // 店铺商品
