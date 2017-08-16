@@ -293,7 +293,34 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
   return promotion
 }
 
+function shopGoodFromLeancloudObject(goodLean){
+  var shop = goodLean.attributes.targetShop
+  var shopAttr = shop.attributes
+  var promotion = goodLean.attributes.promotion
+  var good = {}
+  good.objectId = goodLean.id
+  good.targetShop = shop.id
+  good.goodsName = goodLean.attributes.goodsName
+  good.price = goodLean.attributes.price
+  good.originalPrice = goodLean.attributes.originalPrice
+  good.coverPhoto = goodLean.attributes.coverPhoto
+  good.album = goodLean.attributes.album
+  good.status = goodLean.attributes.status
+  good.detail = goodLean.attributes.detail
+  good.updatedAt = goodLean.updatedAt
+  if(promotion&&promotion.attributes&&promotion.attributes.status!=0){
+    var promotionAttr = promotion.attributes
+    good.promotionId = promotion.id
+    good.promotionType = promotionAttr.type
+    good.promotionPrice = promotionAttr.promotionPrice
+    good.startDate = promotionAttr.startDate
+    good.endDate = promotionAttr.endDate
+  }else{
+    good.promotionId =undefined
+  }
+  return good
 
+}
 var shopUtil = {
   shopFromLeancloudObject: shopFromLeancloudObject,
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
@@ -301,7 +328,8 @@ var shopUtil = {
   shopCommentsConcatReplys: shopCommentsConcatReplys,
   shopCommentUpFromLeancloudObject: shopCommentUpFromLeancloudObject,
   shopCommentsConcatUps: shopCommentsConcatUps,
-  promotionFromLeancloudObject:promotionFromLeancloudObject
+  promotionFromLeancloudObject:promotionFromLeancloudObject,
+  shopGoodFromLeancloudObject: shopGoodFromLeancloudObject
 }
 
 module.exports = shopUtil
