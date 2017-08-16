@@ -1392,7 +1392,14 @@ function closeShopPromotion(request,response){
   var promotion = AV.Object.createWithoutData('ShopGoodPromotion',promotionId)
   promotion.set('status',0)
   promotion.save().then((item)=>{
-    response.success({errcode:'0',message:'关闭成功'})
+    var query= new AV.Query('ShopGoodPromotion')
+    query.include(['targetShop','targetGood'])
+    query.get(item.id).then((promotionInfo)=>{
+      var promotion = shopUtil.promotionFromLeancloudObject(promotionInfo)
+      response.success({errcode:'0',promotion:promotion})
+    },(err)=>{
+      response.error(err)
+    })
   },(err)=>{
     response.error(err)
   })
