@@ -16,12 +16,14 @@ function constructShopGoods(goods) {
   }
   shopGoods.id = goods.id
   shopGoods.goodsName = shopGoodsAttr.goodsName
+  shopGoods.targetShop = shopGoodsAttr.targetShop.id
   shopGoods.price = shopGoodsAttr.price
   shopGoods.originalPrice = shopGoodsAttr.originalPrice
   shopGoods.coverPhoto = shopGoodsAttr.coverPhoto
   shopGoods.album = shopGoodsAttr.album
   shopGoods.detail = shopGoodsAttr.detail
   shopGoods.status = shopGoodsAttr.status
+  shopGoods.updatedAt = goods.updatedAt
   return shopGoods
 }
 
