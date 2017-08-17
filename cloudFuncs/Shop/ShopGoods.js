@@ -13,6 +13,7 @@ function constructShopGoods(goods) {
   if (!shopGoodsAttr) {
     return undefined
   }
+  shopGoods.id = goods.id
   shopGoods.goodsName = shopGoodsAttr.goodsName
   shopGoods.price = shopGoodsAttr.price
   shopGoods.originalPrice = shopGoodsAttr.originalPrice
