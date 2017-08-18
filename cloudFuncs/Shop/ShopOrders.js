@@ -26,6 +26,8 @@ function constructShopOrder(order) {
   shopOrder.paid = orderAttr.paid
   shopOrder.orderStatus = orderAttr.orderStatus
   shopOrder.remark = orderAttr.remark
+  shopOrder.createdAt = order.createdAt
+  shopOrder.updatedAt = order.updatedAt
   shopOrder.buyer = constructUserInfo(orderAttr.buyer)
   shopOrder.vendor = constructShopInfo(orderAttr.vendor)
   shopOrder.goods = constructShopGoods(orderAttr.goods)
