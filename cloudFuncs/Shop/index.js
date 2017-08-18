@@ -1405,6 +1405,72 @@ function closeShopPromotion(request,response){
   })
 }
 
+function pubulishShopComment(request,response){
+  var payload = request.params.payload
+  var ShopComment = AV.Object.extend('ShopComment')
+  var shopComment = new ShopComment()
+  var shop = AV.Object.createWithoutData('Shop', payload.shopId)
+  var user = AV.Object.createWithoutData('_User', payload.userId)
+  var parentComment = undefined
+  var replyComment = undefined
+  shopComment.set('targetShop', shop)
+  shopComment.set('user', user)
+  shopComment.set('content', payload.content)
+  shopComment.set('blueprints',payload.blueprints)
+  if (payload.commentId&&payload.commentId!='') {
+    parentComment = 	AV.Object.createWithoutData('ShopComment', payload.commentId)
+    shopComment.set('parentComment', parentComment)
+  }
+  if(payload.replyId&&payload.replyId != ''){
+    replyComment = 	AV.Object.createWithoutData('ShopComment', payload.replyId)
+    shopComment.set('replyComment', replyComment)
+  }
+
+  shopComment.save().then((comment)=>{
+    shop.increment("commentNum", 1)
+    shop.save().then((shop)=>{
+      if(payload.commentId&&payload.commentId!=''){
+        parentComment.increment("commentCount",1)
+        parentComment.save().then(()=>{
+          var query = new AV.Query('ShopComment')
+          query.include(['user']);
+          query.include(['parentComment']);
+          query.include(['parentComment.user']);
+          query.include(['replyComment'])
+          query.include(['replyComment.user'])
+          query.get(comment.id).then((result)=>{
+            var position = result.attributes.position
+            var parentComment = result.attributes.parentComment
+            var user = result.attributes.user
+            var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
+            response.success(commentInfo)
+          },(err)=>{
+            response.error(err)
+          })
+        },(err)=>{
+          response.error(err)
+        })
+      }else{
+        var query = new AV.Query('ShopComment')
+        query.include(['user']);
+        query.include(['parentComment']);
+        query.include(['parentComment.user']);
+        query.get(comment.id).then((result)=>{
+          var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
+          response.success(commentInfo)
+        },(err)=>{
+          response.error(err)
+        })
+      }
+    },(err)=>{
+      response.error(err)
+    })
+  },(err)=>{
+    response.error(err)
+  })
+
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1432,7 +1498,8 @@ var shopFunc = {
   fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
   fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
   getShopPromotionDayPay: getShopPromotionDayPay,
-  closeShopPromotion: closeShopPromotion
+  closeShopPromotion: closeShopPromotion,
+  pubulishShopComment: pubulishShopComment
 
 }
 
