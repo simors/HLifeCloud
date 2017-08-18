@@ -313,6 +313,7 @@ function shopGoodFromLeancloudObject(goodLean){
     good.promotionId = promotion.id
     good.promotionType = promotionAttr.type
     good.promotionPrice = promotionAttr.promotionPrice
+    good.promotionAbstract = promotionAttr.abstract
     good.startDate = promotionAttr.startDate
     good.endDate = promotionAttr.endDate
   }else{
