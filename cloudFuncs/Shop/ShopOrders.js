@@ -148,7 +148,9 @@ function queryShopOrders(request, response) {
     var vendor = AV.Object.createWithoutData('Shop', vendorId)
     query.equalTo('vendor', vendor)
   }
-  query.containedIn('orderStatus', orderStatus)
+  if (orderStatus) {
+    query.containedIn('orderStatus', orderStatus)
+  }
   if (lastTime) {
     query.lessThan('createdAt', new Date(lastTime))
   }
