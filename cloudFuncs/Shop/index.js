@@ -1416,7 +1416,7 @@ function pubulishShopComment(request,response){
   shopComment.set('targetShop', shop)
   shopComment.set('user', user)
   shopComment.set('content', payload.content)
-  shopComment.set('bluePrints',payload.bluePrints)
+  shopComment.set('blueprints',payload.blueprints)
   if (payload.commentId&&payload.commentId!='') {
     parentComment = 	AV.Object.createWithoutData('ShopComment', payload.commentId)
     shopComment.set('parentComment', parentComment)

@@ -333,7 +333,7 @@ function newShopCommentFromLeanCloudObject(result){
     content: result.attributes.content,
     commentId : result.id,
     shopId : result.attributes.targetShop.id,
-    bluePrints: result.attributes.bluePrints,
+    blueprints: result.attributes.blueprints,
     parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
     parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
     parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
