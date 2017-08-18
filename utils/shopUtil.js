@@ -322,6 +322,48 @@ function shopGoodFromLeancloudObject(goodLean){
   return good
 
 }
+
+function newShopCommentFromLeanCloudObject(result){
+
+  var position = result.attributes.position
+  var parentComment = result.attributes.parentComment
+  var replyComment = result.attributes.replyComment
+  var user = result.attributes.user
+  var comment = {
+    content: result.attributes.content,
+    commentId : result.id,
+    shopId : result.attributes.targetShop.id,
+    bluePrints: result.attributes.bluePrints,
+    parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+    parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+    parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+    parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+    replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+    replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+    replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+    replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
+    upCount : result.attributes.likeCount,
+    authorUsername : user?result.attributes.user.attributes.username:undefined,
+    authorNickname : user?result.attributes.user.attributes.nickname:undefined,
+    commentCount : result.attributes.commentCount,
+    authorId : user?result.attributes.user.id:undefined,
+    authorAvatar : user?user.attributes.avatar:undefined,
+    createdAt : result.createdAt,
+    address : position?position.address:undefined,
+    city : position?position.city:undefined,
+    longitude : position?position.longitude:undefined,
+    latitude : position?position.latitude:undefined,
+    streetNumber : position?position.streetNumber:undefined,
+    street : position?position.street:undefined,
+    province : position?position.province:undefined,
+    country : position?position.country:undefined,
+    district : position?position.district:undefined,
+    updatedAt : result.updatedAt,
+    updatedDate : numberUtils.formatLeancloudTime(result.updatedAt, 'YYYY-MM-DD'),
+    createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')
+  }
+  return comment
+}
 var shopUtil = {
   shopFromLeancloudObject: shopFromLeancloudObject,
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
@@ -330,7 +372,8 @@ var shopUtil = {
   shopCommentUpFromLeancloudObject: shopCommentUpFromLeancloudObject,
   shopCommentsConcatUps: shopCommentsConcatUps,
   promotionFromLeancloudObject:promotionFromLeancloudObject,
-  shopGoodFromLeancloudObject: shopGoodFromLeancloudObject
+  shopGoodFromLeancloudObject: shopGoodFromLeancloudObject,
+  newShopCommentFromLeanCloudObject: newShopCommentFromLeanCloudObject
 }
 
 module.exports = shopUtil
