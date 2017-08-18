@@ -342,7 +342,7 @@ function newShopCommentFromLeanCloudObject(result){
     replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
     replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
     replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
-    upCount : result.attributes.likeCount,
+    upCount : result.attributes.upCount,
     authorUsername : user?result.attributes.user.attributes.username:undefined,
     authorNickname : user?result.attributes.user.attributes.nickname:undefined,
     commentCount : result.attributes.commentCount,
