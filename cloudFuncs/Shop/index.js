@@ -1535,7 +1535,7 @@ function fetchMyShopCommentsUps(request,response){
   query.find().then((results)=>{
     var commentList = []
     results.forEach((result)=>{
-      commentList.push(result.attributes.targetShopComment)
+      commentList.push(result.attributes.targetShopComment.id)
     })
     response.success({commentList:commentList})
   },(err)=>{
