@@ -325,7 +325,7 @@ function shopGoodFromLeancloudObject(goodLean){
 
 function newShopCommentFromLeanCloudObject(result){
 
-  var position = result.attributes.position
+  // var position = result.attributes.position
   var parentComment = result.attributes.parentComment
   var replyComment = result.attributes.replyComment
   var user = result.attributes.user
@@ -349,15 +349,15 @@ function newShopCommentFromLeanCloudObject(result){
     authorId : user?result.attributes.user.id:undefined,
     authorAvatar : user?user.attributes.avatar:undefined,
     createdAt : result.createdAt,
-    address : position?position.address:undefined,
-    city : position?position.city:undefined,
-    longitude : position?position.longitude:undefined,
-    latitude : position?position.latitude:undefined,
-    streetNumber : position?position.streetNumber:undefined,
-    street : position?position.street:undefined,
-    province : position?position.province:undefined,
-    country : position?position.country:undefined,
-    district : position?position.district:undefined,
+    // address : position?position.address:undefined,
+    // city : position?position.city:undefined,
+    // longitude : position?position.longitude:undefined,
+    // latitude : position?position.latitude:undefined,
+    // streetNumber : position?position.streetNumber:undefined,
+    // street : position?position.street:undefined,
+    // province : position?position.province:undefined,
+    // country : position?position.country:undefined,
+    // district : position?position.district:undefined,
     updatedAt : result.updatedAt,
     updatedDate : numberUtils.formatLeancloudTime(result.updatedAt, 'YYYY-MM-DD'),
     createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')

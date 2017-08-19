@@ -1523,6 +1523,25 @@ function fetchShopComments(request,response){
   })
 }
 
+function fetchMyShopCommentsUps(request,response){
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User',userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user',user)
+  // query.equalTo('upType','topicComment')
+  query.equalTo('status',true)
+  query.limit(1000)
+  query.descending('createdAt')
+  query.find().then((results)=>{
+    var commentList = []
+    results.forEach((result)=>{
+      commentList.push(result.attributes.targetShopComment)
+    })
+    response.success({commentList:commentList})
+  },(err)=>{
+    response.error(err)
+  })
+}
 
 var shopFunc = {
   constructShopInfo: constructShopInfo,
@@ -1553,7 +1572,8 @@ var shopFunc = {
   getShopPromotionDayPay: getShopPromotionDayPay,
   closeShopPromotion: closeShopPromotion,
   pubulishShopComment: pubulishShopComment,
-  fetchShopComments: fetchShopComments
+  fetchShopComments: fetchShopComments,
+  fetchMyShopCommentsUps: fetchMyShopCommentsUps
 
 }
 

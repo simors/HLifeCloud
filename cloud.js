@@ -93,6 +93,7 @@ AV.Cloud.define('getShopPromotionDayPay', shopFunc.getShopPromotionDayPay)
 AV.Cloud.define('closeShopPromotion', shopFunc.closeShopPromotion)
 AV.Cloud.define('pubulishShopComment', shopFunc.pubulishShopComment)
 AV.Cloud.define('fetchShopComments', shopFunc.fetchShopComments)
+AV.Cloud.define('fetchMyShopCommentsUps', shopFunc.fetchMyShopCommentsUps)
 
 
 
