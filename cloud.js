@@ -92,6 +92,9 @@ AV.Cloud.define('fetchOpenPromotionsByShopId', shopFunc.fetchOpenPromotionsBySho
 AV.Cloud.define('getShopPromotionDayPay', shopFunc.getShopPromotionDayPay)
 AV.Cloud.define('closeShopPromotion', shopFunc.closeShopPromotion)
 AV.Cloud.define('pubulishShopComment', shopFunc.pubulishShopComment)
+AV.Cloud.define('fetchShopComments', shopFunc.fetchShopComments)
+AV.Cloud.define('fetchMyShopCommentsUps', shopFunc.fetchMyShopCommentsUps)
+
 
 
 // 店铺商品

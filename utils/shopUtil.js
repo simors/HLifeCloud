@@ -325,7 +325,7 @@ function shopGoodFromLeancloudObject(goodLean){
 
 function newShopCommentFromLeanCloudObject(result){
 
-  var position = result.attributes.position
+  // var position = result.attributes.position
   var parentComment = result.attributes.parentComment
   var replyComment = result.attributes.replyComment
   var user = result.attributes.user
@@ -342,22 +342,22 @@ function newShopCommentFromLeanCloudObject(result){
     replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
     replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
     replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
-    upCount : result.attributes.likeCount,
+    upCount : result.attributes.upCount,
     authorUsername : user?result.attributes.user.attributes.username:undefined,
     authorNickname : user?result.attributes.user.attributes.nickname:undefined,
     commentCount : result.attributes.commentCount,
     authorId : user?result.attributes.user.id:undefined,
     authorAvatar : user?user.attributes.avatar:undefined,
     createdAt : result.createdAt,
-    address : position?position.address:undefined,
-    city : position?position.city:undefined,
-    longitude : position?position.longitude:undefined,
-    latitude : position?position.latitude:undefined,
-    streetNumber : position?position.streetNumber:undefined,
-    street : position?position.street:undefined,
-    province : position?position.province:undefined,
-    country : position?position.country:undefined,
-    district : position?position.district:undefined,
+    // address : position?position.address:undefined,
+    // city : position?position.city:undefined,
+    // longitude : position?position.longitude:undefined,
+    // latitude : position?position.latitude:undefined,
+    // streetNumber : position?position.streetNumber:undefined,
+    // street : position?position.street:undefined,
+    // province : position?position.province:undefined,
+    // country : position?position.country:undefined,
+    // district : position?position.district:undefined,
     updatedAt : result.updatedAt,
     updatedDate : numberUtils.formatLeancloudTime(result.updatedAt, 'YYYY-MM-DD'),
     createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')

@@ -1471,6 +1471,78 @@ function pubulishShopComment(request,response){
 
 }
 
+function fetchShopComments(request,response){
+  var shopId = request.params.shopId
+  var commentId = request.params.commentId
+  var isRefresh = request.params.isRefresh;
+  var lastCreatedAt = request.params.lastCreatedAt;
+  var query = new AV.Query('ShopComment')
+
+  if(shopId&&shopId!=''){
+    var shop = AV.Object.createWithoutData('Shop', shopId)
+    query.equalTo('targetShop', shop)
+  }
+
+  if(commentId&&commentId!=''){
+    var comment = AV.Object.createWithoutData('ShopComment', commentId)
+    query.equalTo('parentComment', comment)
+  }
+
+  // console.log('isRefresh====', isRefresh)
+  // console.log('lastCreatedAt====', lastCreatedAt)
+  if(!isRefresh && lastCreatedAt) { //分页查询
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  query.limit(10)
+
+  query.include(['user']);
+  query.include(['parentComment']);
+  query.include(['parentComment.user']);
+  query.include(['replyComment'])
+  query.include(['replyComment.user'])
+
+  query.descending('createdAt')
+  query.find().then((results)=>{
+    var topicCommentList = []
+    var allComments = []
+    var commentList = []
+    results.forEach((result)=>{
+      var position = result.attributes.position
+      var parentComment = result.attributes.parentComment
+      var replyComment = result.attributes.replyComment
+      var user = result.attributes.user
+      var shopComment = shopUtil.newShopCommentFromLeanCloudObject(result)
+      // console.log('result===<',result.id)
+      allComments.push(shopComment)
+      commentList.push(shopComment.commentId)
+    })
+    response.success({allComments:allComments,commentList:commentList})
+  },(err)=>{
+    response.error(err)
+  })
+}
+
+function fetchMyShopCommentsUps(request,response){
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User',userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user',user)
+  // query.equalTo('upType','topicComment')
+  query.equalTo('status',true)
+  query.limit(1000)
+  query.descending('createdAt')
+  query.find().then((results)=>{
+    var commentList = []
+    results.forEach((result)=>{
+      commentList.push(result.attributes.targetShopComment.id)
+    })
+    response.success({commentList:commentList})
+  },(err)=>{
+    response.error(err)
+  })
+}
+
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1499,7 +1571,9 @@ var shopFunc = {
   fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
   getShopPromotionDayPay: getShopPromotionDayPay,
   closeShopPromotion: closeShopPromotion,
-  pubulishShopComment: pubulishShopComment
+  pubulishShopComment: pubulishShopComment,
+  fetchShopComments: fetchShopComments,
+  fetchMyShopCommentsUps: fetchMyShopCommentsUps
 
 }
 
