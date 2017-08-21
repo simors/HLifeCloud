@@ -387,25 +387,7 @@ function paymentEvent(request, response) {
   var mysqlConn = undefined
 
   return insertChargeInMysql(charge).then(() => {
-    if (promoterId) {
-      console.log('invoke promoter paid:', promoterId, ', ', amount)
-      var promoter = undefined
-      return promoterFunc.getPromoterById(promoterId).then((promoterInfo) => {
-        promoter = promoterInfo
-        return promoterFunc.getUpPromoter(promoter)
-      }).then((upPromoter) => {
-        if (!upPromoter) {
-          return new Promise((resolve) => {
-            resolve()
-          })
-        }
-        upPromoterId = upPromoter.id
-        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
-      }).then(() => {
-        // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
-        return promoterFunc.promoterPaid(promoterId)
-      })
-    } else if (shopId && amount) {
+    if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
       var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
