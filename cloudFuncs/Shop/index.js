@@ -1543,6 +1543,35 @@ function fetchMyShopCommentsUps(request,response){
   })
 }
 
+function userUpShopComment(request,response) {
+  var payload = request.params.payload
+  var shopCommentId = payload.shopCommentId
+  var userId = payload.userId
+  var targetShopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user',user)
+  query.equalTo('targetShopComment',targetShopComment)
+  query.equalTo('status',true)
+  query.find().then((result)=>{
+    if(result&&result.length){
+      response.error({message:'您已经点过赞了！'})
+    }else{
+        var ShopCommentUp = AV.Object.extend('ShopCommentUp')
+        var shopCommentUp = new ShopCommentUp()
+        shopCommentUp.set('targetShopComment', targetShopComment)
+        shopCommentUp.set('user', user)
+        shopCommentUp.set('status',true)
+        shopCommentUp.save().then((up)=>{
+          response.success(up)
+        },(err)=>{
+          response.error(err)
+        })
+    }
+  },(err)=>{
+    response.error(err)
+  })
+}
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1573,7 +1602,8 @@ var shopFunc = {
   closeShopPromotion: closeShopPromotion,
   pubulishShopComment: pubulishShopComment,
   fetchShopComments: fetchShopComments,
-  fetchMyShopCommentsUps: fetchMyShopCommentsUps
+  fetchMyShopCommentsUps: fetchMyShopCommentsUps,
+  userUpShopComment: userUpShopComment
 
 }
 
