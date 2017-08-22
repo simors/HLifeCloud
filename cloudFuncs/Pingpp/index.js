@@ -455,6 +455,7 @@ function paymentEvent(request, response) {
       console.log('begin to create shop order: ', order)
       return createShopOrder(order)
     }
+    return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
     authFunc.getOpenidById(toUser).then((openid) => {
