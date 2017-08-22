@@ -452,6 +452,7 @@ function paymentEvent(request, response) {
         paid: amount,
         remark: metadata.remark,
       }
+      console.log('begin to create shop order: ', order)
       return createShopOrder(order)
     }
   }).then(() => {
