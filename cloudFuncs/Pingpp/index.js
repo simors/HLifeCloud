@@ -443,7 +443,7 @@ function paymentEvent(request, response) {
     if (dealType == BUY_GOODS) {
       var order = {
         buyerId: fromUser,
-        vendorId: toUser,
+        vendorId: metadata.vendorId,
         goodsId: metadata.goodsId,
         receiver: metadata.receiver,
         receiverPhone: metadata.receiverPhone,
