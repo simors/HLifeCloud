@@ -448,8 +448,8 @@ function paymentEvent(request, response) {
         receiver: metadata.receiver,
         receiverPhone: metadata.receiverPhone,
         receiverAddr: metadata.receiverAddr,
-        goodsAmount: metadata.goodsAmount,
-        paid: amount,
+        goodsAmount: Number(metadata.goodsAmount),
+        paid: Number(amount),
         remark: metadata.remark,
       }
       console.log('begin to create shop order: ', order)
