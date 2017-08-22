@@ -584,7 +584,6 @@ function getShopInviter(request, response) {
 }
 
 
-
 /**
  * 根据店铺id获取店铺信息
  * @param shopId  店铺id
@@ -786,7 +785,7 @@ function updateShopLocationInfo(request, response) {
   }
 
   return shop.save().then(function (result) {
-      response.success(result)
+    response.success(result)
   }, function (error) {
     console.log('updateShopLocationInfo.error====', error)
     response.error('update fail', error)
@@ -1141,12 +1140,12 @@ function submitEditShopInfo(request, response) {
           item.set('geo', point)
         })
         return AV.Object.saveAll(promotions);
-      }).then((promotionList)=>{
+      }).then((promotionList)=> {
         response.success({errcode: 0, goodsInfo: shopInfo})
-      },(error)=>{
+      }, (error)=> {
         response.error({errcode: 1, message: '店铺更新失败'})
       })
-    }else {
+    } else {
       response.success({errcode: 0, goodsInfo: shopInfo})
     }
   }, (err)=> {
@@ -1287,13 +1286,13 @@ function fetchOpenPromotionsByShopId(request, response) {
   query.equalTo('status', 1)
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
-  if(lastCreatedAt){
-    query.lessThan('createdAt',new Date(lastCreatedAt))
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
   }
   query.addDescending('createdAt')
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
-  query.greaterThanOrEqualTo('endDate',nowDate)
+  query.greaterThanOrEqualTo('endDate', nowDate)
   query.find().then((results) => {
     var promotions = []
     results.forEach((promp) => {
@@ -1316,16 +1315,16 @@ function fetchCloPromotionsByShopId(request, response) {
   var lastCreatedAt = request.params.lastCreatedAt
   var status = request.params.status
   var queryClo = new AV.Query('ShopGoodPromotion')
-  queryClo.equalTo('status',0)
+  queryClo.equalTo('status', 0)
   var queryDat = new AV.Query('ShopGoodPromotion')
-  queryDat.lessThanOrEqualTo('endDate',nowDate)
-  var query =  AV.Query.or(queryClo,queryDat)
+  queryDat.lessThanOrEqualTo('endDate', nowDate)
+  var query = AV.Query.or(queryClo, queryDat)
   query.include(['targetGood', 'targetShop'])
   query.limit(limit)
   var shop = AV.Object.createWithoutData('Shop', shopId)
   query.equalTo('targetShop', shop)
-  if(lastCreatedAt){
-    query.lessThan('createdAt',new Date(lastCreatedAt))
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
   }
   query.addDescending('createdAt')
   query.find().then((results) => {
@@ -1347,11 +1346,11 @@ function getShopPromotionMaxNum(request, response) {
   redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNumRedis)=> {
     if (!shopPromotionMaxNumRedis || shopPromotionMaxNumRedis < 0) {
       redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
-        response.success({
-          errcode: '0',
-          message: shopPromotionMaxNum
-        })
-      } else {
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNum
+      })
+    } else {
       response.success({
         errcode: '0',
         message: shopPromotionMaxNumRedis
@@ -1387,25 +1386,25 @@ function getShopPromotionDayPay(request, response) {
   })
 }
 
-function closeShopPromotion(request,response){
+function closeShopPromotion(request, response) {
   var promotionId = request.params.promotionId
-  var promotion = AV.Object.createWithoutData('ShopGoodPromotion',promotionId)
-  promotion.set('status',0)
-  promotion.save().then((item)=>{
-    var query= new AV.Query('ShopGoodPromotion')
-    query.include(['targetShop','targetGood'])
-    query.get(item.id).then((promotionInfo)=>{
+  var promotion = AV.Object.createWithoutData('ShopGoodPromotion', promotionId)
+  promotion.set('status', 0)
+  promotion.save().then((item)=> {
+    var query = new AV.Query('ShopGoodPromotion')
+    query.include(['targetShop', 'targetGood'])
+    query.get(item.id).then((promotionInfo)=> {
       var promotion = shopUtil.promotionFromLeancloudObject(promotionInfo)
-      response.success({errcode:'0',promotion:promotion})
-    },(err)=>{
+      response.success({errcode: '0', promotion: promotion})
+    }, (err)=> {
       response.error(err)
     })
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 }
 
-function pubulishShopComment(request,response){
+function pubulishShopComment(request, response) {
   var payload = request.params.payload
   var ShopComment = AV.Object.extend('ShopComment')
   var shopComment = new ShopComment()
@@ -1416,81 +1415,81 @@ function pubulishShopComment(request,response){
   shopComment.set('targetShop', shop)
   shopComment.set('user', user)
   shopComment.set('content', payload.content)
-  shopComment.set('blueprints',payload.blueprints)
-  if (payload.commentId&&payload.commentId!='') {
-    parentComment = 	AV.Object.createWithoutData('ShopComment', payload.commentId)
+  shopComment.set('blueprints', payload.blueprints)
+  if (payload.commentId && payload.commentId != '') {
+    parentComment = AV.Object.createWithoutData('ShopComment', payload.commentId)
     shopComment.set('parentComment', parentComment)
   }
-  if(payload.replyId&&payload.replyId != ''){
-    replyComment = 	AV.Object.createWithoutData('ShopComment', payload.replyId)
+  if (payload.replyId && payload.replyId != '') {
+    replyComment = AV.Object.createWithoutData('ShopComment', payload.replyId)
     shopComment.set('replyComment', replyComment)
   }
 
-  shopComment.save().then((comment)=>{
+  shopComment.save().then((comment)=> {
     shop.increment("commentNum", 1)
-    shop.save().then((shop)=>{
-      if(payload.commentId&&payload.commentId!=''){
-        parentComment.increment("commentCount",1)
-        parentComment.save().then(()=>{
+    shop.save().then((shop)=> {
+      if (payload.commentId && payload.commentId != '') {
+        parentComment.increment("commentCount", 1)
+        parentComment.save().then(()=> {
           var query = new AV.Query('ShopComment')
           query.include(['user']);
           query.include(['parentComment']);
           query.include(['parentComment.user']);
           query.include(['replyComment'])
           query.include(['replyComment.user'])
-          query.get(comment.id).then((result)=>{
+          query.get(comment.id).then((result)=> {
             var position = result.attributes.position
             var parentComment = result.attributes.parentComment
             var user = result.attributes.user
             var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
             response.success(commentInfo)
-          },(err)=>{
+          }, (err)=> {
             response.error(err)
           })
-        },(err)=>{
+        }, (err)=> {
           response.error(err)
         })
-      }else{
+      } else {
         var query = new AV.Query('ShopComment')
         query.include(['user']);
         query.include(['parentComment']);
         query.include(['parentComment.user']);
-        query.get(comment.id).then((result)=>{
+        query.get(comment.id).then((result)=> {
           var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
           response.success(commentInfo)
-        },(err)=>{
+        }, (err)=> {
           response.error(err)
         })
       }
-    },(err)=>{
+    }, (err)=> {
       response.error(err)
     })
-  },(err)=>{
+  }, (err)=> {
     response.error(err)
   })
 
 }
 
-function fetchShopComments(request,response){
+function fetchShopComments(request, response) {
   var shopId = request.params.shopId
   var commentId = request.params.commentId
   var isRefresh = request.params.isRefresh;
   var lastCreatedAt = request.params.lastCreatedAt;
   var query = new AV.Query('ShopComment')
 
-  if(shopId&&shopId!=''){
+  if (shopId && shopId != '') {
     var shop = AV.Object.createWithoutData('Shop', shopId)
     query.equalTo('targetShop', shop)
   }
 
-  if(commentId&&commentId!=''){
+  if (commentId && commentId != '') {
     var comment = AV.Object.createWithoutData('ShopComment', commentId)
     query.equalTo('parentComment', comment)
   }
 
   // console.log('isRefresh====', isRefresh)
   // console.log('lastCreatedAt====', lastCreatedAt)
-  if(!isRefresh && lastCreatedAt) { //分页查询
+  if (!isRefresh && lastCreatedAt) { //分页查询
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
 
@@ -1503,11 +1502,11 @@ function fetchShopComments(request,response){
   query.include(['replyComment.user'])
 
   query.descending('createdAt')
-  query.find().then((results)=>{
+  query.find().then((results)=> {
     var topicCommentList = []
     var allComments = []
     var commentList = []
-    results.forEach((result)=>{
+    results.forEach((result)=> {
       var position = result.attributes.position
       var parentComment = result.attributes.parentComment
       var replyComment = result.attributes.replyComment
@@ -1517,32 +1516,67 @@ function fetchShopComments(request,response){
       allComments.push(shopComment)
       commentList.push(shopComment.commentId)
     })
-    response.success({allComments:allComments,commentList:commentList})
-  },(err)=>{
+    response.success({allComments: allComments, commentList: commentList})
+  }, (err)=> {
     response.error(err)
   })
 }
 
-function fetchMyShopCommentsUps(request,response){
+function fetchMyShopCommentsUps(request, response) {
   var userId = request.params.userId
-  var user = AV.Object.createWithoutData('_User',userId)
+  var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('ShopCommentUp')
-  query.equalTo('user',user)
+  query.equalTo('user', user)
   // query.equalTo('upType','topicComment')
-  query.equalTo('status',true)
+  query.equalTo('status', true)
   query.limit(1000)
   query.descending('createdAt')
-  query.find().then((results)=>{
+  query.find().then((results)=> {
     var commentList = []
-    results.forEach((result)=>{
+    results.forEach((result)=> {
       commentList.push(result.attributes.targetShopComment.id)
     })
-    response.success({commentList:commentList})
-  },(err)=>{
+    response.success({commentList: commentList})
+  }, (err)=> {
     response.error(err)
   })
 }
 
+function userUpShopComment(request, response) {
+  var payload = request.params.payload
+  var shopCommentId = payload.shopCommentId
+  var userId = payload.userId
+  var targetShopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user', user)
+  query.equalTo('targetShopComment', targetShopComment)
+  query.equalTo('status', true)
+  query.find().then((result)=> {
+    if (result && result.length) {
+      response.error({message: '您已经点过赞了！'})
+    } else {
+      var ShopCommentUp = AV.Object.extend('ShopCommentUp')
+      var shopCommentUp = new ShopCommentUp()
+      shopCommentUp.set('targetShopComment', targetShopComment)
+      shopCommentUp.set('user', user)
+      shopCommentUp.set('status', true)
+      shopCommentUp.save().then((up)=> {
+        targetShopComment.increment("upCount", 1)
+        targetShopComment.save().then(()=> {
+          response.success(up)
+
+        }, (err)=> {
+          response.error(err)
+        })
+      }, (err)=> {
+        response.error(err)
+      })
+    }
+  }, (err)=> {
+    response.error(err)
+  })
+}
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1573,7 +1607,8 @@ var shopFunc = {
   closeShopPromotion: closeShopPromotion,
   pubulishShopComment: pubulishShopComment,
   fetchShopComments: fetchShopComments,
-  fetchMyShopCommentsUps: fetchMyShopCommentsUps
+  fetchMyShopCommentsUps: fetchMyShopCommentsUps,
+  userUpShopComment: userUpShopComment
 
 }
 

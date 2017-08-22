@@ -94,6 +94,7 @@ AV.Cloud.define('closeShopPromotion', shopFunc.closeShopPromotion)
 AV.Cloud.define('pubulishShopComment', shopFunc.pubulishShopComment)
 AV.Cloud.define('fetchShopComments', shopFunc.fetchShopComments)
 AV.Cloud.define('fetchMyShopCommentsUps', shopFunc.fetchMyShopCommentsUps)
+AV.Cloud.define('userUpShopComment', shopFunc.userUpShopComment)
 
 
 
