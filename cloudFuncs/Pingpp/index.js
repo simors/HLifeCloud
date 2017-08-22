@@ -21,6 +21,7 @@ const INVITE_SHOP = 2           // 邀请店铺获得的收益
 const BUY_GOODS = 3             // 购买商品
 const REWARD = 4                // 打赏
 const WITHDRAW = 5              // 取现
+const PUBLISH_PROMOTION = 6     // 发布店铺活动
 
 // 异常状态
 const NOT_FIXED = 1             // 异常未被处理
@@ -435,6 +436,23 @@ function paymentEvent(request, response) {
           mysqlUtil.release(mysqlConn)
         }
       })
+    }
+  }).then(() => {
+    var createShopOrder = require('../Shop/ShopOrders').createShopOrder
+    var metadata = charge.metadata
+    if (dealType == BUY_GOODS) {
+      var order = {
+        buyerId: fromUser,
+        vendorId: toUser,
+        goodsId: metadata.goodsId,
+        receiver: metadata.receiver,
+        receiverPhone: metadata.receiverPhone,
+        receiverAddr: metadata.receiverAddr,
+        goodsAmount: metadata.goodsAmount,
+        paid: amount,
+        remark: metadata.remark,
+      }
+      return createShopOrder(order)
     }
   }).then(() => {
     //发送微信通知消息
