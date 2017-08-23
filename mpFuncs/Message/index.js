@@ -107,6 +107,10 @@ function sendNewGoodsTmpMsg(username, openid, amount, order_no, created) {
   var orderAmount = '¥' + amount.toFixed(2) +'元'
   var orderTime = created.toLocaleString()
 
+  if (!openid) {
+    return new Promise((resolve) => resolve())
+  }
+
   var url = ""
 
   var data = {
