@@ -1511,6 +1511,7 @@ function fetchShopComments(request, response) {
       var parentComment = result.attributes.parentComment
       var replyComment = result.attributes.replyComment
       var user = result.attributes.user
+      console.log('result========>',result.attributes.replyComment)
       var shopComment = shopUtil.newShopCommentFromLeanCloudObject(result)
       // console.log('result===<',result.id)
       allComments.push(shopComment)
@@ -1564,7 +1565,7 @@ function userUpShopComment(request, response) {
       shopCommentUp.save().then((up)=> {
         targetShopComment.increment("upCount", 1)
         targetShopComment.save().then(()=> {
-          response.success(up)
+          response.success(up.id)
 
         }, (err)=> {
           response.error(err)
