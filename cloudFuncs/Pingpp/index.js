@@ -387,7 +387,7 @@ function paymentEvent(request, response) {
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
 
-  return insertChargeInMysql(charge).then(() => {
+  insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
       var shop = undefined
@@ -443,7 +443,7 @@ function paymentEvent(request, response) {
     if (dealType == BUY_GOODS) {
       var order = {
         buyerId: fromUser,
-        vendorId: toUser,
+        vendorId: metadata.vendorId,
         goodsId: metadata.goodsId,
         receiver: metadata.receiver,
         receiverPhone: metadata.receiverPhone,
@@ -459,6 +459,10 @@ function paymentEvent(request, response) {
   }).then(() => {
     //发送微信通知消息
     authFunc.getOpenidById(toUser).then((openid) => {
+      console.log('to user openid:', toUser, openid)
+      if (!openid) {
+        return
+      }
       switch (dealType) {
         case REWARD:
           mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
