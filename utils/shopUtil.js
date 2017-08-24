@@ -298,6 +298,7 @@ function shopGoodFromLeancloudObject(goodLean){
   var shopAttr = shop.attributes
   var promotion = goodLean.attributes.goodsPromotion
   var good = {}
+  var nowDate = new Date()
   good.objectId = goodLean.id
   good.targetShop = shop.id
   good.goodsName = goodLean.attributes.goodsName
@@ -308,7 +309,7 @@ function shopGoodFromLeancloudObject(goodLean){
   good.status = goodLean.attributes.status
   good.detail = goodLean.attributes.detail
   good.updatedAt = goodLean.updatedAt
-  if(promotion&&promotion.attributes&&promotion.attributes.status!=0){
+  if(promotion&&promotion.attributes&&promotion.attributes.status!=0&&nowDate<promotion.attributes.endDate){
     var promotionAttr = promotion.attributes
     good.promotionId = promotion.id
     good.promotionType = promotionAttr.type
