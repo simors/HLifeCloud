@@ -1265,7 +1265,15 @@ function submitShopPromotion(request, response) {
     good.set('goodsPromotion', promotion)
     // console.log('shop/////>>>>>>>>>>', shop)
     good.save().then((result)=> {
-      response.success()
+      var query = new Query('ShopGoodPromotion')
+      query.include(['targetGood', 'targetShop'])
+      query.get(results.id).then((promotion)=>{
+        var promotionInfo = shopUtil.promotionFromLeancloudObject(promotion)
+        response.success(promotionInfo)
+
+      },(err)=>{
+        response.error(err)
+      })
       // console.log('rep---->>>>', rep)
     }, (error)=> {
       response.error(error)
