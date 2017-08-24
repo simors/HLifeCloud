@@ -296,7 +296,7 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
 function shopGoodFromLeancloudObject(goodLean){
   var shop = goodLean.attributes.targetShop
   var shopAttr = shop.attributes
-  var promotion = goodLean.attributes.promotion
+  var promotion = goodLean.attributes.goodsPromotion
   var good = {}
   good.objectId = goodLean.id
   good.targetShop = shop.id

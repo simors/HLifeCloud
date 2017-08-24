@@ -1262,7 +1262,7 @@ function submitShopPromotion(request, response) {
   shopPromotion.save().then((results) => {
     var good = AV.Object.createWithoutData('ShopGoods', goodId)
     var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
-    good.set('promotion', promotion)
+    good.set('goodsPromotion', promotion)
     // console.log('shop/////>>>>>>>>>>', shop)
     good.save().then((result)=> {
       response.success()
