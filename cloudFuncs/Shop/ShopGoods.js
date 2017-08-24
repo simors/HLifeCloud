@@ -3,6 +3,29 @@
  */
 var Promise = require('bluebird')
 var AV = require('leanengine')
+var shopUtil = require('../../utils/shopUtil');
+
+function constructShopGoods(goods) {
+  if (!goods) {
+    return undefined
+  }
+  var shopGoods = {}
+  var shopGoodsAttr = goods.attributes
+  if (!shopGoodsAttr) {
+    return undefined
+  }
+  shopGoods.id = goods.id
+  shopGoods.goodsName = shopGoodsAttr.goodsName
+  shopGoods.targetShop = shopGoodsAttr.targetShop.id
+  shopGoods.price = shopGoodsAttr.price
+  shopGoods.originalPrice = shopGoodsAttr.originalPrice
+  shopGoods.coverPhoto = shopGoodsAttr.coverPhoto
+  shopGoods.album = shopGoodsAttr.album
+  shopGoods.detail = shopGoodsAttr.detail
+  shopGoods.status = shopGoodsAttr.status
+  shopGoods.updatedAt = goods.updatedAt
+  return shopGoods
+}
 
 function addNewShopGoods(request, response) {
   var shopId = request.params.shopId
@@ -27,7 +50,8 @@ function addNewShopGoods(request, response) {
   shopGoods.set('status', 1)
 
   shopGoods.save(null, {fetchWhenSave: true}).then((goodsInfo) => {
-    response.success({errcode: 0, goodsInfo: goodsInfo})
+    var good = shopUtil.shopGoodFromLeancloudObject(goodsInfo)
+    response.success({errcode: 0, goodsInfo: good})
   }, (err) => {
     console.log('err in addNewShopGoods:', err)
     response.error({errcode: 1, message: '增加商品失败'})
@@ -57,7 +81,8 @@ function modifyShopGoodsInfo(request, response) {
     var query = new AV.Query('ShopGoods')
     return query.get(newGoods.id)
   }).then((goodsInfo) => {
-    response.success({errcode: 0, goodsInfo: goodsInfo})
+    var good=shopUtil.shopGoodFromLeancloudObject(goodsInfo)
+    response.success({errcode: 0, goodsInfo: good})
   }, (err) => {
     console.log('err in shopGoodsOffline:', err)
     response.error({errcode: 1, message: '修改商品信息失败'})
@@ -72,7 +97,9 @@ function shopGoodsOnline(request, response) {
   var shopGoods = AV.Object.createWithoutData('ShopGoods', goodsId)
   shopGoods.set('status', 1)
   shopGoods.save(null, {fetchWhenSave: true}).then((goodsInfo) => {
-    response.success({errcode: 0, goodsInfo: goodsInfo})
+    var good=shopUtil.shopGoodFromLeancloudObject(goodsInfo)
+
+    response.success({errcode: 0, goodsInfo: good})
   }, (err) => {
     console.log('err in shopGoodsOnline:', err)
     response.error({errcode: 1, message: '商品上架失败'})
@@ -87,7 +114,9 @@ function shopGoodsOffline(request, response) {
   var shopGoods = AV.Object.createWithoutData('ShopGoods', goodsId)
   shopGoods.set('status', 2)
   shopGoods.save(null, {fetchWhenSave: true}).then((goodsInfo) => {
-    response.success({errcode: 0, goodsInfo: goodsInfo})
+    var good=shopUtil.shopGoodFromLeancloudObject(goodsInfo)
+
+    response.success({errcode: 0, goodsInfo: good})
   }, (err) => {
     console.log('err in shopGoodsOffline:', err)
     response.error({errcode: 1, message: '商品下架失败'})
@@ -125,11 +154,17 @@ function fetchShopGoods(request, response) {
   if (lastUpdateTime) {
     query.lessThan('updatedAt', new Date(lastUpdateTime))
   }
+  query.include(['goodsPromotion','targetShop'])
   query.descending('updatedAt')
   query.limit(limit)
 
   query.find().then((goods) => {
-    response.success({errcode: 0, goods: goods})
+    var goodList = []
+    goods.forEach((item)=>{
+      var good = shopUtil.shopGoodFromLeancloudObject(item)
+      goodList.push(good)
+    })
+    response.success({errcode: 0, goods: goodList})
   }, (err) => {
     console.log('err in fetchShopGoods:', err)
     response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
@@ -140,6 +175,7 @@ function fetchShopGoods(request, response) {
 }
 
 var GoodsFunc = {
+  constructShopGoods: constructShopGoods,
   addNewShopGoods: addNewShopGoods,
   modifyShopGoodsInfo: modifyShopGoodsInfo,
   shopGoodsOnline: shopGoodsOnline,

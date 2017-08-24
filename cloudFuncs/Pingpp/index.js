@@ -21,6 +21,7 @@ const INVITE_SHOP = 2           // 邀请店铺获得的收益
 const BUY_GOODS = 3             // 购买商品
 const REWARD = 4                // 打赏
 const WITHDRAW = 5              // 取现
+const PUBLISH_PROMOTION = 6     // 发布店铺活动
 
 // 异常状态
 const NOT_FIXED = 1             // 异常未被处理
@@ -386,26 +387,8 @@ function paymentEvent(request, response) {
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
 
-  return insertChargeInMysql(charge).then(() => {
-    if (promoterId) {
-      console.log('invoke promoter paid:', promoterId, ', ', amount)
-      var promoter = undefined
-      return promoterFunc.getPromoterById(promoterId).then((promoterInfo) => {
-        promoter = promoterInfo
-        return promoterFunc.getUpPromoter(promoter)
-      }).then((upPromoter) => {
-        if (!upPromoter) {
-          return new Promise((resolve) => {
-            resolve()
-          })
-        }
-        upPromoterId = upPromoter.id
-        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
-      }).then(() => {
-        // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
-        return promoterFunc.promoterPaid(promoterId)
-      })
-    } else if (shopId && amount) {
+  insertChargeInMysql(charge).then(() => {
+    if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
       var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
@@ -455,8 +438,31 @@ function paymentEvent(request, response) {
       })
     }
   }).then(() => {
+    var createShopOrder = require('../Shop/ShopOrders').createShopOrder
+    var metadata = charge.metadata
+    if (dealType == BUY_GOODS) {
+      var order = {
+        buyerId: fromUser,
+        vendorId: metadata.vendorId,
+        goodsId: metadata.goodsId,
+        receiver: metadata.receiver,
+        receiverPhone: metadata.receiverPhone,
+        receiverAddr: metadata.receiverAddr,
+        goodsAmount: Number(metadata.goodsAmount),
+        paid: Number(amount),
+        remark: metadata.remark,
+      }
+      console.log('begin to create shop order: ', order)
+      return createShopOrder(order)
+    }
+    return new Promise((resolve) => resolve())
+  }).then(() => {
     //发送微信通知消息
     authFunc.getOpenidById(toUser).then((openid) => {
+      console.log('to user openid:', toUser, openid)
+      if (!openid) {
+        return
+      }
       switch (dealType) {
         case REWARD:
           mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())

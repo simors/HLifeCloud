@@ -42,29 +42,69 @@ const defaultPromoterConfig = {
     street_agent: 0.4
   },
   upgradeTable: {
-    promoter_level_1: {
-      team: 100,
-      shop: 200,
+    promoter_level_1: {     // 少尉
+      team: 49,
+      shop: 0,
       royalty: [0.5, 0.1, 0.02]
     },
-    promoter_level_2: {
-      team: 500,
-      shop: 1000,
+    promoter_level_2: {     // 中尉
+      team: 99,
+      shop: 0,
       royalty: [0.5, 0.12, 0.02]
     },
-    promoter_level_3: {
-      team: 1000,
-      shop: 3000,
+    promoter_level_3: {     // 上尉
+      team: 199,
+      shop: 0,
       royalty: [0.5, 0.14, 0.02]
     },
-    promoter_level_4: {
-      team: 5000,
-      shop: 10000,
+    promoter_level_4: {     // 少校
+      team: 499,
+      shop: 0,
       royalty: [0.5, 0.16, 0.02]
     },
-    promoter_level_5: {
-      team: 10000,
-      shop: 30000,
+    promoter_level_5: {     // 中校
+      team: 999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_6: {     // 上校
+      team: 1999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_7: {     // 大校
+      team: 4999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_8: {     // 少将
+      team: 9999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_9: {     // 中将
+      team: 19999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_10: {     // 上将
+      team: 49999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_11: {     // 少帅
+      team: 99999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_12: {     // 中帅
+      team: 199999,
+      shop: 0,
+      royalty: [0.5, 0.18, 0.02]
+    },
+    promoter_level_13: {     // 大帅
+      team: 99999999,
+      shop: 0,
       royalty: [0.5, 0.18, 0.02]
     },
   },
@@ -622,6 +662,9 @@ function incrementInviteShopNum(promoterId) {
  */
 function defaultUpgradeStandard(promoter) {
   var level = promoter.attributes.level
+  if (level == 13) {    // 到达最高级
+    return level
+  }
   var teamMemNum = promoter.attributes.teamMemNum
   var inviteShopNum = promoter.attributes.inviteShopNum
   var team = 0
@@ -642,6 +685,38 @@ function defaultUpgradeStandard(promoter) {
     case 4:
       team = globalPromoterCfg.upgradeTable.promoter_level_4.team
       shop = globalPromoterCfg.upgradeTable.promoter_level_4.shop
+      break
+    case 5:
+      team = globalPromoterCfg.upgradeTable.promoter_level_5.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_5.shop
+      break
+    case 6:
+      team = globalPromoterCfg.upgradeTable.promoter_level_6.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_6.shop
+      break
+    case 7:
+      team = globalPromoterCfg.upgradeTable.promoter_level_7.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_7.shop
+      break
+    case 8:
+      team = globalPromoterCfg.upgradeTable.promoter_level_8.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_8.shop
+      break
+    case 9:
+      team = globalPromoterCfg.upgradeTable.promoter_level_9.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_9.shop
+      break
+    case 10:
+      team = globalPromoterCfg.upgradeTable.promoter_level_10.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_10.shop
+      break
+    case 11:
+      team = globalPromoterCfg.upgradeTable.promoter_level_11.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_11.shop
+      break
+    case 12:
+      team = globalPromoterCfg.upgradeTable.promoter_level_12.team
+      shop = globalPromoterCfg.upgradeTable.promoter_level_12.shop
       break
     default:    // 已经是最高级别
       return level
@@ -1343,78 +1418,6 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
     mysqlConn = conn
     return mysqlUtil.beginTransaction(conn)
   }).then(() => {
-    return getProvinceAgent(promoter)
-  }).then((provinceAgent) => {
-    if (provinceAgent) {
-      localAgents.push(provinceAgent)
-      var identity = provinceAgent.attributes.identity
-      var agentEarn = getAgentEarning(identity, income)
-      console.log('province agent:', provinceAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(2)
-      return insertPromoterInMysql(provinceAgent.id).then(() => {
-        console.log('update province balance:', provinceAgent.attributes.user.id, ', earn:', agentEarn)
-        return updatePaymentBalance(mysqlConn, provinceAgent.attributes.user.id, agentEarn)
-      }).then(() => {
-        console.log('update province agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, provinceAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
-      })
-    } else {
-      return new Promise((resolve) => {
-        resolve()
-      })
-    }
-  }).then((insertRes) => {
-    if (insertRes && !insertRes.results.insertId) {
-      throw new Error('Update province promoter earning error')
-    }
-    return getCityAgent(promoter)
-  }).then((cityAgent) => {
-    if (cityAgent) {
-      localAgents.push(cityAgent)
-      var identity = cityAgent.attributes.identity
-      var agentEarn = getAgentEarning(identity, income)
-      console.log('city agent:', cityAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(2)
-      return insertPromoterInMysql(cityAgent.id).then(() => {
-        console.log('update city balance:', cityAgent.attributes.user.id, ', earn:', agentEarn)
-        return updatePaymentBalance(mysqlConn, cityAgent.attributes.user.id, agentEarn)
-      }).then(() => {
-        console.log('update city agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, cityAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
-      })
-    } else {
-      return new Promise((resolve) => {
-        resolve()
-      })
-    }
-  }).then((insertRes) => {
-    if (insertRes && !insertRes.results.insertId) {
-      throw new Error('Update city promoter earning error')
-    }
-    return getDistrictAgent(promoter)
-  }).then((districtAgent) => {
-    if (districtAgent) {
-      localAgents.push(districtAgent)
-      var identity = districtAgent.attributes.identity
-      var agentEarn = getAgentEarning(identity, income)
-      console.log('district agent:', districtAgent.id, ', earn:', agentEarn)
-      platformEarn = (platformEarn - agentEarn).toFixed(2)
-      return insertPromoterInMysql(districtAgent.id).then(() => {
-        console.log('update district balance:', districtAgent.attributes.user.id, ', earn:', agentEarn)
-        return updatePaymentBalance(mysqlConn, districtAgent.attributes.user.id, agentEarn)
-      }).then(() => {
-        console.log('update district agent earn:', agentEarn)
-        return updatePromoterEarning(mysqlConn, shopOwner, districtAgent.id, promoter.id, agentEarn, INVITE_SHOP, EARN_ROYALTY, charge)
-      })
-    } else {
-      return new Promise((resolve) => {
-        resolve()
-      })
-    }
-  }).then((insertRes) => {
-    if (insertRes && !insertRes.results.insertId) {
-      throw new Error('Update district promoter earning error')
-    }
     // 更新推广员自己的收益
     selfEarn = (income * royalty[0]).toFixed(2)
     platformEarn = (platformEarn - selfEarn).toFixed(2)
@@ -1454,6 +1457,33 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       }
       return newUpPromoter
     })
+  }).then((upPromoter) => {
+    // 更新二级好友（上上级推广员）的分成收益
+    if (upPromoter) {
+      return getUpPromoter(upPromoter, false).then((upupPromoter) => {
+        upUpPro = upupPromoter
+        if (upupPromoter) {
+          console.log('second up promoter:', upupPromoter.id)
+          twoPromoterEarn = (income * royalty[2]).toFixed(2)
+          platformEarn = (platformEarn - twoPromoterEarn).toFixed(2)
+          return insertPromoterInMysql(upupPromoter.id).then(() => {
+            console.log('update second up promoter balance:', upupPromoter.attributes.user.id, ', earn:', twoPromoterEarn)
+            return updatePaymentBalance(mysqlConn, upupPromoter.attributes.user.id, twoPromoterEarn)
+          }).then(() => {
+            console.log('update second up promoter earn:', twoPromoterEarn)
+            return updatePromoterEarning(mysqlConn, shopOwner, upupPromoter.id, promoter.id, twoPromoterEarn, INVITE_SHOP, EARN_ROYALTY, charge)
+          })
+        } else {
+          return new Promise((resolve) => {
+            resolve()
+          })
+        }
+      })
+    }
+  }).then((insertRes) => {
+    if (insertRes && !insertRes.results.insertId) {
+      throw new Error('Update promoter earning of level two friend error')
+    }
   }).then(() => {
     console.log('update platform earn:', platformEarn, ', promoter:', promoter.id)
     // 更新平台分成收益
@@ -1466,13 +1496,6 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
 
     // 更新leancloud上的数据
     var leanAction = []
-    localAgents.forEach((agent) => {
-      var identity = agent.attributes.identity
-      var agentEarn = getAgentEarning(identity, income)
-      console.log('update leancloud agent earnings: promoterId= ', agent.id, ', earn = ', agentEarn)
-      var agentAction = updateLeanPromoterEarning(agent.id, agentEarn, EARN_ROYALTY)
-      leanAction.push(agentAction)
-    })
     console.log('update leancloud self earnings: promoterId= ', promoter.id, ', earn = ', selfEarn)
     var selfAction = updateLeanPromoterEarning(promoter.id, selfEarn, EARN_SHOP_INVITE)
     leanAction.push(selfAction)
@@ -1480,6 +1503,11 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
       console.log('update leancloud one level promoter earnings: promoterId= ', upPro.id, ', earn = ', onePromoterEarn)
       var onePromoter = updateLeanPromoterEarning(upPro.id, onePromoterEarn, EARN_ROYALTY)
       leanAction.push(onePromoter)
+    }
+    if (upUpPro) {
+      console.log('update leancloud two level promoter earnings: promoterId= ', upUpPro.id, ', earn = ', twoPromoterEarn)
+      var twoPromoter = updateLeanPromoterEarning(upUpPro.id, twoPromoterEarn, EARN_ROYALTY)
+      leanAction.push(twoPromoter)
     }
     return Promise.all(leanAction)
   }).then(() => {
@@ -1504,6 +1532,7 @@ function calPromoterShopEarnings(promoter, shop, income, charge) {
  * @param invitedPromoter 被邀请的推广员
  * @param income 新推广员上交的费用
  * @param charge 用户
+ * @deprecated    已作废，不再使用
  */
 function calPromoterInviterEarnings(promoter, invitedPromoter, income, charge) {
   var royalty = globalPromoterCfg.invitePromoterRoyalty[0]
