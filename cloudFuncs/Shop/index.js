@@ -477,10 +477,13 @@ function shopCertificateWithoutInviteCode(request, response) {
         shop.set('geoDistrict', String(geoDistrict))
         shop.set('geoDistrictCode', String(geoDistrictCode))
         shop.set('owner', currentUser)
+        currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
 
         if (upPromoter) {
           shop.set('inviter', upPromoter.attributes.user)
-          PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
+
+          var incShopInvite = PromoterFunc.incrementInviteShopNum(upPromoter.id)
+          Promise.all([currentUser.save(), incShopInvite]).then(() => {
             return shop.save()
           }).then((shopInfo) => {
             response.success({
@@ -497,7 +500,7 @@ function shopCertificateWithoutInviteCode(request, response) {
             })
           })
         } else {
-          shop.save().then((shopInfo) => {
+          Promise.all([currentUser.save(), shop.save()]).then((shopInfo) => {
             response.success({
               errcode: 0,
               message: '店铺注册认证成功',
