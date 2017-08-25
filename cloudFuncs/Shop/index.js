@@ -415,8 +415,7 @@ function shopCertificate(request, response) {
  * @param request
  * @param response
  */
-function shopCertificateNew(request, response) {
-
+function shopCertificateWithoutInviteCode(request, response) {
   var phone = request.params.phone
   var shopName = request.params.shopName
   var shopAddress = request.params.shopAddress
@@ -478,11 +477,9 @@ function shopCertificateNew(request, response) {
         shop.set('geoDistrict', String(geoDistrict))
         shop.set('geoDistrictCode', String(geoDistrictCode))
         shop.set('owner', currentUser)
-        if (upPromoter) {
-          shop.set('inviter', upPromoter.attributes.user)
-        }
 
         if (upPromoter) {
+          shop.set('inviter', upPromoter.attributes.user)
           PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
             return shop.save()
           }).then((shopInfo) => {
@@ -1607,7 +1604,7 @@ var shopFunc = {
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
-  shopCertificateNew: shopCertificateNew,
+  shopCertificateWithoutInviteCode: shopCertificateWithoutInviteCode,
   submitShopPromotion: submitShopPromotion,
   fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
   fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
