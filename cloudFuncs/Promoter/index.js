@@ -233,12 +233,18 @@ function syncPromoterInfo(request, response) {
   var upUserOpenid = undefined
 
   bindPromoterInfo(userId).then((upUser) => {
-    upUserOpenid = upUser.attributes.openid
-    return authFunc.getUserById(userId)
+    if(upUser) {
+      upUserOpenid = upUser.attributes.openid
+      return authFunc.getUserById(userId)
+    } else {
+      return undefined
+    }
   }).then((leanUser) => {
-    var nickname = leanUser.attributes.nickname
-    var city = leanUser.attributes.geoCity
-    mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+    if(leanUser) {
+      var nickname = leanUser.attributes.nickname
+      var city = leanUser.attributes.geoCity
+      mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+    }
     response.success()
   }).catch((error) => {
     response.error(error)
@@ -311,18 +317,21 @@ function bindPromoterInfo(userId) {
     currentPromoter = promoter
     return getUpUserFromRedis(userId)
   }).then((user) => {
-    upUser = user
-    currentPromoter.set('upUser', upUser)
-    var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
-      incrementTeamMem(upPromoter.id)
-    }).catch((err) => {
-      throw err
-    })
+    if(user) {
+      upUser = user
+      currentPromoter.set('upUser', upUser)
+      var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
+        incrementTeamMem(upPromoter.id)
+      }).catch((err) => {
+        throw err
+      })
+      return Promise.all([currentPromoter.save(), incTeamMem])
+    } else {
+      return undefined
+    }
 
-    return Promise.all([currentPromoter.save(), incTeamMem])
   }).then(() => {
-    return insertPromoterInMysql(currentPromoter.id)
-  }).then(() => {
+    insertPromoterInMysql(currentPromoter.id)
     return upUser
   }).catch((error) => {
     throw error
