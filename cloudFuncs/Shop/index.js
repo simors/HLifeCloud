@@ -1265,13 +1265,13 @@ function submitShopPromotion(request, response) {
     good.set('goodsPromotion', promotion)
     // console.log('shop/////>>>>>>>>>>', shop)
     good.save().then((result)=> {
-      var query = new Query('ShopGoodPromotion')
+      var query = new AV.Query('ShopGoodPromotion')
       query.include(['targetGood', 'targetShop'])
-      query.get(results.id).then((promotion)=>{
+      query.get(results.id).then((promotion)=> {
         var promotionInfo = shopUtil.promotionFromLeancloudObject(promotion)
         response.success(promotionInfo)
 
-      },(err)=>{
+      }, (err)=> {
         response.error(err)
       })
       // console.log('rep---->>>>', rep)
@@ -1352,7 +1352,7 @@ function fetchCloPromotionsByShopId(request, response) {
 
 function getShopPromotionMaxNum(request, response) {
   redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNumRedis)=> {
-    if (!shopPromotionMaxNumRedis || shopPromotionMaxNumRedis < 0) {
+    if (!shopPromotionMaxNumRedis) {
       redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
       response.success({
         errcode: '0',
@@ -1375,7 +1375,7 @@ function getShopPromotionMaxNum(request, response) {
 function getShopPromotionDayPay(request, response) {
   redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((promotionDayPay)=> {
     if (!promotionDayPay || promotionDayPay < 0) {
-      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, promotionPayByDay)
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY, promotionPayByDay)
       response.success({
         errcode: '0',
         message: promotionPayByDay
@@ -1519,7 +1519,7 @@ function fetchShopComments(request, response) {
       var parentComment = result.attributes.parentComment
       var replyComment = result.attributes.replyComment
       var user = result.attributes.user
-      console.log('result========>',result.attributes.replyComment)
+      console.log('result========>', result.attributes.replyComment)
       var shopComment = shopUtil.newShopCommentFromLeanCloudObject(result)
       // console.log('result===<',result.id)
       allComments.push(shopComment)
