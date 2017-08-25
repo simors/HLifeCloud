@@ -83,8 +83,6 @@ var exeClickEvent = {
 
 function wechatServer(req, res, next) {
   var message = req.weixin;
-  console.log('weixin  message:', message)
-
   switch (message.MsgType) {
     case 'text':
 
@@ -102,16 +100,28 @@ function wechatServer(req, res, next) {
         var upUser_unionid = scene_id.slice(8)
         wechat_api.getUser(openid, function (err, result) {
           if(!err) {
-            utilFunc.bindWechatUnionid(result.unionid, upUser_unionid).then((result) => {
-              if(!result)
-                console.log("bindWechatUnionid failed!")
-            })
+            utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
           } else {
             console.log("subscribe", err)
           }
           res.reply({
             type: 'text',
             content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+          })
+        })
+      } else if(message.Event === 'SCAN') {
+        var upUser_unionid = message.EventKey
+        var openid = message.FromUserName
+
+        wechat_api.getUser(openid, function (err, result) {
+          if(!err) {
+            utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
+          } else {
+            console.log("subscribe", err)
+          }
+          res.reply({
+            type: 'text',
+            content: "欢迎回来"
           })
         })
       }

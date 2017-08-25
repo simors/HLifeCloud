@@ -50,7 +50,7 @@ router.get('/callback', function (req, res, next) {
       }).then((upUser) => {
         if(upUser) {
           var upUserOpenid = upUser.attributes.openid
-          authFunc.getUserById(userId).then((leanUser) => {
+          authFunc.getUserById(upUser.id).then((leanUser) => {
             var nickname = leanUser.attributes.nickname
             var city = leanUser.attributes.geoCity
             mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
