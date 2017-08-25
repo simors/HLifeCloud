@@ -291,14 +291,13 @@ function getUpUserFromRedis(userId) {
     var currentUserUnionid = authData.weixin.openid
     return wechatBoundOpenidFunc.getUpUserUnionid(currentUserUnionid)
   }).then((unionId) => {
-    var userQuery = new AV.Query('_User')
-    userQuery.equalTo('authData.weixin.openid', unionId)
-    return userQuery.first()
-  }).then((upUserInfo) => {
-    if(!upUserInfo) {
-      throw new Error("没有找到用户信息")
+    if(unionId) {
+      var userQuery = new AV.Query('_User')
+      userQuery.equalTo('authData.weixin.openid', unionId)
+      return userQuery.first()
+    } else {
+      return undefined
     }
-    return upUserInfo
   }).catch((error) => {
     throw error
   })
