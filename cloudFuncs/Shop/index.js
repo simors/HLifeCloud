@@ -1265,15 +1265,21 @@ function submitShopPromotion(request, response) {
     good.set('goodsPromotion', promotion)
     // console.log('shop/////>>>>>>>>>>', shop)
     good.save().then((result)=> {
-      var query = new AV.Query('ShopGoodPromotion')
-      query.include(['targetGood', 'targetShop'])
-      query.get(results.id).then((promotion)=> {
-        var promotionInfo = shopUtil.promotionFromLeancloudObject(promotion)
-        response.success(promotionInfo)
+      shop.addUnique('containedPromotions', [promotion])
+      shop.save().then((shopInfo)=>{
+        var query = new AV.Query('ShopGoodPromotion')
+        query.include(['targetGood', 'targetShop'])
+        query.get(results.id).then((promotion)=> {
+          var promotionInfo = shopUtil.promotionFromLeancloudObject(promotion)
+          response.success(promotionInfo)
 
-      }, (err)=> {
+        }, (err)=> {
+          response.error(err)
+        })
+      },(err)=>{
         response.error(err)
       })
+
       // console.log('rep---->>>>', rep)
     }, (error)=> {
       response.error(error)
