@@ -55,13 +55,13 @@ function sendRewardTmpMsg(openid, amount, title, created) {
 /**
  * 发送邀请店铺收益通知消息
  * @param {String} openid 用户的openid
- * @param {Number} amount 支付金额
+ * @param {String} shopName 店铺名称
  * @param {Date} created 店铺注册时间
  */
-function sendInviteShopTmpMsg(openid, amount, created) {
+function sendInviteShopTmpMsg(openid, shopName, created) {
   var templateId = GLOBAL_CONFIG.SHOP_TMP_ID
   var url = ""
-  var title = "恭喜您成功邀请新店铺，获得" + amount.toFixed(2) + "元收益\n"
+  var title = "恭喜您成功邀请新店铺，店铺名称为" + shopName + "。\n个人收益请查看汇邻优店APP！"
   var paymentTime = created.toLocaleString()
 
   var data = {

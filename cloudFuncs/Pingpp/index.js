@@ -386,11 +386,11 @@ function paymentEvent(request, response) {
   var shopInviterId = undefined
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
+  var shop = undefined
 
   insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
-      var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
         var inviter = shop.attributes.inviter.id
@@ -462,7 +462,7 @@ function paymentEvent(request, response) {
     if (!toUser) {
       if (dealType == INVITE_SHOP) {
         authFunc.getOpenidById(shopInviterId).then((openid) => {
-          mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
+          mpMsgFuncs.sendInviteShopTmpMsg(openid, shop.attributes.shopName, new Date())
         }, (error) => {
           response.error({
             errcode: 1,
@@ -470,6 +470,10 @@ function paymentEvent(request, response) {
           })
         })
       }
+      response.success({
+        errcode: 0,
+        message: 'paymentEvent charge into mysql success!',
+      })
     } else {
       console.log('begin to send wechat message: ', toUser)
       authFunc.getOpenidById(toUser).then((openid) => {
