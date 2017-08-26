@@ -458,6 +458,7 @@ function paymentEvent(request, response) {
     return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
+    console.log('begin to send wechat message: ', toUser)
     authFunc.getOpenidById(toUser).then((openid) => {
       console.log('to user openid:', toUser, openid)
       if (!openid) {
@@ -478,11 +479,16 @@ function paymentEvent(request, response) {
         default:
           break
       }
-    })
 
-    response.success({
-      errcode: 0,
-      message: 'paymentEvent charge into mysql success!',
+      response.success({
+        errcode: 0,
+        message: 'paymentEvent charge into mysql success!',
+      })
+    }, (error) => {
+      response.error({
+        errcode: 1,
+        message: 'Send wechat message error:' + error.message,
+      })
     })
   }).catch((error) => {
     var exp = {

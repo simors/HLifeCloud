@@ -639,6 +639,11 @@ function getOpenidById(userId) {
   }
   var user = AV.Object.createWithoutData('_User', userId)
   return user.fetch().then((userInfo) => {
+    if (!userInfo) {
+      return new Promise((resolve, reject) => {
+        reject({message: '获取用户信息失败'})
+      })
+    }
     return userInfo.get('openid')
   }).catch((error) => {
     throw error
