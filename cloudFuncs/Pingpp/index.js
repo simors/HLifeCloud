@@ -458,38 +458,49 @@ function paymentEvent(request, response) {
     return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
-    console.log('begin to send wechat message: ', toUser)
-    authFunc.getOpenidById(toUser).then((openid) => {
-      console.log('to user openid:', toUser, openid)
-      if (!openid) {
-        return
-      }
-      switch (dealType) {
-        case REWARD:
-          mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
-          break
-        case BUY_GOODS:
-          authFunc.getNicknameById(fromUser).then((nickname) => {
-            mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
-          })
-          break
-        case INVITE_SHOP:
+    console.log('begin to send wechat message: ', shopInviterId)
+    if (!toUser) {
+      if (dealType == INVITE_SHOP) {
+        authFunc.getOpenidById(shopInviterId).then((openid) => {
           mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
-          break
-        default:
-          break
+        }, (error) => {
+          response.error({
+            errcode: 1,
+            message: 'Send wechat message error:' + error.message,
+          })
+        })
       }
+    } else {
+      console.log('begin to send wechat message: ', toUser)
+      authFunc.getOpenidById(toUser).then((openid) => {
+        console.log('to user openid:', toUser, openid)
+        if (!openid) {
+          return
+        }
+        switch (dealType) {
+          case REWARD:
+            mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
+            break
+          case BUY_GOODS:
+            authFunc.getNicknameById(fromUser).then((nickname) => {
+              mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
+            })
+            break
+          default:
+            break
+        }
 
-      response.success({
-        errcode: 0,
-        message: 'paymentEvent charge into mysql success!',
+        response.success({
+          errcode: 0,
+          message: 'paymentEvent charge into mysql success!',
+        })
+      }, (error) => {
+        response.error({
+          errcode: 1,
+          message: 'Send wechat message error:' + error.message,
+        })
       })
-    }, (error) => {
-      response.error({
-        errcode: 1,
-        message: 'Send wechat message error:' + error.message,
-      })
-    })
+    }
   }).catch((error) => {
     var exp = {
       amount: amount,

@@ -635,7 +635,9 @@ function setUserOpenid(openid, unionid) {
 
 function getOpenidById(userId) {
   if(!userId) {
-    return Promise.reject()
+    return new Promise((resolve, reject) => {
+      reject({message: '用户id为空'})
+    })
   }
   var user = AV.Object.createWithoutData('_User', userId)
   return user.fetch().then((userInfo) => {
