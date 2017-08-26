@@ -415,8 +415,7 @@ function shopCertificate(request, response) {
  * @param request
  * @param response
  */
-function shopCertificateNew(request, response) {
-
+function shopCertificateWithoutInviteCode(request, response) {
   var phone = request.params.phone
   var shopName = request.params.shopName
   var shopAddress = request.params.shopAddress
@@ -478,12 +477,13 @@ function shopCertificateNew(request, response) {
         shop.set('geoDistrict', String(geoDistrict))
         shop.set('geoDistrictCode', String(geoDistrictCode))
         shop.set('owner', currentUser)
-        if (upPromoter) {
-          shop.set('inviter', upPromoter.attributes.user)
-        }
+        currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
 
         if (upPromoter) {
-          PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
+          shop.set('inviter', upPromoter.attributes.user)
+
+          var incShopInvite = PromoterFunc.incrementInviteShopNum(upPromoter.id)
+          Promise.all([currentUser.save(), incShopInvite]).then(() => {
             return shop.save()
           }).then((shopInfo) => {
             response.success({
@@ -500,7 +500,7 @@ function shopCertificateNew(request, response) {
             })
           })
         } else {
-          shop.save().then((shopInfo) => {
+          Promise.all([currentUser.save(), shop.save()]).then((shopInfo) => {
             response.success({
               errcode: 0,
               message: '店铺注册认证成功',
@@ -1613,7 +1613,7 @@ var shopFunc = {
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
-  shopCertificateNew: shopCertificateNew,
+  shopCertificateWithoutInviteCode: shopCertificateWithoutInviteCode,
   submitShopPromotion: submitShopPromotion,
   fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
   fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
