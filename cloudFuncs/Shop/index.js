@@ -1499,6 +1499,8 @@ function fetchShopComments(request, response) {
   if (commentId && commentId != '') {
     var comment = AV.Object.createWithoutData('ShopComment', commentId)
     query.equalTo('parentComment', comment)
+  }else{
+    query.doesNotExist('parentComment')
   }
 
   // console.log('isRefresh====', isRefresh)
