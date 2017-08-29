@@ -395,7 +395,7 @@ function paymentEvent(request, response) {
       console.log('invoke shop paid:', shopId, ', ', amount)
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
-        var inviter = shop.attributes.inviter.id
+        var inviter = shop.attributes.inviter ? shop.attributes.inviter.id : undefined
         console.log('shop inviter:', inviter)
         shopInviterId = inviter
         return promoterFunc.getPromoterByUserId(inviter)
@@ -468,10 +468,7 @@ function paymentEvent(request, response) {
         authFunc.getOpenidById(shopInviterId).then((openid) => {
           mpMsgFuncs.sendInviteShopTmpMsg(openid, shop.attributes.shopName, new Date())
         }, (error) => {
-          response.error({
-            errcode: 1,
-            message: 'Send wechat message error:' + error.message,
-          })
+          console.log('Send message to shop inviter ', shopInviterId , " error")
         })
       }
       response.success({
@@ -503,10 +500,7 @@ function paymentEvent(request, response) {
           message: 'paymentEvent charge into mysql success!',
         })
       }, (error) => {
-        response.error({
-          errcode: 1,
-          message: 'Send wechat message error:' + error.message,
-        })
+        console.log('Send message to user ', toUser , " error")
       })
     }
   }).catch((error) => {
