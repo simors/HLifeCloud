@@ -404,6 +404,8 @@ function paymentEvent(request, response) {
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      }).catch((err) => {
+        throw err
       })
     } else if (fromUser && toUser) {
       console.log('invoke common paid: ', fromUser, ', ', toUser)

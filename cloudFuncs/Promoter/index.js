@@ -582,6 +582,9 @@ function finishPromoterPayment(request, response) {
  * @returns {Promise.<TResult>}
  */
 function getPromoterByUserId(userId) {
+  if (!userId) {
+    return Promise.resolve(undefined)
+  }
   var user = AV.Object.createWithoutData('_User', userId)
   var query = new AV.Query('Promoter')
   query.equalTo('user', user)
@@ -1393,9 +1396,8 @@ function getAgentEarning(identity, income) {
  */
 function calPromoterShopEarnings(promoter, shop, income, charge) {
   if (!promoter || !shop) {
-    return new Promise((resolve, reject) => {
-      reject(new Error('Promoter or Shop undefined'))
-    })
+    console.log('no promoter, not need to calculate earnings')
+    return Promise.resolve()
   }
   var level = promoter.attributes.level
   var mysqlConn = undefined
