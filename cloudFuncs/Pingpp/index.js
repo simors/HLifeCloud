@@ -388,6 +388,8 @@ function paymentEvent(request, response) {
   var mysqlConn = undefined
   var shop = undefined
 
+  console.log('payment metadata:', charge.metadata)
+
   insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
@@ -458,8 +460,8 @@ function paymentEvent(request, response) {
     return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
-    console.log('begin to send wechat message: ', shopInviterId)
     if (!toUser) {
+      console.log('begin to send wechat message: ', shopInviterId)
       if (dealType == INVITE_SHOP) {
         authFunc.getOpenidById(shopInviterId).then((openid) => {
           mpMsgFuncs.sendInviteShopTmpMsg(openid, shop.attributes.shopName, new Date())
