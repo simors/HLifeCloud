@@ -294,20 +294,22 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
 }
 
 function shopGoodFromLeancloudObject(goodLean){
-  var shop = goodLean.attributes.targetShop
-  var shopAttr = shop.attributes
-  var promotion = goodLean.attributes.goodsPromotion
+  // console.log('goodLean----->',goodLean.attributes)
+  var shop = goodsAttr?goodsAttr.targetShop:undefined
+  // var shopAttr = shop.attributes
+  var goodsAttr = goodLean.attributes
+  var promotion = goodsAttr?goodsAttr.goodsPromotion:undefined
   var good = {}
   var nowDate = new Date()
   good.objectId = goodLean.id
-  good.targetShop = shop.id
-  good.goodsName = goodLean.attributes.goodsName
-  good.price = goodLean.attributes.price
-  good.originalPrice = goodLean.attributes.originalPrice
-  good.coverPhoto = goodLean.attributes.coverPhoto
-  good.album = goodLean.attributes.album
-  good.status = goodLean.attributes.status
-  good.detail = goodLean.attributes.detail
+  good.targetShop = shop?shop.id:undefined
+  good.goodsName = goodsAttr?goodsAttr.goodsName:undefined
+  good.price = goodsAttr?goodsAttr.price:undefined
+  good.originalPrice = goodsAttr?goodsAttr.originalPrice:undefined
+  good.coverPhoto = goodsAttr?goodsAttr.coverPhoto:undefined
+  good.album = goodsAttr?goodsAttr.album:undefined
+  good.status = goodsAttr?goodsAttr.status:undefined
+  good.detail = goodsAttr?goodsAttr.detail:undefined
   good.updatedAt = goodLean.updatedAt
   if(promotion&&promotion.attributes&&promotion.attributes.status!=0&&nowDate<promotion.attributes.endDate){
     var promotionAttr = promotion.attributes
