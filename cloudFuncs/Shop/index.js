@@ -500,7 +500,9 @@ function shopCertificateWithoutInviteCode(request, response) {
             })
           })
         } else {
-          Promise.all([currentUser.save(), shop.save()]).then((shopInfo) => {
+          currentUser.save().then(() => {
+            return shop.save()
+          }).then((shopInfo) => {
             response.success({
               errcode: 0,
               message: '店铺注册认证成功',

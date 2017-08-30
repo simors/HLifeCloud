@@ -388,12 +388,14 @@ function paymentEvent(request, response) {
   var mysqlConn = undefined
   var shop = undefined
 
+  console.log('payment metadata:', charge.metadata)
+
   insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
-        var inviter = shop.attributes.inviter.id
+        var inviter = shop.attributes.inviter ? shop.attributes.inviter.id : undefined
         console.log('shop inviter:', inviter)
         shopInviterId = inviter
         return promoterFunc.getPromoterByUserId(inviter)
@@ -402,6 +404,8 @@ function paymentEvent(request, response) {
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      }).catch((err) => {
+        throw err
       })
     } else if (fromUser && toUser) {
       console.log('invoke common paid: ', fromUser, ', ', toUser)
@@ -458,16 +462,13 @@ function paymentEvent(request, response) {
     return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
-    console.log('begin to send wechat message: ', shopInviterId)
     if (!toUser) {
+      console.log('begin to send wechat message: ', shopInviterId)
       if (dealType == INVITE_SHOP) {
         authFunc.getOpenidById(shopInviterId).then((openid) => {
           mpMsgFuncs.sendInviteShopTmpMsg(openid, shop.attributes.shopName, new Date())
         }, (error) => {
-          response.error({
-            errcode: 1,
-            message: 'Send wechat message error:' + error.message,
-          })
+          console.log('Send message to shop inviter ', shopInviterId , " error")
         })
       }
       response.success({
@@ -499,10 +500,7 @@ function paymentEvent(request, response) {
           message: 'paymentEvent charge into mysql success!',
         })
       }, (error) => {
-        response.error({
-          errcode: 1,
-          message: 'Send wechat message error:' + error.message,
-        })
+        console.log('Send message to user ', toUser , " error")
       })
     }
   }).catch((error) => {
