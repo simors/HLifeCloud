@@ -295,9 +295,10 @@ function promotionFromLeancloudObject(leanPromotion, showUser) {
 
 function shopGoodFromLeancloudObject(goodLean){
   // console.log('goodLean----->',goodLean.attributes)
-  var shop = goodsAttr?goodsAttr.targetShop:undefined
   // var shopAttr = shop.attributes
   var goodsAttr = goodLean.attributes
+  var shop = goodsAttr?goodsAttr.targetShop:undefined
+
   var promotion = goodsAttr?goodsAttr.goodsPromotion:undefined
   var good = {}
   var nowDate = new Date()
