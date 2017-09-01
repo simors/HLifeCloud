@@ -4,6 +4,8 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 var shopUtil = require('../../utils/shopUtil');
+var redisUtils = require('../../utils/redisUtils')
+var systemConfigNames = require('../../constants/systemConfigNames')
 
 function updateCategoryStatus(request,response){
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
@@ -616,6 +618,35 @@ function updateReplyStatus(request,response){
   })
 }
 
+function setPromotionDayPay(request,response){
+  redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY, request.params.dayPay).then((item)=> {
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((item)=> {
+      response.success(item)
+    }, (err)=> {
+      response.error(err)
+    })
+    }, (err)=> {
+      response.error(err)
+    })
+  }
+
+function setPromotionMaxNmu(request,response) {
+  redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, request.params.maxNum).then((item)=>{
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((item)=>{
+      response.success(item)
+
+    },(err)=>{
+      response.error(err)
+    })
+  },(err)=>{
+    response.error(err)
+  })
+
+}
+
+
+
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -633,6 +664,8 @@ var ShopManagerFunc = {
   deleteShopCoverImg:deleteShopCoverImg,
   updateCategoryStatus:updateCategoryStatus,
   updateShopCategoryId:updateShopCategoryId,
+  setPromotionDayPay: setPromotionDayPay,
+  setPromotionMaxNmu: setPromotionMaxNmu
 
 }
 module.exports = ShopManagerFunc
