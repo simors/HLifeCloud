@@ -2338,6 +2338,53 @@ function getPromoterQrCode(request, response) {
 
 }
 
+/**
+ *  获取我的推广二维码(gm优化)
+ * @param request
+ * @param response
+ */
+function gmCreatePromoterQrCode(request, response) {
+  var unionid = request.params.unionid
+  var query = new AV.Query('_User')
+  var avatar = undefined
+  var nickname = undefined
+  var userId = undefined
+  query.equalTo("authData.weixin.openid", unionid)
+
+  query.first().then((user) => {
+    if(!user) {
+      throw new Error('找不到该用户')
+    }
+    avatar = user.attributes.avatar
+    nickname = user.attributes.nickname
+    userId = user.id
+    var promoterQuery = new AV.Query('Promoter')
+    promoterQuery.equalTo('user', user)
+    return promoterQuery.first()
+  }).then((promoter) => {
+    if(!promoter) {
+      throw new Error('找不到该用户的推广元信息')
+    }
+    var qrcode = promoter.get('qrcode')
+    if(qrcode) {
+      response.success({
+        isSignIn: true,
+        qrcode: qrcode
+      })
+    } else {
+      createPromoterQrCode(userId).then((qrcode) => {
+        response.success({
+          isSignIn: true,
+          qrcode: qrcode
+        })
+      })
+    }
+  }).catch((error) => {
+    console.log("getPromoterQrCode", error)
+    response.error(error)
+  })
+}
+
 function composeQrCodeImage(background, qrcode, logo, avatar, name) {
   images(background).draw(
     images(qrcode).size(320),
@@ -2394,6 +2441,7 @@ function createPromoterQrCode(userId) {
         })
     })
   }).then(() => {
+    console.log("gm process success")
     return mpMaterialFuncs.uploadMaterial(tmpPromoterQrcodrPath)
   }).then((result) => {
     mediaId = result.mediaId
@@ -2423,13 +2471,13 @@ function createPromoterQrCode(userId) {
 }
 
 function promoterTest(request, response) {
-  // var userId = "59776b3d8d6d810057e9dcfa"
-  // createPromoterQrCode(userId).then((result) => {
-  //   console.log("createPromoterQrCode", result)
-  //   response.success(result)
-  // }).catch((error) => {
-  //   response.error(error)
-  // })
+  var userId = "59a8fe8044d9040058421bb7"
+  createPromoterQrCode(userId).then((result) => {
+    console.log("createPromoterQrCode", result)
+    response.success(result)
+  }).catch((error) => {
+    response.error(error)
+  })
 }
 
 var PromoterFunc = {
