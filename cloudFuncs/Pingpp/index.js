@@ -627,8 +627,8 @@ function createTransfers(request, response) {
           amount: amount,
           currency: "cny",
           type: "b2c",
-          // recipient: openid, //微信openId
-          recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //测试
+          recipient: openid, //微信openId
+          // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //测试
           extra: {
             // user_name: userName,
             // force_check: true,
