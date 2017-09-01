@@ -16,10 +16,19 @@ var ejs = require('ejs')
 var fs = require('fs')
 
 const CHINA_WIDTH = 5500.0      // 全国最大宽度
+const shopPromotionMaxNum = 3   // 店铺最多活动数量
+const promotionPayByDay = 10    // 店铺推广日费用
+
 
 function constructShopInfo(leanShop) {
+  if (!leanShop) {
+    return undefined
+  }
   var shop = {}
   var shopAttr = leanShop.attributes
+  if (!shopAttr) {
+    return undefined
+  }
   shop.id = leanShop.id
   shop.name = shopAttr.name
   shop.phone = shopAttr.phone
@@ -98,7 +107,13 @@ function constructShopInfo(leanShop) {
 
 function constructShopPromotion(leanPromotion, showUser) {
   var constructUserInfo = require('../Auth').constructUserInfo
+  if (!leanPromotion) {
+    return undefined
+  }
   var prompAttr = leanPromotion.attributes
+  if (!prompAttr) {
+    return undefined
+  }
   var promotion = {}
   promotion.id = leanPromotion.id
   promotion.coverUrl = prompAttr.coverUrl
@@ -114,13 +129,17 @@ function constructShopPromotion(leanPromotion, showUser) {
   promotion.geo = prompAttr.geo
 
   var targetShop = {}
-  var targetShopAttr = prompAttr.targetShop.attributes
-  targetShop.id = prompAttr.targetShop.id
-  targetShop.shopName = targetShopAttr.shopName
-  targetShop.geoDistrict = targetShopAttr.geoDistrict
-  targetShop.geo = targetShopAttr.geo
-  if (showUser) {
-    targetShop.owner = constructUserInfo(targetShopAttr.owner)
+  if (prompAttr.targetShop) {
+    var targetShopAttr = prompAttr.targetShop.attributes
+    targetShop.id = prompAttr.targetShop.id
+    targetShop.shopName = targetShopAttr.shopName
+    targetShop.geoDistrict = targetShopAttr.geoDistrict
+    targetShop.geo = targetShopAttr.geo
+    if (showUser) {
+      targetShop.owner = constructUserInfo(targetShopAttr.owner)
+    }
+  } else {
+    targetShop = undefined
   }
 
   promotion.targetShop = targetShop
@@ -396,8 +415,7 @@ function shopCertificate(request, response) {
  * @param request
  * @param response
  */
-function shopCertificateNew(request, response) {
-
+function shopCertificateWithoutInviteCode(request, response) {
   var phone = request.params.phone
   var shopName = request.params.shopName
   var shopAddress = request.params.shopAddress
@@ -453,18 +471,19 @@ function shopCertificateNew(request, response) {
           shop.set('geo', point)
         }
         shop.set('geoProvince', String(geoProvince))
-        shop.set('geoProvinceCode',String(geoProvinceCode))
+        shop.set('geoProvinceCode', String(geoProvinceCode))
         shop.set('geoCity', String(geoCity))
         shop.set('geoCityCode', String(geoCityCode))
         shop.set('geoDistrict', String(geoDistrict))
         shop.set('geoDistrictCode', String(geoDistrictCode))
         shop.set('owner', currentUser)
-        if(upPromoter) {
-          shop.set('inviter', upPromoter.attributes.user)
-        }
+        currentUser.addUnique('identity', IDENTITY_SHOPKEEPER)
 
-        if(upPromoter) {
-          PromoterFunc.incrementInviteShopNum(upPromoter.id).then(() => {
+        if (upPromoter) {
+          shop.set('inviter', upPromoter.attributes.user)
+
+          var incShopInvite = PromoterFunc.incrementInviteShopNum(upPromoter.id)
+          Promise.all([currentUser.save(), incShopInvite]).then(() => {
             return shop.save()
           }).then((shopInfo) => {
             response.success({
@@ -481,7 +500,9 @@ function shopCertificateNew(request, response) {
             })
           })
         } else {
-          shop.save().then((shopInfo) => {
+          currentUser.save().then(() => {
+            return shop.save()
+          }).then((shopInfo) => {
             response.success({
               errcode: 0,
               message: '店铺注册认证成功',
@@ -564,42 +585,6 @@ function getShopInviter(request, response) {
   })
 }
 
-function getShopPromotionMaxNum(request, response) {
-
-  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNum)=> {
-    // console.log('redisUtils.getAsync.shopPromotionMaxNum===', shopPromotionMaxNum)
-
-    if (!shopPromotionMaxNum || shopPromotionMaxNum < 0) {
-      var query = new AV.Query('SystemConfig')
-      query.equalTo('cfgName', systemConfigNames.SHOP_PROMOTION_MAX_NUM)
-      query.first().then((result)=> {
-        shopPromotionMaxNum = parseInt(result.attributes.cfgValue)
-        // console.log('redisUtils.query.shopPromotionMaxNum===', shopPromotionMaxNum)
-        redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
-        response.success({
-          errcode: '0',
-          message: shopPromotionMaxNum
-        })
-      }, (error)=> {
-        response.error({
-          errcode: '-1',
-          message: error.message || '网络异常'
-        })
-      })
-    } else {
-      response.success({
-        errcode: '0',
-        message: shopPromotionMaxNum
-      })
-    }
-  }, (error)=> {
-    response.error({
-      errcode: '-1',
-      message: error.message || '网络异常'
-    })
-  })
-
-}
 
 /**
  * 根据店铺id获取店铺信息
@@ -988,6 +973,47 @@ function fetchNearbyShopPromotion(request, response) {
   })
 }
 
+/**
+ * 获取周边店铺商品推广信息
+ * @param request
+ * @param response
+ */
+function fetchNearbyShopGoodPromotion(request, response) {
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
+  var limit = request.params.limit || 20
+  var nowDate = request.params.nowDate
+  var query = new AV.Query('ShopGoodPromotion')
+  query.equalTo('status', 1)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
+
+  if (lastDistance) {
+    var notIncludeQuery = new AV.Query('ShopGoodPromotion')
+    notIncludeQuery.equalTo('status', 1)
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
+  // query.lessThanOrEqualTo('startDate', nowDate)
+  query.greaterThanOrEqualTo('endDate', nowDate)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  })
+}
+
 function submitCompleteShopInfo(request, response) {
   var payload = request.params.payload
   // var shop = request.params.shop
@@ -1043,6 +1069,8 @@ function submitEditShopInfo(request, response) {
   var shop = AV.Object.createWithoutData('Shop', request.params.shop.shopId)
   var album = request.params.shop.album
   var coverUrl = request.params.shop.coverUrl
+  var shopCategoryObjectId = payload.shopCategoryObjectId
+
 
   var openTime = payload.openTime
   var contactNumber = payload.contactNumber
@@ -1059,13 +1087,19 @@ function submitEditShopInfo(request, response) {
   var geoProvinceCode = shop.geoProvinceCode
   var geoCityCode = shop.geoCityCode
   var geoDistrictCode = shop.geoDistrictCode
-
+  var targetShopCategory = null
   var containedTag = []
   if (tagIds && tagIds.length) {
     tagIds.forEach((tagId) => {
       containedTag.push(AV.Object.createWithoutData('ShopTag', tagId))
     })
   }
+
+  if (shopCategoryObjectId) {
+    targetShopCategory = AV.Object.createWithoutData('ShopCategory', shopCategoryObjectId)
+    shop.set('targetShopCategory', targetShopCategory)
+  }
+
   shop.set('shopName', shopName)
   shop.set('shopAddress', shopAddress)
   shop.set('containedTag', containedTag)
@@ -1079,12 +1113,13 @@ function submitEditShopInfo(request, response) {
   if (coverUrl) {
     shop.set('coverUrl', coverUrl)
   }
+  var point = undefined
   if (geo) {
     var geoArr = geo.split(',')
     var latitude = parseFloat(geoArr[0])
     var longitude = parseFloat(geoArr[1])
     var numberGeoArr = [latitude, longitude]
-    var point = new AV.GeoPoint(numberGeoArr)
+    point = new AV.GeoPoint(numberGeoArr)
     shop.set('geo', point)
   }
   shop.set('geoProvince', geoProvince)
@@ -1098,7 +1133,23 @@ function submitEditShopInfo(request, response) {
   // console.log('_submitEditShopInfo.shop===', shop)
   shop.save().then((shopInfo)=> {
     // console.log('new ShopInfo:', shopInfo)
-    response.success({errcode: 0, goodsInfo: shopInfo})
+    if (geo) {
+      var query = new AV.Query('ShopGoodPromotion')
+      query.equalTo('targetShop', shop)
+      query.find().then((promotions)=> {
+        var localPromotions = []
+        promotions.forEach((item)=> {
+          item.set('geo', point)
+        })
+        return AV.Object.saveAll(promotions);
+      }).then((promotionList)=> {
+        response.success({errcode: 0, goodsInfo: shopInfo})
+      }, (error)=> {
+        response.error({errcode: 1, message: '店铺更新失败'})
+      })
+    } else {
+      response.success({errcode: 0, goodsInfo: shopInfo})
+    }
   }, (err)=> {
     // console.log(err)
     response.error({errcode: 1, message: '店铺更新失败'})
@@ -1174,6 +1225,377 @@ function fetchNearbyShops(request, response) {
   })
 }
 
+function submitShopPromotion(request, response) {
+  // console.log('submitShopPromotion.payload===', payload)
+  var payload = request.params.payload
+  var goodId = payload.goodId
+  var status = payload.status
+  var startDate = payload.startDate
+  var endDate = payload.endDate
+  var shopId = payload.shopId
+  var typeId = payload.typeId
+  var type = payload.type
+  var typeDesc = payload.typeDesc
+  var promotionPrice = payload.price
+  var abstract = payload.abstract
+  var geo = payload.geo
+
+  var ShopPromotion = AV.Object.extend('ShopGoodPromotion')
+  var shopPromotion = new ShopPromotion()
+  if (goodId) {
+    var good = AV.Object.createWithoutData('ShopGoods', goodId)
+    shopPromotion.set('targetGood', good)
+  }
+  var shop = null
+  if (shopId) {
+    shop = AV.Object.createWithoutData('Shop', shopId)
+    shopPromotion.set('targetShop', shop)
+
+  }
+  shopPromotion.set('startDate', startDate)
+  shopPromotion.set('endDate', endDate)
+  shopPromotion.set('typeId', typeId)
+  shopPromotion.set('type', type)
+  shopPromotion.set('typeDesc', typeDesc)
+  shopPromotion.set('promotionPrice', promotionPrice)
+  shopPromotion.set('abstract', abstract)
+  shopPromotion.set('geo', geo)
+  shopPromotion.set('status', status)
+  shopPromotion.save().then((results) => {
+    var good = AV.Object.createWithoutData('ShopGoods', goodId)
+    var promotion = AV.Object.createWithoutData('ShopGoodPromotion', results.id)
+    good.set('goodsPromotion', promotion)
+    // console.log('shop/////>>>>>>>>>>', shop)
+    good.save().then((result)=> {
+      shop.addUnique('containedPromotions', [promotion])
+      shop.save().then((shopInfo)=>{
+        var query = new AV.Query('ShopGoodPromotion')
+        query.include(['targetGood', 'targetShop'])
+        query.get(results.id).then((promotion)=> {
+          var promotionInfo = shopUtil.promotionFromLeancloudObject(promotion)
+          response.success(promotionInfo)
+
+        }, (err)=> {
+          response.error(err)
+        })
+      },(err)=>{
+        response.error(err)
+      })
+
+      // console.log('rep---->>>>', rep)
+    }, (error)=> {
+      response.error(error)
+      // console.log('error.........>>>>', error)
+    })
+  }, function (err) {
+    response.error(err)
+  })
+}
+
+function fetchOpenPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 20
+  var query = new AV.Query('ShopGoodPromotion')
+  var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
+  var status = request.params.status
+  query.equalTo('status', 1)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', shop)
+  query.greaterThanOrEqualTo('endDate', nowDate)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  })
+}
+
+function fetchCloPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 20
+  var nowDate = request.params.nowDate
+  var lastCreatedAt = request.params.lastCreatedAt
+  var status = request.params.status
+  var queryClo = new AV.Query('ShopGoodPromotion')
+  queryClo.equalTo('status', 0)
+  var queryDat = new AV.Query('ShopGoodPromotion')
+  queryDat.lessThanOrEqualTo('endDate', nowDate)
+  var query = AV.Query.or(queryClo, queryDat)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', shop)
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+  query.addDescending('createdAt')
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取关闭活动失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取关闭活动失败'})
+  })
+}
+
+function getShopPromotionMaxNum(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((shopPromotionMaxNumRedis)=> {
+    if (!shopPromotionMaxNumRedis) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, shopPromotionMaxNum)
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNum
+      })
+    } else {
+      response.success({
+        errcode: '0',
+        message: shopPromotionMaxNumRedis
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
+  })
+}
+
+function getShopPromotionDayPay(request, response) {
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((promotionDayPay)=> {
+    if (!promotionDayPay || promotionDayPay < 0) {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY, promotionPayByDay)
+      response.success({
+        errcode: '0',
+        message: promotionPayByDay
+      })
+    } else {
+      response.success({
+        errcode: '0',
+        message: promotionDayPay
+      })
+    }
+  }, (error)=> {
+    response.error({
+      errcode: '-1',
+      message: error.message || '网络异常'
+    })
+  })
+}
+
+function closeShopPromotion(request, response) {
+  var promotionId = request.params.promotionId
+  var promotion = AV.Object.createWithoutData('ShopGoodPromotion', promotionId)
+  promotion.set('status', 0)
+  promotion.save().then((item)=> {
+    var query = new AV.Query('ShopGoodPromotion')
+    query.include(['targetShop', 'targetGood'])
+    query.get(item.id).then((promotionInfo)=> {
+      var promotion = shopUtil.promotionFromLeancloudObject(promotionInfo)
+      response.success({errcode: '0', promotion: promotion})
+    }, (err)=> {
+      response.error(err)
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
+function pubulishShopComment(request, response) {
+  var payload = request.params.payload
+  var ShopComment = AV.Object.extend('ShopComment')
+  var shopComment = new ShopComment()
+  var shop = AV.Object.createWithoutData('Shop', payload.shopId)
+  var user = AV.Object.createWithoutData('_User', payload.userId)
+  var parentComment = undefined
+  var replyComment = undefined
+  shopComment.set('targetShop', shop)
+  shopComment.set('user', user)
+  shopComment.set('content', payload.content)
+  shopComment.set('blueprints', payload.blueprints)
+  if (payload.commentId && payload.commentId != '') {
+    parentComment = AV.Object.createWithoutData('ShopComment', payload.commentId)
+    shopComment.set('parentComment', parentComment)
+  }
+  if (payload.replyId && payload.replyId != '') {
+    replyComment = AV.Object.createWithoutData('ShopComment', payload.replyId)
+    shopComment.set('replyComment', replyComment)
+  }
+
+  shopComment.save().then((comment)=> {
+    shop.increment("commentNum", 1)
+    shop.save().then((shop)=> {
+      if (payload.commentId && payload.commentId != '') {
+        parentComment.increment("commentCount", 1)
+        parentComment.save().then(()=> {
+          var query = new AV.Query('ShopComment')
+          query.include(['user']);
+          query.include(['parentComment']);
+          query.include(['parentComment.user']);
+          query.include(['replyComment'])
+          query.include(['replyComment.user'])
+          query.get(comment.id).then((result)=> {
+            var position = result.attributes.position
+            var parentComment = result.attributes.parentComment
+            var user = result.attributes.user
+            var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
+            response.success(commentInfo)
+          }, (err)=> {
+            response.error(err)
+          })
+        }, (err)=> {
+          response.error(err)
+        })
+      } else {
+        var query = new AV.Query('ShopComment')
+        query.include(['user']);
+        query.include(['parentComment']);
+        query.include(['parentComment.user']);
+        query.get(comment.id).then((result)=> {
+          var commentInfo = shopUtil.newShopCommentFromLeanCloudObject(result)
+          response.success(commentInfo)
+        }, (err)=> {
+          response.error(err)
+        })
+      }
+    }, (err)=> {
+      response.error(err)
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+
+}
+
+function fetchShopComments(request, response) {
+  var shopId = request.params.shopId
+  var commentId = request.params.commentId
+  var isRefresh = request.params.isRefresh;
+  var lastCreatedAt = request.params.lastCreatedAt;
+  var query = new AV.Query('ShopComment')
+
+  if (shopId && shopId != '') {
+    var shop = AV.Object.createWithoutData('Shop', shopId)
+    query.equalTo('targetShop', shop)
+  }
+
+  if (commentId && commentId != '') {
+    var comment = AV.Object.createWithoutData('ShopComment', commentId)
+    query.equalTo('parentComment', comment)
+  }else{
+    query.doesNotExist('parentComment')
+  }
+
+  // console.log('isRefresh====', isRefresh)
+  // console.log('lastCreatedAt====', lastCreatedAt)
+  if (!isRefresh && lastCreatedAt) { //分页查询
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  query.limit(10)
+
+  query.include(['user']);
+  query.include(['parentComment']);
+  query.include(['parentComment.user']);
+  query.include(['replyComment'])
+  query.include(['replyComment.user'])
+
+  query.descending('createdAt')
+  query.find().then((results)=> {
+    var topicCommentList = []
+    var allComments = []
+    var commentList = []
+    results.forEach((result)=> {
+      var position = result.attributes.position
+      var parentComment = result.attributes.parentComment
+      var replyComment = result.attributes.replyComment
+      var user = result.attributes.user
+      console.log('result========>', result.attributes.replyComment)
+      var shopComment = shopUtil.newShopCommentFromLeanCloudObject(result)
+      // console.log('result===<',result.id)
+      allComments.push(shopComment)
+      commentList.push(shopComment.commentId)
+    })
+    response.success({allComments: allComments, commentList: commentList})
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
+function fetchMyShopCommentsUps(request, response) {
+  var userId = request.params.userId
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user', user)
+  // query.equalTo('upType','topicComment')
+  query.equalTo('status', true)
+  query.limit(1000)
+  query.descending('createdAt')
+  query.find().then((results)=> {
+    var commentList = []
+    results.forEach((result)=> {
+      commentList.push(result.attributes.targetShopComment.id)
+    })
+    response.success({commentList: commentList})
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
+function userUpShopComment(request, response) {
+  var payload = request.params.payload
+  var shopCommentId = payload.shopCommentId
+  var userId = payload.userId
+  var targetShopComment = AV.Object.createWithoutData('ShopComment', shopCommentId)
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('ShopCommentUp')
+  query.equalTo('user', user)
+  query.equalTo('targetShopComment', targetShopComment)
+  query.equalTo('status', true)
+  query.find().then((result)=> {
+    if (result && result.length) {
+      response.error({message: '您已经点过赞了！'})
+    } else {
+      var ShopCommentUp = AV.Object.extend('ShopCommentUp')
+      var shopCommentUp = new ShopCommentUp()
+      shopCommentUp.set('targetShopComment', targetShopComment)
+      shopCommentUp.set('user', user)
+      shopCommentUp.set('status', true)
+      shopCommentUp.save().then((up)=> {
+        targetShopComment.increment("upCount", 1)
+        targetShopComment.save().then(()=> {
+          response.success(up.id)
+
+        }, (err)=> {
+          response.error(err)
+        })
+      }, (err)=> {
+        response.error(err)
+      })
+    }
+  }, (err)=> {
+    response.error(err)
+  })
+}
 var shopFunc = {
   constructShopInfo: constructShopInfo,
   fetchShopCommentList: fetchShopCommentList,
@@ -1195,7 +1617,18 @@ var shopFunc = {
   modifyPromotionGeoPoint: modifyPromotionGeoPoint,
   submitCompleteShopInfo: submitCompleteShopInfo,
   submitEditShopInfo: submitEditShopInfo,
-  shopCertificateNew: shopCertificateNew,
+  shopCertificateWithoutInviteCode: shopCertificateWithoutInviteCode,
+  submitShopPromotion: submitShopPromotion,
+  fetchNearbyShopGoodPromotion: fetchNearbyShopGoodPromotion,
+  fetchOpenPromotionsByShopId: fetchOpenPromotionsByShopId,
+  fetchCloPromotionsByShopId: fetchCloPromotionsByShopId,
+  getShopPromotionDayPay: getShopPromotionDayPay,
+  closeShopPromotion: closeShopPromotion,
+  pubulishShopComment: pubulishShopComment,
+  fetchShopComments: fetchShopComments,
+  fetchMyShopCommentsUps: fetchMyShopCommentsUps,
+  userUpShopComment: userUpShopComment
+
 }
 
 module.exports = shopFunc

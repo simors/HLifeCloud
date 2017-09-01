@@ -21,6 +21,7 @@ const INVITE_SHOP = 2           // 邀请店铺获得的收益
 const BUY_GOODS = 3             // 购买商品
 const REWARD = 4                // 打赏
 const WITHDRAW = 5              // 取现
+const PUBLISH_PROMOTION = 6     // 发布店铺活动
 
 // 异常状态
 const NOT_FIXED = 1             // 异常未被处理
@@ -385,32 +386,16 @@ function paymentEvent(request, response) {
   var shopInviterId = undefined
   var promoterFunc = require('../Promoter')
   var mysqlConn = undefined
+  var shop = undefined
 
-  return insertChargeInMysql(charge).then(() => {
-    if (promoterId) {
-      console.log('invoke promoter paid:', promoterId, ', ', amount)
-      var promoter = undefined
-      return promoterFunc.getPromoterById(promoterId).then((promoterInfo) => {
-        promoter = promoterInfo
-        return promoterFunc.getUpPromoter(promoter)
-      }).then((upPromoter) => {
-        if (!upPromoter) {
-          return new Promise((resolve) => {
-            resolve()
-          })
-        }
-        upPromoterId = upPromoter.id
-        return promoterFunc.calPromoterInviterEarnings(upPromoter, promoter, amount, charge)
-      }).then(() => {
-        // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
-        return promoterFunc.promoterPaid(promoterId)
-      })
-    } else if (shopId && amount) {
+  console.log('payment metadata:', charge.metadata)
+
+  insertChargeInMysql(charge).then(() => {
+    if (shopId && amount) {
       console.log('invoke shop paid:', shopId, ', ', amount)
-      var shop = undefined
       return shopFunc.getShopById(shopId).then((shopInfo) => {
         shop = shopInfo
-        var inviter = shop.attributes.inviter.id
+        var inviter = shop.attributes.inviter ? shop.attributes.inviter.id : undefined
         console.log('shop inviter:', inviter)
         shopInviterId = inviter
         return promoterFunc.getPromoterByUserId(inviter)
@@ -419,6 +404,8 @@ function paymentEvent(request, response) {
       }).then(() => {
         // app端也会发起更改状态的请求，这里再次发起请求为保证数据可靠性
         return shopFunc.updateShopInfoAfterPaySuccess(shopId, amount)
+      }).catch((err) => {
+        throw err
       })
     } else if (fromUser && toUser) {
       console.log('invoke common paid: ', fromUser, ', ', toUser)
@@ -455,29 +442,67 @@ function paymentEvent(request, response) {
       })
     }
   }).then(() => {
-    //发送微信通知消息
-    authFunc.getOpenidById(toUser).then((openid) => {
-      switch (dealType) {
-        case REWARD:
-          mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
-          break
-        case BUY_GOODS:
-          authFunc.getNicknameById(fromUser).then((nickname) => {
-            mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
-          })
-          break
-        case INVITE_SHOP:
-          mpMsgFuncs.sendInviteShopTmpMsg(openid, amount, new Date())
-          break
-        default:
-          break
+    var createShopOrder = require('../Shop/ShopOrders').createShopOrder
+    var metadata = charge.metadata
+    if (dealType == BUY_GOODS) {
+      var order = {
+        buyerId: fromUser,
+        vendorId: metadata.vendorId,
+        goodsId: metadata.goodsId,
+        receiver: metadata.receiver,
+        receiverPhone: metadata.receiverPhone,
+        receiverAddr: metadata.receiverAddr,
+        goodsAmount: Number(metadata.goodsAmount),
+        paid: Number(amount),
+        remark: metadata.remark,
       }
-    })
+      console.log('begin to create shop order: ', order)
+      return createShopOrder(order)
+    }
+    return new Promise((resolve) => resolve())
+  }).then(() => {
+    //发送微信通知消息
+    if (!toUser) {
+      console.log('begin to send wechat message: ', shopInviterId)
+      if (dealType == INVITE_SHOP) {
+        authFunc.getOpenidById(shopInviterId).then((openid) => {
+          mpMsgFuncs.sendInviteShopTmpMsg(openid, shop.attributes.shopName, new Date())
+        }, (error) => {
+          console.log('Send message to shop inviter ', shopInviterId , " error")
+        })
+      }
+      response.success({
+        errcode: 0,
+        message: 'paymentEvent charge into mysql success!',
+      })
+    } else {
+      console.log('begin to send wechat message: ', toUser)
+      authFunc.getOpenidById(toUser).then((openid) => {
+        console.log('to user openid:', toUser, openid)
+        if (!openid) {
+          return
+        }
+        switch (dealType) {
+          case REWARD:
+            mpMsgFuncs.sendRewardTmpMsg(openid, amount, topicTitle, new Date())
+            break
+          case BUY_GOODS:
+            authFunc.getNicknameById(fromUser).then((nickname) => {
+              mpMsgFuncs.sendNewGoodsTmpMsg(nickname, openid, amount, charge.order_no, new Date())
+            })
+            break
+          default:
+            break
+        }
 
-    response.success({
-      errcode: 0,
-      message: 'paymentEvent charge into mysql success!',
-    })
+        response.success({
+          errcode: 0,
+          message: 'paymentEvent charge into mysql success!',
+        })
+      }, (error) => {
+        console.log('Send message to user ', toUser , " error")
+      })
+    }
   }).catch((error) => {
     var exp = {
       amount: amount,

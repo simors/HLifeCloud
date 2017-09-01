@@ -23,8 +23,8 @@ router.get('/:id', function (req, res, next) {
 
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/topicShare/callback/' + topicId
-  if(userId) {
-    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
+  if(userId && userId != 'undefined') {
+    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_userinfo')
     res.redirect(url)
   } else {
     res.redirect(auth_callback_url)
@@ -36,8 +36,6 @@ router.get('/callback/:id', function (req, res, next) {
   var topicId = req.params.id
   var userId = req.query.state
   var current_unionid = undefined
-  console.log("code:", code)
-  console.log("userId:", userId)
 
   if(code && userId) {
     mpAuthFuncs.getAccessToken(code).then((result) => {
@@ -45,7 +43,6 @@ router.get('/callback/:id', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
-      console.log("bind unionid", unionid, current_unionid)
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query(Topics)

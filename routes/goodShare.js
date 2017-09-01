@@ -21,8 +21,8 @@ router.get('/:id', function (req, res, next) {
 
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/goodShare/callback/' + goodId
-  if(userId) {
-    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
+  if(userId && userId != 'undefined') {
+    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_userinfo')
     res.redirect(url)
   } else {
     res.redirect(auth_callback_url)
@@ -41,7 +41,6 @@ router.get('/callback/:id', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
-      console.log("bind unionid", unionid, current_unionid)
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query('ShopGoods')
@@ -49,7 +48,6 @@ router.get('/callback/:id', function (req, res, next) {
       return query.get(goodId)
     }).then((result) => {
       var goodInfo = result.attributes
-      // console.log('goodInf',goodInfo)
       var shopInfo = goodInfo.targetShop.attributes
       var status = goodInfo.status
       if(status === 1) {
@@ -114,45 +112,5 @@ router.get('/callback/:id', function (req, res, next) {
     })
   }
 })
-
-
-// router.get('/:id', function(req, res, next) {
-//   var goodId = req.params.id;
-//   // console.log('id',goodId)
-//   if(goodId) {
-//     var query = new AV.Query('ShopGoods')
-//     query.include('targetShop')
-//     query.get(goodId).then((result) => {
-//       var goodInfo = result.attributes
-//       // console.log('goodInf',goodInfo)
-//       var shopInfo = goodInfo.targetShop.attributes
-//       var status = goodInfo.status
-//       if(status === 1) {
-//         res.render('goodShare', {
-//           goodTitle: goodInfo.goodsName || '汇邻优店',
-//           coverPhoto: goodInfo.coverPhoto || '',
-//           originalPrice: goodInfo.originalPrice || '',
-//           shopTitle: shopInfo.shopName || '汇邻优店',
-//           album:goodInfo.album || [],
-//           price: goodInfo.price || 0,
-//           detail: JSON.parse(goodInfo.detail) || [],
-//           phone: shopInfo.contactNumber || '未知电话',
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         })
-//       } else {
-//         res.render('shareError', {
-//           title: goodInfo.title || '汇邻优店',
-//           message: "商品已删除！",
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         });
-//       }
-//
-//     }).catch(next)
-//   } else {
-//     console.log("Failed to load Shop", req.params.id)
-//     next(new Error('Failed to load Shop ' + req.params.id));
-//   }
-// });
-
 
 module.exports = router;

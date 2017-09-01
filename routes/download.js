@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
 
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/download/callback'
-  if(userId) {
+  if(userId && userId != 'undefined') {
     var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
     res.redirect(url)
   } else {
@@ -36,7 +36,6 @@ router.get('/callback', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
-      console.log("bind unionid", unionid, current_unionid)
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query(AppVersion)
@@ -71,24 +70,5 @@ router.get('/callback', function (req, res, next) {
     })
   }
 })
-
-
-// // 查询 Todo 列表
-// router.get('/', function(req, res, next) {
-//
-//   var query = new AV.Query(AppVersion)
-//   query.limit(1)
-//   query.descending('createdAt')
-//   query.first().then((result) => {
-//     var fileUrl = result.attributes.fileUrl
-//     res.render('download', {
-//       androidAppDownloadUrl: fileUrl || 'https://www.pgyer.com/pn66'
-//     })
-//   }).catch(() => {
-//     res.render('download', {
-//       androidAppDownloadUrl: 'https://www.pgyer.com/pn66'
-//     })
-//   })
-// })
 
 module.exports = router;

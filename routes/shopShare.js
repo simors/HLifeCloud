@@ -21,8 +21,8 @@ router.get('/:id', function (req, res, next) {
 
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/shopShare/callback/' + ShopId
-  if(userId) {
-    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
+  if(userId && userId != 'undefined') {
+    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_userinfo')
     res.redirect(url)
   } else {
     res.redirect(auth_callback_url)
@@ -41,7 +41,6 @@ router.get('/callback/:id', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
-      console.log("bind unionid", unionid, current_unionid)
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query(Shop)
@@ -103,41 +102,6 @@ router.get('/callback/:id', function (req, res, next) {
     })
   }
 })
-
-// 查询 Shop 详情
-// router.get('/:id', function(req, res, next) {
-//   var ShopId = req.params.id;
-//
-//   if(ShopId) {
-//     var query = new AV.Query(Shop)
-//
-//     query.get(ShopId).then((result) => {
-//       var shopInfo = result.attributes
-//       var status = shopInfo.status
-//       if(status === 1) {
-//         res.render('shopShare', {
-//           title: shopInfo.shopName || '汇邻优店',
-//           coverUrl: shopInfo.coverUrl || '',
-//           address: shopInfo.shopAddress || '未知地址',
-//           phone: shopInfo.contactNumber || '未知电话',
-//           openTime: shopInfo.openTime || '8:30-22:00',
-//           ourSpecial: shopInfo.ourSpecial || '没有特色就是最大的特色',
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         })
-//       } else {
-//         res.render('shareError', {
-//           title: shopInfo.title || '汇邻优店',
-//           message: "店铺已经被删除！",
-//           appDownloadLink: GLOBAL_CONFIG.APP_DOWNLOAD_LINK,
-//         });
-//       }
-//
-//     }).catch(next)
-//   } else {
-//     console.log("Failed to load Shop", req.params.id)
-//     next(new Error('Failed to load Shop ' + req.params.id));
-//   }
-// });
 
 
 module.exports = router;

@@ -11,23 +11,30 @@ var shopUtil = require('../../utils/shopUtil');
  * @param user
  */
 function constructUserInfo(user) {
+  if (!user) {
+    return undefined
+  }
   var userInfo = {}
+  var userAttr = user.attributes
+  if (!userAttr) {
+    return undefined
+  }
   userInfo.id = user.id
-  userInfo.nickname = user.attributes.nickname
-  userInfo.username = user.attributes.username
-  userInfo.birthday = user.attributes.birthday
-  userInfo.phone = user.attributes.mobilePhoneNumber
-  userInfo.status = user.attributes.status
-  userInfo.avatar = user.attributes.avatar
-  userInfo.gender = user.attributes.gender
-  userInfo.identity = user.attributes.identity
-  userInfo.geo = user.attributes.geo
-  userInfo.geoProvince = user.attributes.geoProvince
-  userInfo.geoProvinceCode = user.attributes.geoProvinceCode
-  userInfo.geoCity = user.attributes.getCity
-  userInfo.geoCityCode = user.attributes.geoCityCode
-  userInfo.geoDistrict = user.attributes.geoDistrict
-  userInfo.geoDistrictCode = user.attributes.geoDistrictCode
+  userInfo.nickname = userAttr.nickname
+  userInfo.username = userAttr.username
+  userInfo.birthday = userAttr.birthday
+  userInfo.phone = userAttr.mobilePhoneNumber
+  userInfo.status = userAttr.status
+  userInfo.avatar = userAttr.avatar
+  userInfo.gender = userAttr.gender
+  userInfo.identity = userAttr.identity
+  userInfo.geo = userAttr.geo
+  userInfo.geoProvince = userAttr.geoProvince
+  userInfo.geoProvinceCode = userAttr.geoProvinceCode
+  userInfo.geoCity = userAttr.getCity
+  userInfo.geoCityCode = userAttr.geoCityCode
+  userInfo.geoDistrict = userAttr.geoDistrict
+  userInfo.geoDistrictCode = userAttr.geoDistrictCode
   return userInfo
 }
 
@@ -628,10 +635,17 @@ function setUserOpenid(openid, unionid) {
 
 function getOpenidById(userId) {
   if(!userId) {
-    return Promise.reject()
+    return new Promise((resolve, reject) => {
+      reject({message: '用户id为空'})
+    })
   }
   var user = AV.Object.createWithoutData('_User', userId)
   return user.fetch().then((userInfo) => {
+    if (!userInfo) {
+      return new Promise((resolve, reject) => {
+        reject({message: '获取用户信息失败'})
+      })
+    }
     return userInfo.get('openid')
   }).catch((error) => {
     throw error

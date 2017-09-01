@@ -12,7 +12,7 @@ router.get('/:id', function (req, res, next) {
 
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/shopPromotionShare/callback/' + shopPromotionId
-  if(userId) {
+  if(userId && userId != 'undefined') {
     var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
     res.redirect(url)
   } else {
@@ -32,7 +32,6 @@ router.get('/callback/:id', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
-      console.log("bind unionid", unionid, current_unionid)
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query('ShopPromotion')

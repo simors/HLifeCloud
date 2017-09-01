@@ -257,13 +257,127 @@ function shopCommentsConcatReplys(shopComments, replys) {
 }
 
 
+function promotionFromLeancloudObject(leanPromotion, showUser) {
+  // var constructUserInfo = require('../cloudFuncs/Auth').constructUserInfo
+  var prompAttr = leanPromotion.attributes
+  var goodAttr = leanPromotion.attributes.targetGood.attributes
+  var shopAttr = prompAttr.targetShop.attributes
+  var promotion = {}
+
+  promotion.id = leanPromotion.id
+  promotion.startDate = prompAttr.startDate
+  promotion.endDate = prompAttr.endDate
+  promotion.coverPhoto = goodAttr.coverPhoto
+  promotion.typeId = prompAttr.typeId
+  promotion.type = prompAttr.type
+  promotion.typeDesc = prompAttr.typeDesc
+  promotion.goodName = goodAttr.goodsName
+  promotion.goodId = prompAttr.targetGood.id
+  promotion.abstract = prompAttr.abstract
+  promotion.promotionPrice = prompAttr.promotionPrice
+  promotion.originalPrice = goodAttr.originalPrice
+  promotion.price = goodAttr.price
+  promotion.album = goodAttr.album
+  promotion.detail = goodAttr.detail
+  promotion.goodStatus = goodAttr.status
+
+  promotion.goodUpdatedAt = prompAttr.targetGood.updatedAt
+
+  promotion.status = prompAttr.status
+  promotion.geo = shopAttr.geo
+  promotion.shopId = prompAttr.targetShop.id
+  promotion.shopName = shopAttr.shopName
+  promotion.shopDistrict = shopAttr.geoDistrict
+  promotion.createdAt = leanPromotion.createdAt
+  promotion.updatedAt = leanPromotion.updatedAt
+  return promotion
+}
+
+function shopGoodFromLeancloudObject(goodLean){
+  // console.log('goodLean----->',goodLean.attributes)
+  // var shopAttr = shop.attributes
+  var goodsAttr = goodLean.attributes
+  var shop = goodsAttr?goodsAttr.targetShop:undefined
+
+  var promotion = goodsAttr?goodsAttr.goodsPromotion:undefined
+  var good = {}
+  var nowDate = new Date()
+  good.objectId = goodLean.id
+  good.targetShop = shop?shop.id:undefined
+  good.goodsName = goodsAttr?goodsAttr.goodsName:undefined
+  good.price = goodsAttr?goodsAttr.price:undefined
+  good.originalPrice = goodsAttr?goodsAttr.originalPrice:undefined
+  good.coverPhoto = goodsAttr?goodsAttr.coverPhoto:undefined
+  good.album = goodsAttr?goodsAttr.album:undefined
+  good.status = goodsAttr?goodsAttr.status:undefined
+  good.detail = goodsAttr?goodsAttr.detail:undefined
+  good.updatedAt = goodLean.updatedAt
+  if(promotion&&promotion.attributes&&promotion.attributes.status!=0&&nowDate<promotion.attributes.endDate){
+    var promotionAttr = promotion.attributes
+    good.promotionId = promotion.id
+    good.promotionType = promotionAttr.type
+    good.promotionPrice = promotionAttr.promotionPrice
+    good.promotionAbstract = promotionAttr.abstract
+    good.startDate = promotionAttr.startDate
+    good.endDate = promotionAttr.endDate
+  }else{
+    good.promotionId =undefined
+  }
+  return good
+
+}
+
+function newShopCommentFromLeanCloudObject(result){
+
+  // var position = result.attributes.position
+  var parentComment = result.attributes.parentComment
+  var replyComment = result.attributes.replyComment
+  var user = result.attributes.user
+  var comment = {
+    content: result.attributes.content,
+    commentId : result.id,
+    shopId : result.attributes.targetShop.id,
+    blueprints: result.attributes.blueprints,
+    parentCommentContent : parentComment?result.attributes.parentComment.attributes.content:undefined,
+    parentCommentUserName : parentComment?result.attributes.parentComment.attributes.user.attributes.username:undefined,
+    parentCommentNickname : parentComment?result.attributes.parentComment.attributes.user.attributes.nickname:undefined,
+    parentCommentId : parentComment?result.attributes.parentComment.id:undefined,
+    replyCommentContent : replyComment?result.attributes.replyComment.attributes.content:undefined,
+    replyCommentUserName : replyComment?result.attributes.replyComment.attributes.user.attributes.username:undefined,
+    replyCommentNickname : replyComment?result.attributes.replyComment.attributes.user.attributes.nickname:undefined,
+    replyCommentId : replyComment?result.attributes.replyComment.id:undefined,
+    upCount : result.attributes.upCount,
+    authorUsername : user?result.attributes.user.attributes.username:undefined,
+    authorNickname : user?result.attributes.user.attributes.nickname:undefined,
+    commentCount : result.attributes.commentCount,
+    authorId : user?result.attributes.user.id:undefined,
+    authorAvatar : user?user.attributes.avatar:undefined,
+    createdAt : result.createdAt,
+    // address : position?position.address:undefined,
+    // city : position?position.city:undefined,
+    // longitude : position?position.longitude:undefined,
+    // latitude : position?position.latitude:undefined,
+    // streetNumber : position?position.streetNumber:undefined,
+    // street : position?position.street:undefined,
+    // province : position?position.province:undefined,
+    // country : position?position.country:undefined,
+    // district : position?position.district:undefined,
+    updatedAt : result.updatedAt,
+    updatedDate : numberUtils.formatLeancloudTime(result.updatedAt, 'YYYY-MM-DD'),
+    createdDate : numberUtils.formatLeancloudTime(result.createdAt, 'YYYY-MM-DD')
+  }
+  return comment
+}
 var shopUtil = {
   shopFromLeancloudObject: shopFromLeancloudObject,
   shopCommentFromLeancloudObject: shopCommentFromLeancloudObject,
   shopCommentReplyFromLeancloudObject: shopCommentReplyFromLeancloudObject,
   shopCommentsConcatReplys: shopCommentsConcatReplys,
   shopCommentUpFromLeancloudObject: shopCommentUpFromLeancloudObject,
-  shopCommentsConcatUps: shopCommentsConcatUps
+  shopCommentsConcatUps: shopCommentsConcatUps,
+  promotionFromLeancloudObject:promotionFromLeancloudObject,
+  shopGoodFromLeancloudObject: shopGoodFromLeancloudObject,
+  newShopCommentFromLeanCloudObject: newShopCommentFromLeanCloudObject
 }
 
 module.exports = shopUtil

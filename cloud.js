@@ -23,6 +23,7 @@ var statFunc = require('./cloudFuncs/Statistics/PerformanceStat')
 var searchFunc = require('./cloudFuncs/Search')
 var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 var mpMsgFuncs = require('./mpFuncs/Message')
+var ShopOrdersFunc = require('./cloudFuncs/Shop/ShopOrders')
 /**
  * 云函数
  */
@@ -71,7 +72,7 @@ AV.Cloud.define('hLifeFetchShopCommentList',shopFunc.fetchShopCommentList)
 AV.Cloud.define('hLifeFetchShopCommentReplyList',shopFunc.fetchShopCommentReplyList)
 AV.Cloud.define('hLifeFetchShopCommentUpedUserList',shopFunc.fetchShopCommentUpedUserList)
 AV.Cloud.define('hLifeShopCertificate',shopFunc.shopCertificate)
-AV.Cloud.define('hLifeShopCertificateNew',shopFunc.shopCertificateNew)
+AV.Cloud.define('shopCertificateWithoutInviteCode',shopFunc.shopCertificateWithoutInviteCode)
 AV.Cloud.define('hLifeGetShopInviter',shopFunc.getShopInviter)
 AV.Cloud.define('hLifeGetShopPromotionMaxNum',shopFunc.getShopPromotionMaxNum)
 AV.Cloud.define('hLifeUnregistShop', shopFunc.unregistShop)
@@ -84,6 +85,18 @@ AV.Cloud.define('shopModifyPromotionGeoPoint', shopFunc.modifyPromotionGeoPoint)
 AV.Cloud.define('submitCompleteShopInfo',shopFunc.submitCompleteShopInfo)
 AV.Cloud.define('submitEditShopInfo',shopFunc.submitEditShopInfo)
 AV.Cloud.define('shopFetchNearbyShops', shopFunc.fetchNearbyShops)
+AV.Cloud.define('submitShopPromotion', shopFunc.submitShopPromotion)
+AV.Cloud.define('fetchNearbyShopGoodPromotion', shopFunc.fetchNearbyShopGoodPromotion)
+AV.Cloud.define('fetchCloPromotionsByShopId', shopFunc.fetchCloPromotionsByShopId)
+AV.Cloud.define('fetchOpenPromotionsByShopId', shopFunc.fetchOpenPromotionsByShopId)
+AV.Cloud.define('getShopPromotionDayPay', shopFunc.getShopPromotionDayPay)
+AV.Cloud.define('closeShopPromotion', shopFunc.closeShopPromotion)
+AV.Cloud.define('pubulishShopComment', shopFunc.pubulishShopComment)
+AV.Cloud.define('fetchShopComments', shopFunc.fetchShopComments)
+AV.Cloud.define('fetchMyShopCommentsUps', shopFunc.fetchMyShopCommentsUps)
+AV.Cloud.define('userUpShopComment', shopFunc.userUpShopComment)
+
+
 
 // 店铺商品
 AV.Cloud.define('goodsAddShopGoods', goodsFunc.addNewShopGoods)
@@ -92,6 +105,12 @@ AV.Cloud.define('goodsShopGoodsOnline', goodsFunc.shopGoodsOnline)
 AV.Cloud.define('goodsShopGoodsOffline', goodsFunc.shopGoodsOffline)
 AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
 AV.Cloud.define('goodsFetchGoodsList', goodsFunc.fetchShopGoods)
+
+// 订单管理
+AV.Cloud.define('orderCreateOrder', ShopOrdersFunc.handleNewShopOrderReq)
+AV.Cloud.define('orderModifyStatus', ShopOrdersFunc.modifyOrderStatus)
+AV.Cloud.define('orderQueryOrders', ShopOrdersFunc.queryShopOrders)
+
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
 AV.Cloud.define('addArticleCategory',articleFunc.addArticleCategory)
