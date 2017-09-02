@@ -61,11 +61,11 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
   MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
-  REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8"
-  SHOP_TMP_ID = "4m3VocRQTsLWxVgEKzOwBWMoZQOfh7ToyHqlpQruS3g"
-  GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"
-  WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"
-  INVITER_TMP_ID = "zVnC2WLMts3fJCnz2qkXAmVTGXtVprrYn6zthreOan0"
+  REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
+  SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
+  GOODS_TMP_ID = "MLQiVmfbpgIaNvSLp45GVv-H2JGmhXo79Q88kFVcHdM"
+  WITHDRAW_TMP_ID = "cI49vYLgEK20N6o59nEi08kSc2f_jLyvYMJr8Dx7nNs"
+  INVITER_TMP_ID = "A_ugyWk9ZALz0FukC42Oalf8wwqhrIPudPSTZIvzqKg"
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
@@ -115,7 +115,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
     encodingAESKey: 'tZJ0FCYMKL3vdCTlj9Mj8VGmSJIBz0rNDjci4ncmqRn',
-    appSecret: '6d98755c0738ee954b7f17c535aa0725',
+    appSecret: '016a164c0d3b71516c6a6b397e5b9bfb',
     checkSignature: true,
   }
 }

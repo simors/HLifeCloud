@@ -18,6 +18,11 @@ var images = require("images");
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
 var mpTokenFuncs = require('../../mpFuncs/Token')
+// var gm = require('gm')
+var gm = require('gm').subClass({imageMagick: true})
+var mpQrcodeFuncs = require('../../mpFuncs/Qrcode')
+var mpMaterialFuncs = require('../../mpFuncs/Material')
+var util = require('../../cloudFuncs/util')
 
 
 
@@ -2333,6 +2338,53 @@ function getPromoterQrCode(request, response) {
 
 }
 
+/**
+ *  获取我的推广二维码(gm优化)
+ * @param request
+ * @param response
+ */
+function gmCreatePromoterQrCode(request, response) {
+  var unionid = request.params.unionid
+  var query = new AV.Query('_User')
+  var avatar = undefined
+  var nickname = undefined
+  var userId = undefined
+  query.equalTo("authData.weixin.openid", unionid)
+
+  query.first().then((user) => {
+    if(!user) {
+      throw new Error('找不到该用户')
+    }
+    avatar = user.attributes.avatar
+    nickname = user.attributes.nickname
+    userId = user.id
+    var promoterQuery = new AV.Query('Promoter')
+    promoterQuery.equalTo('user', user)
+    return promoterQuery.first()
+  }).then((promoter) => {
+    if(!promoter) {
+      throw new Error('找不到该用户的推广元信息')
+    }
+    var qrcode = promoter.get('qrcode')
+    if(qrcode) {
+      response.success({
+        isSignIn: true,
+        qrcode: qrcode
+      })
+    } else {
+      createPromoterQrCode(userId).then((qrcode) => {
+        response.success({
+          isSignIn: true,
+          qrcode: qrcode
+        })
+      })
+    }
+  }).catch((error) => {
+    console.log("getPromoterQrCode", error)
+    response.error(error)
+  })
+}
+
 function composeQrCodeImage(background, qrcode, logo, avatar, name) {
   images(background).draw(
     images(qrcode).size(320),
@@ -2354,17 +2406,78 @@ function composeQrCodeImage(background, qrcode, logo, avatar, name) {
   })
 }
 
+function createPromoterQrCode(userId) {
+  var user = AV.Object.createWithoutData('_User', userId)
+  var background = './public/images/qrcode_template.png'
+  var logo = './public/images/hlyd_logo.png'
+  var unionid = undefined
+  var avatar = undefined
+  var nickname = undefined
+  var mediaId = undefined
+  var tmpPromoterQrcodrPath = unionid + 'promoterQrcode.jpeg'
+
+  return user.fetch().then(() => {
+    var authData = user.get('authData')
+    unionid = authData && authData.weixin.openid
+    avatar = user.get('avatar')
+    nickname = user.get('nickname')
+    console.log("avatar:",  avatar)
+    return mpQrcodeFuncs.createLimitQRCode(unionid)
+  }).then((qrcodeUrl) => {
+    return new Promise(function (resolve, reject) {
+      gm(background)
+        .font("./public/SansCN-Regular.TTF", 40)
+        .fontSize(40)
+        .drawText(320, 760, "绿蚁网络")
+        .draw('image Over 210, 720 64, 64 "' + avatar + '"')
+        .draw('image Over 215, 824 320, 320 "' + qrcodeUrl + '"')
+        .draw('image Over 335, 944 80, 80 "' + logo + '"')
+        .write(tmpPromoterQrcodrPath, function (err) {
+          if(err) {
+            console.log("GraphicsMagick error", err)
+            reject(err)
+          }
+          resolve()
+        })
+    })
+  }).then(() => {
+    console.log("gm process success")
+    return mpMaterialFuncs.uploadMaterial(tmpPromoterQrcodrPath)
+  }).then((result) => {
+    mediaId = result.mediaId
+    return util.readFileAsyn(tmpPromoterQrcodrPath, 'base64')
+  }).then((buffer) => {
+    var data = {base64: buffer}
+    var file = new AV.File('promoterQrcode', data)
+    return file.save()
+  }).then((file) => {
+    var qrcode = {
+      url: file.url(),
+      mediaId: mediaId
+    }
+    fs.exists(tmpPromoterQrcodrPath, function (exists) {
+      if(exists)
+        fs.unlink(tmpPromoterQrcodrPath)
+    })
+    return qrcode
+  }).catch((error) => {
+    console.log("createPromoterQrCode failed!", error)
+    fs.exists(tmpPromoterQrcodrPath, function (exists) {
+      if(exists)
+        fs.unlink(tmpPromoterQrcodrPath)
+    })
+    throw error
+  })
+}
+
 function promoterTest(request, response) {
-  var userId = request.params.userId
-
-  getUpUserFromRedis(userId).then((upUser) => {
-    console.log("getUpUserFromRedis", upUser)
-    response.success(upUser)
-
+  var userId = "59a8fe8044d9040058421bb7"
+  createPromoterQrCode(userId).then((result) => {
+    console.log("createPromoterQrCode", result)
+    response.success(result)
   }).catch((error) => {
     response.error(error)
   })
-
 }
 
 var PromoterFunc = {
@@ -2407,6 +2520,7 @@ var PromoterFunc = {
   supplementPromoterInfo: supplementPromoterInfo,
   getPromoterQrCode: getPromoterQrCode,
   bindPromoterInfo: bindPromoterInfo,
+  createPromoterQrCode: createPromoterQrCode,
   promoterTest: promoterTest
 }
 

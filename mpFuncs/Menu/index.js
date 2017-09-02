@@ -48,10 +48,12 @@ function createMenu() {
   }
 
   wechat_api.createMenu(memu, function (err, result) {
-    if(result.errcode === 0) {
-      console.log("微信公众号菜单创建成功")
-    } else {
+    if(err) {
       console.log(err)
+    } else if(result.errcode != 0) {
+      console.log("微信公众号菜单创建异常：", result.errmsg)
+    } else {
+      console.log("微信公众号菜单创建成功")
     }
   })
 }

@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/7/14.
  */
+var Promise = require('bluebird');
 var GLOBAL_CONFIG = require('../../config')
 var client = require('../util/wechatUtil').oauth_client
 
@@ -9,6 +10,7 @@ function userAuthRequest(req, res) {
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/wxOauth/callback'
   var url = client.getAuthorizeURL(auth_callback_url, '', 'snsapi_userinfo');
+  console.log('redirect url:', url)
   res.redirect(url)
 }
 

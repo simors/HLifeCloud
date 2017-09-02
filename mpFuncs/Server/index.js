@@ -1,6 +1,7 @@
 /**
  * Created by wanpeng on 2017/7/15.
  */
+var Promise = require('bluebird');
 var wechat = require('wechat');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
