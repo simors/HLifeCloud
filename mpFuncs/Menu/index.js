@@ -37,11 +37,6 @@ function createMenu() {
             "name":"我的钱包",
             "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
           },
-          {
-            "type":"view",
-            "name":"我的推广",
-            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promoter/performance/1'
-          },
         ]
       }
     ]
