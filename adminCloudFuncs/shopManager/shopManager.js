@@ -694,6 +694,50 @@ function fetchShopGoods(request, response) {
 }
 
 
+function fetchPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 100
+  var query = new AV.Query('ShopGoodPromotion')
+  var nowDate = new Date()
+  var lastCreatedAt = request.params.lastCreatedAt
+  var status = request.params.status
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  if(status==1){
+    query.equalTo('status', 1)
+    query.greaterThanOrEqualTo('endDate', nowDate)
+  }
+
+  if(request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+  }
+
+  if (request.params.endTime) {
+    query.lessThan('createdAt', request.params.endTime);
+  }
+
+  query.addDescending('createdAt')
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', shop)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -713,7 +757,8 @@ var ShopManagerFunc = {
   updateShopCategoryId:updateShopCategoryId,
   setPromotionDayPay: setPromotionDayPay,
   setPromotionMaxNmu: setPromotionMaxNmu,
-  fetchShopGoods: fetchShopGoods
+  fetchShopGoods: fetchShopGoods,
+  fetchPromotionsByShopId: fetchPromotionsByShopId
 
 }
 module.exports = ShopManagerFunc
