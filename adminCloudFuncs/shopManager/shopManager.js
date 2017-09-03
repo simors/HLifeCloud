@@ -644,7 +644,54 @@ function setPromotionMaxNmu(request,response) {
 
 }
 
+function fetchShopGoods(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 100
+  var lastUpdateTime = request.params.lastUpdateTime
+  var status = request.params.status
 
+  var query = new AV.Query('ShopGoods')
+  var targetShop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', targetShop)
+  if (lastUpdateTime) {
+    query.lessThan('updatedAt', new Date(lastUpdateTime))
+  }
+  if(status){
+    query.equalTo('status', status)
+  }
+
+  if (request.params.endTime) {
+    query.lessThan('createdAt', request.params.endTime);
+
+  }
+
+  if(request.params.goodsName){
+    query.equalTo('goodsName',request.params.goodsName)
+  }
+
+  if(request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+  }
+
+  query.include(['goodsPromotion','targetShop'])
+  query.descending('updatedAt')
+  query.limit(limit)
+
+  query.find().then((goods) => {
+    var goodList = []
+    goods.forEach((item)=>{
+      var good = shopUtil.shopGoodFromLeancloudObject(item)
+      goodList.push(good)
+    })
+    response.success({errcode: 0, goods: goodList})
+  }, (err) => {
+    console.log('err in fetchShopGoods:', err)
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
+  }).catch((err) => {
+    console.log('err in fetchShopGoods:', err)
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
+  })
+}
 
 
 var ShopManagerFunc = {
@@ -665,7 +712,8 @@ var ShopManagerFunc = {
   updateCategoryStatus:updateCategoryStatus,
   updateShopCategoryId:updateShopCategoryId,
   setPromotionDayPay: setPromotionDayPay,
-  setPromotionMaxNmu: setPromotionMaxNmu
+  setPromotionMaxNmu: setPromotionMaxNmu,
+  fetchShopGoods: fetchShopGoods
 
 }
 module.exports = ShopManagerFunc
