@@ -10,7 +10,12 @@ function createMenu() {
   var memu = {
     "button":[
       {
-        'name': '汇邻优店',
+        "type":"view",
+        "name":"下载app",
+        "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
+      },
+      {
+        'name': '一起来吧',
         'sub_button': [
           {
             "type":"click",
@@ -19,15 +24,10 @@ function createMenu() {
           },
           {
             "type":"click",
-            "name":"新手指引",
+            "name":"赚钱攻略",
             "key":"NEW_USER_GUIDE"
           },
         ]
-      },
-      {
-        "type":"view",
-        "name":"下载app",
-        "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
       },
       {
         'name': '个人中心',
