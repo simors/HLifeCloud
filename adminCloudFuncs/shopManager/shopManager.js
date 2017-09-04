@@ -4,6 +4,8 @@
 var AV = require('leanengine');
 var Promise = require('bluebird');
 var shopUtil = require('../../utils/shopUtil');
+var redisUtils = require('../../utils/redisUtils')
+var systemConfigNames = require('../../constants/systemConfigNames')
 
 function updateCategoryStatus(request,response){
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
@@ -616,6 +618,126 @@ function updateReplyStatus(request,response){
   })
 }
 
+function setPromotionDayPay(request,response){
+  redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY, request.params.dayPay).then((item)=> {
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((item)=> {
+      response.success(item)
+    }, (err)=> {
+      response.error(err)
+    })
+    }, (err)=> {
+      response.error(err)
+    })
+  }
+
+function setPromotionMaxNmu(request,response) {
+  redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, request.params.maxNum).then((item)=>{
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((item)=>{
+      response.success(item)
+
+    },(err)=>{
+      response.error(err)
+    })
+  },(err)=>{
+    response.error(err)
+  })
+
+}
+
+function fetchShopGoods(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 100
+  var lastUpdateTime = request.params.lastUpdateTime
+  var status = request.params.status
+
+  var query = new AV.Query('ShopGoods')
+  var targetShop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', targetShop)
+  if (lastUpdateTime) {
+    query.lessThan('updatedAt', new Date(lastUpdateTime))
+  }
+  if(status){
+    query.equalTo('status', status)
+  }
+
+  if (request.params.endTime) {
+    query.lessThan('createdAt', request.params.endTime);
+
+  }
+
+  if(request.params.goodsName){
+    query.equalTo('goodsName',request.params.goodsName)
+  }
+
+  if(request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+  }
+
+  query.include(['goodsPromotion','targetShop'])
+  query.descending('updatedAt')
+  query.limit(limit)
+
+  query.find().then((goods) => {
+    var goodList = []
+    goods.forEach((item)=>{
+      var good = shopUtil.shopGoodFromLeancloudObject(item)
+      goodList.push(good)
+    })
+    response.success({errcode: 0, goods: goodList})
+  }, (err) => {
+    console.log('err in fetchShopGoods:', err)
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
+  }).catch((err) => {
+    console.log('err in fetchShopGoods:', err)
+    response.error({errcode: 1, goods: [], message: '获取商品列表失败'})
+  })
+}
+
+
+function fetchPromotionsByShopId(request, response) {
+  var shopId = request.params.shopId
+  var limit = request.params.limit || 100
+  var query = new AV.Query('ShopGoodPromotion')
+  var nowDate = new Date()
+  var lastCreatedAt = request.params.lastCreatedAt
+  var status = request.params.status
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+  if (lastCreatedAt) {
+    query.lessThan('createdAt', new Date(lastCreatedAt))
+  }
+
+  if(status==1){
+    query.equalTo('status', 1)
+    query.greaterThanOrEqualTo('endDate', nowDate)
+  }
+
+  if(request.params.startTime) {
+    query.greaterThanOrEqualTo('createdAt', request.params.startTime);
+  }
+
+  if (request.params.endTime) {
+    query.lessThan('createdAt', request.params.endTime);
+  }
+
+  query.addDescending('createdAt')
+  var shop = AV.Object.createWithoutData('Shop', shopId)
+  query.equalTo('targetShop', shop)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(shopUtil.promotionFromLeancloudObject(promp, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取启用活动失败'})
+  })
+}
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -633,6 +755,10 @@ var ShopManagerFunc = {
   deleteShopCoverImg:deleteShopCoverImg,
   updateCategoryStatus:updateCategoryStatus,
   updateShopCategoryId:updateShopCategoryId,
+  setPromotionDayPay: setPromotionDayPay,
+  setPromotionMaxNmu: setPromotionMaxNmu,
+  fetchShopGoods: fetchShopGoods,
+  fetchPromotionsByShopId: fetchPromotionsByShopId
 
 }
 module.exports = ShopManagerFunc
