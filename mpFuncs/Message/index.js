@@ -203,7 +203,8 @@ function sendWithdrawTmpMsg(openid, amount, account, channel, created) {
       if(!err) {
         return resolve()
       } else {
-        return reject()
+        console.log("提现微信通知消息发送失败", err)
+        // return reject()
       }
     })
   })

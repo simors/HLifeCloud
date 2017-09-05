@@ -9,9 +9,10 @@ var AV = require('leanengine');
 // 详见： https://leancloud.cn/docs/js_guide.html#对象
 
 router.get('/', function (req, res, next) {
+  var message = req.query.message
 
   res.render('wxError', {
-    errorMessage: "",
+    errorMessage: message,
   })
 
 })

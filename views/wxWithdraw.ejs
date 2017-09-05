@@ -17,8 +17,7 @@
         <input id="amount" type="number" style="font-size: 40px; border-width: 0px; width: 300px; margin-left: 10px" />
     </div>
     <div style="padding-top: 10px; padding-bottom: 10px">
-        <Text>当前余额<%=balance%>元，</Text>
-        <a id="withdrawAll" href="javascript:void(0);">全部提现</a>
+        <Text>当前余额<%=balance%>元</Text>
     </div>
 </div>
 
@@ -33,6 +32,26 @@
     </div>
 </div>
 
+<div id="confirmMsg" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">余额提现</strong></div>
+        <div class="weui-dialog__bd">注意：平台将收取1.0%的手续费，最少1.0元</div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:void(0);" class="weui-dialog__btn weui-dialog__btn_primary" id="confirmButton">确定</a>
+        </div>
+    </div>
+</div>
+<div id="successMsg" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">提现成功</strong></div>
+        <div class="weui-dialog__bd">提现金额24小时内到账，汇邻优店账户余额将在到账后更新</div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:void(0);" class="weui-dialog__btn weui-dialog__btn_primary" id="successButton">确定</a>
+        </div>
+    </div>
+</div>
 </body>
 <script type="text/javascript">
     AV.init({
@@ -41,7 +60,10 @@
     });
 
     var withdrawBtn = document.getElementById('withdrawBtn')
-    var withdrawAll = document.getElementById('withdrawAll')
+    var confirmButton = document.getElementById('confirmButton')
+    var successButton = document.getElementById('successButton')
+    var confirmMsg = document.getElementById('confirmMsg')
+    var successMsg = document.getElementById('successMsg')
     var toast = document.getElementById('loadingToast')
     var amount = document.getElementById('amount')
     var openid = "<%=openid%>"
@@ -51,10 +73,31 @@
     var balance = parseFloat("<%=balance%>").toFixed(2)
 
     withdrawBtn.onclick = function () {
-        if(amount.value <= 0 || amount.value > balance) {
+        var freeAmount = Number(amount.value) * 0.01 < 1? 1: Number(amount.value)
+        var precision = 0
+        if(amount.value.indexOf('.') > 0) {
+            precision = amount.value.split('.')[1].length
+        }
+        if(Number(amount.value) <= 0 ) {
             alert("金额有误")
             return
         }
+        if(Number(amount.value) > balance) {
+            alert("余额不足")
+            return
+        }
+        if(Number(amount.value) + freeAmount > balance ) {  //扣除手续费后余额不足
+            alert("平台将收取1.0%的手续费，最少1.0元")
+            return
+        }
+        if(precision >2) {
+            alert("提现金额只支持小数点后两位")
+            return
+        }
+        confirmMsg.setAttribute('style', "display:block;")
+    }
+
+    confirmButton.onclick = function () {
         var params = {
             channel: 'wx_pub',
             order_no: generateUUID().replace(/-/g, '').substr(0, 16),
@@ -66,12 +109,18 @@
             },
         }
         AV.Cloud.run('hLifeCreateTransfers', params).then((result) => {
-            window.location.href = "/wxProfile?openid=" + openid + "&unionid=" + unionid
+            toast.setAttribute('style', "display:none;")
+            successMsg.setAttribute('style', "display:block;")
         }).catch((err) => {
-            window.location.href = "/wxError"
+            window.location.href = "/wxError?message=" + "提现失败，请联系客服"
         })
         withdrawBtn.setAttribute('class', "weui-btn weui-btn_disabled")
         toast.setAttribute('style', "display:block;")
+        confirmMsg.setAttribute('style', "display:none;")
+    }
+
+    successButton.onclick = function () {
+        window.location.href = "/wxProfile?openid=" + openid + "&unionid=" + unionid
     }
 
     function generateUUID(){
@@ -83,9 +132,5 @@
         });
         return uuid;
     };
-
-    withdrawAll.onclick = function () {
-        amount.setAttribute('value', balance)
-    }
 </script>
 </html>
