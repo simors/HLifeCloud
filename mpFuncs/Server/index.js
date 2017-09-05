@@ -163,7 +163,7 @@ function wechatServer(req, res, next) {
           }
           res.reply({
             type: 'text',
-            content: "亲，您的二维码已经生成，您已成汇邻优店的亲密邻友，您可以上传您的店铺到平台上，线上吸引新客到店，👉 最重要的是，现在开始您更可以开始持续分享你的二维码，以后通过你二维码关注加入的邻友上传商铺和在汇邻优店里消费您都将获得财富，积极参与，一起来吧！👯    祝您财源滚滚，生意兴隆！         👏\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+            content: "亲爱的邻友 欢迎您  👉 点击公号菜单栏👉  一起来吧  👉 我的二维码👉   生成二维码  👉 将二维码发送给微信好友 微信群或者朋友圈 朋友通过你的二维码识别关注  你将能获得财富 邻友发展的越多，你的收益会越大  祝您生活愉快 加油👊\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
           })
         })
       } else if(message.Event === 'SCAN') {
