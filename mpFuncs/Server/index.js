@@ -6,6 +6,7 @@ var wechat = require('wechat');
 var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
+var getMaterialIdByName = require('../Material').getMaterialIdByName
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
@@ -50,6 +51,24 @@ var generateQrcode = function (req, res, next) {
         type: 'text',
         content: '获取信息失败'
       })
+    }
+  })
+  getMaterialIdByName('voice', '二维码生成').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find voice media')
+      return
+    }
+    wechat_api.sendVoice(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer message err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer voice error')
+  })
+  wechat_api.sendText(openid, "亲，您的二维码已经生成，您已成汇邻优店的亲密邻友，您可以上传您的店铺到平台上，线上吸引新客店，👉 最重要的是，现在开始您更可以开始持续分享你的二维码，以后通过你二维码关注加入的邻友上传商铺和在汇邻优店里消费您都将获得财富，积极参与，一起来吧！👯    祝您财源滚滚，生意兴隆！         👏", (err, result) => {
+    if (err) {
+      console.log('send text after generate qrcode error.', err)
     }
   })
 }
@@ -123,6 +142,19 @@ function wechatServer(req, res, next) {
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
+        getMaterialIdByName('voice', '公众号开始自动回复语音').then((mediaId) => {
+          if (!mediaId) {
+            console.log('can\'t find voice media')
+            return
+          }
+          wechat_api.sendVoice(openid, mediaId, function (err, result) {
+            if (err) {
+              console.log('customer message err', err)
+            }
+          })
+        }, (err) => {
+          console.log('send customer voice error')
+        })
         wechat_api.getUser(openid, function (err, result) {
           if(!err) {
             utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
@@ -131,7 +163,7 @@ function wechatServer(req, res, next) {
           }
           res.reply({
             type: 'text',
-            content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+            content: "亲，您的二维码已经生成，您已成汇邻优店的亲密邻友，您可以上传您的店铺到平台上，线上吸引新客到店，👉 最重要的是，现在开始您更可以开始持续分享你的二维码，以后通过你二维码关注加入的邻友上传商铺和在汇邻优店里消费您都将获得财富，积极参与，一起来吧！👯    祝您财源滚滚，生意兴隆！         👏\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
           })
         })
       } else if(message.Event === 'SCAN') {
@@ -146,7 +178,7 @@ function wechatServer(req, res, next) {
           }
           res.reply({
             type: 'text',
-            content: "欢迎回来"
+            content: "欢迎回到汇邻优店"
           })
         })
       }

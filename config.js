@@ -69,9 +69,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
-    appid: 'wx34ac208b373814d2',
+    appid: 'wx3dfde3f7184c8c51',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: 'd121a1921db870cc3e37f148cb7cc257',
+    appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
     checkSignature: true,
   }
 
