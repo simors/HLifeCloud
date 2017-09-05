@@ -2252,7 +2252,7 @@ function getPromoterQrCode(request, response) {
       existQuery.first().then((promoter) => {
         if(promoter) {
           var qrcode = promoter.get('qrcode')
-          if(!qrcode) {
+          if(!qrcode || !qrcode.url || !qrcode.mediaId) {
             wechat_api.createLimitQRCode(unionid, function (err, result) {
 
               var ticket = result.ticket
