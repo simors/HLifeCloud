@@ -23,8 +23,56 @@ function uploadMaterial(filepath) {
   })
 }
 
+function getMaterialIdByName(type, mediaName) {
+  return new Promise((resolve, reject) => {
+    wechat_api.getMaterialCount((err, countRes) => {
+      if (err) {
+        reject()
+        return
+      }
+      var count = 0
+      switch (type) {
+        case 'voice':
+          count = countRes.voice_count
+          break
+        case 'video':
+          count = countRes.video_count
+          break
+        case 'image':
+          count = countRes.image_count
+          break
+        case 'news':
+          count = countRes.news_count
+          break
+        default:
+          count = 0
+      }
+      if (count == 0) {
+        reject()
+        return
+      }
+      wechat_api.getMaterials(type, 0, count, (err, result) => {
+        if (err) {
+          reject()
+          return
+        }
+        var materialItems = result.item
+        var meterial = materialItems.find((item) => {
+          return item.name == mediaName
+        })
+        if (meterial) {
+          resolve(meterial.media_id)
+        } else {
+          reject()
+        }
+      })
+    })
+  })
+}
+
 var mpMaterialFuncs = {
-  uploadMaterial: uploadMaterial
+  uploadMaterial: uploadMaterial,
+  getMaterialIdByName: getMaterialIdByName,
 }
 
 module.exports = mpMaterialFuncs
