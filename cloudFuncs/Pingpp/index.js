@@ -396,7 +396,7 @@ function paymentEvent(request, response) {
   var mysqlConn = undefined
   var shop = undefined
 
-  console.log('payment metadata:', charge.metadata)
+  // console.log('payment metadata:', charge.metadata)
 
   insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
@@ -570,8 +570,8 @@ function createTransfers(request, response) {
       amount: amount,
       currency: "cny",
       type: "b2c",
-      // recipient: openid, //微信openId
-      recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //微信openId
+      recipient: openid, //微信openId
+      // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //微信openId/
       extra: {
         // user_name: userName,
         // force_check: true,
