@@ -42,8 +42,10 @@ function getUpUserUnionid(unionid) {
   });
   var key = PREFIX + unionid
   return client.getAsync(key).then((reply) => {
-    if(reply != null) {
+    if(reply && reply != "" && reply != unionid) {
       return reply
+    } else {
+      return undefined
     }
   }).finally(() => {
     client.quit()
