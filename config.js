@@ -59,7 +59,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
-  MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
+  MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
   MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
   REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
   SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
@@ -69,9 +69,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
-    appid: 'wx34ac208b373814d2',
+    appid: 'wx3dfde3f7184c8c51',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: 'd121a1921db870cc3e37f148cb7cc257',
+    appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
     checkSignature: true,
   }
 
@@ -114,7 +114,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   wxConfig = {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
-    encodingAESKey: 'tZJ0FCYMKL3vdCTlj9Mj8VGmSJIBz0rNDjci4ncmqRn',
+    encodingAESKey: 'vsw15YrAgUavFsNvHdEAd3iRLpgigQDbOutnvwPDD0H',
     appSecret: '016a164c0d3b71516c6a6b397e5b9bfb',
     checkSignature: true,
   }
