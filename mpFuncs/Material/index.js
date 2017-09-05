@@ -31,7 +31,6 @@ function getMaterialIdByName(type, mediaName) {
         return
       }
       var count = 0
-      console.log('count result', countRes)
       switch (type) {
         case 'voice':
           count = countRes.voice_count
@@ -57,12 +56,15 @@ function getMaterialIdByName(type, mediaName) {
           reject()
           return
         }
-        console.log('result', result)
         var materialItems = result.item
         var meterial = materialItems.find((item) => {
           return item.name == mediaName
         })
-        resolve(meterial.media_id)
+        if (meterial) {
+          resolve(meterial.media_id)
+        } else {
+          reject()
+        }
       })
     })
   })

@@ -53,7 +53,7 @@ var generateQrcode = function (req, res, next) {
       })
     }
   })
-  getMaterialIdByName('voice', '二维码生成').then((mediaId) => {
+  getMaterialIdByName('voice', '二维码生成2.mp3').then((mediaId) => {
     if (!mediaId) {
       console.log('can\'t find voice media')
       return
@@ -142,7 +142,7 @@ function wechatServer(req, res, next) {
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
-        getMaterialIdByName('voice', '公众号开始自动回复语音').then((mediaId) => {
+        getMaterialIdByName('voice', '开始语音2(1).mp3').then((mediaId) => {
           if (!mediaId) {
             console.log('can\'t find voice media')
             return
