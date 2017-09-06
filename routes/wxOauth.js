@@ -31,9 +31,9 @@ router.get('/callback', function (req, res, next) {
   }).then((result) => {
     if(!result) {
       mpAuthFuncs.getUserInfo(openid).then((userInfo) => {
-        var currentUserNickname = userInfo.nickname
+        currentUserNickname = userInfo.nickname
         var headimgurl = userInfo.headimgurl
-        var currentUserCity = userInfo.city
+        currentUserCity = userInfo.city
         var authData = {
           "openid": unionid,
           "access_token": accessToken,
