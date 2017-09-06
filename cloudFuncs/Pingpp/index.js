@@ -295,6 +295,14 @@ function updatePaymentInfoInMysql(paymentInfo) {
 
 }
 
+function updatePaymentInfo(conn, deal) {
+  if (!deal.to || !deal.cost || !deal.feeAmount) {
+    throw new Error('')
+  }
+  var sql = "UPDATE `PaymentInfo` SET `balance` = `balance` - ? WHERE `userId` = ?"
+  return mysqlUtil.query(conn, sql, [deal.cost + deal.feeAmount, deal.to])
+}
+
 
 function createPayment(request, response) {
   var user = request.params.user
@@ -388,7 +396,7 @@ function paymentEvent(request, response) {
   var mysqlConn = undefined
   var shop = undefined
 
-  console.log('payment metadata:', charge.metadata)
+  // console.log('payment metadata:', charge.metadata)
 
   insertChargeInMysql(charge).then(() => {
     if (shopId && amount) {
@@ -544,218 +552,115 @@ function paymentEvent(request, response) {
 }
 
 function createTransfers(request, response) {
-
-  console.log("createTransfers")
+  // console.log("创建ping++提现请求：", request.params)
   var order_no = request.params.order_no
-  var amount = parseInt(request.params.amount).toFixed(0) * 100 //人民币分
-  var card_number = request.params.card_number
+  var amount = parseFloat(request.params.amount).toFixed(2) * 100 //人民币分
   var userName = request.params.userName
   var metadata = request.params.metadata
   var channel = request.params.channel
-  var open_bank_code = request.params.open_bank_code
   var openid = request.params.openid   //微信用户openid
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
 
-  var today = new Date()
-  // if(today.getDate() == 1 && today.getHours() >8 && today.getHours() < 22) {
-  if (1) {
-    switch (channel) {
-      case 'allinpay': {
-        pingpp.transfers.create({
-          order_no: order_no,
-          app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-          channel: "allinpay",// 通联支付
-          amount: amount,
-          currency: "cny",
-          type: "b2c",
-          extra: {
-            card_number: card_number,  //收款人银行卡号或者存折号
-            user_name: userName,  //收款人姓名 选填
-            open_bank_code: open_bank_code, //开户银行编号 选填
-            // open_bank: open_bank,  //开户银行 选填
-            // prov: , //省份 选填
-            // city: , //城市 选填
-            // sub_bank: , //开户支行名称 选填
-          },
-          description: "Your Description",
-          metadata: metadata,
-        }, function (err, transfer) {
-          if (err != null) {
-            console.log("pingpp.transfers.create", err)
-            response.error({
-              errcode: 703,
-              message: err.message,
-            })
-            return
-          }
-
-          if (transfer.metadata.userId) {
-            var paymentInfo = {
-              channel: transfer.channel,
-              userId: transfer.metadata.userId,
-              card_number: transfer.extra.card_number,
-              user_name: transfer.extra.user_name,
-              open_bank_code: transfer.extra.open_bank_code,
-              open_bank: transfer.extra.open_bank,
-              amount: (transfer.amount).toFixed(0) * 0.01,
-            }
-            return updatePaymentInfoInMysql(paymentInfo).then(() => {
-              response.success({
-                errcode: 0,
-                message: 'allinpay create transfers success!',
-                transfer: transfer,
-              })
-            }).catch((error) => {
-              response.error(error)
-            })
-          } else {
-            response.error({
-              errcode: 1,
-              message: "allinpay create transfers fail!",
-            })
-          }
-
-        })
-      }
-        break
-      case 'wx_pub': {
-        pingpp.transfers.create({
-          order_no: order_no,
-          app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-          channel: "wx_pub",// 微信公众号支付
-          amount: amount,
-          currency: "cny",
-          type: "b2c",
-          recipient: openid, //微信openId
-          // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //测试
-          extra: {
-            // user_name: userName,
-            // force_check: true,
-          },
-          description: "Your Description",
-          metadata: metadata,
-        }, function (err, transfer) {
-          console.log("ping++ create transfers transfer:", transfer)
-          console.log("ping++ create transfers err:", err)
-          if (err != null ) {
-            console.log('pingpp.transfers.create', err)
-            response.error({
-              errcode: 1,
-              message: err.message,
-            })
-            return
-          }
-
-          if(transfer.metadata.userId) {
-            var paymentInfo = {
-              channel: transfer.channel,
-              userId: transfer.metadata.userId,
-              openid: transfer.recipient,
-              amount: (transfer.amount).toFixed(0) * 0.01,
-            }
-            getPaymentFeeByChannel('wx_pub').then((fee) => {
-              paymentInfo.fee = fee
-              return updatePaymentInfoInMysql(paymentInfo)
-            }).then(() => {
-              response.success({
-                errcode: 0,
-                message: 'wx_pub create transfers success!',
-                transfer: transfer,
-              })
-            }).catch((error) => {
-              response.error(error)
-            })
-          } else {
-            response.error({
-              errcode: 1,
-              message: "没有找到用户信息",
-            })
-          }
-        })
-      }
-        break
-      case 'alipay': {
-        // pingpp.batchTransfers.create({
-        //   "app": GLOBAL_CONFIG.PINGPP_APP_ID,
-        //   "batch_no": order_no, // 批量付款批次号
-        //   "channel": "alipay", // 目前只支持 alipay
-        //   "amount": amount, // 批量付款总金额
-        //   "description": "Your Description",
-        //   "metadata": metadata,
-        //   "recipients": [
-        //     {
-        //       "account": account, // 接收者支付宝账号
-        //       "amount": amount, // 付款金额
-        //       "name": userName // 接收者姓名
-        //     }
-        //   ],
-        //   "currency": 'cny',
-        //   "type": "b2c" // 付款类型，当前仅支持 b2c 企业付款
-        // }, function (err, transfer) {
-        //   if (err != null) {
-        //     console.log(err)
-        //     response.error({
-        //       errcode: 1,
-        //       message: err.message,
-        //     })
-        //     return
-        //   }
-        //
-        //   if (transfer.metadata.userId && (transfer.recipients.length == 1)) {
-        //     var paymentInfo = {
-        //       alipay_account: transfer.recipients[0].account,
-        //       userId: transfer.metadata.userId,
-        //       id_name: transfer.recipients[0].name,
-        //       amount: transfer.recipients[0].amount,
-        //     }
-        //     return updatePaymentInfoInMysql(paymentInfo).then(() => {
-        //       response.success({
-        //         errcode: 0,
-        //         message: 'alipay create transfers success!',
-        //         transfer: transfer,
-        //       })
-        //     }).catch((error) => {
-        //       response.error(error)
-        //     })
-        //   } else {
-        //     response.error({
-        //       errcode: 1,
-        //       message: "alipay create transfers fail!",
-        //     })
-        //   }
-        //
-        // })
-      }
-        break
-      default:
+  if(channel == 'wx_pub') {
+    pingpp.transfers.create({
+      order_no: order_no,
+      app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+      channel: "wx_pub",// 微信公众号支付
+      amount: amount,
+      currency: "cny",
+      type: "b2c",
+      recipient: openid, //微信openId
+      // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //微信openId/
+      extra: {
+        // user_name: userName,
+        // force_check: true,
+      },
+      description: "汇邻优店余额提现",
+      metadata: metadata,
+    }, function (err, transfer) {
+      if ((err != null) || transfer.failure_msg ) {
+        console.log('创建ping++提现请求失败 err', err)
+        console.log('创建ping++提现请求失败 failure_msg', transfer.failure_msg)
         response.error({
-          code: 702,
-          message: "unknow channel!",
+          errcode: 1,
+          message: "提现错误，请联系客服！",
         })
-        break
-    }
-  } else {
-    response.error({
-      code: 701,
-      message: "transfer time error",
+      } else {
+        response.success(transfer)
+      }
     })
+  } else {
+    response.error(new Error("无效的渠道"))
   }
 }
 
-function transfersEvent(request, response) {
-  console.log("transfersEvent", request.params)
+// function transfersEvent(request, response) {
+//   console.log("transfersEvent", request.params)
+//
+//   var transfer = request.params.data.object
+//
+//   getPaymentFeeByChannel(transfer.channel).then((fee) => {
+//     var feeAmount = (transfer.amount * 0.01 * fee).toFixed(2)
+//     if(feeAmount < 1.0) {
+//       transfer.feeAmount = 1.0
+//     } else {
+//       transfer.feeAmount = feeAmount
+//     }
+//     return insertTransferInMysql(transfer)
+//   }).then(() => {
+//     var account = ""
+//     if(transfer.channel == 'allinpay') {
+//       account = transfer.extra.card_number
+//     } else if( transfer.channel == 'wx_pub') {
+//       account = transfer.metadata.nickname
+//     }
+//     response.success({
+//       errcode: 0,
+//       message: 'transfersEvent response success!',
+//     })
+//     return mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount * 0.01, account, transfer.channel, new Date())
+//   }).catch((error) => {
+//     console.log("transfersEvent transfer into mysql fail!", error)
+//     response.error({
+//       errcode: 1,
+//       message: 'transfersEvent transfer into mysql fail!',
+//     })
+//   })
+// }
 
+/**
+ * 处理ping++提现成功的webhook消息
+ */
+function handleTransferEvent(request, response) {
   var transfer = request.params.data.object
+  // console.log("收到ping++发送的webhook消息:", transfer)
+  var mysqlConn = undefined
+
+  var deal = {
+    from: 'platform',
+    to: transfer.metadata.userId,
+    cost: (transfer.amount * 0.01).toFixed(2),
+    deal_type: WITHDRAW,
+    charge_id: transfer.id,
+    order_no: transfer.order_no,
+    channel: transfer.channel,
+    transaction_no: transfer.transaction_no,
+    feeAmount: 0
+  }
 
   getPaymentFeeByChannel(transfer.channel).then((fee) => {
-    var feeAmount = (transfer.amount * 0.01 * fee).toFixed(2)
-    if(feeAmount < 1.0) {
-      transfer.feeAmount = 1.0
-    } else {
-      transfer.feeAmount = feeAmount
-    }
-    return insertTransferInMysql(transfer)
+    deal.feeAmount = (deal.cost * fee) < 1? 1 : deal.cost * fee  //手续费最低1元
+    return mysqlUtil.getConnection()
+  }).then((conn) => {
+    mysqlConn = conn
+    return mysqlUtil.beginTransaction(conn)
+  }).then(() => {
+    return updatePaymentInfo(mysqlConn, deal)
+  }).then(() => {
+    return updateUserDealRecords(mysqlConn, deal)
+  }).then(() => {
+    return mysqlUtil.commit(mysqlConn)
   }).then(() => {
     var account = ""
     if(transfer.channel == 'allinpay') {
@@ -763,18 +668,27 @@ function transfersEvent(request, response) {
     } else if( transfer.channel == 'wx_pub') {
       account = transfer.metadata.nickname
     }
-    mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount, account, transfer.channel, new Date())
     response.success({
       errcode: 0,
       message: 'transfersEvent response success!',
     })
+    return mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount * 0.01, account, transfer.channel, new Date())
   }).catch((error) => {
-    console.log("transfersEvent transfer into mysql fail!", error)
+    console.log("handleTransferEvent error", error)
+    if (mysqlConn) {
+      console.log('transaction rollback')
+      mysqlUtil.rollback(mysqlConn)
+    }
     response.error({
       errcode: 1,
-      message: 'transfersEvent transfer into mysql fail!',
+      message: 'handleTransferEvent failed',
     })
+  }).finally(() => {
+    if (mysqlConn) {
+      mysqlUtil.release(mysqlConn)
+    }
   })
+
 }
 
 function idNameCardNumberIdentify(request, response) {
@@ -1105,7 +1019,7 @@ function getPaymentFeeByChannel(channel) {
       return fee
     switch (channel) {
       case 'wx_pub':
-        fee = 0.006
+        fee = 0.01
         break
       case 'allinpay':
         fee = 0
@@ -1148,7 +1062,7 @@ var PingppFunc = {
   createPayment: createPayment,
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
-  transfersEvent: transfersEvent,
+  transfersEvent: handleTransferEvent,
   idNameCardNumberIdentify: idNameCardNumberIdentify,
   updatePaymentBalance: updatePaymentBalance,
   getPaymentInfoByUserId: getPaymentInfoByUserId,

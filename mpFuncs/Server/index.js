@@ -65,6 +65,7 @@ var generateQrcode = function (req, res, next) {
         }
       })
     } else {
+      console.log("微信api getUser", err)
       res.reply({
         type: 'text',
         content: '获取信息失败'
