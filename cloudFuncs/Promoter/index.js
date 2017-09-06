@@ -239,6 +239,7 @@ function syncPromoterInfo(request, response) {
   var upUserOpenid = undefined
   var upUserTeamMemNum = 0
 
+
   bindPromoterInfo(userId).then((result) => {
     var upUser = result.upUser
     upUserTeamMemNum = result.upUserTeamMemNum
@@ -323,7 +324,15 @@ function bindPromoterInfo(userId) {
   var upUser = undefined
   var upUserTeamMemNum = 0
 
-  return createPromoter(userId).then((promoter) => {
+  var user = AV.Object.createWithoutData('_User', userId)
+  var promoterQuery = new AV.Query('Promoter')
+  promoterQuery.equalTo('user', user)
+  return promoterQuery.find().then((results) => {
+    if(results.length > 0) {
+      throw new Error("推广员信息已存在")
+    }
+    return createPromoter(userId)
+  }).then((promoter) => {
     currentPromoter = promoter
     return getUpUserFromRedis(userId)
   }).then((user) => {
@@ -340,7 +349,6 @@ function bindPromoterInfo(userId) {
     } else {
       return undefined
     }
-
   }).then(() => {
     insertPromoterInMysql(currentPromoter.id)
     return {
@@ -348,9 +356,9 @@ function bindPromoterInfo(userId) {
       upUserTeamMemNum: upUserTeamMemNum,
     }
   }).catch((error) => {
+    console.log("bindPromoterInfo", error)
     throw error
   })
-
 }
 
 /**
