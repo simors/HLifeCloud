@@ -22,6 +22,7 @@ var mpTokenFuncs = require('../../mpFuncs/Token')
 var gm = require('gm').subClass({imageMagick: true})
 var mpQrcodeFuncs = require('../../mpFuncs/Qrcode')
 var mpMaterialFuncs = require('../../mpFuncs/Material')
+var mpMediaFuncs = require('../../mpFuncs/Media')
 var util = require('../../cloudFuncs/util')
 
 
@@ -248,7 +249,7 @@ function syncPromoterInfo(request, response) {
     if(leanUser) {
       var nickname = leanUser.attributes.nickname
       var city = leanUser.attributes.geoCity
-      mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city)
+      mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, nickname, city, 1)
     }
     response.success()
   }).catch((error) => {
@@ -2225,129 +2226,127 @@ function supplementPromoterInfo(request, response) {
  * @param request
  * @param response
  */
-function getPromoterQrCode(request, response) {
-  var unionid = request.params.unionid
-
-  if(!unionid) {
-    response.error({
-      errcode: 1,
-      message: '参数错误',
-    })
-  }
-
-  var query = new AV.Query('_User')
-
-  query.equalTo("authData.weixin.openid", unionid)
-
-  query.first().then((user) => {
-    if(!user) {
-      response.success({
-        isSignIn: false
-      })
-    } else {
-      var avatar = user.attributes.avatar
-
-      var existQuery = new AV.Query('Promoter')
-      existQuery.equalTo('user', user)
-      existQuery.first().then((promoter) => {
-        if(promoter) {
-          var qrcode = promoter.get('qrcode')
-          if(!qrcode || !qrcode.url || !qrcode.mediaId) {
-            wechat_api.createLimitQRCode(unionid, function (err, result) {
-
-              var ticket = result.ticket
-               new Promise(function (resolve, reject) {
-                Request({
-                  url: wechat_api.showQRCodeURL(ticket),
-                  encoding: 'base64'
-                }, function(err, res, body) {
-                  resolve(body);
-                });
-              }).then((body) => {
-                fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
-                  if(!err) {
-
-                    Request({
-                      url: avatar,
-                      encoding: 'base64'
-                    }, function (err, res, body) {
-                      fs.writeFile('./avatar.png', body, 'base64', function (err) {
-                        var background = './public/images/qrcode_template.png'
-                        var logo = './public/images/hlyd_logo.png'
-                        var qrcode = './qrcode.jpeg'
-                        var localAvatar = './avatar.png'
-                        composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
-                          wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
-                            var mediaId = result.media_id
-
-                            fs.readFile('./myQrCode.png', 'base64', function (err, buffer) {
-                              var data = {base64: buffer}
-                              var file = new AV.File('./myQrCode.png', data)
-                              file.save().then(function (file) {
-                                //删除生成的临时图片
-                                fs.unlink('./myQrCode.png')
-                                fs.unlink('./qrcode.jpeg')
-                                fs.unlink(localAvatar)
-
-                                var url = file.url()
-                                var qrcode = {
-                                  mediaId: mediaId,
-                                  url: url,
-                                }
-                                promoter.set('qrcode', qrcode)
-                                promoter.save().then(function (promoter) {
-                                  response.success({
-                                    isSignIn: true,
-                                    qrcode: qrcode
-                                  })
-                                })
-                              })
-                            })
-
-                          })
-                        })
-                      })
-                    })
-
-                  }
-
-                })
-              })
-            })
-          } else {
-            response.success({
-              isSignIn: true,
-              qrcode: qrcode
-            })
-          }
-        } else {
-          response.success({
-            isSignIn: false
-          })
-        }
-      })
-
-    }
-  }).catch((err) => {
-    console.log(err)
-    response.error({
-      errcode: 1,
-      message: '获取我的二维码失败',
-    })
-  })
-
-}
+// function getPromoterQrCode(request, response) {
+//   var unionid = request.params.unionid
+//
+//   if(!unionid) {
+//     response.error({
+//       errcode: 1,
+//       message: '参数错误',
+//     })
+//   }
+//
+//   var query = new AV.Query('_User')
+//
+//   query.equalTo("authData.weixin.openid", unionid)
+//
+//   query.first().then((user) => {
+//     if(!user) {
+//       response.success({
+//         isSignIn: false
+//       })
+//     } else {
+//       var avatar = user.attributes.avatar
+//
+//       var existQuery = new AV.Query('Promoter')
+//       existQuery.equalTo('user', user)
+//       existQuery.first().then((promoter) => {
+//         if(promoter) {
+//           var qrcode = promoter.get('qrcode')
+//           if(!qrcode || !qrcode.url || !qrcode.mediaId) {
+//             wechat_api.createLimitQRCode(unionid, function (err, result) {
+//
+//               var ticket = result.ticket
+//                new Promise(function (resolve, reject) {
+//                 Request({
+//                   url: wechat_api.showQRCodeURL(ticket),
+//                   encoding: 'base64'
+//                 }, function(err, res, body) {
+//                   resolve(body);
+//                 });
+//               }).then((body) => {
+//                 fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
+//                   if(!err) {
+//
+//                     Request({
+//                       url: avatar,
+//                       encoding: 'base64'
+//                     }, function (err, res, body) {
+//                       fs.writeFile('./avatar.png', body, 'base64', function (err) {
+//                         var background = './public/images/qrcode_template.png'
+//                         var logo = './public/images/hlyd_logo.png'
+//                         var qrcode = './qrcode.jpeg'
+//                         var localAvatar = './avatar.png'
+//                         composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
+//                           wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
+//                             var mediaId = result.media_id
+//
+//                             fs.readFile('./myQrCode.png', 'base64', function (err, buffer) {
+//                               var data = {base64: buffer}
+//                               var file = new AV.File('./myQrCode.png', data)
+//                               file.save().then(function (file) {
+//                                 //删除生成的临时图片
+//                                 fs.unlink('./myQrCode.png')
+//                                 fs.unlink('./qrcode.jpeg')
+//                                 fs.unlink(localAvatar)
+//
+//                                 var url = file.url()
+//                                 var qrcode = {
+//                                   mediaId: mediaId,
+//                                   url: url,
+//                                 }
+//                                 promoter.set('qrcode', qrcode)
+//                                 promoter.save().then(function (promoter) {
+//                                   response.success({
+//                                     isSignIn: true,
+//                                     qrcode: qrcode
+//                                   })
+//                                 })
+//                               })
+//                             })
+//
+//                           })
+//                         })
+//                       })
+//                     })
+//
+//                   }
+//
+//                 })
+//               })
+//             })
+//           } else {
+//             response.success({
+//               isSignIn: true,
+//               qrcode: qrcode
+//             })
+//           }
+//         } else {
+//           response.success({
+//             isSignIn: false
+//           })
+//         }
+//       })
+//
+//     }
+//   }).catch((err) => {
+//     console.log(err)
+//     response.error({
+//       errcode: 1,
+//       message: '获取我的二维码失败',
+//     })
+//   })
+//
+// }
 
 /**
  *  获取我的推广二维码(gm优化)
  * @param request
  * @param response
  */
-function gmCreatePromoterQrCode(request, response) {
+function getPromoterQrCode(request, response) {
   var unionid = request.params.unionid
   var query = new AV.Query('_User')
-  var avatar = undefined
-  var nickname = undefined
   var userId = undefined
   query.equalTo("authData.weixin.openid", unionid)
 
@@ -2355,83 +2354,68 @@ function gmCreatePromoterQrCode(request, response) {
     if(!user) {
       throw new Error('找不到该用户')
     }
-    avatar = user.attributes.avatar
-    nickname = user.attributes.nickname
     userId = user.id
-    var promoterQuery = new AV.Query('Promoter')
-    promoterQuery.equalTo('user', user)
-    return promoterQuery.first()
-  }).then((promoter) => {
-    if(!promoter) {
-      throw new Error('找不到该用户的推广元信息')
-    }
-    var qrcode = promoter.get('qrcode')
-    if(qrcode) {
+    createPromoterQrCode(userId).then((qrcode) => {
       response.success({
         isSignIn: true,
         qrcode: qrcode
       })
-    } else {
-      createPromoterQrCode(userId).then((qrcode) => {
-        response.success({
-          isSignIn: true,
-          qrcode: qrcode
-        })
-      })
-    }
+    })
   }).catch((error) => {
     console.log("getPromoterQrCode", error)
     response.error(error)
   })
 }
 
-function composeQrCodeImage(background, qrcode, logo, avatar, name) {
-  images(background).draw(
-    images(qrcode).size(320),
-    215, 824    //二维码左上角合成坐标
-  ).draw(
-    images(80, 80).draw(
-      images(logo).size(76), 2, 2
-    ),
-    335, 944   //汇邻优店左上角合成坐标
-  ).draw(
-    images(avatar).size(64),
-    210, 720    //个人头像合成坐标
-  ).save("myQrCode.png", {
-    quality: 50
-  })
-
-  return new Promise((resolve, reject) => {
-    resolve()
+function saveFileFromURL(url, path) {
+  return new Promise(function (resolve, reject) {
+    Request({
+      url: url,
+      encoding: 'binary'
+    }, function(err, res, body) {
+      if(err) {
+        reject(err)
+      } else {
+        resolve(body)
+        fs.writeFile(path, body, 'binary', function (err) {
+          if(err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      }
+    })
   })
 }
 
 function createPromoterQrCode(userId) {
   var user = AV.Object.createWithoutData('_User', userId)
   var background = './public/images/qrcode_template.png'
-  var logo = './public/images/hlyd_logo.png'
   var unionid = undefined
   var avatar = undefined
   var nickname = undefined
   var mediaId = undefined
-  var tmpPromoterQrcodrPath = unionid + 'promoterQrcode.jpeg'
+  var tmpPromoterQrcodrPath =userId + 'promoterQrcode.jpeg'
+  var tmpQrcodePath = './public/images/' + userId + 'qrcode.jpeg'
+  var tmpAvatarPath = './public/images/' + userId + 'avatar.jpeg'
 
   return user.fetch().then(() => {
     var authData = user.get('authData')
     unionid = authData && authData.weixin.openid
     avatar = user.get('avatar')
     nickname = user.get('nickname')
-    console.log("avatar:",  avatar)
-    return mpQrcodeFuncs.createLimitQRCode(unionid)
+    return mpQrcodeFuncs.createTmpQRCode(unionid, 2592000)
   }).then((qrcodeUrl) => {
+    return saveFileFromURL(qrcodeUrl, tmpQrcodePath)
+  }).then(() => {
+    return saveFileFromURL(avatar, tmpAvatarPath)
+  }).then(() => {
     return new Promise(function (resolve, reject) {
       gm(background)
-        .font("./public/SansCN-Regular.TTF", 40)
-        .fontSize(40)
-        .drawText(320, 760, "绿蚁网络")
-        .draw('image Over 210, 720 64, 64 "' + avatar + '"')
-        .draw('image Over 215, 824 320, 320 "' + qrcodeUrl + '"')
-        .draw('image Over 335, 944 80, 80 "' + logo + '"')
+        .font("./public/SansCN-Regular.TTF", 20)
+        .fontSize(20)
+        .drawText(160, 385, nickname)
         .write(tmpPromoterQrcodrPath, function (err) {
           if(err) {
             console.log("GraphicsMagick error", err)
@@ -2441,8 +2425,18 @@ function createPromoterQrCode(userId) {
         })
     })
   }).then(() => {
-    console.log("gm process success")
-    return mpMaterialFuncs.uploadMaterial(tmpPromoterQrcodrPath)
+    images(tmpPromoterQrcodrPath).draw(
+      images(tmpQrcodePath).size(160),
+      107, 412    //二维码左上角合成坐标
+    ).draw(
+      images(tmpAvatarPath).size(32),
+      105, 360    //个人头像合成坐标
+    ).save(tmpPromoterQrcodrPath, {
+      quality: 60
+    })
+
+  }).then(() => {
+    return mpMediaFuncs.uploadMedia(tmpPromoterQrcodrPath, 'image')
   }).then((result) => {
     mediaId = result.mediaId
     return util.readFileAsyn(tmpPromoterQrcodrPath, 'base64')
@@ -2455,29 +2449,40 @@ function createPromoterQrCode(userId) {
       url: file.url(),
       mediaId: mediaId
     }
+    fs.exists(tmpQrcodePath, function (exists) {
+      if(exists) fs.unlink(tmpQrcodePath)
+    })
     fs.exists(tmpPromoterQrcodrPath, function (exists) {
-      if(exists)
-        fs.unlink(tmpPromoterQrcodrPath)
+      if(exists) fs.unlink(tmpPromoterQrcodrPath)
+    })
+    fs.exists(tmpAvatarPath, function (exists) {
+      if(exists) fs.unlink(tmpAvatarPath)
     })
     return qrcode
   }).catch((error) => {
-    console.log("createPromoterQrCode failed!", error)
-    fs.exists(tmpPromoterQrcodrPath, function (exists) {
-      if(exists)
-        fs.unlink(tmpPromoterQrcodrPath)
+    fs.exists(tmpQrcodePath, function (exists) {
+      if(exists) fs.unlink(tmpQrcodePath)
     })
+    fs.exists(tmpPromoterQrcodrPath, function (exists) {
+      if(exists) fs.unlink(tmpPromoterQrcodrPath)
+    })
+    fs.exists(tmpAvatarPath, function (exists) {
+      if(exists) fs.unlink(tmpAvatarPath)
+    })
+    console.log("createPromoterQrCode failed!", error)
     throw error
   })
 }
 
 function promoterTest(request, response) {
-  var userId = "59a8fe8044d9040058421bb7"
+  var userId = request.params.userId
   createPromoterQrCode(userId).then((result) => {
     console.log("createPromoterQrCode", result)
     response.success(result)
   }).catch((error) => {
     response.error(error)
   })
+
 }
 
 var PromoterFunc = {

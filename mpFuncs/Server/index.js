@@ -7,6 +7,7 @@ var AV = require('leanengine');
 var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
 var getMaterialIdByName = require('../Material').getMaterialIdByName
+var PromoterFunc = require('../../cloudFuncs/Promoter')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
@@ -23,22 +24,20 @@ var generateQrcode = function (req, res, next) {
       query.equalTo("authData.weixin.openid", unionid)
       query.first().then((user) => {
         if(user && user.attributes.authData) {
-          AV.Cloud.run('promoterGetPromoterQrCode', {unionid: unionid}).then((result) => {
-            if(result.isSignIn && result.qrcode) {
-              res.reply({
-                type: 'image',
-                content: {
-                  mediaId: result.qrcode.mediaId
-                }
-              })
-            } else {
-              res.reply({
-                type: 'text',
-                content: "感谢关注汇邻优店！\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
-              })
-            }
+          PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
+            res.reply({
+              type: 'image',
+              content: {
+                mediaId: qrcode.mediaId
+              }
+            })
+          }).catch((error) => {
+            console.log("generateQrcode", error)
+            res.reply({
+              type: 'text',
+              content: "系统错误，请联系客服"
+            })
           })
-
         } else {
           res.reply({
             type: 'text',

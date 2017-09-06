@@ -10,6 +10,7 @@ function uploadMaterial(filepath) {
       if(err) {
         console.log("uploadMaterial", err)
         reject(err)
+        return
       }
       var mediaId = result.media_id
       var type = result.type

@@ -53,7 +53,7 @@ router.get('/callback', function (req, res, next) {
       }).then((upUser) => {
         if(upUser) {
           var upUserOpenid = upUser.attributes.openid
-          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, currentUserNickname, currentUserCity)
+          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, currentUserNickname, currentUserCity, 1)
 
         }
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)

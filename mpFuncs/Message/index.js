@@ -215,14 +215,15 @@ function sendWithdrawTmpMsg(openid, amount, account, channel, created) {
  * @param {String} openid 邀请者的openid
  * @param {String} username 用户姓名
  * @param {String} city  城市
+ * @param {Number} teamMemNum  邀请好友数量
  */
-function sendInviterTmpMsg(openid, username, city) {
+function sendInviterTmpMsg(openid, username, city, teamMemNum) {
   var templateId = GLOBAL_CONFIG.INVITER_TMP_ID
   var url = ""
 
   var data = {
     "first": {
-      "value": "恭喜您邀请到新的汇邻优店用户\n",
+      "value": "恭喜您邀请到第" + teamMemNum + "位好友",
       "color":"#173177"
     },
     "keyword1": {
@@ -238,7 +239,7 @@ function sendInviterTmpMsg(openid, username, city) {
       "color":"#173177"
     },
     "keyword4" : {
-      "value": "登录注册",
+      "value": "推广员入驻",
       "color":"#173177"
     },
     "remark":{
