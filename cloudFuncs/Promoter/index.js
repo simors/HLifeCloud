@@ -241,6 +241,9 @@ function syncPromoterInfo(request, response) {
 
 
   bindPromoterInfo(userId).then((result) => {
+    if(!result) {
+      return undefined
+    }
     var upUser = result.upUser
     upUserTeamMemNum = result.upUserTeamMemNum
     if(upUser) {
@@ -329,27 +332,33 @@ function bindPromoterInfo(userId) {
   promoterQuery.equalTo('user', user)
   return promoterQuery.find().then((results) => {
     if(results.length > 0) {
-      throw new Error("推广员信息已存在")
+      // throw new Error("推广员信息已存在")
+      return undefined
     }
     return createPromoter(userId)
   }).then((promoter) => {
+    if(!promoter) {
+      return undefined
+    }
     currentPromoter = promoter
     return getUpUserFromRedis(userId)
   }).then((user) => {
-    if(user) {
-      upUser = user
-      currentPromoter.set('upUser', upUser)
-      var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
-        upUserTeamMemNum = upPromoter.attributes.teamMemNum
-        incrementTeamMem(upPromoter.id)
-      }).catch((err) => {
-        throw err
-      })
-      return Promise.all([currentPromoter.save(), incTeamMem])
-    } else {
+    if(!user) {
       return undefined
     }
-  }).then(() => {
+    upUser = user
+    currentPromoter.set('upUser', upUser)
+    var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
+      upUserTeamMemNum = upPromoter.attributes.teamMemNum
+      incrementTeamMem(upPromoter.id)
+    }).catch((err) => {
+      throw err
+    })
+    return Promise.all([currentPromoter.save(), incTeamMem])
+  }).then((result) => {
+    if(!result) {
+      return undefined
+    }
     insertPromoterInMysql(currentPromoter.id)
     return {
       upUser: upUser,
@@ -2354,6 +2363,23 @@ function supplementPromoterInfo(request, response) {
 //   })
 //
 // }
+/**
+ * 更新推广员二维码信息
+ */
+function updatePromoterQrCode(userId, qrcode) {
+  var query = new AV.Query('Promoter')
+  var user = AV.Object.createWithoutData('_User', userId)
+  query.equalTo('user', user)
+  return query.first().then((promoter) => {
+    if(!promoter) {
+      throw new Error("没有找到推广员信息")
+    }
+    promoter.set('qrcode', qrcode)
+    return promoter.save()
+  }).catch((error) => {
+    throw error
+  })
+}
 
 /**
  *  获取我的推广二维码(gm优化)
@@ -2376,6 +2402,7 @@ function getPromoterQrCode(request, response) {
         isSignIn: true,
         qrcode: qrcode
       })
+      return updatePromoterQrCode(userId, qrcode)
     })
   }).catch((error) => {
     console.log("getPromoterQrCode", error)
@@ -2542,6 +2569,7 @@ var PromoterFunc = {
   getPromoterQrCode: getPromoterQrCode,
   bindPromoterInfo: bindPromoterInfo,
   createPromoterQrCode: createPromoterQrCode,
+  updatePromoterQrCode: updatePromoterQrCode,
   promoterTest: promoterTest
 }
 

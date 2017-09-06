@@ -51,6 +51,10 @@ router.get('/callback', function (req, res, next) {
       }).then((user) => {
         return PromoterFunc.bindPromoterInfo(user.id)
       }).then((result) => {
+        if(!result) {
+          res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
+          return
+        }
         var upUser = result.upUser
         var upUserTeamMemNum = result.upUserTeamMemNum
         if(upUser) {
@@ -59,6 +63,8 @@ router.get('/callback', function (req, res, next) {
 
         }
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)
+      }).catch((error) => {
+        throw error
       })
     } else {
       authFunc.setUserOpenid(openid, unionid).then(() => {

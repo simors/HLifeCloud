@@ -56,6 +56,7 @@ var generateQrcode = function (req, res, next) {
               mediaId: qrcode.mediaId
             }
           })
+          return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
         }).catch((error) => {
           console.log("generateQrcode", error)
           res.reply({
