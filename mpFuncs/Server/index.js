@@ -82,7 +82,7 @@ var newUserGuide = function (req, res, next) {
       console.log('can\'t find news media')
       return
     }
-    wechat_api.sendNews(openid, mediaId, function (err, result) {
+    wechat_api.sendMpNews(openid, mediaId, function (err, result) {
       if (err) {
         console.log('customer news err', err)
       }
