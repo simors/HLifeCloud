@@ -50,10 +50,12 @@ router.get('/callback', function (req, res, next) {
         return AV.User.associateWithAuthData(leanUser, platform, authData)
       }).then((user) => {
         return PromoterFunc.bindPromoterInfo(user.id)
-      }).then((upUser) => {
+      }).then((result) => {
+        var upUser = result.upUser
+        var upUserTeamMemNum = result.upUserTeamMemNum
         if(upUser) {
           var upUserOpenid = upUser.attributes.openid
-          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, currentUserNickname, currentUserCity, 1)
+          mpMsgFuncs.sendInviterTmpMsg(upUserOpenid, currentUserNickname, currentUserCity, upUserTeamMemNum + 1)
 
         }
         res.redirect('/wxProfile?unionid=' + unionid + '&openid=' + openid)

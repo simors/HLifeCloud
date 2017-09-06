@@ -10,7 +10,6 @@ function userAuthRequest(req, res) {
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/wxOauth/callback'
   var url = client.getAuthorizeURL(auth_callback_url, '', 'snsapi_userinfo');
-  console.log('redirect url:', url)
   res.redirect(url)
 }
 
