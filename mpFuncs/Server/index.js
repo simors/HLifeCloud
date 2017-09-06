@@ -75,50 +75,20 @@ var generateQrcode = function (req, res, next) {
 }
 
 var newUserGuide = function (req, res, next) {
-  res.reply([
-    {
-      title: '如何在汇邻优店赚到钱',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJptQC23DAdc5obxEdeudArZTIgr1peniakr8Ts9V8mich84JFMMmnsR9Sicgic2Erf8uBLJP69kj12RhKA/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/kX1I5ZPmRjutqP1LHksf1w'
-    },
-    {
-      title: '线下推广技巧',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJptQC23DAdc5obxEdeudArZTKiaM6b7vEFUliar6UzXAjJTQ61ibERXuryTUQTpve0ONegX5BckN8juYw/0?wx_fmt=png',
-      url: 'https://mp.weixin.qq.com/s/qFVL1R6RG7sjbzB0JHrUfQ'
-    },
-    {
-      title: '推广等级和奖励制度',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJpvnlz5dx9YwT39ahyhQ5ia8RCickyuOzzxS6QvIKFuiaPQM3ibywbOia13lcOmhecUbwloFD1LaFkicNuQw/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/O7cxR86KpQxWutC8rqk5RQ'
-    },
-    {
-      title: '推广技巧与转发分享的话术',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJptrCwBqibTZDRyHM4QibxBxKFVOy6DSwLBWHuHwxicvFVXDUKKT6zVG3icvcTiaawkg07qFWoibUsdPKCyQ/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/kxyWIPGMl0TRvsTGiS8WPg'
-    },
-    {
-      title: '善芳分享：如何快速组建团队，复制团队三部曲',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJptMY1crjuQLfTicic4pE6nicfuJSb8Nk2Hib4S9iajYCxibW2fMia732DNPaHFoAufcIQ106y9vA2bVIB95A/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/FWE3DPw0q0h2Vopf5q9j8g'
-    },
-    {
-      title: '团队打造12字秘诀',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJptMY1crjuQLfTicic4pE6nicfu7C4ZQ6YWzPW6pgQrMMmtSgXicq6GWP7e0hRl7FIcXLDeaN98MoMJhUQ/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/nM4N9-dyYUTzwwQkxRHfFg'
-    },
-    {
-      title: '团队管理之破冰法则',
-      description: '',
-      picurl: 'https://mmbiz.qlogo.cn/mmbiz_png/9jgnpibfyJpvBibR9Z5T6vPw082SNMplicph7JYlrqon7TF9CxquMryUSNgUJ3tDhQHZCIoEXjHQIRj0YFDBXzicgA/0?wx_fmt=png',
-      url: 'http://mp.weixin.qq.com/s/8RucASIX5OeDkmq0A1X18Q'
-    },
-  ])
+  getMaterialIdByName('news', '三分钟了解汇邻优店').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find news media')
+      return
+    }
+    wechat_api.sendNews(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer news err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer news error')
+  })
+  res.reply('')
 }
 
 var exeClickEvent = {
