@@ -58,11 +58,18 @@ function getMaterialIdByName(type, mediaName) {
           return
         }
         var materialItems = result.item
-        var meterial = materialItems.find((item) => {
-          return item.name == mediaName
-        })
-        if (meterial) {
-          resolve(meterial.media_id)
+        var material = undefined
+        if (type != 'news') {
+          material = materialItems.find((item) => {
+            return item.name == mediaName
+          })
+        } else {
+          material = materialItems.find((item) => {
+            return item.content.news_item[0].title == mediaName
+          })
+        }
+        if (material) {
+          resolve(material.media_id)
         } else {
           reject()
         }
