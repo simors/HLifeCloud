@@ -36,6 +36,7 @@ router.get('/callback', function (req, res, next) {
 
       return authFunc.getUnionidById(userId)
     }).then((unionid) => {
+      if(!unionid) return undefined
       return utilFunc.bindWechatUnionid(unionid, current_unionid)
     }).then(() => {
       var query = new AV.Query(AppVersion)

@@ -56,6 +56,7 @@ var generateQrcode = function (req, res, next) {
               mediaId: qrcode.mediaId
             }
           })
+          return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
         }).catch((error) => {
           console.log("generateQrcode", error)
           res.reply({
@@ -128,7 +129,7 @@ function wechatServer(req, res, next) {
           console.log('send customer voice error')
         })
         wechat_api.getUser(openid, function (err, result) {
-          if(!err) {
+          if(!err && upUser_unionid) {
             utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
           } else {
             console.log("subscribe", err)
@@ -143,7 +144,7 @@ function wechatServer(req, res, next) {
         var openid = message.FromUserName
 
         wechat_api.getUser(openid, function (err, result) {
-          if(!err) {
+          if(!err && upUser_unionid) {
             utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
           } else {
             console.log("subscribe", err)

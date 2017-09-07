@@ -18,7 +18,7 @@ function getApiTokenFromRedis(callback) {
   // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
   // 主从切换等原因造成短暂不可用导致应用进程退出。
   client.on('error', function (err) {
-    response.error({errcode: 1, message: '设置费率失败，请重试！'})
+    return callback(err)
   })
 
   client.getAsync(PREFIX).then((token) => {
@@ -36,7 +36,7 @@ function setApiTokenToRedis(token, callback) {
   // 建议增加 client 的 on error 事件处理，否则可能因为网络波动或 redis server
   // 主从切换等原因造成短暂不可用导致应用进程退出。
   client.on('error', function (err) {
-    response.error({errcode: 1, message: '设置费率失败，请重试！'})
+    return callback(err)
   })
 
   client.setAsync(PREFIX, JSON.stringify(token)).then(() => {

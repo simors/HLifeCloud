@@ -233,7 +233,11 @@ function syncPromoterInfo(request, response) {
   var upUserOpenid = undefined
   var upUserTeamMemNum = 0
 
+
   bindPromoterInfo(userId).then((result) => {
+    if(!result) {
+      return undefined
+    }
     var upUser = result.upUser
     upUserTeamMemNum = result.upUserTeamMemNum
     if(upUser) {
@@ -317,34 +321,47 @@ function bindPromoterInfo(userId) {
   var upUser = undefined
   var upUserTeamMemNum = 0
 
-  return createPromoter(userId).then((promoter) => {
+  var user = AV.Object.createWithoutData('_User', userId)
+  var promoterQuery = new AV.Query('Promoter')
+  promoterQuery.equalTo('user', user)
+  return promoterQuery.find().then((results) => {
+    if(results.length > 0) {
+      // throw new Error("推广员信息已存在")
+      return undefined
+    }
+    return createPromoter(userId)
+  }).then((promoter) => {
+    if(!promoter) {
+      return undefined
+    }
     currentPromoter = promoter
     return getUpUserFromRedis(userId)
   }).then((user) => {
-    if(user) {
-      upUser = user
-      currentPromoter.set('upUser', upUser)
-      var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
-        upUserTeamMemNum = upPromoter.attributes.teamMemNum
-        incrementTeamMem(upPromoter.id)
-      }).catch((err) => {
-        throw err
-      })
-      return Promise.all([currentPromoter.save(), incTeamMem])
-    } else {
+    if(!user) {
       return undefined
     }
-
-  }).then(() => {
+    upUser = user
+    currentPromoter.set('upUser', upUser)
+    var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
+      upUserTeamMemNum = upPromoter.attributes.teamMemNum
+      incrementTeamMem(upPromoter.id)
+    }).catch((err) => {
+      throw err
+    })
+    return Promise.all([currentPromoter.save(), incTeamMem])
+  }).then((result) => {
+    if(!result) {
+      return undefined
+    }
     insertPromoterInMysql(currentPromoter.id)
     return {
       upUser: upUser,
       upUserTeamMemNum: upUserTeamMemNum,
     }
   }).catch((error) => {
+    console.log("bindPromoterInfo", error)
     throw error
   })
-
 }
 
 /**
@@ -2224,6 +2241,24 @@ function supplementPromoterInfo(request, response) {
 }
 
 /**
+ * 更新推广员二维码信息
+ */
+function updatePromoterQrCode(userId, qrcode) {
+  var query = new AV.Query('Promoter')
+  var user = AV.Object.createWithoutData('_User', userId)
+  query.equalTo('user', user)
+  return query.first().then((promoter) => {
+    if(!promoter) {
+      throw new Error("没有找到推广员信息")
+    }
+    promoter.set('qrcode', qrcode)
+    return promoter.save()
+  }).catch((error) => {
+    throw error
+  })
+}
+
+/**
  *  获取我的推广二维码(gm优化)
  * @param request
  * @param response
@@ -2244,6 +2279,7 @@ function getPromoterQrCode(request, response) {
         isSignIn: true,
         qrcode: qrcode
       })
+      return updatePromoterQrCode(userId, qrcode)
     })
   }).catch((error) => {
     console.log("getPromoterQrCode", error)
@@ -2586,6 +2622,7 @@ var PromoterFunc = {
   getPromoterQrCode: getPromoterQrCode,
   bindPromoterInfo: bindPromoterInfo,
   createPromoterQrCode: createPromoterQrCode,
+  updatePromoterQrCode: updatePromoterQrCode,
   promoterTest: promoterTest,
   handleCleanPromoterTeamMem: handleCleanPromoterTeamMem,
   handleStatLevelTeamMem: handleStatLevelTeamMem,

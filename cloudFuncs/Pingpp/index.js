@@ -451,6 +451,7 @@ function paymentEvent(request, response) {
     }
   }).then(() => {
     var createShopOrder = require('../Shop/ShopOrders').createShopOrder
+    response.success()
     var metadata = charge.metadata
     if (dealType == BUY_GOODS) {
       var order = {
@@ -467,7 +468,6 @@ function paymentEvent(request, response) {
       console.log('begin to create shop order: ', order)
       return createShopOrder(order)
     }
-    return new Promise((resolve) => resolve())
   }).then(() => {
     //发送微信通知消息
     if (!toUser) {
@@ -479,10 +479,6 @@ function paymentEvent(request, response) {
           console.log('Send message to shop inviter ', shopInviterId , " error")
         })
       }
-      response.success({
-        errcode: 0,
-        message: 'paymentEvent charge into mysql success!',
-      })
     } else {
       console.log('begin to send wechat message: ', toUser)
       authFunc.getOpenidById(toUser).then((openid) => {
@@ -502,11 +498,6 @@ function paymentEvent(request, response) {
           default:
             break
         }
-
-        response.success({
-          errcode: 0,
-          message: 'paymentEvent charge into mysql success!',
-        })
       }, (error) => {
         console.log('Send message to user ', toUser , " error")
       })
@@ -544,10 +535,7 @@ function paymentEvent(request, response) {
         console.log('save exception earn for common payment error: ', err)
       })
     }
-    response.error({
-      errcode: 1,
-      message: 'paymentEvent charge into mysql fail!',
-    })
+    response.error(error)
   })
 }
 
@@ -668,10 +656,7 @@ function handleTransferEvent(request, response) {
     } else if( transfer.channel == 'wx_pub') {
       account = transfer.metadata.nickname
     }
-    response.success({
-      errcode: 0,
-      message: 'transfersEvent response success!',
-    })
+    response.success()
     return mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount * 0.01, account, transfer.channel, new Date())
   }).catch((error) => {
     console.log("handleTransferEvent error", error)
@@ -679,10 +664,7 @@ function handleTransferEvent(request, response) {
       console.log('transaction rollback')
       mysqlUtil.rollback(mysqlConn)
     }
-    response.error({
-      errcode: 1,
-      message: 'handleTransferEvent failed',
-    })
+    response.error(error)
   }).finally(() => {
     if (mysqlConn) {
       mysqlUtil.release(mysqlConn)
