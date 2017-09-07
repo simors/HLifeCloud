@@ -129,7 +129,7 @@ function wechatServer(req, res, next) {
           console.log('send customer voice error')
         })
         wechat_api.getUser(openid, function (err, result) {
-          if(!err) {
+          if(!err && upUser_unionid) {
             utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
           } else {
             console.log("subscribe", err)
@@ -144,7 +144,7 @@ function wechatServer(req, res, next) {
         var openid = message.FromUserName
 
         wechat_api.getUser(openid, function (err, result) {
-          if(!err) {
+          if(!err && upUser_unionid) {
             utilFunc.bindWechatUnionid(upUser_unionid, result.unionid)
           } else {
             console.log("subscribe", err)
