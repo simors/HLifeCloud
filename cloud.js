@@ -223,6 +223,8 @@ AV.Cloud.define('promoterSyncPromoterInfo', PromoterFunc.syncPromoterInfo)
 AV.Cloud.define('promoterSupplementPromoterInfo', PromoterFunc.supplementPromoterInfo)
 AV.Cloud.define('promoterGetPromoterQrCode', PromoterFunc.getPromoterQrCode)
 AV.Cloud.define('promoterTest', PromoterFunc.promoterTest)
+AV.Cloud.define('promoterCleanTeamMem', PromoterFunc.handleCleanPromoterTeamMem)
+AV.Cloud.define('promoterStatLevelTeamMem', PromoterFunc.handleStatLevelTeamMem)
 
 // 店铺入驻费用
 AV.Cloud.define('promoterGetShopTenantFeeList', TenantFeeFunc.fetchShopTenantFee)

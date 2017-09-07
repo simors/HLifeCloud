@@ -26,12 +26,6 @@ var mpMediaFuncs = require('../../mpFuncs/Media')
 var util = require('../../cloudFuncs/util')
 
 
-
-
-
-var wechat_api = new WechatAPI(GLOBAL_CONFIG.wxConfig.appid, GLOBAL_CONFIG.wxConfig.appSecret, mpTokenFuncs.getApiTokenFromRedis, mpTokenFuncs.setApiTokenToRedis);
-
-
 const PREFIX = 'promoter:'
 
 // 收益类型分类
@@ -2230,124 +2224,6 @@ function supplementPromoterInfo(request, response) {
 }
 
 /**
- * 获取我的推广二维码
- * @param request
- * @param response
- */
-// function getPromoterQrCode(request, response) {
-//   var unionid = request.params.unionid
-//
-//   if(!unionid) {
-//     response.error({
-//       errcode: 1,
-//       message: '参数错误',
-//     })
-//   }
-//
-//   var query = new AV.Query('_User')
-//
-//   query.equalTo("authData.weixin.openid", unionid)
-//
-//   query.first().then((user) => {
-//     if(!user) {
-//       response.success({
-//         isSignIn: false
-//       })
-//     } else {
-//       var avatar = user.attributes.avatar
-//
-//       var existQuery = new AV.Query('Promoter')
-//       existQuery.equalTo('user', user)
-//       existQuery.first().then((promoter) => {
-//         if(promoter) {
-//           var qrcode = promoter.get('qrcode')
-//           if(!qrcode || !qrcode.url || !qrcode.mediaId) {
-//             wechat_api.createLimitQRCode(unionid, function (err, result) {
-//
-//               var ticket = result.ticket
-//                new Promise(function (resolve, reject) {
-//                 Request({
-//                   url: wechat_api.showQRCodeURL(ticket),
-//                   encoding: 'base64'
-//                 }, function(err, res, body) {
-//                   resolve(body);
-//                 });
-//               }).then((body) => {
-//                 fs.writeFile('./qrcode.jpeg', body, 'base64', function (err) {
-//                   if(!err) {
-//
-//                     Request({
-//                       url: avatar,
-//                       encoding: 'base64'
-//                     }, function (err, res, body) {
-//                       fs.writeFile('./avatar.png', body, 'base64', function (err) {
-//                         var background = './public/images/qrcode_template.png'
-//                         var logo = './public/images/hlyd_logo.png'
-//                         var qrcode = './qrcode.jpeg'
-//                         var localAvatar = './avatar.png'
-//                         composeQrCodeImage(background, qrcode, logo, localAvatar, '汇邻优店').then(() => {
-//                           wechat_api.uploadMaterial('./myQrCode.png', 'image', function (err, result) {
-//                             var mediaId = result.media_id
-//
-//                             fs.readFile('./myQrCode.png', 'base64', function (err, buffer) {
-//                               var data = {base64: buffer}
-//                               var file = new AV.File('./myQrCode.png', data)
-//                               file.save().then(function (file) {
-//                                 //删除生成的临时图片
-//                                 fs.unlink('./myQrCode.png')
-//                                 fs.unlink('./qrcode.jpeg')
-//                                 fs.unlink(localAvatar)
-//
-//                                 var url = file.url()
-//                                 var qrcode = {
-//                                   mediaId: mediaId,
-//                                   url: url,
-//                                 }
-//                                 promoter.set('qrcode', qrcode)
-//                                 promoter.save().then(function (promoter) {
-//                                   response.success({
-//                                     isSignIn: true,
-//                                     qrcode: qrcode
-//                                   })
-//                                 })
-//                               })
-//                             })
-//
-//                           })
-//                         })
-//                       })
-//                     })
-//
-//                   }
-//
-//                 })
-//               })
-//             })
-//           } else {
-//             response.success({
-//               isSignIn: true,
-//               qrcode: qrcode
-//             })
-//           }
-//         } else {
-//           response.success({
-//             isSignIn: false
-//           })
-//         }
-//       })
-//
-//     }
-//   }).catch((err) => {
-//     console.log(err)
-//     response.error({
-//       errcode: 1,
-//       message: '获取我的二维码失败',
-//     })
-//   })
-//
-// }
-
-/**
  *  获取我的推广二维码(gm优化)
  * @param request
  * @param response
@@ -2493,6 +2369,182 @@ function promoterTest(request, response) {
 
 }
 
+function cleanPromoterTeamMem(promoter) {
+  var userId = promoter.attributes.user.id
+  var user = AV.Object.createWithoutData('_User', userId)
+  var query = new AV.Query('Promoter')
+  query.equalTo('upUser', user)
+  return query.count().then((cnt) => {
+    promoter.set('teamMemNum', cnt)
+    return promoter.save()
+  })
+}
+
+function cleanPromoterTeamMemSegment(lastTime) {
+  var queryNum = 0
+  var retLastTime = lastTime
+  var query = new AV.Query('Promoter')
+  query.descending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+  query.limit(1000)
+  return query.find().then((promoters) => {
+    queryNum = promoters.length
+    promoters.forEach((prompMem) => {
+      cleanPromoterTeamMem(prompMem)
+      retLastTime = prompMem.createdAt
+    })
+    return {
+      queryNum,
+      lastTime: retLastTime
+    }
+  })
+}
+
+async function cleanAllPromoterTeamMem() {
+  var lastTime = undefined
+  while (1) {
+    var result = await cleanPromoterTeamMemSegment(lastTime)
+    if (result.queryNum <= 0) {
+      break
+    }
+    lastTime = result.lastTime
+  }
+}
+
+function handleCleanPromoterTeamMem(request, response) {
+  cleanAllPromoterTeamMem().then(() => {
+    response.success({errcode: 0, message: '推广员团队成员数清理成功'})
+  }).catch((error) => {
+    response.error({errcode: 1, message: '推广员团队成员数清理失败'})
+  })
+}
+
+async function statLevelTeamMem(promoter, level) {
+  if (level != 2 && level != 3) {
+    return Promise.resolve()
+  }
+  var i = 0
+  var newPromoter = promoter
+  for (i = 0; i < level; i++) {
+    if (!newPromoter) {
+      break
+    }
+    newPromoter = await getUpPromoter(newPromoter, false)
+  }
+  if (!newPromoter) {
+    return undefined
+  }
+  if (level == 2) {
+    newPromoter.increment('level2Num', 1)
+  } else {
+    newPromoter.increment('level3Num', 1)
+  }
+  return newPromoter.save()
+}
+
+function statLevelTeamNumSegment(level, lastTime) {
+  if (level != 2 && level != 3) {
+    return Promise.resolve({
+      queryNum: 0,
+      lastTime: undefined
+    })
+  }
+  var queryNum = 0
+  var retLastTime = lastTime
+  var query = new AV.Query('Promoter')
+  query.descending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+  query.limit(1000)
+  return query.find().then((promoters) => {
+    queryNum = promoters.length
+    promoters.forEach((prompMem) => {
+      statLevelTeamMem(prompMem, level)
+      retLastTime = prompMem.createdAt
+    })
+    return {
+      queryNum,
+      lastTime: retLastTime
+    }
+  })
+}
+
+async function statAllLevelPromoterTeamMem(level) {
+  if (level != 2 && level != 3) {
+    return Promise.reject()
+  }
+  var lastTime = undefined
+  while (1) {
+    var result = await statLevelTeamNumSegment(level, lastTime)
+    if (result.queryNum <= 0) {
+      break
+    }
+    lastTime = result.lastTime
+  }
+}
+
+function cleanLevelTeamMem(level, lastTime) {
+  if (level != 2 && level != 3) {
+    return Promise.resolve({
+      queryNum: 0,
+      lastTime: undefined
+    })
+  }
+  var queryNum = 0
+  var retLastTime = lastTime
+  var query = new AV.Query('Promoter')
+  query.descending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+  query.limit(1000)
+  return query.find().then((promoters) => {
+    queryNum = promoters.length
+    promoters.forEach((prompMem) => {
+      if (level == 2) {
+        prompMem.set('level2Num', 0)
+      } else {
+        prompMem.set('level3Num', 0)
+      }
+      retLastTime = prompMem.createdAt
+    })
+    return AV.Object.saveAll(promoters)
+  }).then(() => {
+    return {
+      queryNum,
+      lastTime: retLastTime
+    }
+  })
+}
+
+async function cleanAllLevelTeamMem(level) {
+  if (level != 2 && level != 3) {
+    return Promise.reject()
+  }
+  var lastTime = undefined
+  while (1) {
+    var result = await cleanLevelTeamMem(level, lastTime)
+    if (result.queryNum <= 0) {
+      break
+    }
+    lastTime = result.lastTime
+  }
+}
+
+function handleStatLevelTeamMem(request, response) {
+  var level = request.params.level
+  cleanAllLevelTeamMem(level).then(() => {
+    return statAllLevelPromoterTeamMem(level)
+  }).then(() => {
+    response.success({errcode: 0, message: '推广员团队成员数统计成功'})
+  }).catch((error) => {
+    response.error({errcode: 1, message: '推广员团队成员数统计失败'})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2534,7 +2586,9 @@ var PromoterFunc = {
   getPromoterQrCode: getPromoterQrCode,
   bindPromoterInfo: bindPromoterInfo,
   createPromoterQrCode: createPromoterQrCode,
-  promoterTest: promoterTest
+  promoterTest: promoterTest,
+  handleCleanPromoterTeamMem: handleCleanPromoterTeamMem,
+  handleStatLevelTeamMem: handleStatLevelTeamMem,
 }
 
 module.exports = PromoterFunc
