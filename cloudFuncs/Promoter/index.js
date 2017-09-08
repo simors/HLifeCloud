@@ -5,6 +5,7 @@ var AV = require('leanengine');
 var redis = require('redis');
 var Promise = require('bluebird');
 var dateFormat = require('dateformat')
+var math = require('mathjs');
 var inviteCodeFunc = require('../util/inviteCode')
 var IDENTITY_PROMOTER = require('../../constants/appConst').IDENTITY_PROMOTER
 var GLOBAL_CONFIG = require('../../config')
@@ -665,12 +666,54 @@ function fetchPromoterByUser(request, response) {
  * @returns {Promise.<TResult>}
  */
 function incrementTeamMem(promoterId) {
+  var query = new AV.Query('Promoter')
   var promoter = AV.Object.createWithoutData('Promoter', promoterId)
   promoter.increment('teamMemNum', 1)
-  return promoter.save(null, {fetchWhenSave: true}).then((promoterInfo) => {
-    var query = new AV.Query('Promoter')
-    query.get(promoterInfo.id).then((newPromoter) => {
+  return promoter.save(null, {fetchWhenSave: true}).then((leve1Promoter) => {
+    return query.get(leve1Promoter.id).then((newPromoter) => {
       judgePromoterUpgrade(newPromoter, defaultUpgradeStandard)
+      return newPromoter
+    })
+  }).then((level1Promoter) => {
+    return getUpPromoter(level1Promoter, false).then((level2Promoter) => {
+      if (!level2Promoter) {
+        return undefined
+      }
+      level2Promoter.increment('level2Num', 1)
+      return level2Promoter.save(null, {fetchWhenSave: true})
+    }).then((level2Promoter) => {
+      if (!level2Promoter) {
+        return undefined
+      }
+      return query.get(level2Promoter.id)
+    }).then((level2Promoter) => {
+      if (!level2Promoter) {
+        return undefined
+      }
+      judgePromoterUpgrade(level2Promoter, defaultUpgradeStandard)
+      return level2Promoter
+    })
+  }).then((level2Promoter) => {
+    if (!level2Promoter) {
+      return undefined
+    }
+    return getUpPromoter(level2Promoter, false).then((level3Promoter) => {
+      if (!level3Promoter) {
+        return undefined
+      }
+      level3Promoter.increment('level3Num', 1)
+      return level3Promoter.save(null, {fetchWhenSave: true})
+    }).then((level3Promoter) => {
+      if (!level3Promoter) {
+        return undefined
+      }
+      return query.get(level3Promoter.id)
+    }).then((level3Promoter) => {
+      if (!level3Promoter) {
+        return undefined
+      }
+      judgePromoterUpgrade(level3Promoter, defaultUpgradeStandard)
+      return level3Promoter
     })
   })
 }
@@ -702,6 +745,9 @@ function defaultUpgradeStandard(promoter) {
     return level
   }
   var teamMemNum = promoter.attributes.teamMemNum
+  var level2Num = promoter.attributes.level2Num
+  var level3Num = promoter.attributes.level3Num
+  var teamNum = math.chain(teamMemNum).add(level2Num).add(level3Num).done()
   var inviteShopNum = promoter.attributes.inviteShopNum
   var team = 0
   var shop = 0
@@ -757,7 +803,7 @@ function defaultUpgradeStandard(promoter) {
     default:    // 已经是最高级别
       return level
   }
-  if (teamMemNum >= team && inviteShopNum >= shop) {
+  if (teamNum >= team && inviteShopNum >= shop) {
     level = level + 1
   }
   return level
@@ -768,7 +814,7 @@ function defaultUpgradeStandard(promoter) {
  * @param promoterId
  */
 function judgePromoterUpgrade(promoter, upgradeStandard) {
-  if (upgradeStandard) {
+  if (upgradeStandard && promoter) {
     var newLevel = upgradeStandard(promoter)
     if (newLevel > promoter.attributes.level) {
       var newPromoter = AV.Object.createWithoutData('Promoter', promoter.id)
