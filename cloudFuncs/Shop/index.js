@@ -1529,7 +1529,6 @@ function fetchShopComments(request, response) {
       var parentComment = result.attributes.parentComment
       var replyComment = result.attributes.replyComment
       var user = result.attributes.user
-      console.log('result========>', result.attributes.replyComment)
       var shopComment = shopUtil.newShopCommentFromLeanCloudObject(result)
       // console.log('result===<',result.id)
       allComments.push(shopComment)
