@@ -4,6 +4,7 @@
 var Promise = require('bluebird')
 var GLOBAL_CONFIG = require('../../config')
 var wechat_api = require('../util/wechatUtil').wechat_api
+var authFunc = require('../../cloudFuncs/Auth')
 
 /**
  * 发送打赏模板消息
@@ -259,13 +260,87 @@ function sendInviterTmpMsg(openid, username, city, teamMemNum) {
   })
 }
 
+async function sendSubTmpMsg(openid, username, city) {
+  var promoterFunc = require('../../cloudFuncs/Promoter')
+  var templateId = GLOBAL_CONFIG.INVITER_TMP_ID
+  var url = ""
+
+  var data = {
+    "first": {
+      "value": username + "在您的邀请下关注了公众号，请继续指导他生成个人二维码海报，邀请更多的人加入汇邻优店赚钱收益",
+      "color":"#173177"
+    },
+    "keyword1": {
+      "value": username,
+      "color":"#173177"
+    },
+    "keyword2" : {
+      "value": "未知",
+      "color":"#173177"
+    },
+    "keyword3" : {
+      "value": city,
+      "color":"#173177"
+    },
+    "keyword4" : {
+      "value": "推广员入驻",
+      "color":"#173177"
+    },
+    "remark":{
+      "value": "\n您的努力初见成效，再接再励哟。",
+      "color":"#173177"
+    }
+  }
+
+  try {
+    var level1User = await authFunc.getUserByOpenId(openid)
+    console.log('level 1 user:', level1User.attributes.nickname)
+    wechat_api.sendTemplate(openid, templateId, url, data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level1User.attributes.nickname, 'error', err)
+      }
+    })
+    var level2User = await promoterFunc.getUpUserByUser(level1User)
+    if (!level2User) {
+      return
+    }
+    console.log('level 2 user:', level2User.attributes.nickname)
+    var level2Data = data
+    level2Data.first = {
+      "value": "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level2User.attributes.openid, templateId, url, level2Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level2User.attributes.nickname, 'error', err)
+      }
+    })
+    var level3User = await promoterFunc.getUpUserByUser(level2User)
+    if (!level3User) {
+      return
+    }
+    console.log('level 3 user:', level3User.attributes.nickname)
+    var level3Data = data
+    level3Data.first = {
+      "value": "您的朋友" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level3User.attributes.openid, templateId, url, level3Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level3User.attributes.nickname, 'error', err)
+      }
+    })
+  } catch (err) {
+    console.log('send template message error', err)
+  }
+}
+
 function wechatMessageTest(request, response) {
-  console.log("wechatMessageTest", request.params)
   var openid = request.params.openid
   var username = request.params.username
   var city = request.params.city
 
-  sendInviterTmpMsg(openid, username, city).then(() => {
+  sendSubTmpMsg(openid, username, city).then(() => {
     response.success({
 
     })
@@ -280,6 +355,7 @@ var mpMsgFuncs = {
   sendNewGoodsTmpMsg: sendNewGoodsTmpMsg,
   sendWithdrawTmpMsg: sendWithdrawTmpMsg,
   sendInviterTmpMsg: sendInviterTmpMsg,
+  sendSubTmpMsg: sendSubTmpMsg,
   wechatMessageTest: wechatMessageTest
 }
 

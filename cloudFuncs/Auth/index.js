@@ -816,6 +816,18 @@ function isWXBindByPhone(request, response) {
   })
 }
 
+function getUserByOpenId(openId) {
+  var query = new AV.Query('_User')
+  query.equalTo("openid", openId)
+  return query.first()
+}
+
+function getUserByUnionId(unionId) {
+  var query = new AV.Query('_User')
+  query.equalTo("authData.weixin.openid", unionId)
+  return query.first()
+}
+
 function authTest(request, response) {
   var userId = request.params.userId
 
@@ -847,7 +859,9 @@ var authFunc = {
   setUserOpenid: setUserOpenid,
   getOpenidById: getOpenidById,
   getUnionidById: getUnionidById,
-  authTest: authTest
+  authTest: authTest,
+  getUserByOpenId: getUserByOpenId,
+  getUserByUnionId: getUserByUnionId,
 }
 
 module.exports = authFunc

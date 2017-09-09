@@ -499,6 +499,21 @@ function insertPromoterInMysql(promoterId) {
   })
 }
 
+function getUpUserByUser(user) {
+  if (!user) {
+    return Promise.reject(new Error('input param user empty'))
+  }
+  var upQuery = new AV.Query('Promoter')
+  upQuery.include('upUser')
+  upQuery.equalTo('user', user)
+  return upQuery.first().then((promoter) => {
+    if (!promoter) {
+      return Promise.resolve(undefined)
+    }
+    return promoter.attributes.upUser
+  })
+}
+
 /**
  * 获取到上级推广员
  * @param promoter
@@ -2636,6 +2651,7 @@ var PromoterFunc = {
   getPromoterByInviteCode: getPromoterByInviteCode,
   promoterCertificate: promoterCertificate,
   getPromoterById: getPromoterById,
+  getUpUserByUser: getUpUserByUser,
   getUpPromoter: getUpPromoter,
   getUpPromoterByUserId: getUpPromoterByUserId,
   promoterPaid: promoterPaid,

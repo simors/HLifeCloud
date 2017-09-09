@@ -8,6 +8,8 @@ var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
 var getMaterialIdByName = require('../Material').getMaterialIdByName
 var PromoterFunc = require('../../cloudFuncs/Promoter')
+var authFunc = require('../../cloudFuncs/Auth')
+var mpMsgFuncs = require('../Message')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
@@ -112,6 +114,7 @@ function wechatServer(req, res, next) {
       if(message.Event === 'CLICK') {
         exeClickEvent[message.EventKey](req, res, next)
       } else if(message.Event === 'subscribe') {
+        console.log('message', message)
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
@@ -137,6 +140,9 @@ function wechatServer(req, res, next) {
           res.reply({
             type: 'text',
             content: "亲爱的邻友 欢迎您  👉 点击公众号菜单栏👉  一起来吧  👉 我的二维码👉   生成二维码  👉 将二维 码发送给微信好友 微信群或者朋友圈 朋友通过您的二维码识别关注  您将能获得财富 邻友发展的越多 您的收益会越大  生成二维码群发吧 祝您生活愉快 加油👊\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
+          })
+          authFunc.getUserByUnionId(upUser_unionid).then((upUser) => {
+            mpMsgFuncs.sendSubTmpMsg(upUser.attributes.openid, result.nickname, result.city)
           })
         })
       } else if(message.Event === 'SCAN') {
