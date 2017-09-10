@@ -34,7 +34,7 @@ var generateQrcode = function (req, res, next) {
     query.first().then((user) => {
       if (user && user.attributes.authData) {
         PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
-          getMaterialIdByName('voice', '二维码生成2.mp3').then((mediaId) => {
+          getMaterialIdByName('voice', '二维码生成.mp3').then((mediaId) => {
             if (!mediaId) {
               console.log('can\'t find voice media')
               return
@@ -46,11 +46,6 @@ var generateQrcode = function (req, res, next) {
             })
           }, (err) => {
             console.log('send customer voice error')
-          })
-          wechat_api.sendText(openid, "亲！您的二维码已经生成，现已是汇邻优店的亲密邻友，您可以上传你的店铺到APP平台，引导新客增收👉 最重要的是，现在只要分享您的二维码，通过扫您的二维码加入的邻友，上传商铺和在汇邻优店里消费，您都将获得财富，积极参与，让我们一起来吧！👯 群发二维码！ 祝您生意兴隆，财源滚滚！", (err, result) => {
-            if (err) {
-              console.log('send text after generate qrcode error.', err)
-            }
           })
           res.reply({
             type: 'image',
@@ -118,7 +113,7 @@ function wechatServer(req, res, next) {
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
-        getMaterialIdByName('voice', '开始语音2(1).mp3').then((mediaId) => {
+        getMaterialIdByName('voice', '开始语音.mp3').then((mediaId) => {
           if (!mediaId) {
             console.log('can\'t find voice media')
             return
