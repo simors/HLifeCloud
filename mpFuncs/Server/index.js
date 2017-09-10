@@ -34,7 +34,7 @@ var generateQrcode = function (req, res, next) {
     query.first().then((user) => {
       if (user && user.attributes.authData) {
         PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
-          getMaterialIdByName('voice', '二维码生成.mp3').then((mediaId) => {
+          getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
             if (!mediaId) {
               console.log('can\'t find voice media')
               return
@@ -113,7 +113,7 @@ function wechatServer(req, res, next) {
         var scene_id = message.EventKey
         var openid = message.FromUserName
         var upUser_unionid = scene_id.slice(8)
-        getMaterialIdByName('voice', '开始语音.mp3').then((mediaId) => {
+        getMaterialIdByName('voice', '开始录音.mp3').then((mediaId) => {
           if (!mediaId) {
             console.log('can\'t find voice media')
             return
