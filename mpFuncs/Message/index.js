@@ -305,7 +305,7 @@ async function sendSubTmpMsg(openid, username, city) {
       return
     }
     console.log('level 2 user:', level2User.attributes.nickname)
-    var level2Data = data
+    var level2Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
     level2Data.first = {
       "value": "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号",
       "color":"#173177"
@@ -320,7 +320,7 @@ async function sendSubTmpMsg(openid, username, city) {
       return
     }
     console.log('level 3 user:', level3User.attributes.nickname)
-    var level3Data = data
+    var level3Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
     level3Data.first = {
       "value": "您的朋友" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号",
       "color":"#173177"
