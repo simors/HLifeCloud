@@ -60,10 +60,11 @@ function sendRewardTmpMsg(openid, amount, title, created) {
  * @param {String} shopName 店铺名称
  * @param {Date} created 店铺注册时间
  */
-function sendInviteShopTmpMsg(openid, shopName, created) {
+async function sendInviteShopTmpMsg(openid, shopName, created) {
+  var promoterFunc = require('../../cloudFuncs/Promoter')
   var templateId = GLOBAL_CONFIG.SHOP_TMP_ID
   var url = ""
-  var title = "恭喜您成功邀请新店铺，店铺名称为" + shopName + "。\n个人收益请查看汇邻优店APP！"
+  var title = "恭喜您成功邀请新店铺，店铺名称为" + shopName + "。请协助店主完成店铺编辑和商品上传吧！\n个人收益请查看汇邻优店APP！"
   var paymentTime = created.toLocaleString()
 
   var data = {
@@ -85,15 +86,47 @@ function sendInviteShopTmpMsg(openid, shopName, created) {
     }
   }
 
-  return new Promise((resolve, reject) => {
+  try {
+    var level1User = await authFunc.getUserByOpenId(openid)
+    console.log('level 1 user:', level1User.attributes.nickname)
     wechat_api.sendTemplate(openid, templateId, url, data, function (err, result) {
-      if(!err) {
-        return resolve()
-      } else {
-        return reject()
+      if(err) {
+        console.log('send message to ', level1User.attributes.nickname, 'error', err)
       }
     })
-  })
+    var level2User = await promoterFunc.getUpUserByUser(level1User)
+    if (!level2User) {
+      return
+    }
+    console.log('level 2 user:', level2User.attributes.nickname)
+    var level2Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
+    level2Data.first = {
+      "value": "您的熟人" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level2User.attributes.openid, templateId, url, level2Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level2User.attributes.nickname, 'error', err)
+      }
+    })
+    var level3User = await promoterFunc.getUpUserByUser(level2User)
+    if (!level3User) {
+      return
+    }
+    console.log('level 3 user:', level3User.attributes.nickname)
+    var level3Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
+    level3Data.first = {
+      "value": "您的朋友" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level3User.attributes.openid, templateId, url, level3Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level3User.attributes.nickname, 'error', err)
+      }
+    })
+  } catch (err) {
+    console.log('send template message error', err)
+  }
 }
 
 /**
@@ -218,13 +251,14 @@ function sendWithdrawTmpMsg(openid, amount, account, channel, created) {
  * @param {String} city  城市
  * @param {Number} teamMemNum  邀请好友数量
  */
-function sendInviterTmpMsg(openid, username, city, teamMemNum) {
+async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
+  var promoterFunc = require('../../cloudFuncs/Promoter')
   var templateId = GLOBAL_CONFIG.INVITER_TMP_ID
   var url = ""
 
   var data = {
     "first": {
-      "value": "恭喜您邀请到第" + teamMemNum + "位好友",
+      "value": "恭喜您邀请到第" + teamMemNum + "位好友" + username + '，协助好友分享他的二维码吧，您将获得更多的收益！',
       "color":"#173177"
     },
     "keyword1": {
@@ -249,15 +283,47 @@ function sendInviterTmpMsg(openid, username, city, teamMemNum) {
     }
   }
 
-  return new Promise((resolve, reject) => {
+  try {
+    var level1User = await authFunc.getUserByOpenId(openid)
+    console.log('level 1 user:', level1User.attributes.nickname)
     wechat_api.sendTemplate(openid, templateId, url, data, function (err, result) {
-      if(!err) {
-        return resolve()
-      } else {
-        return reject(err)
+      if(err) {
+        console.log('send message to ', level1User.attributes.nickname, 'error', err)
       }
     })
-  })
+    var level2User = await promoterFunc.getUpUserByUser(level1User)
+    if (!level2User) {
+      return
+    }
+    console.log('level 2 user:', level2User.attributes.nickname)
+    var level2Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
+    level2Data.first = {
+      "value": "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "成为推广员",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level2User.attributes.openid, templateId, url, level2Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level2User.attributes.nickname, 'error', err)
+      }
+    })
+    var level3User = await promoterFunc.getUpUserByUser(level2User)
+    if (!level3User) {
+      return
+    }
+    console.log('level 3 user:', level3User.attributes.nickname)
+    var level3Data = JSON.parse(JSON.stringify(data))   // 实现js对象深拷贝
+    level3Data.first = {
+      "value": "您的朋友" + level1User.attributes.nickname + "邀请了" + username + "成为推广员",
+      "color":"#173177"
+    }
+    wechat_api.sendTemplate(level3User.attributes.openid, templateId, url, level3Data, function (err, result) {
+      if(err) {
+        console.log('send message to ', level3User.attributes.nickname, 'error', err)
+      }
+    })
+  } catch (err) {
+    console.log('send template message error', err)
+  }
 }
 
 async function sendSubTmpMsg(openid, username, city) {
