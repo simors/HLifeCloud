@@ -227,7 +227,7 @@ async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
   try {
     var level1User = await authFunc.getUserByOpenId(openid)
     console.log('level 1 user:', level1User.attributes.nickname)
-    var level1Data = "恭喜您邀请到第" + teamMemNum + "位好友" + username + '，协助好友分享他的二维码吧，您将获得更多的收益！'
+    var level1Data = "恭喜" + username + "成为您第" + teamMemNum + "位汇邻好友，请关注好友一起开启快乐的汇邻创业之旅！"
     wechat_api.sendText(openid, level1Data, function (err, result) {
       if(err) {
         console.log('send message to ', level1User.attributes.nickname, 'error', err)
@@ -238,7 +238,7 @@ async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
       return
     }
     console.log('level 2 user:', level2User.attributes.nickname)
-    var level2Data = "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "成为推广员"
+    var level2Data = "恭喜您的熟人" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
     wechat_api.sendText(level2User.attributes.openid, level2Data, function (err, result) {
       if(err) {
         console.log('send message to ', level2User.attributes.nickname, 'error', err)
@@ -249,7 +249,7 @@ async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
       return
     }
     console.log('level 3 user:', level3User.attributes.nickname)
-    var level3Data = "您的朋友" + level1User.attributes.nickname + "邀请了" + username + "成为推广员"
+    var level3Data = "恭喜您的朋友" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
     wechat_api.sendText(level3User.attributes.openid, level3Data, function (err, result) {
       if(err) {
         console.log('send message to ', level3User.attributes.nickname, 'error', err)
@@ -265,7 +265,7 @@ async function sendSubTmpMsg(openid, username, city) {
 
   try {
     var level1User = await authFunc.getUserByOpenId(openid)
-    var level1Data = username + "在您的邀请下关注了公众号，请继续指导他生成个人二维码海报，邀请更多的人加入汇邻优店赚钱收益"
+    var level1Data = username + "通过您的邀请关注了公众号，请继续邀请好友生成二维码一起来开始愉快的汇邻创业之旅吧，加油"
     console.log('level 1 user:', level1User.attributes.nickname)
     wechat_api.sendText(openid, level1Data, function (err, result) {
       if(err) {
