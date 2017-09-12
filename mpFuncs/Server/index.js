@@ -136,7 +136,7 @@ function wechatServer(req, res, next) {
           //   type: 'text',
           //   content: "亲爱的邻友 欢迎您  👉 点击公众号菜单栏👉  一起来吧  👉 我的二维码👉   生成二维码  👉 将二维 码发送给微信好友 微信群或者朋友圈 朋友通过您的二维码识别关注  您将能获得财富 邻友发展的越多 您的收益会越大  生成二维码群发吧 祝您生活愉快 加油👊\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
           // })
-          res.reply('')
+          res.reply('👇生成二维码')
           authFunc.getUserByUnionId(upUser_unionid).then((upUser) => {
             mpMsgFuncs.sendSubTmpMsg(upUser.attributes.openid, result.nickname, result.city)
           })

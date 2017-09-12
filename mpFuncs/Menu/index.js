@@ -11,7 +11,7 @@ function createMenu() {
     "button":[
       {
         "type":"click",
-        "name":"我的二维码",
+        "name":"生成二维码",
         "key":"MY_QRCODE"
       },
       {
@@ -41,7 +41,7 @@ function createMenu() {
     if(err) {
       console.log(err)
     } else if(result.errcode != 0) {
-      console.log("微信公众号菜单创建异常：", result.errmsg)
+      console.log("微信公众号菜单创建异常：", result.err)
     } else {
       console.log("微信公众号菜单创建成功")
     }
