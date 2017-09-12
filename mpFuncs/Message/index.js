@@ -77,7 +77,7 @@ async function sendInviteShopTmpMsg(openid, shopName, created) {
       return
     }
     console.log('level 2 user:', level2User.attributes.nickname)
-    var level2Data = "您的熟人" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！"
+    var level2Data = "您的好友" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！"
     wechat_api.sendText(level2User.attributes.openid, level2Data, function (err, result) {
       if(err) {
         console.log('send message to ', level2User.attributes.nickname, 'error', err)
@@ -88,7 +88,7 @@ async function sendInviteShopTmpMsg(openid, shopName, created) {
       return
     }
     console.log('level 3 user:', level3User.attributes.nickname)
-    var level3Data = "您的朋友" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！"
+    var level3Data = "您的熟人" + level1User.attributes.nickname + "邀请了店铺" + shopName + "完成注册\n个人收益请查看汇邻优店APP！"
     wechat_api.sendText(level3User.attributes.openid, level3Data, function (err, result) {
       if(err) {
         console.log('send message to ', level3User.attributes.nickname, 'error', err)
@@ -238,7 +238,7 @@ async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
       return
     }
     console.log('level 2 user:', level2User.attributes.nickname)
-    var level2Data = "恭喜您的熟人" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
+    var level2Data = "恭喜您的好友" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
     wechat_api.sendText(level2User.attributes.openid, level2Data, function (err, result) {
       if(err) {
         console.log('send message to ', level2User.attributes.nickname, 'error', err)
@@ -249,7 +249,7 @@ async function sendInviterTmpMsg(openid, username, city, teamMemNum) {
       return
     }
     console.log('level 3 user:', level3User.attributes.nickname)
-    var level3Data = "恭喜您的朋友" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
+    var level3Data = "恭喜您的熟人" + level1User.attributes.nickname + "邀请了" + username + "加入了汇邻有爱的大家庭"
     wechat_api.sendText(level3User.attributes.openid, level3Data, function (err, result) {
       if(err) {
         console.log('send message to ', level3User.attributes.nickname, 'error', err)
@@ -277,7 +277,7 @@ async function sendSubTmpMsg(openid, username, city) {
       return
     }
     console.log('level 2 user:', level2User.attributes.nickname)
-    var level2Data = "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号"
+    var level2Data = "您的好友" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号"
     wechat_api.sendText(level2User.attributes.openid, level2Data, function (err, result) {
       if(err) {
         console.log('send message to ', level2User.attributes.nickname, 'error', err)
@@ -288,7 +288,7 @@ async function sendSubTmpMsg(openid, username, city) {
       return
     }
     console.log('level 3 user:', level3User.attributes.nickname)
-    var level3Data = "您的朋友" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号"
+    var level3Data = "您的熟人" + level1User.attributes.nickname + "邀请了" + username + "关注了公众号"
     wechat_api.sendText(level3User.attributes.openid, level3Data, function (err, result) {
       if(err) {
         console.log('send message to ', level3User.attributes.nickname, 'error', err)
