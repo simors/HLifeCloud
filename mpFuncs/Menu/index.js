@@ -16,7 +16,7 @@ function createMenu() {
       },
       {
         "type":"click",
-        "name":"赚钱攻略",
+        "name":"了解汇邻",
         "key":"NEW_USER_GUIDE"
       },
       {
