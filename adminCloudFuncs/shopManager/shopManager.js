@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var shopUtil = require('../../utils/shopUtil');
 var redisUtils = require('../../utils/redisUtils')
 var systemConfigNames = require('../../constants/systemConfigNames')
-
+var ShopOderFunc = require('../../cloudFuncs/Shop/ShopOrders')
 function updateCategoryStatus(request,response){
   var category = AV.Object.createWithoutData('ShopCategory', request.params.id)
   category.set('status',request.params.status)
@@ -630,7 +630,7 @@ function setPromotionDayPay(request,response){
     })
   }
 
-function setPromotionMaxNmu(request,response) {
+function setPromotionMaxNum(request,response) {
   redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, request.params.maxNum).then((item)=>{
     redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((item)=>{
       response.success(item)
@@ -738,6 +738,7 @@ function fetchPromotionsByShopId(request, response) {
   })
 }
 
+
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
   getShopTagList: getShopTagList,
@@ -756,7 +757,7 @@ var ShopManagerFunc = {
   updateCategoryStatus:updateCategoryStatus,
   updateShopCategoryId:updateShopCategoryId,
   setPromotionDayPay: setPromotionDayPay,
-  setPromotionMaxNmu: setPromotionMaxNmu,
+  setPromotionMaxNum: setPromotionMaxNum,
   fetchShopGoods: fetchShopGoods,
   fetchPromotionsByShopId: fetchPromotionsByShopId
 

@@ -142,7 +142,7 @@ AV.Cloud.define('createShopCategory',ShopManagerFunc.createShopCategory)
 AV.Cloud.define('updateShopCategory',ShopManagerFunc.updateShopCategory)
 AV.Cloud.define('updateShopCategoryId',ShopManagerFunc.updateShopCategoryId)
 AV.Cloud.define('setPromotionDayPay',ShopManagerFunc.setPromotionDayPay)
-AV.Cloud.define('setPromotionMaxNmu',ShopManagerFunc.setPromotionMaxNmu)
+AV.Cloud.define('setPromotionMaxNum',ShopManagerFunc.setPromotionMaxNum)
 AV.Cloud.define('adminFetchShopGoods',ShopManagerFunc.fetchShopGoods)
 AV.Cloud.define('adminFetchPromotionsByShopId',ShopManagerFunc.fetchPromotionsByShopId)
 
