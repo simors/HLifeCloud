@@ -10,24 +10,14 @@ function createMenu() {
   var memu = {
     "button":[
       {
-        "type":"view",
-        "name":"下载app",
-        "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
+        "type":"click",
+        "name":"我的二维码",
+        "key":"MY_QRCODE"
       },
       {
-        'name': '一起来吧',
-        'sub_button': [
-          {
-            "type":"click",
-            "name":"我的二维码",
-            "key":"MY_QRCODE"
-          },
-          {
-            "type":"click",
-            "name":"赚钱攻略",
-            "key":"NEW_USER_GUIDE"
-          },
-        ]
+        "type":"click",
+        "name":"赚钱攻略",
+        "key":"NEW_USER_GUIDE"
       },
       {
         'name': '个人中心',
@@ -36,6 +26,11 @@ function createMenu() {
             "type":"view",
             "name":"我的钱包",
             "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
+          },
+          {
+            "type":"view",
+            "name":"下载app",
+            "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
           },
         ]
       }

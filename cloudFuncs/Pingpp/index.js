@@ -13,7 +13,7 @@ var shopFunc = require('../../cloudFuncs/Shop')
 var dateFormat = require('dateformat')
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
-
+var mathjs  = require('mathjs')
 
 // 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
@@ -299,8 +299,9 @@ function updatePaymentInfo(conn, deal) {
   if (!deal.to || !deal.cost || !deal.feeAmount) {
     throw new Error('')
   }
+  var amount = mathjs.eval(deal.cost + deal.feeAmount)
   var sql = "UPDATE `PaymentInfo` SET `balance` = `balance` - ? WHERE `userId` = ?"
-  return mysqlUtil.query(conn, sql, [deal.cost + deal.feeAmount, deal.to])
+  return mysqlUtil.query(conn, sql, [amount, deal.to])
 }
 
 
@@ -628,7 +629,7 @@ function handleTransferEvent(request, response) {
   var deal = {
     from: 'platform',
     to: transfer.metadata.userId,
-    cost: (transfer.amount * 0.01).toFixed(2),
+    cost: Number((transfer.amount * 0.01).toFixed(2)),
     deal_type: WITHDRAW,
     charge_id: transfer.id,
     order_no: transfer.order_no,
@@ -638,7 +639,9 @@ function handleTransferEvent(request, response) {
   }
 
   getPaymentFeeByChannel(transfer.channel).then((fee) => {
-    deal.feeAmount = (deal.cost * fee) < 1? 1 : deal.cost * fee  //手续费最低1元
+    deal.feeAmount = mathjs.eval(deal.cost * fee)
+    if(deal.feeAmount < 1.0) deal.feeAmount = 1   //手续费最低1元
+
     return mysqlUtil.getConnection()
   }).then((conn) => {
     mysqlConn = conn
