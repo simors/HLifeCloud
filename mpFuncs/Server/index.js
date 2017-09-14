@@ -74,7 +74,7 @@ var generateQrcode = function (req, res, next) {
 var newUserGuide = function (req, res, next) {
   var message = req.weixin
   var openid = message.FromUserName
-  getMaterialIdByName('news', '三分钟了解汇邻优店').then((mediaId) => {
+  getMaterialIdByName('news', '汇邻优店的商业价值').then((mediaId) => {
     if (!mediaId) {
       console.log('can\'t find news media')
       return
