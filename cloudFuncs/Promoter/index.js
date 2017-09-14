@@ -2642,6 +2642,78 @@ function handleStatLevelTeamMem(request, response) {
   })
 }
 
+async function changePromoterUpUser(destPromoterId, newUpUser) {
+  try {
+    var promoter = await getPromoterById(destPromoterId, false)
+    if (!promoter) {
+      return
+    }
+    console.log('promoter', promoter)
+    var level1Promoter = await getUpPromoter(promoter, false)
+    console.log('level1Promoter', level1Promoter)
+    if (level1Promoter) {
+      level1Promoter.increment('teamMemNum', -1)
+      level1Promoter.save()
+
+      var level2Promoter = await getUpPromoter(level1Promoter, false)
+      console.log('level2Promoter', level2Promoter)
+      if (level2Promoter) {
+        level2Promoter.increment('level2Num', -1)
+        level2Promoter.save()
+
+        var level3Promoter = await getUpPromoter(level2Promoter, false)
+        console.log('level3Promoter', level3Promoter)
+        if (level3Promoter) {
+          level3Promoter.increment('level3Num', -1)
+          level3Promoter.save()
+        }
+      }
+    }
+
+    var upUser = await authFunc.getUserById(newUpUser)
+    promoter.set('upUser', upUser)
+    promoter.save()
+    var newLevel1Promoter = await getPromoterByUserId(newUpUser)
+    console.log('newLevel1Promoter', newLevel1Promoter)
+    if (newLevel1Promoter) {
+      newLevel1Promoter.increment('teamMemNum')
+      newLevel1Promoter.save()
+
+      var newLevel2Promoter = await getUpPromoter(newLevel1Promoter, false)
+      console.log('newLevel2Promoter', newLevel2Promoter)
+      if (newLevel2Promoter) {
+        newLevel2Promoter.increment('level2Num')
+        newLevel2Promoter.save()
+
+        var newLevel3Promoter = await getUpPromoter(newLevel2Promoter, false)
+        console.log('newLevel3Promoter', newLevel3Promoter)
+        if (newLevel3Promoter) {
+          newLevel3Promoter.increment('level3Num')
+          newLevel3Promoter.save()
+        }
+      }
+    }
+  } catch (err) {
+    console.log('err in change promoter up user', err)
+    throw err
+  }
+}
+
+/**
+ * 替换某推广员的上级推广员。此接口不对外开放，由开放人员内部使用
+ * @param request
+ * @param response
+ */
+function handleChangeUpUser(request, response) {
+  var destPromoterId = request.params.destPromoterId
+  var newUpUser = request.params.newUpUser
+  changePromoterUpUser(destPromoterId, newUpUser).then(() => {
+    response.success({errcode: 0})
+  }).catch((err) => {
+    response.error({errcode: 1})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2688,6 +2760,7 @@ var PromoterFunc = {
   promoterTest: promoterTest,
   handleCleanPromoterTeamMem: handleCleanPromoterTeamMem,
   handleStatLevelTeamMem: handleStatLevelTeamMem,
+  handleChangeUpUser: handleChangeUpUser,
 }
 
 module.exports = PromoterFunc
