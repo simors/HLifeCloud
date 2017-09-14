@@ -738,6 +738,35 @@ function fetchPromotionsByShopId(request, response) {
   })
 }
 
+function setShopConfig(request,response){
+  redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY, request.params.dayPay).then((test)=> {
+    console.log('test=====>',test)
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((dayPay)=> {
+      redisUtils.setAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM, request.params.maxNum).then(()=>{
+        redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((maxNum)=>{
+          response.success({dayPay: dayPay, maxNum: maxNum})
+        },(err)=>{
+          response.error(err)
+        })
+      },(err)=>{
+        response.error(err)
+      })
+    }, (err)=> {
+      response.error(err)
+    })
+  }, (err)=> {
+    response.error(err)
+  })
+}
+
+function getShopConfig(request,response){
+  redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_DAY_PAY).then((dayPay)=> {
+    redisUtils.getAsync(systemConfigNames.SHOP_PROMOTION_MAX_NUM).then((maxNum)=>{
+      response.success({dayPay: dayPay, maxNum: maxNum})
+    },(err) =>{response.error(err)})
+  },(err) =>{response.error(err)})
+
+  }
 
 var ShopManagerFunc = {
   getShopCategoryList: getShopCategoryList,
@@ -759,7 +788,9 @@ var ShopManagerFunc = {
   setPromotionDayPay: setPromotionDayPay,
   setPromotionMaxNum: setPromotionMaxNum,
   fetchShopGoods: fetchShopGoods,
-  fetchPromotionsByShopId: fetchPromotionsByShopId
+  fetchPromotionsByShopId: fetchPromotionsByShopId,
+  setShopConfig: setShopConfig,
+  getShopConfig: getShopConfig
 
 }
 module.exports = ShopManagerFunc
