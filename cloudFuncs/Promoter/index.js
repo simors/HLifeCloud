@@ -2535,8 +2535,22 @@ async function statLevelTeamMem(promoter, level) {
   }
   if (level == 2) {
     newPromoter.increment('level2Num', 1)
+    if (newPromoter && newPromoter.id != promoter.id) {
+      promoter.set('up2User', newPromoter.attributes.user)
+      promoter.save()
+    } else {
+      promoter.unset('up2User')
+      promoter.save()
+    }
   } else {
     newPromoter.increment('level3Num', 1)
+    if (newPromoter && newPromoter.id != promoter.id) {
+      promoter.set('up3User', newPromoter.attributes.user)
+      promoter.save()
+    } else {
+      promoter.unset('up3User')
+      promoter.save()
+    }
   }
   return newPromoter.save()
 }
@@ -2639,6 +2653,53 @@ function handleStatLevelTeamMem(request, response) {
     response.success({errcode: 0, message: '推广员团队成员数统计成功'})
   }).catch((error) => {
     response.error({errcode: 1, message: '推广员团队成员数统计失败'})
+  })
+}
+
+function cleanUpUser(lastTime) {
+  var queryNum = 0
+  var retLastTime = lastTime
+  var query = new AV.Query('Promoter')
+  query.descending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+  query.limit(1000)
+  return query.find().then((promoters) => {
+    queryNum = promoters.length
+    promoters.forEach((prompMem) => {
+      console.log('promoterMem:', prompMem.id)
+      if (prompMem.attributes.upUser && prompMem.attributes.user &&
+        prompMem.attributes.upUser.id == prompMem.attributes.user.id) {
+        prompMem.unset('upUser')
+      }
+      retLastTime = prompMem.createdAt
+    })
+    return AV.Object.saveAll(promoters)
+  }).then(() => {
+    return {
+      queryNum,
+      lastTime: retLastTime
+    }
+  })
+}
+
+async function cleanAllUpUser() {
+  var lastTime = undefined
+  while (1) {
+    var result = await cleanUpUser(lastTime)
+    if (result.queryNum <= 0) {
+      break
+    }
+    lastTime = result.lastTime
+  }
+}
+
+function handleCleanUpUser(request, response) {
+  cleanAllUpUser().then(() => {
+    response.success({errcode: 0, message: '上级推广员清理成功'})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '上级推广员清理失败'})
   })
 }
 
@@ -2760,6 +2821,7 @@ var PromoterFunc = {
   promoterTest: promoterTest,
   handleCleanPromoterTeamMem: handleCleanPromoterTeamMem,
   handleStatLevelTeamMem: handleStatLevelTeamMem,
+  handleCleanUpUser: handleCleanUpUser,
   handleChangeUpUser: handleChangeUpUser,
 }
 
