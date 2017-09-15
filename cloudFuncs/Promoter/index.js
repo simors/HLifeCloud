@@ -2382,6 +2382,7 @@ function saveFileFromURL(url, path) {
       encoding: 'binary'
     }, function(err, res, body) {
       if(err) {
+        console.log("saveFileFromURL", err)
         reject(err)
       } else {
         resolve(body)
@@ -2417,7 +2418,9 @@ function createPromoterQrCode(userId) {
   }).then((qrcodeUrl) => {
     return saveFileFromURL(qrcodeUrl, tmpQrcodePath)
   }).then(() => {
-    return saveFileFromURL(avatar, tmpAvatarPath)
+    if(avatar) {
+      return saveFileFromURL(avatar, tmpAvatarPath)
+    }
   }).then(() => {
     return new Promise(function (resolve, reject) {
       gm(background)
@@ -2433,16 +2436,24 @@ function createPromoterQrCode(userId) {
         })
     })
   }).then(() => {
-    images(tmpPromoterQrcodrPath).draw(
-      images(tmpQrcodePath).size(160),
-      107, 412    //二维码左上角合成坐标
-    ).draw(
-      images(tmpAvatarPath).size(32),
-      105, 360    //个人头像合成坐标
-    ).save(tmpPromoterQrcodrPath, {
-      quality: 60
-    })
-
+    if(avatar) {
+      images(tmpPromoterQrcodrPath).draw(
+        images(tmpQrcodePath).size(160),
+        107, 412    //二维码左上角合成坐标
+      ).draw(
+        images(tmpAvatarPath).size(32),
+        105, 360    //个人头像合成坐标
+      ).save(tmpPromoterQrcodrPath, {
+        quality: 60
+      })
+    } else {
+      images(tmpPromoterQrcodrPath).draw(
+        images(tmpQrcodePath).size(160),
+        107, 412    //二维码左上角合成坐标
+      ).save(tmpPromoterQrcodrPath, {
+        quality: 60
+      })
+    }
   }).then(() => {
     return mpMediaFuncs.uploadMedia(tmpPromoterQrcodrPath, 'image')
   }).then((result) => {
