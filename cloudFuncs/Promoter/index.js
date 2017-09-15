@@ -2802,6 +2802,43 @@ function handleChangeUpUser(request, response) {
   })
 }
 
+function getPromoterFriends(request, response) {
+  var currentUser = request.currentUser
+  var level = request.params.level
+  var limit = request.params.limit
+  var lastUpdatedAt = request.params.lastUpdatedAt
+
+  if (!limit) {
+    limit = 10
+  }
+
+  var query = new AV.Query('Promoter')
+  query.include('user')
+  if (level == 3) {
+    query.equalTo('up3User', currentUser)
+  } else if (level == 2) {
+    query.equalTo('up2User', currentUser)
+  } else {
+    query.equalTo('upUser', currentUser)
+  }
+  query.descending('updatedAt')
+  query.limit(limit)
+  if (lastUpdatedAt) {
+    query.lessThan('updatedAt', new Date(lastUpdatedAt))
+  }
+  query.find().then((promoters) => {
+    var constructUserInfo = require('../Auth').constructUserInfo
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取团队成员失败'})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2850,6 +2887,7 @@ var PromoterFunc = {
   handleStatLevelTeamMem: handleStatLevelTeamMem,
   handleCleanUpUser: handleCleanUpUser,
   handleChangeUpUser: handleChangeUpUser,
+  getPromoterFriends: getPromoterFriends,
 }
 
 module.exports = PromoterFunc
