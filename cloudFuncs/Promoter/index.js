@@ -342,14 +342,41 @@ function bindPromoterInfo(userId) {
       return undefined
     }
     upUser = user
-    currentPromoter.set('upUser', upUser)
+    var promoterSaver = getPromoterByUserId(upUser.id).then((up1Promoter) => {
+      currentPromoter.set('upUser', upUser)
+      return up1Promoter
+    }).then((up1Promoter) => {
+      if (!up1Promoter) {
+        return undefined
+      }
+      return getUpPromoter(up1Promoter, false).then((up2Promoter) => {
+        if (!up2Promoter) {
+          return undefined
+        }
+        currentPromoter.set('up2User', up2Promoter.attributes.user)
+        return up2Promoter
+      })
+    }).then((up2Promoter) => {
+      if (!up2Promoter) {
+        return undefined
+      }
+      return getUpPromoter(up2Promoter, false).then((up3Promoter) => {
+        if (!up3Promoter) {
+          return undefined
+        }
+        currentPromoter.set('up3User', up3Promoter.attributes.user)
+        return up3Promoter
+      })
+    }).then(() => {
+      return currentPromoter.save()
+    })
     var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
       upUserTeamMemNum = upPromoter.attributes.teamMemNum
       incrementTeamMem(upPromoter.id)
     }).catch((err) => {
       throw err
     })
-    return Promise.all([currentPromoter.save(), incTeamMem])
+    return Promise.all([promoterSaver, incTeamMem])
   }).then((result) => {
     if(!result) {
       return undefined
