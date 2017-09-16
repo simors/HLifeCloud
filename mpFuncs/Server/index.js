@@ -58,7 +58,7 @@ var generateQrcode = function (req, res, next) {
           console.log("generateQrcode", error)
           res.reply({
             type: 'text',
-            content: "系统错误，请联系客服"
+            content: ""
           })
         })
       } else {
