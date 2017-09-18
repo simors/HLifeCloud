@@ -21,6 +21,8 @@ router.get('/callback', function (req, res, next) {
   var currentUserNickname = undefined
   var currentUserCity = undefined
 
+  console.log('receive wechat code: ', code)
+
   mpAuthFuncs.getAccessToken(code).then((result) => {
     accessToken = result.data.access_token;
     openid = result.data.openid
