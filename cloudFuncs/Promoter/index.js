@@ -2466,7 +2466,8 @@ function createPromoterQrCode(userId) {
   }).then((file) => {
     var qrcode = {
       url: file.url(),
-      mediaId: mediaId
+      mediaId: mediaId,
+      createdTime: (new Date()).getTime(),
     }
     fs.exists(tmpQrcodePath, function (exists) {
       if(exists) fs.unlink(tmpQrcodePath)

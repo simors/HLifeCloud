@@ -4,6 +4,7 @@
 var Promise = require('bluebird');
 var wechat = require('wechat');
 var AV = require('leanengine');
+var math = require('mathjs')
 var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
 var getMaterialIdByName = require('../Material').getMaterialIdByName
@@ -33,33 +34,72 @@ var generateQrcode = function (req, res, next) {
     query.equalTo("authData.weixin.openid", unionid)
     query.first().then((user) => {
       if (user && user.attributes.authData) {
-        PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
-          getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
-            if (!mediaId) {
-              console.log('can\'t find voice media')
-              return
-            }
-            wechat_api.sendVoice(openid, mediaId, function (err, result) {
-              if (err) {
-                console.log('customer message err', err)
+        PromoterFunc.getPromoterByUserId(user.id).then((promoter) => {
+          if (!promoter) {
+            console.log('can\'t find promoter')
+            res.reply('')
+            return
+          }
+          let qrcode = promoter.attributes.qrcode
+          let nowTime = (new Date()).getTime()
+          if (qrcode && qrcode.createdTime && qrcode.mediaId && (math.chain(nowTime).subtract(qrcode.createdTime).done() < (60*60*24*2*1000))) {
+            console.log('send qrcode exist', qrcode)
+            getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
+              if (!mediaId) {
+                console.log('can\'t find voice media')
+                return
+              }
+              wechat_api.sendVoice(openid, mediaId, function (err, result) {
+                if (err) {
+                  console.log('customer message err', err)
+                }
+              })
+            }, (err) => {
+              console.log('send customer voice error')
+            }).catch((error) => {
+              console.log("generateQrcode", error)
+              res.reply({
+                type: 'text',
+                content: ""
+              })
+            })
+            res.reply({
+              type: 'image',
+              content: {
+                mediaId: qrcode.mediaId
               }
             })
-          }, (err) => {
-            console.log('send customer voice error')
-          })
-          res.reply({
-            type: 'image',
-            content: {
-              mediaId: qrcode.mediaId
-            }
-          })
-          return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
-        }).catch((error) => {
-          console.log("generateQrcode", error)
-          res.reply({
-            type: 'text',
-            content: ""
-          })
+          } else {
+            PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
+              console.log('send a new generated qrcode:', qrcode)
+              getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
+                if (!mediaId) {
+                  console.log('can\'t find voice media')
+                  return
+                }
+                wechat_api.sendVoice(openid, mediaId, function (err, result) {
+                  if (err) {
+                    console.log('customer message err', err)
+                  }
+                })
+              }, (err) => {
+                console.log('send customer voice error')
+              })
+              res.reply({
+                type: 'image',
+                content: {
+                  mediaId: qrcode.mediaId
+                }
+              })
+              return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
+            }).catch((error) => {
+              console.log("generateQrcode", error)
+              res.reply({
+                type: 'text',
+                content: ""
+              })
+            })
+          }
         })
       } else {
         res.reply({
