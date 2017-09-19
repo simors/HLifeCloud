@@ -24,7 +24,7 @@ router.get('/:id', function (req, res, next) {
   var domain = GLOBAL_CONFIG.MP_SERVER_DOMAIN
   var auth_callback_url = domain + '/topicShare/callback/' + topicId
   if(userId && userId != 'undefined') {
-    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_userinfo')
+    var url = client.getAuthorizeURL(auth_callback_url, userId, 'snsapi_base')
     res.redirect(url)
   } else {
     res.redirect(auth_callback_url)
