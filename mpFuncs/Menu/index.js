@@ -11,7 +11,7 @@ function createMenu() {
     "button":[
       {
         "type":"click",
-        "name":"生成二维码",
+        "name":"我的海报",
         "key":"MY_QRCODE"
       },
       {

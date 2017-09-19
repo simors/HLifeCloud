@@ -179,7 +179,7 @@ function wechatServer(req, res, next) {
           authFunc.getUserByUnionId(upUser_unionid).then((upUser) => {
             mpMsgFuncs.sendSubTmpMsg(upUser.attributes.openid, result.nickname, result.city)
           })
-          res.reply('👇生成二维码')
+          res.reply('👇生成海报 了解汇邻')
         })
       } else if(message.Event === 'SCAN') {
         var upUser_unionid = message.EventKey
