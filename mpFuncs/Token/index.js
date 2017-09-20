@@ -70,6 +70,7 @@ function setOauthTokenToMysql(openid, token, callback) {
   var mysqlConn = undefined
 
   mysqlUtil.getConnection().then((conn) => {
+    mysqlConn = conn
     sql = 'REPLACE INTO token(access_token, expires_in, refresh_token, openid, scope, create_at) VALUES(?, ?, ?, ?, ?, ?)';
     var fields = [token.access_token, token.expires_in, token.refresh_token, token.openid, token.scope, token.create_at];
     return mysqlUtil.query(conn, sql, fields)
