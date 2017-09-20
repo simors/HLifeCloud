@@ -144,7 +144,7 @@ var earnStrategy = function (req, res, next) {
       }
     })
   }, (err) => {
-    console.log('send customer news error')
+    console.log('send customer news error', err)
   })
   res.reply('')
 }
