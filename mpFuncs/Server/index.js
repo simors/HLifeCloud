@@ -133,7 +133,7 @@ var newUserGuide = function (req, res, next) {
 var earnStrategy = function (req, res, next) {
   var message = req.weixin
   var openid = message.FromUserName
-  getMaterialIdByName('news', '汇邻优店的推广等级和奖励说明').then((mediaId) => {
+  getMaterialIdByName('news', '汇邻优店推广等级和奖励说明').then((mediaId) => {
     if (!mediaId) {
       console.log('can\'t find news media')
       return
