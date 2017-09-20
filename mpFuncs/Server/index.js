@@ -130,9 +130,29 @@ var newUserGuide = function (req, res, next) {
   res.reply('')
 }
 
+var earnStrategy = function (req, res, next) {
+  var message = req.weixin
+  var openid = message.FromUserName
+  getMaterialIdByName('news', '汇邻优店的推广等级和奖励说明').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find news media')
+      return
+    }
+    wechat_api.sendMpNews(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer news err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer news error')
+  })
+  res.reply('')
+}
+
 var exeClickEvent = {
   MY_QRCODE: generateQrcode,
   NEW_USER_GUIDE: newUserGuide,
+  EARN_STRATEGY: earnStrategy,
 }
 
 function wechatServer(req, res, next) {

@@ -28,6 +28,11 @@ function createMenu() {
             "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
           },
           {
+            "type":"click",
+            "name":"赚钱攻略",
+            "key": "EARN_STRATEGY"
+          },
+          {
             "type":"view",
             "name":"下载app",
             "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
