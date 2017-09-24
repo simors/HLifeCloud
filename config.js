@@ -41,8 +41,12 @@ var PINGPP_PRO_APP_ID = "app_C8ub5OWfvHS4ybLq" //ping++ 汇邻优店-PRO应用 I
 var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
+var MP_CLIENT_DOMAIN = 'http://dev.mp.ngrok.io'
+const MP_CLIENT_DOMAIN_DEV = 'http://dev.mp.ngrok.io'
+const MP_CLIENT_DOMAIN_STAGE = 'http://stage.mp.ngrok.io'
+const MP_CLIENT_DOMAIN_PRO = ''
+
 var MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
-var MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
 var REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8" //微信模版消息id：打赏功能
 var WITHDRAW_TMP_ID = "cEf4nAF5GSIiPB6Sen2FXOxPQBsPeTTkbnKOIxBHVFw"  //微信模版消息id：提现通知
 var GOODS_TMP_ID = "piiTpGgWBBcvZfATnnhrf7unoj8yQIUjQeMnSDVS67g"   //微信模版消息id：商品交易支付通知
@@ -60,7 +64,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
   MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
-  MP_CLIENT_DOMAIN = "http://dev.mp.ngrok.io"
+  MP_CLIENT_DOMAIN = MP_CLIENT_DOMAIN_DEV
   REWARD_TMP_ID = "GRV5xvTTwrOQRhza5Ngm63V7VvqP_hQknAzhhdSFIDQ"
   SHOP_TMP_ID = "Q2IF95JstKqwwtv9QOBLONTOhA9Dep2JuVLDJKv7BvM"
   GOODS_TMP_ID = "MLQiVmfbpgIaNvSLp45GVv-H2JGmhXo79Q88kFVcHdM"
@@ -83,7 +87,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
-  MP_CLIENT_DOMAIN = "http://139.196.84.116"
+  MP_CLIENT_DOMAIN = MP_CLIENT_DOMAIN_STAGE
   REWARD_TMP_ID = "K6Y6On2Ya12S8N32rT8GsDSyrRZGWf9K10HLWF8bMDo"
   SHOP_TMP_ID = "oMEz008Y4ThT1y_8ZFTe5VRdft-DmkcONVc-3Syty0k"
   GOODS_TMP_ID = "-yvrwRNpJEDp19XDMUCjE_wC5RISR5Sl56RRxT1528M"
@@ -104,7 +108,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
 
   MP_SERVER_DOMAIN = "http://share.xiaojee.cn"
-  MP_CLIENT_DOMAIN = "http://120.77.220.234"
+  MP_CLIENT_DOMAIN = MP_CLIENT_DOMAIN_PRO
   REWARD_TMP_ID = "ELAwKkLzY0dnVYaYGWbuJIOXMTuVwz7qKDO2-TAWaL4"
   SHOP_TMP_ID = "NzBXdCA-95TJnjJYMU8RGPRKhKs4AhNO_fCc9wnRD_w"
   GOODS_TMP_ID = "yosEBCYJmJotmcwSYedRqszjwEiQRnHQTHZ--g-1wG4"

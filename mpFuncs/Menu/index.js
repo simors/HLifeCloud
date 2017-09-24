@@ -28,6 +28,11 @@ function createMenu() {
             "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
           },
           {
+            "type":"view",
+            "name":"邻友圈",
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promoter'
+          },
+          {
             "type":"click",
             "name":"赚钱攻略",
             "key": "EARN_STRATEGY"
