@@ -342,14 +342,41 @@ function bindPromoterInfo(userId) {
       return undefined
     }
     upUser = user
-    currentPromoter.set('upUser', upUser)
+    var promoterSaver = getPromoterByUserId(upUser.id).then((up1Promoter) => {
+      currentPromoter.set('upUser', upUser)
+      return up1Promoter
+    }).then((up1Promoter) => {
+      if (!up1Promoter) {
+        return undefined
+      }
+      return getUpPromoter(up1Promoter, false).then((up2Promoter) => {
+        if (!up2Promoter) {
+          return undefined
+        }
+        currentPromoter.set('up2User', up2Promoter.attributes.user)
+        return up2Promoter
+      })
+    }).then((up2Promoter) => {
+      if (!up2Promoter) {
+        return undefined
+      }
+      return getUpPromoter(up2Promoter, false).then((up3Promoter) => {
+        if (!up3Promoter) {
+          return undefined
+        }
+        currentPromoter.set('up3User', up3Promoter.attributes.user)
+        return up3Promoter
+      })
+    }).then(() => {
+      return currentPromoter.save()
+    })
     var incTeamMem = getPromoterByUserId(upUser.id).then((upPromoter) => {
       upUserTeamMemNum = upPromoter.attributes.teamMemNum
       incrementTeamMem(upPromoter.id)
     }).catch((err) => {
       throw err
     })
-    return Promise.all([currentPromoter.save(), incTeamMem])
+    return Promise.all([promoterSaver, incTeamMem])
   }).then((result) => {
     if(!result) {
       return undefined
@@ -2355,6 +2382,7 @@ function saveFileFromURL(url, path) {
       encoding: 'binary'
     }, function(err, res, body) {
       if(err) {
+        console.log("saveFileFromURL", err)
         reject(err)
       } else {
         resolve(body)
@@ -2390,7 +2418,9 @@ function createPromoterQrCode(userId) {
   }).then((qrcodeUrl) => {
     return saveFileFromURL(qrcodeUrl, tmpQrcodePath)
   }).then(() => {
-    return saveFileFromURL(avatar, tmpAvatarPath)
+    if(avatar) {
+      return saveFileFromURL(avatar, tmpAvatarPath)
+    }
   }).then(() => {
     return new Promise(function (resolve, reject) {
       gm(background)
@@ -2406,16 +2436,24 @@ function createPromoterQrCode(userId) {
         })
     })
   }).then(() => {
-    images(tmpPromoterQrcodrPath).draw(
-      images(tmpQrcodePath).size(160),
-      107, 412    //二维码左上角合成坐标
-    ).draw(
-      images(tmpAvatarPath).size(32),
-      105, 360    //个人头像合成坐标
-    ).save(tmpPromoterQrcodrPath, {
-      quality: 60
-    })
-
+    if(avatar) {
+      images(tmpPromoterQrcodrPath).draw(
+        images(tmpQrcodePath).size(160),
+        107, 412    //二维码左上角合成坐标
+      ).draw(
+        images(tmpAvatarPath).size(32),
+        105, 360    //个人头像合成坐标
+      ).save(tmpPromoterQrcodrPath, {
+        quality: 60
+      })
+    } else {
+      images(tmpPromoterQrcodrPath).draw(
+        images(tmpQrcodePath).size(160),
+        107, 412    //二维码左上角合成坐标
+      ).save(tmpPromoterQrcodrPath, {
+        quality: 60
+      })
+    }
   }).then(() => {
     return mpMediaFuncs.uploadMedia(tmpPromoterQrcodrPath, 'image')
   }).then((result) => {
@@ -2428,7 +2466,8 @@ function createPromoterQrCode(userId) {
   }).then((file) => {
     var qrcode = {
       url: file.url(),
-      mediaId: mediaId
+      mediaId: mediaId,
+      createdTime: (new Date()).getTime(),
     }
     fs.exists(tmpQrcodePath, function (exists) {
       if(exists) fs.unlink(tmpQrcodePath)
@@ -2535,8 +2574,22 @@ async function statLevelTeamMem(promoter, level) {
   }
   if (level == 2) {
     newPromoter.increment('level2Num', 1)
+    if (newPromoter && newPromoter.id != promoter.id) {
+      promoter.set('up2User', newPromoter.attributes.user)
+      promoter.save()
+    } else {
+      promoter.unset('up2User')
+      promoter.save()
+    }
   } else {
     newPromoter.increment('level3Num', 1)
+    if (newPromoter && newPromoter.id != promoter.id) {
+      promoter.set('up3User', newPromoter.attributes.user)
+      promoter.save()
+    } else {
+      promoter.unset('up3User')
+      promoter.save()
+    }
   }
   return newPromoter.save()
 }
@@ -2642,6 +2695,162 @@ function handleStatLevelTeamMem(request, response) {
   })
 }
 
+function cleanUpUser(lastTime) {
+  var queryNum = 0
+  var retLastTime = lastTime
+  var query = new AV.Query('Promoter')
+  query.descending('createdAt')
+  if (lastTime) {
+    query.lessThan('createdAt', new Date(lastTime))
+  }
+  query.limit(1000)
+  return query.find().then((promoters) => {
+    queryNum = promoters.length
+    promoters.forEach((prompMem) => {
+      console.log('promoterMem:', prompMem.id)
+      if (prompMem.attributes.upUser && prompMem.attributes.user &&
+        prompMem.attributes.upUser.id == prompMem.attributes.user.id) {
+        prompMem.unset('upUser')
+      }
+      retLastTime = prompMem.createdAt
+    })
+    return AV.Object.saveAll(promoters)
+  }).then(() => {
+    return {
+      queryNum,
+      lastTime: retLastTime
+    }
+  })
+}
+
+async function cleanAllUpUser() {
+  var lastTime = undefined
+  while (1) {
+    var result = await cleanUpUser(lastTime)
+    if (result.queryNum <= 0) {
+      break
+    }
+    lastTime = result.lastTime
+  }
+}
+
+function handleCleanUpUser(request, response) {
+  cleanAllUpUser().then(() => {
+    response.success({errcode: 0, message: '上级推广员清理成功'})
+  }).catch((err) => {
+    response.error({errcode: 1, message: '上级推广员清理失败'})
+  })
+}
+
+async function changePromoterUpUser(destPromoterId, newUpUser) {
+  try {
+    var promoter = await getPromoterById(destPromoterId, false)
+    if (!promoter) {
+      return
+    }
+    console.log('promoter', promoter)
+    var level1Promoter = await getUpPromoter(promoter, false)
+    console.log('level1Promoter', level1Promoter)
+    if (level1Promoter) {
+      level1Promoter.increment('teamMemNum', -1)
+      level1Promoter.save()
+
+      var level2Promoter = await getUpPromoter(level1Promoter, false)
+      console.log('level2Promoter', level2Promoter)
+      if (level2Promoter) {
+        level2Promoter.increment('level2Num', -1)
+        level2Promoter.save()
+
+        var level3Promoter = await getUpPromoter(level2Promoter, false)
+        console.log('level3Promoter', level3Promoter)
+        if (level3Promoter) {
+          level3Promoter.increment('level3Num', -1)
+          level3Promoter.save()
+        }
+      }
+    }
+
+    var upUser = await authFunc.getUserById(newUpUser)
+    promoter.set('upUser', upUser)
+    promoter.save()
+    var newLevel1Promoter = await getPromoterByUserId(newUpUser)
+    console.log('newLevel1Promoter', newLevel1Promoter)
+    if (newLevel1Promoter) {
+      newLevel1Promoter.increment('teamMemNum')
+      newLevel1Promoter.save()
+
+      var newLevel2Promoter = await getUpPromoter(newLevel1Promoter, false)
+      console.log('newLevel2Promoter', newLevel2Promoter)
+      if (newLevel2Promoter) {
+        newLevel2Promoter.increment('level2Num')
+        newLevel2Promoter.save()
+
+        var newLevel3Promoter = await getUpPromoter(newLevel2Promoter, false)
+        console.log('newLevel3Promoter', newLevel3Promoter)
+        if (newLevel3Promoter) {
+          newLevel3Promoter.increment('level3Num')
+          newLevel3Promoter.save()
+        }
+      }
+    }
+  } catch (err) {
+    console.log('err in change promoter up user', err)
+    throw err
+  }
+}
+
+/**
+ * 替换某推广员的上级推广员。此接口不对外开放，由开放人员内部使用
+ * @param request
+ * @param response
+ */
+function handleChangeUpUser(request, response) {
+  var destPromoterId = request.params.destPromoterId
+  var newUpUser = request.params.newUpUser
+  changePromoterUpUser(destPromoterId, newUpUser).then(() => {
+    response.success({errcode: 0})
+  }).catch((err) => {
+    response.error({errcode: 1})
+  })
+}
+
+function getPromoterFriends(request, response) {
+  var currentUser = request.currentUser
+  var level = request.params.level
+  var limit = request.params.limit
+  var lastUpdatedAt = request.params.lastUpdatedAt
+
+  if (!limit) {
+    limit = 10
+  }
+
+  var query = new AV.Query('Promoter')
+  query.include('user')
+  if (level == 3) {
+    query.equalTo('up3User', currentUser)
+  } else if (level == 2) {
+    query.equalTo('up2User', currentUser)
+  } else {
+    query.equalTo('upUser', currentUser)
+  }
+  query.descending('updatedAt')
+  query.limit(limit)
+  if (lastUpdatedAt) {
+    query.lessThan('updatedAt', new Date(lastUpdatedAt))
+  }
+  query.find().then((promoters) => {
+    var constructUserInfo = require('../Auth').constructUserInfo
+    var users = []
+    promoters.forEach((promoter) => {
+      users.push(constructUserInfo(promoter.attributes.user))
+    })
+    response.success({errcode: 0, promoters: promoters, users: users})
+  }).catch((err) => {
+    console.log(err)
+    response.error({errcode: 1, message: '获取团队成员失败'})
+  })
+}
+
 var PromoterFunc = {
   getPromoterConfig: getPromoterConfig,
   fetchPromoterSysConfig: fetchPromoterSysConfig,
@@ -2688,6 +2897,9 @@ var PromoterFunc = {
   promoterTest: promoterTest,
   handleCleanPromoterTeamMem: handleCleanPromoterTeamMem,
   handleStatLevelTeamMem: handleStatLevelTeamMem,
+  handleCleanUpUser: handleCleanUpUser,
+  handleChangeUpUser: handleChangeUpUser,
+  getPromoterFriends: getPromoterFriends,
 }
 
 module.exports = PromoterFunc

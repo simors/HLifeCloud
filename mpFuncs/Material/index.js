@@ -28,7 +28,7 @@ function getMaterialIdByName(type, mediaName) {
   return new Promise((resolve, reject) => {
     wechat_api.getMaterialCount((err, countRes) => {
       if (err) {
-        reject()
+        reject(new Error('get material count error'))
         return
       }
       var count = 0
@@ -54,7 +54,7 @@ function getMaterialIdByName(type, mediaName) {
       }
       wechat_api.getMaterials(type, 0, count, (err, result) => {
         if (err) {
-          reject()
+          reject(new Error('get material list error'))
           return
         }
         var materialItems = result.item
@@ -71,7 +71,7 @@ function getMaterialIdByName(type, mediaName) {
         if (material) {
           resolve(material.media_id)
         } else {
-          reject()
+          reject(new Error('get material media id error'))
         }
       })
     })

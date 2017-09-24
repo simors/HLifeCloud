@@ -30,6 +30,9 @@ function createTmpQRCode(unionid, expire_seconds) {
       }
       var ticket = result.ticket
       var qrcodeUrl = wechat_api.showQRCodeURL(ticket)
+      if(!qrcodeUrl) {
+        reject(new Error("获取临时二维码失败"))
+      }
       resolve(qrcodeUrl)
     })
   })

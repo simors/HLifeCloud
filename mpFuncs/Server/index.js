@@ -4,6 +4,7 @@
 var Promise = require('bluebird');
 var wechat = require('wechat');
 var AV = require('leanengine');
+var math = require('mathjs')
 var GLOBAL_CONFIG = require('../../config')
 var utilFunc = require('../../cloudFuncs/util')
 var getMaterialIdByName = require('../Material').getMaterialIdByName
@@ -33,38 +34,77 @@ var generateQrcode = function (req, res, next) {
     query.equalTo("authData.weixin.openid", unionid)
     query.first().then((user) => {
       if (user && user.attributes.authData) {
-        PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
-          getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
-            if (!mediaId) {
-              console.log('can\'t find voice media')
-              return
-            }
-            wechat_api.sendVoice(openid, mediaId, function (err, result) {
-              if (err) {
-                console.log('customer message err', err)
+        PromoterFunc.getPromoterByUserId(user.id).then((promoter) => {
+          if (!promoter) {
+            console.log('can\'t find promoter')
+            res.reply('')
+            return
+          }
+          let qrcode = promoter.attributes.qrcode
+          let nowTime = (new Date()).getTime()
+          if (qrcode && qrcode.createdTime && qrcode.mediaId && (math.chain(nowTime).subtract(qrcode.createdTime).done() < (60*60*24*2*1000))) {
+            console.log('send qrcode exist', qrcode)
+            getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
+              if (!mediaId) {
+                console.log('can\'t find voice media')
+                return
+              }
+              wechat_api.sendVoice(openid, mediaId, function (err, result) {
+                if (err) {
+                  console.log('customer message err', err)
+                }
+              })
+            }, (err) => {
+              console.log('send customer voice error')
+            }).catch((error) => {
+              console.log("generateQrcode", error)
+              res.reply({
+                type: 'text',
+                content: ""
+              })
+            })
+            res.reply({
+              type: 'image',
+              content: {
+                mediaId: qrcode.mediaId
               }
             })
-          }, (err) => {
-            console.log('send customer voice error')
-          })
-          res.reply({
-            type: 'image',
-            content: {
-              mediaId: qrcode.mediaId
-            }
-          })
-          return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
-        }).catch((error) => {
-          console.log("generateQrcode", error)
-          res.reply({
-            type: 'text',
-            content: "系统错误，请联系客服"
-          })
+          } else {
+            PromoterFunc.createPromoterQrCode(user.id).then((qrcode) => {
+              console.log('send a new generated qrcode:', qrcode)
+              getMaterialIdByName('voice', '生成二维码.mp3').then((mediaId) => {
+                if (!mediaId) {
+                  console.log('can\'t find voice media')
+                  return
+                }
+                wechat_api.sendVoice(openid, mediaId, function (err, result) {
+                  if (err) {
+                    console.log('customer message err', err)
+                  }
+                })
+              }, (err) => {
+                console.log('send customer voice error')
+              })
+              res.reply({
+                type: 'image',
+                content: {
+                  mediaId: qrcode.mediaId
+                }
+              })
+              return PromoterFunc.updatePromoterQrCode(user.id, qrcode)
+            }).catch((error) => {
+              console.log("generateQrcode", error)
+              res.reply({
+                type: 'text',
+                content: ""
+              })
+            })
+          }
         })
       } else {
         res.reply({
           type: 'text',
-          content: "感谢关注汇邻优店！您还没有登录，请点击\n" + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" + "完成登录后，再生成二维码。"
+          content: "汇邻优店欢迎您 " + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" + " 获取专属二维码  祝您愉快！"
         })
       }
     })
@@ -74,7 +114,7 @@ var generateQrcode = function (req, res, next) {
 var newUserGuide = function (req, res, next) {
   var message = req.weixin
   var openid = message.FromUserName
-  getMaterialIdByName('news', '三分钟了解汇邻优店').then((mediaId) => {
+  getMaterialIdByName('news', '汇邻优店的商业价值').then((mediaId) => {
     if (!mediaId) {
       console.log('can\'t find news media')
       return
@@ -90,9 +130,29 @@ var newUserGuide = function (req, res, next) {
   res.reply('')
 }
 
+var earnStrategy = function (req, res, next) {
+  var message = req.weixin
+  var openid = message.FromUserName
+  getMaterialIdByName('news', '汇邻优店推广等级和奖励说明').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find news media')
+      return
+    }
+    wechat_api.sendMpNews(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer news err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer news error', err)
+  })
+  res.reply('')
+}
+
 var exeClickEvent = {
   MY_QRCODE: generateQrcode,
   NEW_USER_GUIDE: newUserGuide,
+  EARN_STRATEGY: earnStrategy,
 }
 
 function wechatServer(req, res, next) {
@@ -136,10 +196,10 @@ function wechatServer(req, res, next) {
           //   type: 'text',
           //   content: "亲爱的邻友 欢迎您  👉 点击公众号菜单栏👉  一起来吧  👉 我的二维码👉   生成二维码  👉 将二维 码发送给微信好友 微信群或者朋友圈 朋友通过您的二维码识别关注  您将能获得财富 邻友发展的越多 您的收益会越大  生成二维码群发吧 祝您生活愉快 加油👊\n点击<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" +"体验更多功能。"
           // })
-          res.reply('')
           authFunc.getUserByUnionId(upUser_unionid).then((upUser) => {
             mpMsgFuncs.sendSubTmpMsg(upUser.attributes.openid, result.nickname, result.city)
           })
+          res.reply('👇生成海报 了解汇邻')
         })
       } else if(message.Event === 'SCAN') {
         var upUser_unionid = message.EventKey

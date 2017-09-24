@@ -11,12 +11,12 @@ function createMenu() {
     "button":[
       {
         "type":"click",
-        "name":"我的二维码",
+        "name":"我的海报",
         "key":"MY_QRCODE"
       },
       {
         "type":"click",
-        "name":"赚钱攻略",
+        "name":"了解汇邻",
         "key":"NEW_USER_GUIDE"
       },
       {
@@ -26,6 +26,11 @@ function createMenu() {
             "type":"view",
             "name":"我的钱包",
             "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
+          },
+          {
+            "type":"click",
+            "name":"赚钱攻略",
+            "key": "EARN_STRATEGY"
           },
           {
             "type":"view",
@@ -41,7 +46,7 @@ function createMenu() {
     if(err) {
       console.log(err)
     } else if(result.errcode != 0) {
-      console.log("微信公众号菜单创建异常：", result.errmsg)
+      console.log("微信公众号菜单创建异常：", result.err)
     } else {
       console.log("微信公众号菜单创建成功")
     }

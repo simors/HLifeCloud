@@ -22,7 +22,7 @@ function bindWechatUnionid(upUserUnionid, unionid) {
   var key = PREFIX + unionid
 
   return client.setAsync(key, upUserUnionid).then((reply) => {
-    client.expireAsync(key, 24 * 60 * 60)  //过期时间24小时
+    client.expireAsync(key, 24 * 60 * 60 * 30)  //过期时间30天
   }).finally(() => {
     client.quit()
   })

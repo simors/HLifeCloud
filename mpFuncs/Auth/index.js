@@ -17,7 +17,7 @@ function getAccessToken(code) {
   return new Promise(function (resolve, reject) {
     client.getAccessToken(code, function (err, result) {
       if(err) {
-        reject(new Error('获取微信授权access_token失败'))
+        reject(new Error('获取微信授权access_token失败: ' + err))
       } else {
         resolve(result)
       }
@@ -29,7 +29,7 @@ function getUserInfo(openid) {
   return new Promise(function (resolve, reject) {
     client.getUser(openid, function (err, result) {
       if(err) {
-        reject(new Error('获取微信用户信息失败'))
+        reject(new Error('获取微信用户信息失败: ' + err))
       } else {
         resolve(result)
       }
