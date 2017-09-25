@@ -44,7 +44,7 @@ var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 var MP_CLIENT_DOMAIN = 'http://dev.mp.ngrok.io'
 const MP_CLIENT_DOMAIN_DEV = 'http://dev.mp.ngrok.io'
 const MP_CLIENT_DOMAIN_STAGE = 'http://dev.xiaojee.cn:6300'
-const MP_CLIENT_DOMAIN_PRO = ''
+const MP_CLIENT_DOMAIN_PRO = 'http://admin.xiaojee.cn:6300'
 
 var MP_SERVER_DOMAIN = "http://hlyd_mp_dev.ngrok.io"
 var REWARD_TMP_ID = "KgqlsGloHZnWHp9Bhkd-KP56Y4wkR0kC2juJHABwjf8" //微信模版消息id：打赏功能
