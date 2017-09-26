@@ -157,17 +157,18 @@ router.get('/clientAuth', function (req, res, next) {
 
 router.get('/shareAuth', function (req, res, next) {
   var code = req.query.code
-  var {userId, nextPathname} = req.query.state
+  var state = req.query.state
   let current_unionid = undefined
   let redurl = ''
 
+  let stateObj = JSON.parse(state)
   console.log('receive code: ', code)
-  console.log('get state user and nextPathname:', userId, nextPathname)
+  console.log('get state user and nextPathname:', stateObj)
 
   mpAuthFuncs.getAccessToken(code).then((result) => {
     current_unionid = result.data.unionid
 
-    return authFunc.getUnionidById(userId)
+    return authFunc.getUnionidById(stateObj.userId)
   }).then((unionid) => {
     if(!unionid) return undefined
     return utilFunc.bindWechatUnionid(unionid, current_unionid)
@@ -175,7 +176,7 @@ router.get('/shareAuth', function (req, res, next) {
     let queryData = {
       unionid: current_unionid
     }
-    redurl = nextPathname + '?' + querystring.stringify(queryData)
+    redurl = stateObj.nextPathname + '?' + querystring.stringify(queryData)
     res.redirect(redurl)
   }).catch((error) => {
     console.log(error)
