@@ -137,14 +137,14 @@ router.get('/clientAuth', function (req, res, next) {
           }
         }
 
-        redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/' + state + '?' + querystring.stringify(authData)
+        redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + state + '?' + querystring.stringify(authData)
         res.redirect(redurl)
       }).catch((error) => {
         throw error
       })
     } else {
       authFunc.setUserOpenid(openid, unionid).then(() => {
-        redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/' + state + '?' + querystring.stringify(authData)
+        redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + state + '?' + querystring.stringify(authData)
         res.redirect(redurl)
       })
     }
@@ -176,7 +176,7 @@ router.get('/shareAuth', function (req, res, next) {
     let queryData = {
       unionid: current_unionid
     }
-    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/' + stateObj.nextUri + '?' + querystring.stringify(queryData)
+    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + stateObj.nextUri + '?' + querystring.stringify(queryData)
     res.redirect(redurl)
   }).catch((error) => {
     console.log(error)
