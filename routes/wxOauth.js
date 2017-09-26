@@ -8,6 +8,7 @@ var mpAuthFuncs = require('../mpFuncs/Auth')
 var authFunc = require('../cloudFuncs/Auth')
 var PromoterFunc = require('../cloudFuncs/Promoter')
 var mpMsgFuncs = require('../mpFuncs/Message')
+var utilFunc = require('../cloudFuncs/util')
 var querystring = require('querystring')
 
 router.get('/', mpAuthFuncs.userAuthRequest)
@@ -149,6 +150,32 @@ router.get('/clientAuth', function (req, res, next) {
   }).catch((error) => {
     console.log(error)
     redurl = state + '/error'
+    res.redirect(redurl)
+  })
+})
+
+router.get('/tinyAuth', function (req, res, next) {
+  var code = req.query.code
+  var {userId, nextPathname} = req.query.state
+  let current_unionid = undefined
+  let redurl = ''
+
+  mpAuthFuncs.getAccessToken(code).then((result) => {
+    current_unionid = result.data.unionid
+
+    return authFunc.getUnionidById(userId)
+  }).then((unionid) => {
+    if(!unionid) return undefined
+    return utilFunc.bindWechatUnionid(unionid, current_unionid)
+  }).then(() => {
+    let queryData = {
+      unionid: current_unionid
+    }
+    redurl = nextPathname + '?' + querystring.stringify(queryData)
+    res.redirect(redurl)
+  }).catch((error) => {
+    console.log(error)
+    redurl = nextPathname + '/error'
     res.redirect(redurl)
   })
 })
