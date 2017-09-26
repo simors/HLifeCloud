@@ -658,6 +658,9 @@ function getUnionidById(userId) {
   }
   var user = AV.Object.createWithoutData('_User', userId)
   return user.fetch().then((userInfo) => {
+    if (!userInfo) {
+      return undefined
+    }
     var authData = userInfo.get('authData')
     if(authData) {
       return authData.weixin.openid

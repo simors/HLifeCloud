@@ -10,6 +10,7 @@ var PromoterFunc = require('../cloudFuncs/Promoter')
 var mpMsgFuncs = require('../mpFuncs/Message')
 var utilFunc = require('../cloudFuncs/util')
 var querystring = require('querystring')
+var GLOBAL_CONFIG = require('../config')
 
 router.get('/', mpAuthFuncs.userAuthRequest)
 
@@ -149,16 +150,19 @@ router.get('/clientAuth', function (req, res, next) {
     }
   }).catch((error) => {
     console.log(error)
-    redurl = state + '/error'
+    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/error'
     res.redirect(redurl)
   })
 })
 
-router.get('/tinyAuth', function (req, res, next) {
+router.get('/shareAuth', function (req, res, next) {
   var code = req.query.code
   var {userId, nextPathname} = req.query.state
   let current_unionid = undefined
   let redurl = ''
+
+  console.log('receive code: ', code)
+  console.log('get state user and nextPathname:', userId, nextPathname)
 
   mpAuthFuncs.getAccessToken(code).then((result) => {
     current_unionid = result.data.unionid
@@ -175,7 +179,7 @@ router.get('/tinyAuth', function (req, res, next) {
     res.redirect(redurl)
   }).catch((error) => {
     console.log(error)
-    redurl = nextPathname + '/error'
+    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/error'
     res.redirect(redurl)
   })
 })
