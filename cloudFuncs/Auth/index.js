@@ -654,7 +654,7 @@ function getOpenidById(userId) {
 
 function getUnionidById(userId) {
   if(!userId) {
-    return Promise.reject()
+    return Promise.resolve(undefined)
   }
   var user = AV.Object.createWithoutData('_User', userId)
   return user.fetch().then((userInfo) => {

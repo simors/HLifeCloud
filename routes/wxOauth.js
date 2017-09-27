@@ -163,7 +163,6 @@ router.get('/shareAuth', function (req, res, next) {
 
   let stateObj = JSON.parse(state)
   console.log('receive code: ', code)
-  console.log('get state user and nextUri:', stateObj)
 
   mpAuthFuncs.getAccessToken(code).then((result) => {
     current_unionid = result.data.unionid
