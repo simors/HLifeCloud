@@ -77,6 +77,10 @@ function constructShop(leanShop, includeOwner, includeInviter) {
   shop.album = shopAttr.album
   shop.payment = shopAttr.payment
   shop.tenant = shopAttr.tenant
+  shop.followrNum = shopAttr.followerNum
+  shop.commentNum = shopAttr.commentNum
+  shop.isOpen = shopAttr.isOpen
+  shop.grade = shopAttr.grade
   shop.createdAt = leanShop.createdAt
   shop.updatedAt = leanShop.updatedAt
 
