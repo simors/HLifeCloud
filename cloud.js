@@ -24,6 +24,7 @@ var searchFunc = require('./cloudFuncs/Search')
 var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 var mpMsgFuncs = require('./mpFuncs/Message')
 var ShopOrdersFunc = require('./cloudFuncs/Shop/ShopOrders')
+var goodsFuncV2 = require('./cloudFuncs/ShopV2/ShopGoods')
 /**
  * 云函数
  */
@@ -105,6 +106,8 @@ AV.Cloud.define('goodsShopGoodsOnline', goodsFunc.shopGoodsOnline)
 AV.Cloud.define('goodsShopGoodsOffline', goodsFunc.shopGoodsOffline)
 AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
 AV.Cloud.define('goodsFetchGoodsList', goodsFunc.fetchShopGoods)
+
+AV.Cloud.define('goodsFetchGoodsDetail', goodsFuncV2.fetchShopGoodsDetail)
 
 // 订单管理
 AV.Cloud.define('orderCreateOrder', ShopOrdersFunc.handleNewShopOrderReq)
