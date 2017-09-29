@@ -24,7 +24,7 @@ function constructShop(leanShop, includeOwner, includeInviter) {
   shop.certification = shopAttr.certification
   shop.status = shopAttr.status
 
-  shop.targetShopCategoryId = shopAttr.targetShopCategory ? shopAttr.targetShopCategory : undefined
+  shop.targetShopCategoryId = shopAttr.targetShopCategory ? shopAttr.targetShopCategory.id : undefined
   shop.targetShopCategory = constructShopCategory(shopAttr.targetShopCategory)
 
   if (shopAttr.owner) {
