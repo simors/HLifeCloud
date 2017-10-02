@@ -162,7 +162,7 @@ function wechatServer(req, res, next) {
       console.log('message:', message)
       let content = message.Content
       if (content == '杯子') {
-        getMaterialIdByName('image', '开始录音.mp3').then((mediaId) => {
+        getMaterialIdByName('image', '杯子.jpg').then((mediaId) => {
           if (!mediaId) {
             console.log('can\'t find voice media')
             return
