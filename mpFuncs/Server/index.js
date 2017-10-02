@@ -160,7 +160,7 @@ function wechatServer(req, res, next) {
   switch (message.MsgType) {
     case 'text':
       let content = message.Content
-      let openid = message.FromUserName
+      var openid = message.FromUserName
       let isReply = false
       if (content == '杯子') {
         getMaterialIdByName('image', '杯子.jpg').then((mediaId) => {
