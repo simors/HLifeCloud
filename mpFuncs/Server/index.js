@@ -159,8 +159,9 @@ function wechatServer(req, res, next) {
   var message = req.weixin;
   switch (message.MsgType) {
     case 'text':
-      console.log('message:', message)
       let content = message.Content
+      let openid = message.FromUserName
+      let isReply = false
       if (content == '杯子') {
         getMaterialIdByName('image', '杯子.jpg').then((mediaId) => {
           if (!mediaId) {
@@ -175,8 +176,13 @@ function wechatServer(req, res, next) {
         }, (err) => {
           console.log('send customer voice error')
         })
+      } else {
+        isReply = true
+        res.reply('欢迎')
       }
-      res.reply('')
+      if (!isReply) {
+        res.reply('')
+      }
       break;
     case 'event':
       if(message.Event === 'CLICK') {
