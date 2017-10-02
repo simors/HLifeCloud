@@ -159,11 +159,24 @@ function wechatServer(req, res, next) {
   var message = req.weixin;
   switch (message.MsgType) {
     case 'text':
-
-      res.reply({
-        type: 'text',
-        content: '欢迎'
-      })
+      console.log('message:', message)
+      let content = message.Content
+      if (content == '杯子') {
+        getMaterialIdByName('image', '开始录音.mp3').then((mediaId) => {
+          if (!mediaId) {
+            console.log('can\'t find voice media')
+            return
+          }
+          wechat_api.sendImage(openid, mediaId, function (err, result) {
+            if (err) {
+              console.log('customer message err', err)
+            }
+          })
+        }, (err) => {
+          console.log('send customer voice error')
+        })
+      }
+      res.reply('')
       break;
     case 'event':
       if(message.Event === 'CLICK') {

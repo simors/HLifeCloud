@@ -61,6 +61,7 @@ function getMaterialIdByName(type, mediaName) {
         var material = undefined
         if (type != 'news') {
           material = materialItems.find((item) => {
+            console.log('name:', item.name)
             return item.name == mediaName
           })
         } else {
