@@ -15,7 +15,8 @@ var wechatBoundOpenidFunc = require('../util/wechatBoundOpenid')
 var WechatAPI = require('wechat-api');
 var Request = require('request');
 var fs = require('fs');
-var images = require("images");
+var images = require("images")
+var sharp = require('sharp')
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
 var mpTokenFuncs = require('../../mpFuncs/Token')
@@ -2375,24 +2376,17 @@ function getPromoterQrCode(request, response) {
   })
 }
 
-function saveFileFromURL(url, path) {
+function saveBufferfromURL(url) {
   return new Promise(function (resolve, reject) {
     Request({
       url: url,
-      encoding: 'binary'
+      encoding: null
     }, function(err, res, body) {
       if(err) {
-        console.log("saveFileFromURL", err)
+        console.log("saveBufferfromURL", err)
         reject(err)
       } else {
         resolve(body)
-        fs.writeFile(path, body, 'binary', function (err) {
-          if(err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        })
       }
     })
   })
@@ -2405,9 +2399,10 @@ function createPromoterQrCode(userId) {
   var avatar = undefined
   var nickname = undefined
   var mediaId = undefined
-  var tmpPromoterQrcodrPath =userId + 'promoterQrcode.jpeg'
-  var tmpQrcodePath = './public/images/' + userId + 'qrcode.jpeg'
-  var tmpAvatarPath = './public/images/' + userId + 'avatar.jpeg'
+  var tmpPromoterQrcodrPath = userId + 'promoterQrcode.jpeg'
+  var tmpQrcodrPath = userId + 'Qrcode.jpeg'
+  var qrcordBuffer = undefined
+  var avatarBuffer = undefined
 
   return user.fetch().then(() => {
     var authData = user.get('authData')
@@ -2416,12 +2411,26 @@ function createPromoterQrCode(userId) {
     nickname = user.get('nickname')
     return mpQrcodeFuncs.createTmpQRCode(unionid, 2592000)
   }).then((qrcodeUrl) => {
-    return saveFileFromURL(qrcodeUrl, tmpQrcodePath)
-  }).then(() => {
+    return saveBufferfromURL(qrcodeUrl)
+  }).then((buffer) => {
+     sharp(buffer)
+      .resize(160, 160)
+      .toBuffer(function (err, outputBuffer) {
+        if(!err) {
+          qrcordBuffer = outputBuffer
+        }
+      })
     if(avatar) {
-      return saveFileFromURL(avatar, tmpAvatarPath)
+      return saveBufferfromURL(avatar)
     }
-  }).then(() => {
+  }).then((buffer) => {
+    sharp(buffer)
+      .resize(32, 32)
+      .toBuffer(function (err, outputBuffer) {
+        if(!err) {
+          avatarBuffer = outputBuffer
+        }
+      })
     return new Promise(function (resolve, reject) {
       gm(background)
         .font("./public/SansCN-Regular.TTF", 20)
@@ -2436,24 +2445,13 @@ function createPromoterQrCode(userId) {
         })
     })
   }).then(() => {
-    if(avatar) {
-      images(tmpPromoterQrcodrPath).draw(
-        images(tmpQrcodePath).size(160),
-        107, 412    //二维码左上角合成坐标
-      ).draw(
-        images(tmpAvatarPath).size(32),
-        105, 360    //个人头像合成坐标
-      ).save(tmpPromoterQrcodrPath, {
-        quality: 60
-      })
-    } else {
-      images(tmpPromoterQrcodrPath).draw(
-        images(tmpQrcodePath).size(160),
-        107, 412    //二维码左上角合成坐标
-      ).save(tmpPromoterQrcodrPath, {
-        quality: 60
-      })
-    }
+    return sharp(tmpPromoterQrcodrPath)
+      .overlayWith(qrcordBuffer, {left: 107, top: 412})
+      .toFile(tmpQrcodrPath)
+  }).then(() => {
+    return sharp(tmpQrcodrPath)
+      .overlayWith(avatarBuffer, {left: 105, top: 360})
+      .toFile(tmpPromoterQrcodrPath)
   }).then(() => {
     return mpMediaFuncs.uploadMedia(tmpPromoterQrcodrPath, 'image')
   }).then((result) => {
@@ -2469,25 +2467,20 @@ function createPromoterQrCode(userId) {
       mediaId: mediaId,
       createdTime: (new Date()).getTime(),
     }
-    fs.exists(tmpQrcodePath, function (exists) {
-      if(exists) fs.unlink(tmpQrcodePath)
-    })
     fs.exists(tmpPromoterQrcodrPath, function (exists) {
       if(exists) fs.unlink(tmpPromoterQrcodrPath)
     })
-    fs.exists(tmpAvatarPath, function (exists) {
-      if(exists) fs.unlink(tmpAvatarPath)
+    fs.exists(tmpQrcodrPath, function (exists) {
+      if(exists) fs.unlink(tmpQrcodrPath)
     })
+
     return qrcode
   }).catch((error) => {
-    fs.exists(tmpQrcodePath, function (exists) {
-      if(exists) fs.unlink(tmpQrcodePath)
-    })
     fs.exists(tmpPromoterQrcodrPath, function (exists) {
       if(exists) fs.unlink(tmpPromoterQrcodrPath)
     })
-    fs.exists(tmpAvatarPath, function (exists) {
-      if(exists) fs.unlink(tmpAvatarPath)
+    fs.exists(tmpQrcodrPath, function (exists) {
+      if(exists) fs.unlink(tmpQrcodrPath)
     })
     console.log("createPromoterQrCode failed!", error)
     throw error
