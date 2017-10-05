@@ -176,6 +176,9 @@ function wechatServer(req, res, next) {
         }, (err) => {
           console.log('send customer voice error')
         })
+      } else if (content == '聪明') {
+        isReply = true
+        res.reply('01.化整为零 � �02.网开一面\n03.心花怒放 � �04.血口喷人\n05.引人入胜 � �06.火冒三丈\n07.面黄肌瘦� �08.无的放矢\n09.雌雄难辨� �10.隔岸观火')
       } else {
         isReply = true
         res.reply('欢迎')
