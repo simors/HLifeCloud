@@ -15,7 +15,6 @@ var wechatBoundOpenidFunc = require('../util/wechatBoundOpenid')
 var WechatAPI = require('wechat-api');
 var Request = require('request');
 var fs = require('fs');
-var images = require("images")
 var sharp = require('sharp')
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
