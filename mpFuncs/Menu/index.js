@@ -25,7 +25,7 @@ function createMenu() {
           {
             "type":"view",
             "name":"我的钱包",
-            "url": GLOBAL_CONFIG.MP_SERVER_DOMAIN + '/wxOauth'
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/wallet'
           },
           {
             "type":"view",
