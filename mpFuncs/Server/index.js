@@ -149,10 +149,50 @@ var earnStrategy = function (req, res, next) {
   res.reply('')
 }
 
+var lifeSkill = function (req, res, next) {
+  var message = req.weixin
+  var openid = message.FromUserName
+  getMaterialIdByName('news', '生活美学').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find news media')
+      return
+    }
+    wechat_api.sendMpNews(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer news err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer news error', err)
+  })
+  res.reply('')
+}
+
+var haveFun = function (req, res, next) {
+  var message = req.weixin
+  var openid = message.FromUserName
+  getMaterialIdByName('news', '生活其实很好玩').then((mediaId) => {
+    if (!mediaId) {
+      console.log('can\'t find news media')
+      return
+    }
+    wechat_api.sendMpNews(openid, mediaId, function (err, result) {
+      if (err) {
+        console.log('customer news err', err)
+      }
+    })
+  }, (err) => {
+    console.log('send customer news error', err)
+  })
+  res.reply('')
+}
+
 var exeClickEvent = {
   MY_QRCODE: generateQrcode,
   NEW_USER_GUIDE: newUserGuide,
   EARN_STRATEGY: earnStrategy,
+  LIFE_SKILL: lifeSkill,
+  USER_HAVE_FUN: haveFun,
 }
 
 function wechatServer(req, res, next) {

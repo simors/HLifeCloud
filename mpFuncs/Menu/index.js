@@ -11,17 +11,22 @@ function createMenu() {
     "button":[
       {
         "type":"click",
-        "name":"我的海报",
-        "key":"MY_QRCODE"
+        "name":"生活技艺",
+        "key":"LIFE_SKILL"
       },
       {
         "type":"click",
-        "name":"了解汇邻",
-        "key":"NEW_USER_GUIDE"
+        "name":"汇邻趣",
+        "key":"USER_HAVE_FUN"
       },
       {
         'name': '个人中心',
         'sub_button': [
+          {
+            "type":"click",
+            "name":"我的海报",
+            "key":"MY_QRCODE"
+          },
           {
             "type":"view",
             "name":"我的钱包",
@@ -31,11 +36,6 @@ function createMenu() {
             "type":"view",
             "name":"邻友圈",
             "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promoter'
-          },
-          {
-            "type":"click",
-            "name":"赚钱攻略",
-            "key": "EARN_STRATEGY"
           },
           {
             "type":"view",
