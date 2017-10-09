@@ -3,6 +3,7 @@ require("babel-core/register");
 var AV = require('leanengine');
 var mpMenuFuncs = require('./mpFuncs/Menu')
 var wechat_api = require('./mpFuncs/util/wechatUtil').wechat_api
+var mpTokenFuncs = require('./mpFuncs/Token')
 
 AV.init({
   appId: process.env.LEANCLOUD_APP_ID,
@@ -18,7 +19,7 @@ wechat_api.getLatestToken(function (err, token) {
   if(err) {
     console.warn("获取微信公众号token失败", err)
   } else {
-    wechat_api.clearQuota()
+    wechat_api.registerTicketHandle(mpTokenFuncs.getTicketToken, mpTokenFuncs.saveTicketToken)
     mpMenuFuncs.createMenu();
   }
 })

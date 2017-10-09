@@ -25,6 +25,7 @@ var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 var mpMsgFuncs = require('./mpFuncs/Message')
 var ShopOrdersFunc = require('./cloudFuncs/Shop/ShopOrders')
 var goodsFuncV2 = require('./cloudFuncs/ShopV2/ShopGoods')
+var mpJsSdkFuncs = require('./mpFuncs/JSSDK')
 /**
  * 云函数
  */
@@ -273,5 +274,6 @@ AV.Cloud.define('searchFetchTopicResult', searchFunc.fetchTopicResult)
 
 //微信api
 AV.Cloud.define('wechatMessageTest', mpMsgFuncs.wechatMessageTest)
+AV.Cloud.define('wechatGetJsConfig', mpJsSdkFuncs.getJsConfig)
 
 module.exports = AV.Cloud;
