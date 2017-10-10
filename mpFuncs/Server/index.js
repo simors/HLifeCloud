@@ -104,7 +104,7 @@ var generateQrcode = function (req, res, next) {
       } else {
         res.reply({
           type: 'text',
-          content: "汇邻优店欢迎您 " + "<a href='" + GLOBAL_CONFIG.MP_SERVER_DOMAIN + "/wxOauth" + "'>登录微信</a>" + " 获取专属二维码  祝您愉快！"
+          content: "汇邻优店欢迎您 " + "<a href='" + GLOBAL_CONFIG.MP_CLIENT_DOMAIN + "/wallet" + "'>登录微信</a>" + " 获取专属二维码  祝您愉快！"
         })
       }
     })
