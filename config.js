@@ -42,7 +42,7 @@ var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
 var MP_CLIENT_DOMAIN = 'http://dev.mp.ngrok.io'
-const MP_CLIENT_DOMAIN_DEV = 'http://dev.mp.ngrok.io'
+const MP_CLIENT_DOMAIN_DEV = 'http://dev.mp.ngrok.lvyii.com'
 const MP_CLIENT_DOMAIN_STAGE = 'http://dev.xiaojee.cn:6300'
 const MP_CLIENT_DOMAIN_PRO = 'http://admin.xiaojee.cn:6300'
 
