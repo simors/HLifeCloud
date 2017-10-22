@@ -11,12 +11,12 @@ function createMenu() {
     "button":[
       {
         "type":"click",
-        "name":"生活技艺",
+        "name":"汇邻荐读",
         "key":"LIFE_SKILL"
       },
       {
         "type":"click",
-        "name":"汇邻趣",
+        "name":"精彩美文",
         "key":"USER_HAVE_FUN"
       },
       {
