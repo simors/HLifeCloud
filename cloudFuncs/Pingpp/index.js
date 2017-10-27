@@ -540,83 +540,71 @@ function paymentEvent(request, response) {
   })
 }
 
-function createTransfers(request, response) {
-  // console.log("创建ping++提现请求：", request.params)
-  var order_no = request.params.order_no
-  var amount = parseFloat(request.params.amount).toFixed(2) * 100 //人民币分
-  var userName = request.params.userName
-  var metadata = request.params.metadata
-  var channel = request.params.channel
-  var openid = request.params.openid   //微信用户openid
+function judgeWalletBalance(wallet, willBalance) {
+  return wallet.balance >= willBalance
+}
 
-  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
-
-  if(channel == 'wx_pub') {
-    pingpp.transfers.create({
-      order_no: order_no,
-      app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
-      channel: "wx_pub",// 微信公众号支付
-      amount: amount,
-      currency: "cny",
-      type: "b2c",
-      recipient: openid, //微信openId
-      // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //微信openId/
-      extra: {
-        // user_name: userName,
-        // force_check: true,
-      },
-      description: "汇邻优店余额提现",
-      metadata: metadata,
-    }, function (err, transfer) {
-      if ((err != null) || transfer.failure_msg ) {
-        console.log('创建ping++提现请求失败 err', err)
-        console.log('创建ping++提现请求失败 failure_msg', transfer.failure_msg)
-        response.error({
-          errcode: 1,
-          message: "提现错误，请联系客服！",
-        })
-      } else {
-        response.success(transfer)
-      }
-    })
-  } else {
-    response.error(new Error("无效的渠道"))
+async function isWithdrawAllowed(userId, willBalance) {
+  try {
+    let wallet = await fetchPaymentInfoByUserId(userId)
+    if (!judgeWalletBalance(wallet, willBalance)) {
+      return false
+    }
+    return true
+  } catch (e) {
+    console.log('error in isWithdrawAllowed', e)
+    throw e
   }
 }
 
-// function transfersEvent(request, response) {
-//   console.log("transfersEvent", request.params)
-//
-//   var transfer = request.params.data.object
-//
-//   getPaymentFeeByChannel(transfer.channel).then((fee) => {
-//     var feeAmount = (transfer.amount * 0.01 * fee).toFixed(2)
-//     if(feeAmount < 1.0) {
-//       transfer.feeAmount = 1.0
-//     } else {
-//       transfer.feeAmount = feeAmount
-//     }
-//     return insertTransferInMysql(transfer)
-//   }).then(() => {
-//     var account = ""
-//     if(transfer.channel == 'allinpay') {
-//       account = transfer.extra.card_number
-//     } else if( transfer.channel == 'wx_pub') {
-//       account = transfer.metadata.nickname
-//     }
-//     response.success({
-//       errcode: 0,
-//       message: 'transfersEvent response success!',
-//     })
-//     return mpMsgFuncs.sendWithdrawTmpMsg(transfer.recipient, transfer.amount * 0.01, account, transfer.channel, new Date())
-//   }).catch((error) => {
-//     console.log("transfersEvent transfer into mysql fail!", error)
-//     response.error({
-//       errcode: 1,
-//       message: 'transfersEvent transfer into mysql fail!',
-//     })
-//   })
-// }
+async function createTransfers(request) {
+  // console.log("创建ping++提现请求：", request.params)
+  var order_no = request.params.order_no
+  let originalAmount = request.params.amount
+  var amount = parseFloat(originalAmount).toFixed(2) * 100 //人民币分
+  var metadata = request.params.metadata
+  var channel = request.params.channel
+  var openid = request.params.openid   //微信用户openid
+  let toUser = metadata.userId
+
+  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem")
+
+  if(channel != 'wx_pub') {
+    throw new AV.Cloud.Error('无效的渠道', {errcode: 1})
+  }
+
+  try {
+    let result = await isWithdrawAllowed(toUser, originalAmount)
+    if (!result) {
+      throw new AV.Cloud.Error('余额不足', {errcode: 1})
+    }
+  } catch (e) {
+    throw new AV.Cloud.Error('query wallet balance error', {errcode: 1})
+  }
+
+  let retTransfer = undefined
+  pingpp.transfers.create({
+    order_no: order_no,
+    app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+    channel: "wx_pub",// 微信公众号支付
+    amount: amount,
+    currency: "cny",
+    type: "b2c",
+    recipient: openid, //微信openId
+    // recipient: "oOg1701aE8l-MfagTXTFpjmDdl8o", //微信openId/
+    extra: {},
+    description: "汇邻优店余额提现",
+    metadata: metadata,
+  }, function (err, transfer) {
+    if ((err != null) || transfer.failure_msg ) {
+      console.log('创建ping++提现请求失败 err', err)
+      console.log('创建ping++提现请求失败 failure_msg', transfer.failure_msg)
+      throw new AV.Cloud.Error('提现请求错误，请联系客服！' + err.message, {errcode: 1})
+    }
+    retTransfer = transfer
+  })
+  return retTransfer
+}
 
 /**
  * 处理ping++提现成功的webhook消息
