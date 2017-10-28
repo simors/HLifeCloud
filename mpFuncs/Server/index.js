@@ -14,7 +14,7 @@ var mpMsgFuncs = require('../Message')
 
 var wechat_api = require('../util/wechatUtil').wechat_api
 
-var generateQrcode = function (req, res, next) {
+var generateQrcode = (req, res, next) => {
   var message = req.weixin
   if (message.Event != 'CLICK') {
     return
@@ -79,7 +79,7 @@ var generateQrcode = function (req, res, next) {
   })
 }
 
-var newUserGuide = function (req, res, next) {
+var newUserGuide = (req, res, next) => {
   var message = req.weixin
   var openid = message.FromUserName
   getMaterialIdByName('news', '汇邻优店的商业价值').then((mediaId) => {
@@ -98,7 +98,7 @@ var newUserGuide = function (req, res, next) {
   res.reply('')
 }
 
-var earnStrategy = function (req, res, next) {
+var earnStrategy = (req, res, next) => {
   var message = req.weixin
   var openid = message.FromUserName
   getMaterialIdByName('news', '汇邻优店推广等级和奖励说明').then((mediaId) => {
@@ -117,7 +117,7 @@ var earnStrategy = function (req, res, next) {
   res.reply('')
 }
 
-var lifeSkill = function (req, res, next) {
+var lifeSkill = (req, res, next) => {
   var message = req.weixin
   var openid = message.FromUserName
   getMaterialIdByName('news', '生活美学').then((mediaId) => {
@@ -136,7 +136,7 @@ var lifeSkill = function (req, res, next) {
   res.reply('')
 }
 
-var haveFun = function (req, res, next) {
+var haveFun = (req, res, next) => {
   var message = req.weixin
   var openid = message.FromUserName
   getMaterialIdByName('news', '生活其实很好玩').then((mediaId) => {
@@ -155,12 +155,24 @@ var haveFun = function (req, res, next) {
   res.reply('')
 }
 
-var exeClickEvent = {
-  MY_QRCODE: generateQrcode,
-  NEW_USER_GUIDE: newUserGuide,
-  EARN_STRATEGY: earnStrategy,
-  LIFE_SKILL: lifeSkill,
-  USER_HAVE_FUN: haveFun,
+function exeClickEvent(eventKey, req, res, next) {
+  switch (eventKey) {
+    case 'MY_QRCODE':
+      generateQrcode(req, res, next)
+      break
+    case 'NEW_USER_GUIDE':
+      newUserGuide(req, res, next)
+      break
+    case 'EARN_STRATEGY':
+      earnStrategy(req, res, next)
+      break
+    case 'LIFE_SKILL':
+      lifeSkill(req, res, next)
+      break
+    case 'USER_HAVE_FUN':
+      haveFun(req, res, next)
+      break
+  }
 }
 
 function wechatServer(req, res, next) {
@@ -197,7 +209,7 @@ function wechatServer(req, res, next) {
       break;
     case 'event':
       if(message.Event === 'CLICK') {
-        exeClickEvent[message.EventKey](req, res, next)
+        exeClickEvent(message.EventKey, req, res, next)
       } else if(message.Event === 'subscribe') {
         console.log('message', message)
         var scene_id = message.EventKey
