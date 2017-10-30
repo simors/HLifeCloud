@@ -10,12 +10,17 @@ function createMenu() {
   var memu = {
     "button":[
       {
-        'type:': 'view',
-        'name': '小游戏',
-        'url': 'http://15181462-9.hd.faisco.cn/15181462/6HdOxqLZJBfP3q1FQ9Vqiw/yhyqzs_new.html'
+        "name": '天天福利',
+        "sub_button": [
+          {
+            'type': 'view',
+            'name': '爱心齐种树',
+            'url': 'http://15181462-9.hd.faisco.cn/15181462/6HdOxqLZJBfP3q1FQ9Vqiw/yhyqzs_new.html'
+          },
+        ]
       },
       {
-        "name": '奇文共赏',
+        "name": '正能量',
         "sub_button": [
           {
             "type":"click",
