@@ -10,14 +10,24 @@ function createMenu() {
   var memu = {
     "button":[
       {
-        "type":"click",
-        "name":"汇邻荐读",
-        "key":"LIFE_SKILL"
+        'type:': 'view',
+        'name': '小游戏',
+        'url': 'http://15181462-9.hd.faisco.cn/15181462/6HdOxqLZJBfP3q1FQ9Vqiw/yhyqzs_new.html'
       },
       {
-        "type":"click",
-        "name":"精彩美文",
-        "key":"USER_HAVE_FUN"
+        "name": '奇文共赏',
+        "sub_button": [
+          {
+            "type":"click",
+            "name":"汇邻荐读",
+            "key":"LIFE_SKILL"
+          },
+          {
+            "type":"click",
+            "name":"精彩美文",
+            "key":"USER_HAVE_FUN"
+          },
+        ]
       },
       {
         'name': '个人中心',
