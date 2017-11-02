@@ -14,8 +14,8 @@ function createMenu() {
         "sub_button": [
           {
             'type': 'view',
-            'name': '爱心齐种树',
-            'url': 'http://15181462-9.hd.faisco.cn/15181462/6HdOxqLZJBfP3q1FQ9Vqiw/yhyqzs_new.html'
+            'name': '萌宠爱消除',
+            'url': 'http://15181462-14.hd.faisco.cn/15181462/6HdOxqLZJBeN1Upv-D1mtg/mcaxc.html'
           },
         ]
       },
