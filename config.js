@@ -3,33 +3,24 @@
  */
 
 // redis配置
-var REDIS_URL = "120.77.220.234"
-var REDIS_PORT = 6379
+var REDIS_URL = process.env.REDIS_URL
+var REDIS_PORT = process.env.REDIS_PORT
 var DEBUG_REDIS = 0
 var PRE_REDIS = 1
 var PROD_REDIS = 2
 var REDIS_DB = 0
-var REDIS_AUTH = "Simors2017"
+var REDIS_AUTH = process.env.REDIS_AUTH
 
 // mysql数据库配置
-var MYSQL_HOST = '120.77.220.234'
-var MYSQL_USER = ''
-var MYSQL_PWD = ''
-var MYSQL_DB = ''
-var MYSQL_DEV_USER = 'simors'
-var MYSQL_DEV_PWD = 'Simors2017'
-var MYSQL_DEV_DB = 'hlife_dev'
-var MYSQL_PRE_USER = 'xiaojee'
-var MYSQL_PRE_PWD = 'Xiaojee2017'
-var MYSQL_PRE_DB = 'hlife_pre'
-var MYSQL_PROD_USER = 'xiaojeePro'
-var MYSQL_PROD_PWD = 'XjDayDayUpGo!!'
-var MYSQL_PROD_DB = 'hlife_pro'
+var MYSQL_HOST = process.env.MYSQL_HOST
+var MYSQL_USER = process.env.MYSQL_USER
+var MYSQL_PWD = process.env.MYSQL_PWD
+var MYSQL_DB = process.env.MYSQL_DB
 
 //Ping++应用配置
 var PINGPP_APP_ID = ""
 var PINGPP_TEST_API_KEY = "sk_test_fbTiHOOG0008r9Sq10GWXXnT" //Secret Key
-var PINGPP_LIVE_API_KEY = "sk_live_P044i19GCS8SyT84eTvbHmbH" //Secret Key
+var PINGPP_LIVE_API_KEY = process.env.PINGPP_LIVE_API_KEY //Secret Key
 
 var PINGPP_DEV_APP_ID = "app_aX1mbDu5G08OP0i9" //ping++ 汇邻优店-DEV应用 Id
 
@@ -58,9 +49,6 @@ var wxConfig = undefined
 
 if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   REDIS_DB = DEBUG_REDIS
-  MYSQL_USER = MYSQL_DEV_USER
-  MYSQL_PWD = MYSQL_DEV_PWD
-  MYSQL_DB = MYSQL_DEV_DB
   PINGPP_APP_ID = PINGPP_DEV_APP_ID
 
   MP_SERVER_DOMAIN = "http://hlyd-dev.leanapp.cn"
@@ -81,9 +69,6 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
 } else if (process.env.LEANCLOUD_APP_ID === 'TUVjJ5HHNmopfJeREa4IcB1T-gzGzoHsz') {
   REDIS_DB = PRE_REDIS
-  MYSQL_USER = MYSQL_PRE_USER
-  MYSQL_PWD = MYSQL_PRE_PWD
-  MYSQL_DB = MYSQL_PRE_DB
   PINGPP_APP_ID = PINGPP_PRE_APP_ID
 
   MP_SERVER_DOMAIN = "http://hlyd-pre.leanapp.cn"
@@ -102,9 +87,6 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
   }
 } else if (process.env.LEANCLOUD_APP_ID === 'pHIMCdWo3VQX09TKFuU9AGdd-gzGzoHsz') {
   REDIS_DB = PROD_REDIS
-  MYSQL_USER = MYSQL_PROD_USER
-  MYSQL_PWD = MYSQL_PROD_PWD
-  MYSQL_DB = MYSQL_PROD_DB
   PINGPP_APP_ID = PINGPP_PRO_APP_ID
 
   MP_SERVER_DOMAIN = "http://share.xiaojee.cn"
