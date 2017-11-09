@@ -14,6 +14,11 @@ function createMenu() {
         "sub_button": [
           {
             'type': 'view',
+            'name': '眼明手快抢大奖',
+            'url': 'http://15181462-25.hd.faisco.cn/15181462/6HdOxqLZJBcAoorKZgGYuQ/ymskqdj.html'
+          },
+          {
+            'type': 'view',
             'name': '萌宠爱消除',
             'url': 'http://15181462-14.hd.faisco.cn/15181462/6HdOxqLZJBeN1Upv-D1mtg/mcaxc.html'
           },
