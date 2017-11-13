@@ -201,8 +201,39 @@ function constructPromotion(promotion, includeShop, includeGoods) {
   return goodsPromotion
 }
 
+function constructAddress(address, includeAdmin) {
+  const constructUserInfo = require('../Auth').constructUserInfo
+
+  if (!address) {
+    return undefined
+  }
+  let userAddress = {}
+  let addressAttr = address.attributes
+  if (!addressAttr) {
+    return undefined
+  }
+  userAddress.id = address.id
+  userAddress.createdAt = address.createdAt
+  userAddress.updatedAt = address.updatedAt
+  userAddress.username = addressAttr.username
+  userAddress.mobilePhoneNumber = addressAttr.mobilePhoneNumber
+  userAddress.province = addressAttr.province
+  userAddress.city = addressAttr.city
+  userAddress.district = addressAttr.district
+  userAddress.addr = addressAttr.addr
+  userAddress.tag = addressAttr.tag
+
+  if (includeAdmin&&addressAttr.admin) {
+    userAddress.admin = constructUserInfo(addressAttr.admin)
+  }
+
+
+  return userAddress
+}
+
 module.exports = {
   constructShop,
   constructGoods,
   constructPromotion,
+  constructAddress,
 }
