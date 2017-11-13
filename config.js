@@ -101,7 +101,7 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
     token: 'huilinyoudian2017pro',
     appid: 'wxc13204ac7a37acb4',
     encodingAESKey: 'vsw15YrAgUavFsNvHdEAd3iRLpgigQDbOutnvwPDD0H',
-    appSecret: '016a164c0d3b71516c6a6b397e5b9bfb',
+    appSecret: '1c202cb984f8dec7557bb11db88934c8',
     checkSignature: true,
   }
 }
