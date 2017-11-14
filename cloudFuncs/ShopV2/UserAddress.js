@@ -135,11 +135,12 @@ async function setDefaultAddr(req){
   try{
     let oldDefault = await query.find()
     if(oldDefault&&oldDefault.length>0){
-      let oldAddr = AV.Object.createWithouData('Address', oldDefault[0].id)
+      let oldAddr = AV.Object.createWithoutData('Address', oldDefault[0].id)
       oldAddr.set('status', addrStatus.ENABLE_ADDR)
+      await oldAddr.save()
     }
     let addr = AV.Object.createWithoutData('Address', addrId)
-    addr.set('status', addStatus.DEFAUT_ADDR)
+    addr.set('status', addrStatus.DEFAUT_ADDR)
     let addrInfo = await addr.save()
     return constructAddress(addrInfo)
   }catch(err){
