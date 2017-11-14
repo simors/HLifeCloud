@@ -222,7 +222,7 @@ function constructAddress(address, includeAdmin) {
   userAddress.district = addressAttr.district
   userAddress.addr = addressAttr.addr
   userAddress.tag = addressAttr.tag
-
+  userAddress.adminId = addressAttr.admin.id
   if (includeAdmin&&addressAttr.admin) {
     userAddress.admin = constructUserInfo(addressAttr.admin)
   }
