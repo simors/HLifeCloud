@@ -19,6 +19,7 @@ async function createAddr(req) {
   let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
   let Address = AV.Object.extend('Address')
   let address = new Address()
+  address.set('admin',currentUser)
   address.set('username', username)
   address.set('mobilephoneNumber', mobilePhoneNumber)
   address.set('province', province)
