@@ -11,14 +11,16 @@ const addrStatus = {
   DISABLE_ADDR: 0,    // 被删除地址
 }
 
-function createAddr(req,res) {
-  let {params} = req
-
-    let {username,  mobilePhoneNumber, province, city, district, addr, tag,userId } = params
-    let user = AV.Object.createWithoutData('_User',userId)
+async function createAddr(req,res) {
+  let {params,currentUser} = req
+  if(!currentUser){
+    res.error('don t login')
+    return
+  }else{
+    let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
     let Address = AV.Object.extend('Address')
     let address = new Address()
-    address.set('admin',user)
+    address.set('admin',currentUser)
     address.set('username', username)
     address.set('mobilePhoneNumber', mobilePhoneNumber)
     address.set('province', province)
@@ -27,13 +29,13 @@ function createAddr(req,res) {
     address.set('addr', addr)
     address.set('tag', tag)
     address.set('status',addrStatus.ENABLE_ADDR)
-      address.save().then((result)=>{
-        res.success(constructAddress(result))
-
-      },(err)=>{
-        res.error(err)
-      })
-
+    try{
+      let addressInfo = await address.save()
+      res.success(constructAddress(addressInfo))
+    }catch(err){
+      res.error(err)
+    }
+  }
 
 }
 
