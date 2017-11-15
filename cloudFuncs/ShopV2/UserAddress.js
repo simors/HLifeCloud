@@ -12,6 +12,7 @@ const addrStatus = {
 }
 
 async function createAddr(req,res) {
+  console.log('dayinyixia shishi ')
   let {params,currentUser} = req
   if(!currentUser){
     res.error('don t login')
