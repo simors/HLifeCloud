@@ -11,7 +11,7 @@ const addrStatus = {
   DISABLE_ADDR: 0,    // 被删除地址
 }
 
-async function createAddr(req,res) {
+function createAddr(req,res) {
   let {params,currentUser} = req
   if(!currentUser){
     res.error('don t login')
@@ -29,12 +29,13 @@ async function createAddr(req,res) {
     address.set('addr', addr)
     address.set('tag', tag)
     address.set('status',addrStatus.ENABLE_ADDR)
-    try{
-      let addressInfo = await address.save()
-      res.success(constructAddress(addressInfo))
-    }catch(err){
-      res.error(err)
-    }
+      address.save().then((result)=>{
+        res.success(constructAddress(result))
+
+      },(err)=>{
+        res.error(err)
+      })
+
   }
 }
 
