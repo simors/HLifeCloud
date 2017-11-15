@@ -11,17 +11,17 @@ const addrStatus = {
   DISABLE_ADDR: 0,    // 被删除地址
 }
 
-async function createAddr(req) {
+async function createAddr(req,res) {
   let {params,currentUser} = req
   if(!currentUser){
-    throw new AV.Cloud.Error('don t login',{code: -1})
+    res.error('don t login')
   }
   let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
   let Address = AV.Object.extend('Address')
   let address = new Address()
   address.set('admin',currentUser)
   address.set('username', username)
-  address.set('mobilephoneNumber', mobilePhoneNumber)
+  address.set('mobilePhoneNumber', mobilePhoneNumber)
   address.set('province', province)
   address.set('city', city)
   address.set('district', district)
@@ -30,21 +30,21 @@ async function createAddr(req) {
   address.set('status',addrStatus.ENABLE_ADDR)
   try{
     let addressInfo = await address.save()
-    return (constructAddress(addressInfo))
+    res.success(constructAddress(addressInfo))
   }catch(err){
-    throw new AV.Cloud.Error('create fail!',{code: -2})
+    res.error(err)
   }
 }
 
-async function updateAddr(req) {
+async function updateAddr(req,res) {
   let {params,currentUser} = req
   if(!currentUser){
-    throw new AV.Cloud.Error('don t login',{code: -1})
+    res.error('don t login')
   }
   let {username, mobilePhoneNumber, province, city, district, addr, tag, addrId, status } = params
   let address = AV.Object.createWithoutData('Address', addrId)
   address.set('username', username)
-  address.set('mobilephoneNumber', mobilePhoneNumber)
+  address.set('mobilePhoneNumber', mobilePhoneNumber)
   address.set('province', province)
   address.set('city', city)
   address.set('district', district)
@@ -53,9 +53,9 @@ async function updateAddr(req) {
   address.set('status', status)
   try{
     let addressInfo = await address.save()
-    return (constructAddress(addressInfo))
+    res.success(constructAddress(addressInfo))
   }catch(err){
-    throw new AV.Cloud.Error('update fail!',{code: -3})
+    res.error(err)
   }
 }
 
@@ -80,19 +80,19 @@ async function getAddrsFunc(params){
     let addrList = []
     if(addrs && addrs.length>0){
       addrs.forEach((item)=>{
-        addrList.push(item,true)
+        addrList.push(constructAddress(item,true))
       })
     }
     return addrList
   }catch(err){
-    throw new AV.Cloud.Error('fetch fail!',{code: -4})
+    return err
   }
 }
 
-async function getAddrs(req) {
+async function getAddrs(req,res) {
   let {currentUser,params} = req
   if(!currentUser){
-    throw new AV.Cloud.Error('don t login',{code: -1})
+    res.error('don t login')
   }
   let payload = {
     user: currentUser,
@@ -100,29 +100,30 @@ async function getAddrs(req) {
   }
   try{
     let addrList = await getAddrsFunc(payload)
-    return addrList
+    res.success(addrList)
   }catch (err){
-    throw new AV.Cloud.Error('fetch fail!',{code: -4})
+    res.error(err)
   }
 }
 
-async function disableAddr(req){
+async function disableAddr(req,res){
   let {currentUser,params} = req
   if(!currentUser){
-    throw new AV.Cloud.Error('don t login',{code: -1})
+    res.error('don t login')
   }
   let {addrId} = params
   let addr = AV.Object.createWithoutDate('Address',addrId)
   addr.set('status',addrStatus.DISABLE_ADDR)
   try{
-    return true
+    let addrInfo = await addr.save()
+    res.success(constructAddress(addrInfo))
   }catch(err){
-    throw new AV.Cloud.Error('disable fail',{code: -5})
+    res.error(err)
   }
 }
 
 
-async function setDefaultAddr(req){
+async function setDefaultAddr(req,res){
   let {currentUser,params} = req
   if(!currentUser){
     throw new AV.Cloud.Error('don t login',{code: -1})
@@ -142,16 +143,16 @@ async function setDefaultAddr(req){
     let addr = AV.Object.createWithoutData('Address', addrId)
     addr.set('status', addrStatus.DEFAUT_ADDR)
     let addrInfo = await addr.save()
-    return constructAddress(addrInfo)
+    res.success(constructAddress(addrInfo))
   }catch(err){
-    throw new AV.Cloud.Error('set default fail',{code: -6})
+    res.error(err)
   }
 
 }
 
 
-async function testAddFunc(req){
-  return await getAddrs(req)
+async function testAddFunc(req,res){
+  return await getAddrs(req,res)
 }
 
 
