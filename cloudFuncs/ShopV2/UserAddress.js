@@ -130,7 +130,7 @@ async function disableAddr(req,res){
 async function setDefaultAddr(req,res){
   let {currentUser,params} = req
   if(!currentUser){
-    throw new AV.Cloud.Error('don t login',{code: -1})
+    res.error('don t login')
   }
 
   let {addrId} = params
