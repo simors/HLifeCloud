@@ -15,24 +15,26 @@ async function createAddr(req,res) {
   let {params,currentUser} = req
   if(!currentUser){
     res.error('don t login')
-  }
-  let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
-  let Address = AV.Object.extend('Address')
-  let address = new Address()
-  address.set('admin',currentUser)
-  address.set('username', username)
-  address.set('mobilePhoneNumber', mobilePhoneNumber)
-  address.set('province', province)
-  address.set('city', city)
-  address.set('district', district)
-  address.set('addr', addr)
-  address.set('tag', tag)
-  address.set('status',addrStatus.ENABLE_ADDR)
-  try{
-    let addressInfo = await address.save()
-    res.success(constructAddress(addressInfo))
-  }catch(err){
-    res.error(err)
+    return
+  }else{
+    let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
+    let Address = AV.Object.extend('Address')
+    let address = new Address()
+    address.set('admin',currentUser)
+    address.set('username', username)
+    address.set('mobilePhoneNumber', mobilePhoneNumber)
+    address.set('province', province)
+    address.set('city', city)
+    address.set('district', district)
+    address.set('addr', addr)
+    address.set('tag', tag)
+    address.set('status',addrStatus.ENABLE_ADDR)
+    try{
+      let addressInfo = await address.save()
+      res.success(constructAddress(addressInfo))
+    }catch(err){
+      res.error(err)
+    }
   }
 }
 
