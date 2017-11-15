@@ -12,15 +12,13 @@ const addrStatus = {
 }
 
 function createAddr(req,res) {
-  let {params,currentUser} = req
-  if(!currentUser){
-    res.error('don t login')
-    return
-  }else{
-    let {username,  mobilePhoneNumber, province, city, district, addr, tag } = params
+  let {params} = req
+
+    let {username,  mobilePhoneNumber, province, city, district, addr, tag,userId } = params
+    let user = AV.Object.createWithoutData('_User',userId)
     let Address = AV.Object.extend('Address')
     let address = new Address()
-    address.set('admin',currentUser)
+    address.set('admin',user)
     address.set('username', username)
     address.set('mobilePhoneNumber', mobilePhoneNumber)
     address.set('province', province)
@@ -36,7 +34,7 @@ function createAddr(req,res) {
         res.error(err)
       })
 
-  }
+
 }
 
 async function updateAddr(req,res) {
