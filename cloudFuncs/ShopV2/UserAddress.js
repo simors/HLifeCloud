@@ -12,7 +12,6 @@ const addrStatus = {
 }
 
 async function createAddr(req,res) {
-  console.log('dayinyixia shishi ')
   let {params,currentUser} = req
   if(!currentUser){
     res.error('don t login')
@@ -116,7 +115,7 @@ async function disableAddr(req,res){
     res.error('don t login')
   }
   let {addrId} = params
-  let addr = AV.Object.createWithoutDate('Address',addrId)
+  let addr = AV.Object.createWithoutData('Address',addrId)
   addr.set('status',addrStatus.DISABLE_ADDR)
   try{
     let addrInfo = await addr.save()
