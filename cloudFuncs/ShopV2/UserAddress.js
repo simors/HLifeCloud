@@ -55,7 +55,10 @@ async function updateAddr(req,res) {
   address.set('tag', tag)
   address.set('status', status)
   try{
-    let addressInfo = await address.save()
+    await address.save()
+    let query = new AV.Query('Address')
+    query.include('admin')
+    let addressInfo = await query.get(addrId)
     res.success(constructAddress(addressInfo))
   }catch(err){
     res.error(err)
@@ -119,8 +122,8 @@ async function disableAddr(req,res){
   let addr = AV.Object.createWithoutData('Address',addrId)
   addr.set('status',addrStatus.DISABLE_ADDR)
   try{
-    let addrInfo = await addr.save()
-    res.success(constructAddress(addrInfo))
+    await addr.save()
+    res.success()
   }catch(err){
     res.error(err)
   }
