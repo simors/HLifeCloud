@@ -76,6 +76,7 @@ async function getAddrsFunc(params){
   if(lastCreatedAt){
     query.lessThan('createdAt', new Date(lastCreatedAt))
   }
+  query.notEqualTo('status', addrStatus.DISABLE_ADDR)
   query.include(['admin'])
   query.descending('createdAt')
   try{
