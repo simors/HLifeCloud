@@ -132,7 +132,7 @@ async function disableAddr(req, res) {
   let addr = AV.Object.createWithoutData('Address', addrId)
   addr.set('status', addrStatus.DISABLE_ADDR)
   try {
-    currentUser.increment('addressCount', 1)
+    currentUser.increment('addressCount', -1)
     await currentUser.save()
     await addr.save()
     res.success()
