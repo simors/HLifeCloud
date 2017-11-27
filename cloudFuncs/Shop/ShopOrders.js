@@ -12,10 +12,10 @@ const ORDER_STATUS = {
   DELETED: 4,       // 已删除
 }
 
-function constructShopOrder(order) {
+function constructShopOrder(order,includeUser,includeShop,includeShopGoods) {
   var constructUserInfo = require('../Auth').constructUserInfo
-  var constructShopInfo = require('../Shop').constructShopInfo
-  var constructShopGoods = require('../Shop/ShopGoods').constructShopGoods
+  var constructShopInfo = require('../ShopV2/shopTools').constructShop
+  var constructShopGoods = require('../ShopV2/shopTools').constructGoods
   var shopOrder = {}
   var orderAttr = order.attributes
   shopOrder.id = order.id
@@ -28,9 +28,18 @@ function constructShopOrder(order) {
   shopOrder.remark = orderAttr.remark
   shopOrder.createdAt = order.createdAt
   shopOrder.updatedAt = order.updatedAt
-  shopOrder.buyer = constructUserInfo(orderAttr.buyer)
-  shopOrder.vendor = constructShopInfo(orderAttr.vendor)
-  shopOrder.goods = constructShopGoods(orderAttr.goods)
+  shopOrder.buyerId = orderAttr.buyer.id
+  shopOrder.vendorId = orderAttr.vendor.id
+  shopOrder.goodsId = orderAttr.goods.id
+  if(orderAttr.buyer&&includeUser){
+    shopOrder.buyer = constructUserInfo(orderAttr.buyer)
+  }
+  if(orderAttr.buyer&&includeShop) {
+    shopOrder.vendor = constructShopInfo(orderAttr.vendor,false,false)
+  }
+  if(orderAttr.buyer&&includeShopGoods) {
+    shopOrder.goods = constructShopGoods(orderAttr.goods,false,false)
+  }
   return shopOrder
 }
 
@@ -163,7 +172,7 @@ function queryShopOrders(request, response) {
   query.find().then((results) => {
     var shopOrders = []
     results.forEach((order) => {
-      shopOrders.push(constructShopOrder(order))
+      shopOrders.push(constructShopOrder(order,true,true,true))
     })
     response.success({
       errcode: 0,
