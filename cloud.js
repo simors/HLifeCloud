@@ -24,6 +24,8 @@ var searchFunc = require('./cloudFuncs/Search')
 var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 var mpMsgFuncs = require('./mpFuncs/Message')
 var ShopOrdersFunc = require('./cloudFuncs/Shop/ShopOrders')
+var ShopOrdersFuncV2 = require('./cloudFuncs/ShopV2/ShopOrder')
+
 var goodsFuncV2 = require('./cloudFuncs/ShopV2/ShopGoods')
 var mpJsSdkFuncs = require('./mpFuncs/JSSDK')
 var addrFuncs = require('./cloudFuncs/ShopV2/UserAddress')
@@ -116,6 +118,7 @@ AV.Cloud.define('goodsFetchGoodsDetail', goodsFuncV2.fetchShopGoodsDetail)
 AV.Cloud.define('orderCreateOrder', ShopOrdersFunc.handleNewShopOrderReq)
 AV.Cloud.define('orderModifyStatus', ShopOrdersFunc.modifyOrderStatus)
 AV.Cloud.define('orderQueryOrders', ShopOrdersFunc.queryShopOrders)
+AV.Cloud.define('orderQueryOrdersV2', ShopOrdersFuncV2.queryShopOrders)
 
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)

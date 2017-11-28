@@ -233,9 +233,32 @@ function constructAddress(address, includeAdmin) {
   return userAddress
 }
 
+
+function constructShopOrder(order) {
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var shopOrder = {}
+  var orderAttr = order.attributes
+  shopOrder.id = order.id
+  shopOrder.receiver = orderAttr.receiver
+  shopOrder.receiverPhone = orderAttr.receiverPhone
+  shopOrder.receiverAddr = orderAttr.receiverAddr
+  shopOrder.goodsAmount = orderAttr.goodsAmount
+  shopOrder.paid = orderAttr.paid
+  shopOrder.orderStatus = orderAttr.orderStatus
+  shopOrder.remark = orderAttr.remark
+  shopOrder.createdAt = order.createdAt
+  shopOrder.updatedAt = order.updatedAt
+  shopOrder.buyer = constructUserInfo(orderAttr.buyer)
+  shopOrder.vendor = constructShop(orderAttr.vendor,false,false)
+  shopOrder.goods = constructGoods(orderAttr.goods,false,false)
+  return shopOrder
+}
+
+
 module.exports = {
   constructShop,
   constructGoods,
   constructPromotion,
   constructAddress,
+  constructShopOrder,
 }
