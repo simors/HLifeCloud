@@ -234,7 +234,7 @@ function constructAddress(address, includeAdmin) {
 }
 
 
-function constructShopOrder(order) {
+function constructShopOrder(order,includeUsr,includeShop,includeGoods) {
   var constructUserInfo = require('../Auth').constructUserInfo
   var shopOrder = {}
   var orderAttr = order.attributes
@@ -248,9 +248,16 @@ function constructShopOrder(order) {
   shopOrder.remark = orderAttr.remark
   shopOrder.createdAt = order.createdAt
   shopOrder.updatedAt = order.updatedAt
+  shopOrder.buyerId = orderAttr.buyer.id
+  shopOrder.vendorId = orderAttr.vendor.id
+  shopOrder.goodsId = orderAttr.goods.id
   shopOrder.buyer = constructUserInfo(orderAttr.buyer)
-  shopOrder.vendor = constructShop(orderAttr.vendor,false,false)
-  shopOrder.goods = constructGoods(orderAttr.goods,false,false)
+  if(orderAttr.vendor && includeShop){
+    shopOrder.vendor = constructShop(orderAttr.vendor,false,false)
+  }
+  if(orderAttr.goods && includeGoods){
+    shopOrder.goods = constructGoods(orderAttr.goods,false,false)
+  }
   return shopOrder
 }
 
