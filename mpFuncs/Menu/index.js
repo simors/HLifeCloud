@@ -49,8 +49,8 @@ function createMenu() {
           },
           {
             "type":"view",
-            "name":"我的钱包",
-            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/wallet'
+            "name":"个人主页",
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/mine'
           },
           {
             "type":"view",
