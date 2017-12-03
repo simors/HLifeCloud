@@ -201,8 +201,74 @@ function constructPromotion(promotion, includeShop, includeGoods) {
   return goodsPromotion
 }
 
+function constructAddress(address, includeAdmin) {
+  const constructUserInfo = require('../Auth').constructUserInfo
+
+  if (!address) {
+    return undefined
+  }
+  let userAddress = {}
+  let addressAttr = address.attributes
+  if (!addressAttr) {
+    return undefined
+  }
+  userAddress.id = address.id
+  userAddress.createdAt = address.createdAt
+  userAddress.updatedAt = address.updatedAt
+  userAddress.username = addressAttr.username
+  userAddress.mobilePhoneNumber = addressAttr.mobilePhoneNumber
+  userAddress.province = addressAttr.province
+  userAddress.city = addressAttr.city
+  userAddress.district = addressAttr.district
+  userAddress.addr = addressAttr.addr
+  userAddress.tag = addressAttr.tag
+  userAddress.status = addressAttr.status
+  userAddress.adminId = addressAttr.admin.id
+
+  if (includeAdmin&&addressAttr.admin) {
+    userAddress.admin = constructUserInfo(addressAttr.admin)
+  }
+
+
+  return userAddress
+}
+
+
+function constructShopOrder(order,includeUser,includeShop,includeGoods) {
+  var constructUserInfo = require('../Auth').constructUserInfo
+  var shopOrder = {}
+  var orderAttr = order.attributes
+  shopOrder.id = order.id
+  shopOrder.receiver = orderAttr.receiver
+  shopOrder.receiverPhone = orderAttr.receiverPhone
+  shopOrder.receiverAddr = orderAttr.receiverAddr
+  shopOrder.goodsAmount = orderAttr.goodsAmount
+  shopOrder.paid = orderAttr.paid
+  shopOrder.orderStatus = orderAttr.orderStatus
+  shopOrder.remark = orderAttr.remark
+  shopOrder.createdAt = order.createdAt
+  shopOrder.updatedAt = order.updatedAt
+  shopOrder.buyerId = orderAttr.buyer.id
+  shopOrder.vendorId = orderAttr.vendor.id
+  shopOrder.goodsId = orderAttr.goods.id
+  if(orderAttr.buyer && includeUser){
+    shopOrder.buyer = constructUserInfo(orderAttr.buyer)
+  }
+
+  if(orderAttr.vendor && includeShop){
+    shopOrder.vendor = constructShop(orderAttr.vendor,false,false)
+  }
+  if(orderAttr.goods && includeGoods){
+    shopOrder.goods = constructGoods(orderAttr.goods,false,false)
+  }
+  return shopOrder
+}
+
+
 module.exports = {
   constructShop,
   constructGoods,
   constructPromotion,
+  constructAddress,
+  constructShopOrder,
 }

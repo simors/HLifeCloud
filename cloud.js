@@ -24,8 +24,12 @@ var searchFunc = require('./cloudFuncs/Search')
 var goodsFunc = require('./cloudFuncs/Shop/ShopGoods')
 var mpMsgFuncs = require('./mpFuncs/Message')
 var ShopOrdersFunc = require('./cloudFuncs/Shop/ShopOrders')
+var ShopOrdersFuncV2 = require('./cloudFuncs/ShopV2/ShopOrder')
+
 var goodsFuncV2 = require('./cloudFuncs/ShopV2/ShopGoods')
 var mpJsSdkFuncs = require('./mpFuncs/JSSDK')
+var addrFuncs = require('./cloudFuncs/ShopV2/UserAddress')
+
 /**
  * 云函数
  */
@@ -114,6 +118,7 @@ AV.Cloud.define('goodsFetchGoodsDetail', goodsFuncV2.fetchShopGoodsDetail)
 AV.Cloud.define('orderCreateOrder', ShopOrdersFunc.handleNewShopOrderReq)
 AV.Cloud.define('orderModifyStatus', ShopOrdersFunc.modifyOrderStatus)
 AV.Cloud.define('orderQueryOrders', ShopOrdersFunc.queryShopOrders)
+AV.Cloud.define('orderQueryOrdersV2', ShopOrdersFuncV2.queryShopOrders)
 
 
 AV.Cloud.define('getArticleCommentList',articleFunc.getArticleCommentList)
@@ -275,5 +280,13 @@ AV.Cloud.define('searchFetchTopicResult', searchFunc.fetchTopicResult)
 //微信api
 AV.Cloud.define('wechatMessageTest', mpMsgFuncs.wechatMessageTest)
 AV.Cloud.define('wechatGetJsConfig', mpJsSdkFuncs.getJsConfig)
+
+//地址管理
+AV.Cloud.define('addrGetAddrs', addrFuncs.getAddrs)
+AV.Cloud.define('addrCreateAddr', addrFuncs.createAddr)
+AV.Cloud.define('addrUpdateAddr', addrFuncs.updateAddr)
+AV.Cloud.define('addrDisableAddr', addrFuncs.disableAddr)
+AV.Cloud.define('addrSetDefaultAddr', addrFuncs.setDefaultAddr)
+AV.Cloud.define('addrTestAddFunc', addrFuncs.testAddFunc)
 
 module.exports = AV.Cloud;
