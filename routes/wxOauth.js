@@ -146,6 +146,8 @@ router.get('/clientAuth', function (req, res, next) {
       authFunc.setUserOpenid(openid, unionid).then(() => {
         redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + state + '?' + querystring.stringify(authData)
         res.redirect(redurl)
+      }).catch((error) => {
+        throw error
       })
     }
   }).catch((error) => {
