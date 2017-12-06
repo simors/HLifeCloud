@@ -42,6 +42,7 @@ function fetchNearbyGoodPromotion(request, response) {
   var lastDistance = request.params.lastDistance
   var limit = request.params.limit || 20
   var nowDate = request.params.nowDate
+  var isRefresh = request.params.isRefresh
   var query = new AV.Query('ShopGoodPromotion')
   query.equalTo('status', 1)
   query.include(['targetGood', 'targetShop'])
@@ -50,7 +51,7 @@ function fetchNearbyGoodPromotion(request, response) {
   var point = new AV.GeoPoint(geo)
   query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
 
-  if (lastDistance) {
+  if (!isRefresh && lastDistance) {
     var notIncludeQuery = new AV.Query('ShopGoodPromotion')
     notIncludeQuery.equalTo('status', 1)
     notIncludeQuery.withinKilometers('geo', point, lastDistance)
