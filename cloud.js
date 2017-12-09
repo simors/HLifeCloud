@@ -113,6 +113,8 @@ AV.Cloud.define('goodsShopGoodsDelete', goodsFunc.shopGoodsDelete)
 AV.Cloud.define('goodsFetchGoodsList', goodsFunc.fetchShopGoods)
 
 AV.Cloud.define('goodsFetchGoodsDetail', goodsFuncV2.fetchShopGoodsDetail)
+AV.Cloud.define('goodsFetchNearbyGoodPromotion', goodsFuncV2.fetchNearbyGoodPromotion)
+
 
 // 订单管理
 AV.Cloud.define('orderCreateOrder', ShopOrdersFunc.handleNewShopOrderReq)

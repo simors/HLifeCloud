@@ -146,6 +146,8 @@ router.get('/clientAuth', function (req, res, next) {
       authFunc.setUserOpenid(openid, unionid).then(() => {
         redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + state + '?' + querystring.stringify(authData)
         res.redirect(redurl)
+      }).catch((error) => {
+        throw error
       })
     }
   }).catch((error) => {
@@ -166,9 +168,11 @@ router.get('/shareAuth', function (req, res, next) {
 
   mpAuthFuncs.getAccessToken(code).then((result) => {
     current_unionid = result.data.unionid
+    console.log('current_unionid', current_unionid)
 
     return authFunc.getUnionidById(stateObj.userId)
   }).then((unionid) => {
+    console.log('user unionid', unionid)
     if(!unionid) return undefined
     return utilFunc.bindWechatUnionid(unionid, current_unionid)
   }).then(() => {
@@ -178,8 +182,12 @@ router.get('/shareAuth', function (req, res, next) {
     redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + stateObj.nextUri + '?' + querystring.stringify(queryData)
     res.redirect(redurl)
   }).catch((error) => {
-    console.log(error)
-    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/error'
+    console.error('error in share auth', error)
+    // 出错也让用户能够正常跳转到分享页面
+    let queryData = {
+      unionid: current_unionid
+    }
+    redurl = GLOBAL_CONFIG.MP_CLIENT_DOMAIN + stateObj.nextUri + '?' + querystring.stringify(queryData)
     res.redirect(redurl)
   })
 })

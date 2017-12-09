@@ -4,6 +4,10 @@
 var Promise = require('bluebird')
 var AV = require('leanengine')
 var constructGoods = require('./shopTools').constructGoods
+var constructPromotion = require('./shopTools').constructPromotion
+
+const CHINA_WIDTH = 5500.0      // 全国最大宽度
+
 
 function getShopGoodsById(goodsId, includeShop, includePromotion) {
   let query = new AV.Query('ShopGoods')
@@ -33,8 +37,45 @@ function fetchShopGoodsDetail(request, response) {
   })
 }
 
+function fetchNearbyGoodPromotion(request, response) {
+  var geo = request.params.geo
+  var lastDistance = request.params.lastDistance
+  var limit = request.params.limit || 20
+  var nowDate = request.params.nowDate
+  var isRefresh = request.params.isRefresh
+  var query = new AV.Query('ShopGoodPromotion')
+  query.equalTo('status', 1)
+  query.include(['targetGood', 'targetShop'])
+  query.limit(limit)
+
+  var point = new AV.GeoPoint(geo)
+  query.withinKilometers('geo', point, CHINA_WIDTH) // 全中国的最大距离
+
+  if (!isRefresh && lastDistance) {
+    var notIncludeQuery = new AV.Query('ShopGoodPromotion')
+    notIncludeQuery.equalTo('status', 1)
+    notIncludeQuery.withinKilometers('geo', point, lastDistance)
+    query.doesNotMatchKeyInQuery('objectId', 'objectId', notIncludeQuery)
+  }
+  query.greaterThanOrEqualTo('endDate', nowDate)
+  query.find().then((results) => {
+    var promotions = []
+    results.forEach((promp) => {
+      promotions.push(constructPromotion(promp, true, true))
+    })
+    response.success({errcode: 0, promotions: promotions})
+  }, (err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  }).catch((err) => {
+    console.log('error in fetchNearbyShopPromotion: ', err)
+    response.error({errcode: 1, message: '获取附近店铺促销信息失败'})
+  })
+}
+
 const goodsFunc = {
   fetchShopGoodsDetail,
+  fetchNearbyGoodPromotion,
 }
 
 module.exports = goodsFunc

@@ -59,8 +59,18 @@ function createMenu() {
           },
           {
             "type":"view",
+            "name":"附近活动",
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promotion'
+          },
+          {
+            "type":"view",
             "name":"下载app",
             "url":"http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
+          },
+          {
+            "type": "view",
+            "name": "附近活动",
+            "url": GLOBAL_CONFIG.MP_CLIENT_DOMAIN + '/promotion'
           },
         ]
       }

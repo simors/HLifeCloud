@@ -33,7 +33,7 @@ var APP_DOWNLOAD_LINK = "http://a.app.qq.com/o/simple.jsp?pkgname=com.hlife"
 
 //微信公众平台配置
 var MP_CLIENT_DOMAIN = 'http://dev.mp.ngrok.io'
-const MP_CLIENT_DOMAIN_DEV = 'http://dev.mp.ngrok.lvyii.com'
+const MP_CLIENT_DOMAIN_DEV = 'http://www.hlifempwan.frp.lvyii.com'
 const MP_CLIENT_DOMAIN_STAGE = 'http://dev.xiaojee.cn:6300'
 const MP_CLIENT_DOMAIN_PRO = 'http://admin.xiaojee.cn:6300'
 
@@ -61,9 +61,9 @@ if (process.env.LEANCLOUD_APP_ID === 'K5Rltwmfnxd5pYjMsOFFL0kT-gzGzoHsz') {
 
   wxConfig = {
     token: 'huilinyoudian2017dev',
-    appid: 'wx3dfde3f7184c8c51',
+    appid: 'wx1acbae7446bf8307',
     encodingAESKey: 'K65BlkT0U2lH1SntekBotsAhKX0VLo94bMTQDAZudIY',
-    appSecret: 'd8ad2d32d51a72e3efb3be16a628139a',
+    appSecret: '77dac2a726bb1ed2adf17461e8c8c2d6',
     checkSignature: true,
   }
 
