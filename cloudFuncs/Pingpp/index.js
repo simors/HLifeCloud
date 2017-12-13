@@ -14,6 +14,8 @@ var dateFormat = require('dateformat')
 var mpMsgFuncs = require('../../mpFuncs/Message')
 var authFunc = require('../../cloudFuncs/Auth')
 var mathjs  = require('mathjs')
+const uuidv4 = require('uuid/v4')
+
 
 // 收益来源分类
 const INVITE_PROMOTER = 1       // 邀请推广员获得的收益
@@ -314,23 +316,6 @@ function createPayment(request, response) {
   var metadata = request.params.metadata
 
   var extra = {};
-  // var channel = 'alipay'
-  // switch (channel) {
-  //   case 'alipay':
-  //     extra = {}
-  //     metadata = {
-  //       user: user,
-  //     }
-  //     break;
-  //   case 'wx':
-  //     extra = {}
-  //     metadata = {
-  //       user: user,
-  //     }
-  //     break
-  //   default:
-  //     break;
-  // }
 
   pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
   pingpp.charges.create({
@@ -359,6 +344,51 @@ function createPayment(request, response) {
       charge: charge,
     })
     // YOUR CODE
+  })
+}
+
+function createPaymentV2(request, response) {
+  const {currentUser, params, meta} = request
+  const remoteAddress = meta.remoteAddress
+  const {amount, metadata, subject} = params
+
+  if (!currentUser) {
+    response.error({
+      errcode: 1,
+      message: '用户未登录',
+    })
+  }
+  const order_no = uuidv4().replace(/-/g, '').substr(0, 16)
+  const openid = currentUser.attributes.authData.weixin.openid
+
+  pingpp.setPrivateKeyPath(__dirname + "/rsa_private_key.pem");
+  pingpp.charges.create({
+    order_no: order_no,// 推荐使用 8-20 位，要求数字或字母，不允许其他字符
+    app: {id: GLOBAL_CONFIG.PINGPP_APP_ID},
+    channel: "wx_pub",// 支付使用的第三方支付渠道取值，请参考：https://www.pingxx.com/api#api-c-new
+    amount: amount,//订单总金额, 人民币单位：分（如订单总金额为 1 元，此处请填 100）
+    client_ip: remoteAddress,// 发起支付请求客户端的 IP 地址，格式为 IPV4，如: 127.0.0.1
+    currency: "cny",
+    subject: subject,
+    body: "商品的描述信息",
+    extra: {
+      open_id: openid
+    },
+    description: "汇邻优店",
+    metadata: metadata,
+  }, function (err, charge) {
+    if (err != null) {
+      console.log("pingpp.charges.create fail:", err)
+      response.error({
+        errcode: 1,
+        message: '[PingPP] create charges failed!',
+      })
+    }
+    response.success({
+      errcode: 0,
+      message: '[PingPP] create charges success!',
+      charge: charge,
+    })
   })
 }
 
@@ -1033,6 +1063,7 @@ var PingppFunc = {
   REWARD: REWARD,
   WITHDRAW: WITHDRAW,
   createPayment: createPayment,
+  createPaymentV2: createPaymentV2,
   createTransfers: createTransfers,
   paymentEvent: paymentEvent,
   transfersEvent: handleTransferEvent,
