@@ -37,7 +37,11 @@ async function createAddr(req, res) {
         address.set('district', district)
         address.set('addr', addr)
         address.set('tag', tag)
-        address.set('status', addrStatus.ENABLE_ADDR)
+        if(user.attributes.addressCount < 1){
+          address.set('status', addrStatus.DEFAUT_ADDR)
+        }else{
+          address.set('status', addrStatus.ENABLE_ADDR)
+        }
         currentUser.increment('addressCount', 1)
         await currentUser.save()
         let addressInfo = await address.save()
